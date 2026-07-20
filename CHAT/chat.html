@@ -1051,6 +1051,12 @@ img.twemoji {
         <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/>
       </svg>
     </button>
+    <button data-action="copy">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+      </svg>
+    </button>
     <button data-action="pin">
       <svg width="18" height="18" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" transform="rotate(-10)">
         <path d="M58.7,21.1L42.9,5.3C42.1,4.5,41,4,39.8,4c-1.2,0-2.3,0.5-3.2,1.4c-1.7,1.7-1.7,4.5,0,6.3c0.6,0.6,0.8,1.3,0.7,2.1c-0.1,0.8-0.5,1.4-1.2,1.8l-16.6,9.7c-1,0.6-2.2,0.4-2.9-0.3c-0.8-0.9-1.9-1.3-3.1-1.4c-1.2-0.1-2.3,0.4-3.1,1.3L10.2,25c-1.7,1.7-1.7,4.5,0,6.2l8.2,8.2L8.3,49.5l-4,8.8c-0.3,0.7,0.1,1.4,0.9,1.4l9-3.9l10.1-10.1l8.2,8.2c0.8,0.8,1.9,1.3,3.1,1.3c1.2,0,2.3-0.5,3.1-1.3l0.1-0.1c0.8-0.8,1.3-2,1.3-3.1c0-1.2-0.5-2.3-1.4-3.1c-0.7-0.7-0.9-1.9-0.3-2.9L48.5,28c0.4-0.7,1.1-1.1,1.8-1.2c0.8-0.1,1.5,0.2,2.1,0.7c0.8,0.8,1.9,1.3,3.1,1.3c1.2,0,2.3-0.5,3.2-1.4C60.4,25.7,60.4,22.8,58.7,21.1z"/>
@@ -1064,6 +1070,17 @@ img.twemoji {
   </div>
 
 <div id="msg-context-menu" class="msg-context-menu">
+  <!-- Панель реакций -->
+  <div class="context-reactions" style="display:flex;gap:6px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.1)">
+    <button class="context-reaction-btn" data-emoji="❤️" style="font-size:20px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;transition:transform 0.15s">❤️</button>
+    <button class="context-reaction-btn" data-emoji="👍" style="font-size:20px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;transition:transform 0.15s">👍</button>
+    <button class="context-reaction-btn" data-emoji="👎" style="font-size:20px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;transition:transform 0.15s">👎</button>
+    <button class="context-reaction-btn" data-emoji="🔥" style="font-size:20px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;transition:transform 0.15s">🔥</button>
+    <button class="context-reaction-btn" data-emoji="😍" style="font-size:20px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;transition:transform 0.15s">😍</button>
+    <button class="context-reaction-btn" data-emoji="👏" style="font-size:20px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;transition:transform 0.15s">👏</button>
+    <button class="context-reaction-btn" data-emoji="😊" style="font-size:20px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;transition:transform 0.15s">😊</button>
+  </div>
+  
   <button data-action="reply">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
       <path d="M9 14L4 9l5-5"/>
@@ -1078,6 +1095,13 @@ img.twemoji {
     </svg>
     <span data-key="ctx_edit">Изменить</span>
   </button>
+  <button data-action="copy">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+      <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+    </svg>
+    <span data-key="ctx_copy">Копировать</span>
+  </button>
   <button data-action="pin">
     <svg width="18" height="18" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" transform="rotate(-10)">
       <path d="M58.7,21.1L42.9,5.3C42.1,4.5,41,4,39.8,4c-1.2,0-2.3,0.5-3.2,1.4c-1.7,1.7-1.7,4.5,0,6.3c0.6,0.6,0.8,1.3,0.7,2.1c-0.1,0.8-0.5,1.4-1.2,1.8l-16.6,9.7c-1,0.6-2.2,0.4-2.9-0.3c-0.8-0.9-1.9-1.3-3.1-1.4c-1.2-0.1-2.3,0.4-3.1,1.3L10.2,25c-1.7,1.7-1.7,4.5,0,6.2l8.2,8.2L8.3,49.5l-4,8.8c-0.3,0.7,0.1,1.4,0.9,1.4l9-3.9l10.1-10.1l8.2,8.2c0.8,0.8,1.9,1.3,3.1,1.3c1.2,0,2.3-0.5,3.1-1.3l0.1-0.1c0.8-0.8,1.3-2,1.3-3.1c0-1.2-0.5-2.3-1.4-3.1c-0.7-0.7-0.9-1.9-0.3-2.9L48.5,28c0.4-0.7,1.1-1.1,1.8-1.2c0.8-0.1,1.5,0.2,2.1,0.7c0.8,0.8,1.9,1.3,3.1,1.3c1.2,0,2.3-0.5,3.2-1.4C60.4,25.7,60.4,22.8,58.7,21.1z"/>
@@ -1090,6 +1114,36 @@ img.twemoji {
 </svg>
     <span data-key="ctx_delete">Удалить</span>
   </button>
+</div>
+
+<!-- Панель реакций для режима выбора -->
+<div id="selection-reactions-panel" style="display:none;position:fixed;background:linear-gradient(180deg,rgba(10,10,12,0.98),rgba(6,6,8,0.98));border-radius:16px;padding:12px;box-shadow:0 8px 30px rgba(0,0,0,0.6);z-index:10060;min-width:280px">
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="selection-reaction-btn" data-emoji="❤️" style="font-size:24px;background:none;border:none;cursor:pointer;padding:4px;border-radius:8px;transition:transform 0.15s">❤️</button>
+    <button class="selection-reaction-btn" data-emoji="👍" style="font-size:24px;background:none;border:none;cursor:pointer;padding:4px;border-radius:8px;transition:transform 0.15s">👍</button>
+    <button class="selection-reaction-btn" data-emoji="👎" style="font-size:24px;background:none;border:none;cursor:pointer;padding:4px;border-radius:8px;transition:transform 0.15s">👎</button>
+    <button class="selection-reaction-btn" data-emoji="🔥" style="font-size:24px;background:none;border:none;cursor:pointer;padding:4px;border-radius:8px;transition:transform 0.15s">🔥</button>
+    <button class="selection-reaction-btn" data-emoji="😍" style="font-size:24px;background:none;border:none;cursor:pointer;padding:4px;border-radius:8px;transition:transform 0.15s">😍</button>
+    <button class="selection-reaction-btn" data-emoji="👏" style="font-size:24px;background:none;border:none;cursor:pointer;padding:4px;border-radius:8px;transition:transform 0.15s">👏</button>
+    <button class="selection-reaction-btn" data-emoji="😊" style="font-size:24px;background:none;border:none;cursor:pointer;padding:4px;border-radius:8px;transition:transform 0.15s">😊</button>
+  </div>
+</div>
+
+<!-- Панель реакций -->
+<div id="reactions-panel" style="display:none;position:fixed;background:linear-gradient(180deg,rgba(10,10,12,0.98),rgba(6,6,8,0.98));border-radius:16px;padding:12px;box-shadow:0 8px 30px rgba(0,0,0,0.6);z-index:10060;min-width:280px">
+  <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+    <button class="reaction-btn" data-emoji="❤️" style="font-size:24px;background:none;border:none;cursor:pointer;padding:4px;border-radius:8px;transition:transform 0.15s">❤️</button>
+    <button class="reaction-btn" data-emoji="👍" style="font-size:24px;background:none;border:none;cursor:pointer;padding:4px;border-radius:8px;transition:transform 0.15s">👍</button>
+    <button class="reaction-btn" data-emoji="👎" style="font-size:24px;background:none;border:none;cursor:pointer;padding:4px;border-radius:8px;transition:transform 0.15s">👎</button>
+    <button class="reaction-btn" data-emoji="🔥" style="font-size:24px;background:none;border:none;cursor:pointer;padding:4px;border-radius:8px;transition:transform 0.15s">🔥</button>
+    <button class="reaction-btn" data-emoji="😍" style="font-size:24px;background:none;border:none;cursor:pointer;padding:4px;border-radius:8px;transition:transform 0.15s">😍</button>
+    <button class="reaction-btn" data-emoji="👏" style="font-size:24px;background:none;border:none;cursor:pointer;padding:4px;border-radius:8px;transition:transform 0.15s">👏</button>
+    <button class="reaction-btn" data-emoji="😊" style="font-size:24px;background:none;border:none;cursor:pointer;padding:4px;border-radius:8px;transition:transform 0.15s">😊</button>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button id="change-reactions-btn" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:8px;border-radius:8px;cursor:pointer;font-size:12px;transition:background 0.15s">🔄 Изменить</button>
+    <button id="copy-from-reactions-btn" style="flex:1;background:rgba(0,209,255,0.1);border:1px solid rgba(0,209,255,0.3);color:#00d1ff;padding:8px;border-radius:8px;cursor:pointer;font-size:12px;transition:background 0.15s">📋 Копировать</button>
+  </div>
 </div>
 
   <div id="search-panel">
@@ -1626,6 +1680,95 @@ const LETTERS = { admin: 'N', partner: 'P' };
   name: '',
   avatar: ''
 };
+
+let myProfileLoaded = false;
+let otherProfileLoaded = false;
+
+// Функция для получения аватара пользователя по роли
+function getUserAvatar(userRole) {
+  if (userRole === myRole) {
+    return userProfile.avatar;
+  } else if (userRole === otherRole) {
+    return otherProfile.avatar;
+  }
+  return null;
+}
+
+// Функция для обновления всех аватаров в реакциях
+function updateAllReactionsAvatars() {
+  document.querySelectorAll('.reactions-container').forEach(container => {
+    const parentWrap = container.closest('.msg-wrap');
+    if (parentWrap && parentWrap.dataset.reactions) {
+      const reactions = JSON.parse(parentWrap.dataset.reactions);
+      if (reactions && reactions.length > 0) {
+        // Перерисовываем контейнер реакций
+        const meta = container.parentElement;
+        container.remove();
+        
+        const newReactionsContainer = document.createElement('div');
+        newReactionsContainer.className = 'reactions-container';
+        newReactionsContainer.style.cssText = 'display:flex;align-items:center;gap:4px;margin-right:8px;padding:2px 6px;background:rgba(255,255,255,0.9);border-radius:8px;';
+        
+        // Группируем реакции по эмодзи
+        const groupedReactions = {};
+        reactions.forEach(r => {
+          if (!groupedReactions[r.emoji]) {
+            groupedReactions[r.emoji] = [];
+          }
+          groupedReactions[r.emoji].push(r.user);
+        });
+        
+        // Отображаем каждую реакцию с аватарами
+        Object.entries(groupedReactions).forEach(([emoji, users]) => {
+          const reactionItem = document.createElement('div');
+          reactionItem.style.cssText = 'display:flex;align-items:center;gap:2px;font-size:11px;';
+          
+          // Добавляем эмодзи
+          const emojiSpan = document.createElement('span');
+          emojiSpan.textContent = emoji;
+          emojiSpan.style.fontSize = '14px';
+          reactionItem.appendChild(emojiSpan);
+          
+          // Добавляем аватары пользователей (максимум 3)
+          users.slice(0, 3).forEach(user => {
+            const avatar = document.createElement('div');
+            avatar.style.cssText = 'width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#07060a;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-left:-4px;border:1px solid #fff;overflow:hidden;';
+            
+            const userAvatar = getUserAvatar(user);
+            if (userAvatar && userAvatar.startsWith('http')) {
+              // Показываем реальный аватар
+              avatar.style.background = 'none';
+              avatar.innerHTML = `<img src="${userAvatar}" style="width:100%;height:100%;object-fit:cover;">`;
+            } else {
+              // Показываем букву если нет аватара
+              const letter = LETTERS[user] || user.charAt(0).toUpperCase();
+              avatar.textContent = letter;
+            }
+            reactionItem.appendChild(avatar);
+          });
+          
+          // Если больше 3 пользователей, показываем "+N"
+          if (users.length > 3) {
+            const more = document.createElement('span');
+            more.textContent = '+' + (users.length - 3);
+            more.style.cssText = 'font-size:10px;color:#666;margin-left:2px;';
+            reactionItem.appendChild(more);
+          }
+          
+          newReactionsContainer.appendChild(reactionItem);
+        });
+        
+        // Вставляем перед временем
+        const timeSpan = meta.querySelector('span');
+        if (timeSpan) {
+          meta.insertBefore(newReactionsContainer, timeSpan);
+        } else {
+          meta.appendChild(newReactionsContainer);
+        }
+      }
+    }
+  });
+}
   async function uploadToWorker(file, folder, fileName) {
   const fd = new FormData();
   fd.append('file', file);
@@ -1773,11 +1916,179 @@ window.addEventListener('scroll', () => {
 
 
 let longPressTimer = null;
+let selectedReactions = ['❤️', '👍', '👎', '🔥', '😍', '👏', '😊']; // Дефолтные реакции
+let currentReactionMessageId = null; // ID сообщения для которого открыта панель реакций
+let replyToMessage = null; // Сообщение на которое отвечаем
+
+// === Режим ответа (глобальная функция) ===
+function startReplyMode(messageId) {
+  const wrap = document.querySelector(`.msg-wrap[data-id="${messageId}"]`);
+  if (!wrap) return;
+  
+  // Получаем данные из сообщения в Firestore
+  db.collection('chat_messages').doc(messageId).get().then(doc => {
+    if (!doc.exists) return;
+    
+    const m = doc.data();
+    const sender = m.sender;
+    const text = m.text || '';
+    const senderName = sender === myRole ? userProfile.name : otherProfile.name;
+    
+    replyToMessage = {
+      id: messageId,
+      sender: sender,
+      senderName: senderName,
+      text: text,
+      type: m.type || 'text'
+    };
+    
+    // Показываем UI режима ответа
+    showReplyUI();
+    
+    // Фокус на поле ввода
+    const input = document.getElementById('msg-input');
+    input.focus();
+  }).catch(e => {
+    console.error('Error getting message for reply:', e);
+  });
+}
+
+function cancelReplyMode() {
+  replyToMessage = null;
+  hideReplyUI();
+}
+
+function showReplyUI() {
+  if (!replyToMessage) return;
+  
+  let replyBar = document.getElementById('reply-bar');
+  if (!replyBar) {
+    replyBar = document.createElement('div');
+    replyBar.id = 'reply-bar';
+    replyBar.style.cssText = 'display:none;padding:8px 12px;background:rgba(0,170,255,0.1);border-left:3px solid #00aaff;margin-bottom:8px;border-radius:4px;';
+    
+    const inputBar = document.getElementById('input-bar');
+    // Вставляем reply bar ПЕРЕД input bar, а не внутрь него
+    inputBar.parentNode.insertBefore(replyBar, inputBar);
+  }
+  
+  replyBar.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div style="flex:1;">
+        <div style="font-size:11px;color:#00aaff;font-weight:600;margin-bottom:2px;">${t('reply_to')}: ${replyToMessage.senderName}</div>
+        <div style="font-size:12px;color:#ccc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">${replyToMessage.text || t('attachment')}</div>
+      </div>
+      <button id="cancel-reply-btn" style="background:none;border:none;color:#666;cursor:pointer;padding:4px;font-size:16px;">✕</button>
+    </div>
+  `;
+  
+  replyBar.style.display = 'block';
+  
+  document.getElementById('cancel-reply-btn').addEventListener('click', cancelReplyMode);
+}
+
+function hideReplyUI() {
+  const replyBar = document.getElementById('reply-bar');
+  if (replyBar) {
+    replyBar.style.display = 'none';
+  }
+}
+
+// === Панель реакций для режима выбора (глобальная функция) ===
+function showSelectionReactionsPanel(x, y, messageId) {
+  const panel = document.getElementById('selection-reactions-panel');
+  if (!panel) return;
+  
+  currentReactionMessageId = messageId;
+  
+  // Обновляем кнопки реакций
+  const buttons = panel.querySelectorAll('.selection-reaction-btn');
+  buttons.forEach((btn, index) => {
+    if (selectedReactions[index]) {
+      btn.textContent = selectedReactions[index];
+      btn.dataset.emoji = selectedReactions[index];
+    }
+  });
+  
+  // Позиционируем панель
+  panel.style.left = x + 'px';
+  panel.style.top = y + 'px';
+  panel.style.display = 'block';
+  
+  // Закрываем при клике вне панели
+  setTimeout(() => {
+    document.addEventListener('click', hideSelectionReactionsPanelOutside, { once: true });
+  }, 10);
+}
+
+function hideSelectionReactionsPanel() {
+  const panel = document.getElementById('selection-reactions-panel');
+  if (panel) {
+    panel.style.display = 'none';
+  }
+  currentReactionMessageId = null;
+}
+
+function hideSelectionReactionsPanelOutside(e) {
+  const panel = document.getElementById('selection-reactions-panel');
+  if (panel && !panel.contains(e.target)) {
+    hideSelectionReactionsPanel();
+  }
+}
+
+// === Панель реакций (глобальная функция) ===
+function showReactionsPanel(x, y, messageId) {
+  const panel = document.getElementById('reactions-panel');
+  if (!panel) return;
+  
+  currentReactionMessageId = messageId;
+  
+  // Обновляем кнопки реакций
+  const buttons = panel.querySelectorAll('.reaction-btn');
+  buttons.forEach((btn, index) => {
+    if (selectedReactions[index]) {
+      btn.textContent = selectedReactions[index];
+      btn.dataset.emoji = selectedReactions[index];
+    }
+  });
+  
+  // Позиционируем панель
+  panel.style.left = x + 'px';
+  panel.style.top = y + 'px';
+  panel.style.display = 'block';
+  
+  // Закрываем при клике вне панели
+  setTimeout(() => {
+    document.addEventListener('click', hideReactionsPanelOutside, { once: true });
+  }, 10);
+}
+
+function hideReactionsPanel() {
+  const panel = document.getElementById('reactions-panel');
+  if (panel) {
+    panel.style.display = 'none';
+  }
+  currentReactionMessageId = null;
+}
+
+function hideReactionsPanelOutside(e) {
+  const panel = document.getElementById('reactions-panel');
+  if (panel && !panel.contains(e.target)) {
+    hideReactionsPanel();
+  }
+}
 
 function enableLongPressSelection(row, id) {
   let pressTimer = null;
   let longPressTriggered = false;
+  
+  // Получаем тип сообщения из data-атрибута
+  const wrap = row.parentElement;
+  const msgType = wrap ? (wrap.dataset.type || 'text') : 'text';
+  
+  console.log('enableLongPressSelection called for message', id, 'type:', msgType, 'wrap:', wrap);
 
+  // Для десктопа
   row.addEventListener('mousedown', (e) => {
     if (e.target.classList.contains('msg-checkbox')) return;
 
@@ -1785,23 +2096,59 @@ function enableLongPressSelection(row, id) {
 
     pressTimer = setTimeout(() => {
       longPressTriggered = true;
+      
+      // При длительном нажатии - режим выбора с чекбоксами + панель реакций для нажатого сообщения
+      console.log('Desktop long press - selection mode + reactions panel for', msgType, id);
+      
       selectionMode = true;
       document.body.classList.add('selection-mode');
 
-      // ИЩЕМ чекбокс НЕ в row, а в wrap
       const cb = row.parentElement.querySelector('.msg-checkbox');
 
       if (cb) {
         cb.checked = true;
-
-        // ДАЁМ DOM обновиться
         setTimeout(() => updateDeleteButton(), 0);
       }
+      
+      // Показываем панель реакций для нажатого сообщения
+      const rect = row.getBoundingClientRect();
+      showReactionsPanel(rect.left, rect.top - 150, id);
     }, 450);
   });
 
   row.addEventListener('mouseup', () => clearTimeout(pressTimer));
   row.addEventListener('mouseleave', () => clearTimeout(pressTimer));
+
+  // Для мобильных устройств
+  row.addEventListener('touchstart', (e) => {
+    if (e.target.classList.contains('msg-checkbox')) return;
+
+    longPressTriggered = false;
+
+    pressTimer = setTimeout(() => {
+      longPressTriggered = true;
+      
+      // При длительном нажатии - режим выбора с чекбоксами + панель реакций для нажатого сообщения
+      console.log('Mobile long press - selection mode + reactions panel for', msgType, id);
+      
+      selectionMode = true;
+      document.body.classList.add('selection-mode');
+
+      const cb = row.parentElement.querySelector('.msg-checkbox');
+
+      if (cb) {
+        cb.checked = true;
+        setTimeout(() => updateDeleteButton(), 0);
+      }
+      
+      // Показываем панель реакций для нажатого сообщения
+      const rect = row.getBoundingClientRect();
+      showReactionsPanel(rect.left, rect.top - 150, id);
+    }, 500);
+  });
+
+  row.addEventListener('touchend', () => clearTimeout(pressTimer));
+  row.addEventListener('touchcancel', () => clearTimeout(pressTimer));
 
   row.addEventListener('click', (e) => {
     if (longPressTriggered) {
@@ -1817,6 +2164,13 @@ async function loadProfile() {
     const doc = await db.collection('profiles').doc(myRole).get();
     if (doc.exists) userProfile = doc.data();
     updateProfileDisplay();
+    
+    myProfileLoaded = true;
+    
+    // Если оба профиля загружены, обновляем аватары в реакциях
+    if (myProfileLoaded && otherProfileLoaded) {
+      updateAllReactionsAvatars();
+    }
   } catch (e) {
         console.error('loadProfile:', e);
   }
@@ -2077,8 +2431,106 @@ document.getElementById('close-selection-btn').addEventListener('click', () => {
     await deleteSelectedMessages(true);
     document.getElementById('delete-modal').classList.remove('open');
   });
+
+// Добавление реакции к сообщению (глобальная функция)
+async function addReaction(messageId, emoji) {
+  try {
+    const doc = await db.collection('chat_messages').doc(messageId).get();
+    if (!doc.exists) return;
+    
+    const msg = doc.data();
+    const reactions = msg.reactions || [];
+    
+    // Проверяем, что reactions это массив
+    if (!Array.isArray(reactions)) {
+      // Если не массив, создаем новый
+      await db.collection('chat_messages').doc(messageId).update({ reactions: [{ user: myRole, emoji }] });
+      return;
+    }
+    
+    // Проверяем, есть ли уже реакция от текущего пользователя
+    const existingIndex = reactions.findIndex(r => r.user === myRole);
+    
+    if (existingIndex >= 0) {
+      // Обновляем существующую реакцию
+      reactions[existingIndex] = { user: myRole, emoji };
+    } else {
+      // Добавляем новую реакцию
+      reactions.push({ user: myRole, emoji });
+    }
+    
+    await db.collection('chat_messages').doc(messageId).update({ reactions });
+  } catch (e) {
+    console.error('Error adding reaction:', e);
+  }
+}
+
+// Редактирование сообщения (глобальная функция)
+function startEdit(msgId, currentText) {
+  const input = document.getElementById('msg-input');
+  const sendBtn = document.getElementById('send-btn');
+  
+  editingMessageId = msgId;
+  input.value = currentText;
+  input.focus();
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+  sendBtn.disabled = false;
+  
+  // Изменяем текст кнопки отправки
+  sendBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  sendBtn.title = t('save_changes');
+  
+  // Добавляем кнопку отмены редактирования
+  if (!document.getElementById('cancel-edit-btn')) {
+    const cancelBtn = document.createElement('button');
+    cancelBtn.id = 'cancel-edit-btn';
+    cancelBtn.className = 'chat-icon-btn';
+    cancelBtn.style.width = '36px';
+    cancelBtn.style.height = '36px';
+    cancelBtn.title = t('cancel_edit');
+    cancelBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+    cancelBtn.addEventListener('click', cancelEdit);
+    
+    const inputBar = document.getElementById('input-bar');
+    inputBar.insertBefore(cancelBtn, sendBtn);
+  }
+}
+
+// Отмена редактирования (глобальная функция)
+function cancelEdit() {
+  const input = document.getElementById('msg-input');
+  const sendBtn = document.getElementById('send-btn');
+  
+  editingMessageId = null;
+  input.value = '';
+  input.style.height = 'auto';
+  sendBtn.disabled = true;
+  
+  // Возвращаем оригинальный вид кнопки отправки
+  sendBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 11.5L21 3L14 21L11 13L3 11.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+  sendBtn.title = t('send');
+  
+  // Удаляем кнопку отмены
+  const cancelBtn = document.getElementById('cancel-edit-btn');
+  if (cancelBtn) cancelBtn.remove();
+}
+
 // === ДЕЙСТВИЯ КОНТЕКСТНОГО МЕНЮ ===
 const menu = document.getElementById('msg-context-menu');
+
+// Обработчики для реакций в контекстном меню
+menu.querySelectorAll('.context-reaction-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const emoji = btn.dataset.emoji;
+    const id = menu.dataset.id;
+    if (id && emoji) {
+      addReaction(id, emoji);
+    }
+    menu.style.display = 'none';
+  });
+});
 
 // Ответить
 menu.querySelector('[data-action="reply"]').addEventListener('click', () => {
@@ -2089,16 +2541,31 @@ menu.querySelector('[data-action="reply"]').addEventListener('click', () => {
 // Изменить (только свои)
 menu.querySelector('[data-action="edit"]').addEventListener('click', () => {
   const id = menu.dataset.id;
+  const text = menu.dataset.text || '';
+  
+  // Вызываем функцию редактирования напрямую
+  if (typeof startEdit === 'function') {
+    startEdit(id, text);
+  }
+  
+  menu.style.display = 'none';
+});
 
-  // Находим wrap сообщения
-  const wrap = document.querySelector(`.msg-wrap[data-id="${id}"]`);
-  if (!wrap) return;
-
-  // Находим старую кнопку редактирования внутри сообщения
-  const oldEditBtn = wrap.querySelector('.msg-actions button[title="Редактировать"]');
-  if (!oldEditBtn) return;
-
-  oldEditBtn.click();   // ← вызываем её
+// Копировать
+menu.querySelector('[data-action="copy"]').addEventListener('click', () => {
+  const text = menu.dataset.text || '';
+  if (text) {
+    navigator.clipboard.writeText(text).then(() => {
+      // Показываем уведомление о копировании
+      const notification = document.createElement('div');
+      notification.textContent = t('copied');
+      notification.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,209,255,0.9);color:#07060a;padding:8px 16px;border-radius:12px;font-size:13px;font-weight:600;z-index:10070;animation:fadeIn 0.2s';
+      document.body.appendChild(notification);
+      setTimeout(() => notification.remove(), 2000);
+    }).catch(() => {
+      alert(t('copy_failed'));
+    });
+  }
   menu.style.display = 'none';
 });
 
@@ -2149,8 +2616,33 @@ document.querySelector('#top-select-bar').addEventListener('click', (e) => {
     const wrap = document.querySelector(`.msg-wrap[data-id="${id}"]`);
     if (!wrap) return;
 
-    const oldEditBtn = wrap.querySelector('.msg-actions button[title="Редактировать"]');
-    if (oldEditBtn) oldEditBtn.click();
+    const text = wrap.dataset.text || '';
+    if (typeof startEdit === 'function') {
+      startEdit(id, text);
+    }
+    return;
+  }
+
+  // === COPY ===
+  if (action === 'copy') {
+    if (ids.length !== 1) return;
+
+    const id = ids[0];
+    const wrap = document.querySelector(`.msg-wrap[data-id="${id}"]`);
+    if (!wrap) return;
+
+    const text = wrap.dataset.text || '';
+    if (text) {
+      navigator.clipboard.writeText(text).then(() => {
+        const notification = document.createElement('div');
+        notification.textContent = t('copied');
+        notification.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,209,255,0.9);color:#07060a;padding:8px 16px;border-radius:12px;font-size:13px;font-weight:600;z-index:10070;animation:fadeIn 0.2s';
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 2000);
+      }).catch(() => {
+        alert(t('copy_failed'));
+      });
+    }
     return;
   }
 
@@ -2396,7 +2888,7 @@ header.innerHTML = `
     loadTrashMessages();
   } catch (error) {
     console.error('Ошибка удаления:', error);
-    alert('❌ Ошибка при удалении');
+    alert(t('delete_error_permanent'));
   }
 }
 
@@ -3212,6 +3704,8 @@ else if (file.type.startsWith('video/')) {
   LETTERS[otherRole] = data.avatar.startsWith("http")
     ? null
     : data.avatar.toUpperCase();
+  
+  otherProfileLoaded = true;
 
   // обновление хедера
   const headerName = document.getElementById('header-name');
@@ -3239,11 +3733,15 @@ else if (file.type.startsWith('video/')) {
       }
     }
   });
+  
+  // Если оба профиля загружены, обновляем аватары в реакциях
+  if (myProfileLoaded && otherProfileLoaded) {
+    updateAllReactionsAvatars();
+  }
 
   // 🔥 ДОБАВЬ ЭТО
   updateProfileDisplay();
 });
-
 
     db.collection('chat_messages')
   .orderBy('createdAt', 'asc')
@@ -3293,12 +3791,17 @@ else if (file.type.startsWith('video/')) {
         const oldEdited = wrap.querySelector('.edited') ? true : false;
         const oldLikes = wrap.querySelector('.like-badge')?.innerText || '';
         const oldStatus = wrap.querySelector('.ticks')?.innerHTML || '';
+        
+        // Проверяем реакции
+        const oldReactions = JSON.stringify(wrap.dataset.reactions || []);
+        const newReactions = JSON.stringify(m.reactions || []);
 
         const needUpdate =
           oldText !== m.text ||
           oldEdited !== !!m.edited ||
           oldLikes !== ('❤ ' + (m.likes?.length || 0)) ||
-          oldStatus !== (m.status === 'read' ? TICK_DOUBLE : TICK_SINGLE);
+          oldStatus !== (m.status === 'read' ? TICK_DOUBLE : TICK_SINGLE) ||
+          oldReactions !== newReactions;
 
         if (!needUpdate) continue;
 
@@ -3370,15 +3873,89 @@ if (
             if (!likeBadge) {
               const newBadge = document.createElement('div');
               newBadge.className = 'like-badge' + (m.likes.includes(myRole) ? ' active' : '');
-              newBadge.innerHTML = '❤ ' + m.likes.length;
-              newBadge.addEventListener('click', () => toggleLike(id));
-              wrap.appendChild(newBadge);
+              newBadge.textContent = '❤ ' + m.likes.length;
+              bubble.appendChild(newBadge);
             } else {
+              likeBadge.textContent = '❤ ' + m.likes.length;
               likeBadge.className = 'like-badge' + (m.likes.includes(myRole) ? ' active' : '');
-              likeBadge.innerHTML = '❤ ' + m.likes.length;
             }
           } else if (likeBadge) {
             likeBadge.remove();
+          }
+        }
+        
+        // Обновляем реакции
+        if (oldReactions !== newReactions) {
+          wrap.dataset.reactions = JSON.stringify(m.reactions || []);
+          
+          // Удаляем старый контейнер реакций
+          const oldReactionsContainer = meta.querySelector('.reactions-container');
+          if (oldReactionsContainer) {
+            oldReactionsContainer.remove();
+          }
+          
+          // Добавляем новый контейнер реакций
+          if (m.reactions && m.reactions.length > 0) {
+            const reactionsContainer = document.createElement('div');
+            reactionsContainer.className = 'reactions-container';
+            reactionsContainer.style.cssText = 'display:flex;align-items:center;gap:4px;margin-right:8px;padding:2px 6px;background:rgba(255,255,255,0.9);border-radius:8px;';
+            
+            // Группируем реакции по эмодзи
+            const groupedReactions = {};
+            m.reactions.forEach(r => {
+              if (!groupedReactions[r.emoji]) {
+                groupedReactions[r.emoji] = [];
+              }
+              groupedReactions[r.emoji].push(r.user);
+            });
+            
+            // Отображаем каждую реакцию с аватарами
+            Object.entries(groupedReactions).forEach(([emoji, users]) => {
+              const reactionItem = document.createElement('div');
+              reactionItem.style.cssText = 'display:flex;align-items:center;gap:2px;font-size:11px;';
+              
+              // Добавляем эмодзи
+              const emojiSpan = document.createElement('span');
+              emojiSpan.textContent = emoji;
+              emojiSpan.style.fontSize = '14px';
+              reactionItem.appendChild(emojiSpan);
+              
+              // Добавляем аватары пользователей (максимум 3)
+              users.slice(0, 3).forEach(user => {
+                const avatar = document.createElement('div');
+                avatar.style.cssText = 'width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#07060a;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-left:-4px;border:1px solid #fff;overflow:hidden;';
+                
+                const userAvatar = getUserAvatar(user);
+                if (userAvatar && userAvatar.startsWith('http')) {
+                  // Показываем реальный аватар
+                  avatar.style.background = 'none';
+                  avatar.innerHTML = `<img src="${userAvatar}" style="width:100%;height:100%;object-fit:cover;">`;
+                } else {
+                  // Показываем букву если нет аватара
+                  const letter = LETTERS[user] || user.charAt(0).toUpperCase();
+                  avatar.textContent = letter;
+                }
+                reactionItem.appendChild(avatar);
+              });
+              
+              // Если больше 3 пользователей, показываем "+N"
+              if (users.length > 3) {
+                const more = document.createElement('span');
+                more.textContent = '+' + (users.length - 3);
+                more.style.cssText = 'font-size:10px;color:#666;margin-left:2px;';
+                reactionItem.appendChild(more);
+              }
+              
+              reactionsContainer.appendChild(reactionItem);
+            });
+            
+            // Вставляем перед временем
+            const timeSpan = meta.querySelector('span');
+            if (timeSpan) {
+              meta.insertBefore(reactionsContainer, timeSpan);
+            } else {
+              meta.appendChild(reactionsContainer);
+            }
           }
         }
 
@@ -3401,17 +3978,19 @@ row.className = 'msg-row';
 // 1) Долгое удержание
 enableLongPressSelection(row, id);
 
-// 2) Обычный клик → контекстное меню
+// 2) Обычный клик → контекстное меню только для текстовых сообщений
 row.addEventListener('click', (e) => {
 
   if (selectionMode) return;
   if (e.target.closest('.msg-checkbox')) return;
 
-  // если сообщение НЕ текстовое — не открываем меню
-  if (m.type !== 'text') return;
-
   e.stopPropagation();
-  openContextMenu(e, id, m);
+  
+  // Открываем контекстное меню только для текстовых сообщений
+  if (m.type === 'text') {
+    openContextMenu(e, id, m);
+  }
+  // Для медиа (музыка, голосовое, видео, картинка) не открываем меню - позволяем проигрывание
 });
 
 
@@ -3429,6 +4008,12 @@ checkbox.dataset.messageId = id;
 checkbox.addEventListener('change', () => {
   wrap.classList.toggle('selected', checkbox.checked);  // подсветка на .msg-wrap
   updateDeleteButton();
+  
+  // Если выбрано больше одного сообщения, скрываем панель эмодзи
+  const selectedCount = document.querySelectorAll('.msg-checkbox:checked').length;
+  if (selectedCount > 1) {
+    hideReactionsPanel();
+  }
 });
 
 // Вставляем чекбокс ВНУТРЬ msg-wrap
@@ -3475,11 +4060,104 @@ if (m.sender === myRole) {
 
       const bubble = document.createElement('div');
       bubble.className = 'bubble';
+      
+      // Отображаем reply block если есть
+      if (m.replyTo) {
+        const replyBlock = document.createElement('div');
+        replyBlock.className = 'reply-block';
+        replyBlock.style.cssText = 'padding:6px 10px;background:rgba(0,170,255,0.08);border-left:3px solid #00aaff;border-radius:4px;margin-bottom:8px;cursor:pointer;';
+        replyBlock.dataset.replyToId = m.replyTo.id;
+        
+        const replySender = document.createElement('div');
+        replySender.style.cssText = 'font-size:11px;color:#00aaff;font-weight:600;margin-bottom:2px;';
+        replySender.textContent = t('reply_to') + ': ' + (m.replyTo.senderName || NAMES[m.replyTo.sender] || m.replyTo.sender);
+        replyBlock.appendChild(replySender);
+        
+        const replyText = document.createElement('div');
+        replyText.style.cssText = 'font-size:12px;color:#999;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:250px;';
+        replyText.textContent = m.replyTo.text || t('attachment');
+        replyBlock.appendChild(replyText);
+        
+        // Клик по reply block для скролла к оригиналу
+        replyBlock.addEventListener('click', () => {
+          const originalMessage = document.querySelector(`.msg-wrap[data-id="${m.replyTo.id}"]`);
+          if (originalMessage) {
+            originalMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Подсветка оригинального сообщения
+            originalMessage.style.transition = 'background 0.3s';
+            originalMessage.style.background = 'rgba(0,170,255,0.2)';
+            setTimeout(() => {
+              originalMessage.style.background = '';
+            }, 1000);
+          }
+        });
+        
+        bubble.appendChild(replyBlock);
+      }
+      
       await renderBubbleContent(bubble, m, id);
 
       const meta = document.createElement('div');
       meta.className = 'meta';
       meta.title = fmtFullDateTime(date);
+
+      // Отображаем реакции слева от даты
+      if (m.reactions && m.reactions.length > 0) {
+        const reactionsContainer = document.createElement('div');
+        reactionsContainer.className = 'reactions-container';
+        reactionsContainer.style.cssText = 'display:flex;align-items:center;gap:4px;margin-right:8px;padding:2px 6px;background:rgba(255,255,255,0.9);border-radius:8px;';
+        
+        // Группируем реакции по эмодзи
+        const groupedReactions = {};
+        m.reactions.forEach(r => {
+          if (!groupedReactions[r.emoji]) {
+            groupedReactions[r.emoji] = [];
+          }
+          groupedReactions[r.emoji].push(r.user);
+        });
+        
+        // Отображаем каждую реакцию с аватарами
+        Object.entries(groupedReactions).forEach(([emoji, users]) => {
+          const reactionItem = document.createElement('div');
+          reactionItem.style.cssText = 'display:flex;align-items:center;gap:2px;font-size:11px;';
+          
+          // Добавляем эмодзи
+          const emojiSpan = document.createElement('span');
+          emojiSpan.textContent = emoji;
+          emojiSpan.style.fontSize = '14px';
+          reactionItem.appendChild(emojiSpan);
+          
+          // Добавляем аватары пользователей (максимум 3)
+          users.slice(0, 3).forEach(user => {
+            const avatar = document.createElement('div');
+            avatar.style.cssText = 'width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#07060a;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-left:-4px;border:1px solid #fff;overflow:hidden;';
+            
+            const userAvatar = getUserAvatar(user);
+            if (userAvatar && userAvatar.startsWith('http')) {
+              // Показываем реальный аватар
+              avatar.style.background = 'none';
+              avatar.innerHTML = `<img src="${userAvatar}" style="width:100%;height:100%;object-fit:cover;">`;
+            } else {
+              // Показываем букву если нет аватара
+              const letter = LETTERS[user] || user.charAt(0).toUpperCase();
+              avatar.textContent = letter;
+            }
+            reactionItem.appendChild(avatar);
+          });
+          
+          // Если больше 3 пользователей, показываем "+N"
+          if (users.length > 3) {
+            const more = document.createElement('span');
+            more.textContent = '+' + (users.length - 3);
+            more.style.cssText = 'font-size:10px;color:#666;margin-left:2px;';
+            reactionItem.appendChild(more);
+          }
+          
+          reactionsContainer.appendChild(reactionItem);
+        });
+        
+        meta.appendChild(reactionsContainer);
+      }
 
       const timeSpan = document.createElement('span');
       timeSpan.textContent = fmtTime(date);
@@ -3510,22 +4188,22 @@ else if (m.status === 'read') {
 
       bubble.appendChild(meta);
 
-      const actions = document.createElement('div');
-      actions.className = 'msg-actions';
-
-      const likeBtn = document.createElement('button');
-      likeBtn.textContent = '♡';
-      likeBtn.title = t('like_title');
-      likeBtn.addEventListener('click', () => toggleLike(id));
-      actions.appendChild(likeBtn);
-
-      if (isMe && m.type === 'text') {
-        const editBtn = document.createElement('button');
-        editBtn.textContent = '✎';
-        editBtn.title = t('edit_title');
-        editBtn.addEventListener('click', () => startEdit(id, m.text));
-        actions.appendChild(editBtn);
-      }
+      // Убираем кнопки действий рядом с сообщением
+      // const actions = document.createElement('div');
+      // actions.className = 'msg-actions';
+      // const likeBtn = document.createElement('button');
+      // likeBtn.textContent = '♡';
+      // likeBtn.title = t('like_title');
+      // likeBtn.addEventListener('click', () => toggleLike(id));
+      // actions.appendChild(likeBtn);
+      // if (isMe && m.type === 'text') {
+      //   const editBtn = document.createElement('button');
+      //   editBtn.textContent = '✎';
+      //   editBtn.title = t('edit_title');
+      //   editBtn.addEventListener('click', () => startEdit(id, m.text));
+      //   actions.appendChild(editBtn);
+      // }
+      // bubble.appendChild(actions);
 
       if (isMe) {
         row.appendChild(bubble);
@@ -3535,7 +4213,7 @@ else if (m.status === 'read') {
         row.appendChild(bubble);
       }
 
-      row.appendChild(actions);
+      // row.appendChild(actions); // Убрано - кнопки действий больше не используются
       wrap.appendChild(row);
 
       if (m.likes && m.likes.length > 0) {
@@ -3561,6 +4239,11 @@ else if (m.status === 'read') {
       if (isFirstLoad) {
   setTimeout(scrollToLastMessage, 30);
   isFirstLoad = false;
+  
+  // Обновляем аватары в реакциях после первой загрузки сообщений
+  if (myProfileLoaded && otherProfileLoaded) {
+    setTimeout(updateAllReactionsAvatars, 100);
+  }
 }
 
       // Для новых сообщений от меня тоже скроллим
@@ -3905,49 +4588,127 @@ if (isEmojiOnly(m.text)) {
       db.collection('chat_messages').doc(msgId).update({ likes: newLikes }).catch(() => {});
     }
 
-    function startEdit(msgId, currentText) {
-      editingMessageId = msgId;
-      input.value = currentText;
-      input.focus();
-      input.style.height = 'auto';
-      input.style.height = Math.min(input.scrollHeight, 120) + 'px';
-      sendBtn.disabled = false;
-      
-      // Изменяем текст кнопки отправки
-      sendBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-      sendBtn.title = t('save_changes');
-      
-      // Добавляем кнопку отмены редактирования
-      if (!document.getElementById('cancel-edit-btn')) {
-        const cancelBtn = document.createElement('button');
-        cancelBtn.id = 'cancel-edit-btn';
-        cancelBtn.className = 'chat-icon-btn';
-        cancelBtn.style.width = '36px';
-        cancelBtn.style.height = '36px';
-        cancelBtn.title = t('cancel_edit');
-        cancelBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
-        cancelBtn.addEventListener('click', cancelEdit);
-        
-        const inputBar = document.getElementById('input-bar');
-        inputBar.insertBefore(cancelBtn, sendBtn);
+    // === Загрузка сохраненных реакций из Firebase ===
+    async function loadSavedReactions() {
+      try {
+        const doc = await db.collection('profiles').doc(myRole).get();
+        if (doc.exists) {
+          const data = doc.data();
+          if (data.reactions && Array.isArray(data.reactions) && data.reactions.length === 7) {
+            selectedReactions = data.reactions;
+          }
+        }
+      } catch (e) {
+        console.error('Error loading saved reactions:', e);
       }
     }
-    
-    function cancelEdit() {
-      editingMessageId = null;
-      input.value = '';
-      input.style.height = 'auto';
-      sendBtn.disabled = true;
-      
-      // Возвращаем оригинальный вид кнопки отправки
-      sendBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 11.5L21 3L14 21L11 13L3 11.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>';
-      sendBtn.title = t('send');
-      
-      // Удаляем кнопку отмены
-      const cancelBtn = document.getElementById('cancel-edit-btn');
-      if (cancelBtn) cancelBtn.remove();
+
+    // === Сохранение выбранных реакций в Firebase ===
+    async function saveSelectedReactions() {
+      try {
+        await db.collection('profiles').doc(myRole).update({
+          reactions: selectedReactions
+        });
+      } catch (e) {
+        console.error('Error saving reactions:', e);
+      }
     }
 
+    // Загружаем сохраненные реакции при инициализации
+    loadSavedReactions();
+    
+    // === Панель реакций для режима выбора ===
+    function showSelectionReactionsPanel(x, y, messageId) {
+      const panel = document.getElementById('selection-reactions-panel');
+      currentReactionMessageId = messageId;
+      
+      // Обновляем кнопки реакций
+      const buttons = panel.querySelectorAll('.selection-reaction-btn');
+      buttons.forEach((btn, index) => {
+        if (selectedReactions[index]) {
+          btn.textContent = selectedReactions[index];
+          btn.dataset.emoji = selectedReactions[index];
+        }
+      });
+      
+      // Позиционируем панель
+      panel.style.left = x + 'px';
+      panel.style.top = y + 'px';
+      panel.style.display = 'block';
+      
+      // Закрываем при клике вне панели
+      setTimeout(() => {
+        document.addEventListener('click', hideSelectionReactionsPanelOutside, { once: true });
+      }, 10);
+    }
+
+    function hideSelectionReactionsPanel() {
+      const panel = document.getElementById('selection-reactions-panel');
+      panel.style.display = 'none';
+      currentReactionMessageId = null;
+    }
+
+    function hideSelectionReactionsPanelOutside(e) {
+      const panel = document.getElementById('selection-reactions-panel');
+      if (!panel.contains(e.target)) {
+        hideSelectionReactionsPanel();
+      }
+    }
+
+    // Обработчики кнопок реакций для режима выбора
+    document.querySelectorAll('.selection-reaction-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const emoji = btn.dataset.emoji;
+        if (currentReactionMessageId) {
+          addReaction(currentReactionMessageId, emoji);
+        }
+        hideSelectionReactionsPanel();
+      });
+    });
+    
+    // Обработчики кнопок реакций
+    document.querySelectorAll('.reaction-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const emoji = btn.dataset.emoji;
+        if (currentReactionMessageId) {
+          addReaction(currentReactionMessageId, emoji);
+        }
+        hideReactionsPanel();
+      });
+    });
+
+    // Кнопка изменения реакций
+    document.getElementById('change-reactions-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      // TODO: Открыть модалку для выбора новых реакций
+      alert(t('reactions_coming_soon'));
+    });
+
+    // Кнопка копировать в панели реакций
+    document.getElementById('copy-from-reactions-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (currentReactionMessageId) {
+        const wrap = document.querySelector(`.msg-wrap[data-id="${currentReactionMessageId}"]`);
+        if (wrap) {
+          const text = wrap.dataset.text || '';
+          if (text) {
+            navigator.clipboard.writeText(text).then(() => {
+              const notification = document.createElement('div');
+              notification.textContent = t('copied');
+              notification.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,209,255,0.9);color:#07060a;padding:8px 16px;border-radius:12px;font-size:13px;font-weight:600;z-index:10070;animation:fadeIn 0.2s';
+              document.body.appendChild(notification);
+              setTimeout(() => notification.remove(), 2000);
+            }).catch(() => {
+              alert(t('copy_failed'));
+            });
+          }
+        }
+      }
+      hideReactionsPanel();
+    });
+    
     async function sendMessage() {
       const text = input.value.trim();
       if (!text) return;
@@ -3969,18 +4730,34 @@ if (isEmojiOnly(m.text)) {
       }
       
       // Отправка нового сообщения
+      const replyTo = replyToMessage ? {
+        id: replyToMessage.id,
+        sender: replyToMessage.sender,
+        senderName: replyToMessage.senderName,
+        text: replyToMessage.text,
+        type: replyToMessage.type
+      } : null;
+      
       input.value = '';
       input.style.height = 'auto';
       sendBtn.disabled = true;
       setTyping(false);
+      cancelReplyMode();
+      
       try {
-        await db.collection('chat_messages').add({
+        const messageData = {
           type: 'text',
           text,
           sender: myRole,
           status: 'sent',
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        };
+        
+        if (replyTo) {
+          messageData.replyTo = replyTo;
+        }
+        
+        await db.collection('chat_messages').add(messageData);
         setTimeout(scrollToLastMessage, 30);
       } catch (e) {
         console.error(e);
