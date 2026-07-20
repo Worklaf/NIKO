@@ -1,0 +1,1990 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>N1K∅ — Tracks</title>
+   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://unpkg.com/modern-normalize/modern-normalize.css">
+  <base target="_blank">
+</head>
+<body>
+  <div class="container">
+  <header>
+        <a id="site-logo" class="site-logo" href="#">
+      <span class="logo-text">N1K∅</span>
+    </a>
+       <div class="login-wrap">
+      <button id="loginBtn" class="btn" style="padding:4px 10px;font-size:12px">🔑 Войти</button>
+    </div>
+       <div class="lang-bar">
+      <button id="lang-en" class="btn icon" style="padding:4px 8px;font-size:11px;border-radius:6px" title="English">EN</button>
+      <button id="lang-pl" class="btn icon" style="padding:4px 8px;font-size:11px;border-radius:6px" title="Polski">PL</button>
+      <button id="lang-ua" class="btn icon" style="padding:4px 8px;font-size:11px;border-radius:6px" title="Українська">UA</button>
+      <button id="managePlaylistsBtn" class="btn playlists-chip" style="display:none">🎵 <span data-i18n="playlists"></span></button>
+    </div>
+
+    <div class="search-wrap" role="search" aria-label="Search tracks">
+      <input id="siteSearch" class="search-input" placeholder="Search: title, artist or genre">
+      <select id="siteGenre" class="search-select" aria-label="Genre">
+        <option value="">All genres</option>
+      </select>
+    </div>
+
+ <button id="addTrackBtn" class="btn" style="display:none"><span data-i18n="uploadTrack"></span></button>
+<button id="exportJsonBtn" class="btn" style="display:none"><span data-i18n="exportJson"></span></button>
+<button id="resetPlaysBtn" class="btn" style="display:none;background:rgba(255,77,77,0.1);border-color:rgba(255,77,77,0.3)"><span data-i18n="resetPlays">Reset Plays</span></button>
+<button id="userUploadBtn" class="btn" style="display:none">🎧 <span data-i18n="userUpload"></span></button>
+<select id="upload-permission-select" class="search-select" style="display:none">
+  <option value="admin_only" data-i18n="uploadAdminOnly"></option>
+  <option value="partner_only" data-i18n="uploadPartnerOnly"></option>
+  <option value="everyone" data-i18n="uploadEveryone"></option>
+</select>
+  </header>
+
+  <main>
+    <div class="list" id="tracksList">
+      <div class="loading-state">
+        <h2>⏳ Loading tracks...</h2>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="playlists-modal" class="modal">
+  <div class="panel">
+
+    <!-- Заголовок -->
+    <h3 data-i18n="playlists">🎵 Плейлисты</h3>
+
+    <div id="playlists-list" style="margin-bottom:16px"></div>
+
+    <!-- Название -->
+    <input id="pl-name" class="search-input" data-i18n-placeholder="playlistName" placeholder="" style="width:100%;margin-bottom:8px">
+
+    <!-- Видимость -->
+    <select id="pl-visibility" class="search-select" style="width:100%;margin-bottom:12px">
+      <option value="public" data-i18n="public">🌍 Public</option>
+      <option value="partner" data-i18n="partner">♥ Partner only</option>
+      <option value="hidden" data-i18n="hidden">🔒 Hidden</option>
+    </select>
+
+    <!-- Кнопки -->
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button id="pl-cancel" class="btn" data-i18n="close"></button>
+      <button id="pl-save" class="btn active" data-i18n="createPlaylist"></button>
+    </div>
+
+  </div>
+</div>
+
+<div id="login-modal" class="modal">
+  <div class="panel" style="max-width:320px;text-align:center;background:linear-gradient(135deg,rgba(10,10,15,0.95),rgba(5,5,8,0.95));border:1px solid rgba(0,229,255,0.2);box-shadow:0 0 30px rgba(0,229,255,0.1)">
+    <h3 style="color:#00E5FF;text-shadow:0 0 10px rgba(0,229,255,0.5);margin-bottom:16px">ENTER CODE</h3>
+    <div id="pin-display" style="font-size:28px;font-weight:700;letter-spacing:8px;color:#00E5FF;text-shadow:0 0 15px rgba(0,229,255,0.8);margin:16px 0;min-height:40px;font-family:monospace">••••</div>
+    
+    <div class="pin-pad" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:20px 0">
+      <button class="pin-btn" data-digit="1">1</button>
+      <button class="pin-btn" data-digit="2">2</button>
+      <button class="pin-btn" data-digit="3">3</button>
+      <button class="pin-btn" data-digit="4">4</button>
+      <button class="pin-btn" data-digit="5">5</button>
+      <button class="pin-btn" data-digit="6">6</button>
+      <button class="pin-btn" data-digit="7">7</button>
+      <button class="pin-btn" data-digit="8">8</button>
+      <button class="pin-btn" data-digit="9">9</button>
+      <button class="pin-btn clear-btn" data-action="clear">✕</button>
+      <button class="pin-btn" data-digit="0">0</button>
+      <button class="pin-btn confirm-btn" data-action="confirm">✓</button>
+    </div>
+    
+    <button id="login-cancel" class="btn" style="margin-top:12px;background:transparent;border:1px solid rgba(255,255,255,0.1)">Cancel</button>
+  </div>
+</div>
+  <div id="mini-player" style="display:none" role="region" aria-label="Mini player">
+    <div id="mini-center">
+      <div id="mini-title">—</div>
+      <div style="display:flex;align-items:center;gap:8px;position:relative">
+        <img id="mini-thumb" src="" alt="" style="width:36px;height:36px;object-fit:cover;border-radius:4px;position:absolute;left:0">
+        <div id="mini-wave" style="flex:1;margin-left:40px"></div>
+      </div>
+      <div id="mini-controls" class="mini-controls">
+        <button id="mini-prev" class="control-btn" aria-label="Previous" title="Previous">◀</button>
+        <button id="mini-play" class="control-btn" aria-label="Play/Pause" title="Play/Pause">
+          <svg id="mini-play-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3v18l15-9L5 3z"/></svg>
+        </button>
+        <button id="mini-next" class="control-btn" aria-label="Next" title="Next">▶</button>
+        <button id="shuffle-btn" class="control-btn" aria-label="Shuffle" title="Sequential"><span id="shuffle-icon">🔁</span></button>
+      </div>
+      <div class="time-display" id="mini-time">0:00 / 0:00</div>
+    </div>
+
+    <div id="mini-right" class="mini-actions">
+      <div class="row icon-row" style="display:flex;gap:8px;align-items:center">
+        <input id="mini-volume" type="range" min="0" max="1" step="0.01" value="1" style="width:50px;height:20px" title="Volume">
+        <button id="mini-open-text" class="btn icon" aria-label="Open full text" title="Text">📄</button>
+        <button id="mini-like" class="btn icon" aria-label="Like" title="Like">❤</button>
+        <button id="mini-dislike" class="btn icon" aria-label="Dislike" title="Dislike">👎</button>
+		  <button id="mini-visualizer" class="btn icon visualizer-btn" aria-label="Visualizer" title="Visualizer">🌀</button>
+        <button id="mini-comment" class="btn icon" aria-label="Comments" title="Comments">💬</button>
+        <button id="mini-share" class="btn icon" aria-label="Share" title="Share">🔗</button>
+        <a id="mini-download" class="btn icon" href="#" download aria-label="Download" title="Download">⬇️</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="comments-modal" class="modal" role="dialog" aria-hidden="true">
+    <div class="panel" role="document">
+      <h3 id="comments-title">Comments</h3>
+      <div id="comments-list" class="comments-list" style="max-height:320px;overflow:auto;margin-top:8px;border-radius:8px;padding:8px;background:rgba(255,255,255,0.02)"></div>
+      
+      <div class="emoji-quick-access" style="margin-top:12px;display:flex;gap:6px;">
+        <button class="emoji-btn quick-emoji" data-emoji="🔥">🔥</button>
+        <button class="emoji-btn quick-emoji" data-emoji="😍">😍</button>
+        <button class="emoji-btn quick-emoji" data-emoji="😱">😱</button>
+        <button class="emoji-btn quick-emoji" data-emoji="🙌">🙌</button>
+        <button class="emoji-btn quick-emoji" data-emoji="👍">👍</button>
+        <button class="emoji-btn quick-emoji" data-emoji="🥵">🥵</button>
+      <button class="emoji-btn" id="emoji-show-all"
+        style="background:rgba(255,255,255,0.05);
+               border:1px solid rgba(255,255,255,0.2);
+               font-size:14px;
+               padding:8px 12px;
+               color:#eaeaf2;
+               border-radius:8px;">
+  + More
+</button>
+</div>
+
+      <div style="position:relative;margin-top:12px">
+        <textarea id="comment-input" placeholder="Write a comment..." style="width:100%;min-height:80px;padding:12px;border-radius:8px;background:#07060a;border:1px solid rgba(255,255,255,0.08);color:#eaeaf2"></textarea>
+      </div>
+      
+      <div class="row" style="justify-content:flex-end;display:flex;gap:8px;margin-top:12px">
+        <button id="comment-cancel" class="btn">Cancel</button>
+        <button id="comment-send" class="btn active">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="emoji-popup-modal" class="emoji-popup-modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 style="margin:0">Emoji</h3>
+      <button id="emoji-popup-close" class="btn" style="font-size:20px;padding:4px 8px">✕</button>
+    </div>
+    <div class="emoji-quick-access" id="emoji-quick-access-popup"></div>
+    <div class="emoji-popup-grid" id="emoji-popup-grid"></div>
+  </div>
+
+  <div id="side-panel" class="side-panel" aria-hidden="true">
+    <div class="side-panel-header" id="side-panel-view-header">
+      <button id="side-close" class="btn">Close</button>
+      <div class="side-panel-actions">
+        <button id="copy-text">📋 Copy</button>
+        <button id="edit-text" style="display:none">✏️ Edit</button>
+      </div>
+    </div>
+    <h3 id="side-title">Full text</h3>
+    <div id="side-content" style="white-space:pre-wrap;color:#eaeaf2;margin-top:8px"></div>
+    <textarea id="side-content-editor"></textarea>
+    <div class="edit-mode-actions" id="edit-mode-actions">
+      <button id="edit-cancel" class="btn">Cancel</button>
+      <button id="edit-save" class="btn active">💾 Save</button>
+    </div>
+  </div>
+
+ <div id="add-track-modal" class="modal">
+  <div class="panel">
+
+    <!-- Заголовок -->
+    <h3 id="add-track-title" data-i18n="addTrack"></h3>
+
+    <!-- Поля -->
+    <input id="t-title" class="search-input" data-i18n-placeholder="trackTitle" placeholder="" style="width:100%;margin-bottom:12px">
+    <input id="t-genre" class="search-input" data-i18n-placeholder="genres" placeholder="" style="width:100%;margin-bottom:12px">
+    <input id="t-playlist" class="search-input" data-i18n-placeholder="playlistName" placeholder="" style="width:100%;margin-bottom:12px">
+
+    <!-- Плейлист ID -->
+    <select id="t-playlist-id" class="search-input" style="width:100%;margin-bottom:12px">
+      <option value="" data-i18n="noPlaylists">Без плейлиста</option>
+    </select>
+
+    <!-- Видимость -->
+    <select id="t-visibility" class="search-select" style="width:100%;margin-bottom:12px">
+      <option value="public" data-i18n="public">🌍 Public</option>
+      <option value="partner" data-i18n="partner">♥ Partner only</option>
+      <option value="hidden" data-i18n="hidden">🔒 Hidden</option>
+    </select>
+
+    <!-- Текст песни -->
+    <textarea id="t-lyrics" data-i18n-placeholder="lyrics" placeholder="" style="width:100%;min-height:100px;padding:8px;border-radius:8px;background:#07060a;border:1px solid rgba(255,255,255,0.04);color:#eaeaf2;margin-bottom:12px"></textarea>
+
+    <!-- Файлы -->
+    <label data-i18n="mp3Link" style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px">MP3 файл</label>
+    <input id="t-audio-file" type="file" accept="audio/*" style="width:100%;margin-bottom:12px">
+
+    <label data-i18n="coverUrl" style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px">Фото обложки</label>
+    <input id="t-cover-file" type="file" accept="image/*" style="width:100%;margin-bottom:12px">
+
+    <!-- Кнопки -->
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button id="add-cancel" class="btn" data-i18n="cancel"></button>
+      <button id="add-save" class="btn active" data-i18n="save"></button>
+    </div>
+
+  </div>
+</div>
+
+<div id="user-upload-modal" class="modal">
+  <div class="panel">
+
+    <!-- Заголовок -->
+    <h3 data-i18n="uploadYourSong"></h3>
+
+    <!-- Файл -->
+    <input id="u-audio-file" type="file" accept="audio/*" style="width:100%;margin-bottom:12px">
+
+    <!-- Превью -->
+    <div id="u-preview" style="display:none;margin-bottom:12px">
+      <img id="u-preview-cover" style="width:80px;height:80px;object-fit:cover;border-radius:8px;margin-bottom:8px">
+
+      <input id="u-preview-title" class="search-input" data-i18n-placeholder="songTitle" placeholder="" style="width:100%;margin-bottom:8px">
+      <input id="u-preview-artist" class="search-input" data-i18n-placeholder="songArtist" placeholder="" style="width:100%;margin-bottom:8px">
+      <input id="u-preview-genre" class="search-input" data-i18n-placeholder="songGenre" placeholder="" style="width:100%;margin-bottom:8px">
+    </div>
+
+    <!-- Кнопки -->
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button id="u-cancel" class="btn" data-i18n="cancel"></button>
+      <button id="u-save" class="btn active" disabled data-i18n="upload"></button>
+    </div>
+
+  </div>
+</div>
+
+
+<div id="replace-track-modal" class="modal">
+  <div class="panel">
+
+    <!-- Заголовок -->
+    <h3 data-i18n="replaceTrackFiles">🔄 Заменить файлы трека</h3>
+
+    <!-- Подзаголовок -->
+    <p data-i18n="statsWillStay" style="color:var(--muted);font-size:13px;margin-bottom:16px">
+      Статистика (лайки, прослушивания) сохранится
+    </p>
+
+    <!-- Информация о треке -->
+    <div style="margin-bottom:12px;padding:12px;background:rgba(255,255,255,0.05);border-radius:8px">
+      <div style="font-weight:600;color:#fff;margin-bottom:4px" id="replace-track-title"></div>
+      <div style="color:var(--muted);font-size:12px" id="replace-track-info"></div>
+    </div>
+
+    <!-- Новый MP3 -->
+    <label data-i18n="newMp3Optional" style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px">
+      Новый MP3 файл (опционально)
+    </label>
+    <input id="r-audio-file" type="file" accept="audio/*" style="width:100%;margin-bottom:12px">
+
+    <!-- Новая обложка -->
+    <label data-i18n="newCoverOptional" style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px">
+      Новое фото обложки (опционально)
+    </label>
+    <input id="r-cover-file" type="file" accept="image/*" style="width:100%;margin-bottom:12px">
+
+    <!-- Кнопки -->
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button id="replace-cancel" class="btn" data-i18n="cancel"></button>
+      <button id="replace-save" class="btn active" data-i18n="replace">🔄</button>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+<!-- Firebase (wersja compat do użycia w zwykłych <script>) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+  // 🔧 Твоя конфигурация Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyBzCiSmy714eAS_sDQffBHHhN3HkPniIKk",
+    authDomain: "niko-music-1d585.firebaseapp.com",
+    projectId: "niko-music-1d585",
+    storageBucket: "niko-music-1d585.firebasestorage.app",
+    messagingSenderId: "223346886059",
+    appId: "1:223346886059:web:e6e76ad23663de701b7eee",
+    measurementId: "G-L9ZY3FYN1R"
+  };
+
+  // 🚀 Инициализация Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // ⚙️ Настройки для R2 и Worker
+  const WORKER_URL = "https://r2-upload-proxy.nikolfar91.workers.dev"; // без слэша на конце
+  const STORAGE_FOLDER_AUDIO = "NIKO_music/audio";
+  const STORAGE_FOLDER_COVERS = "NIKO_music/covers";
+</script>
+
+  <script src="https://unpkg.com/wavesurfer.js@7"></script>
+
+  <script>
+let accessHashes = null;
+
+async function sha256(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function loadAccessHashes() {
+  const doc = await db.collection('config').doc('access').get();
+  accessHashes = doc.exists ? doc.data() : {};
+}
+function getRole() { return localStorage.getItem('siteRole') || 'guest'; }
+function setRole(r) { localStorage.setItem('siteRole', r); }
+function logoutRole() { localStorage.removeItem('siteRole'); location.reload(); }
+
+let isAdmin = getRole() === 'admin';
+let isPartner = getRole() === 'partner';
+
+async function loadUploadPermission() {
+  const doc = await db.collection('config').doc('upload_permission').get();
+  return doc.exists ? doc.data().value : 'admin_only';
+}
+
+if (isAdmin) {
+  const sel = document.getElementById('upload-permission-select');
+  if (sel) {
+    sel.style.display = 'inline-block';
+    loadUploadPermission().then(v => sel.value = v);
+    sel.addEventListener('change', async () => {
+      await db.collection('config').doc('upload_permission').set({ value: sel.value });
+    });
+  }
+}
+  
+  
+  let globalCounts = {};
+  
+  const getCount = k => {
+    if (globalCounts[k] !== undefined) return globalCounts[k];
+    return parseInt(localStorage.getItem(k) || '0', 10);
+  };
+  const setCount = (k,v) => {
+    globalCounts[k] = v;
+    localStorage.setItem(k, String(v));
+  };
+
+  let globalTracks = [];
+  let isShuffleMode = localStorage.getItem('shuffleMode') === 'true';
+  let globalPlaylists = [];
+
+function isVisibleToRole(item, role) {
+  if (item.visibility === 'hidden') return role === 'admin';
+  if (item.visibility === 'partner') return role === 'admin' || role === 'partner';
+  return true; // public
+}
+
+function renderPlaylistsList() {
+  const list = document.getElementById('playlists-list');
+  if (!list) return;
+  const mine = globalPlaylists.filter(p => p.ownerRole === getRole());   // ← фильтр
+  list.innerHTML = mine.map(p => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:rgba(255,255,255,0.05);border-radius:8px;margin-bottom:6px">
+      <span>${p.name} <small style="color:var(--muted)">(${p.visibility})</small></span>
+      <button class="btn icon delete-playlist-btn" data-id="${p.id}">🗑️</button>
+    </div>
+  `).join('');
+  list.querySelectorAll('.delete-playlist-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (confirm(t('deletePlaylistConfirm'))) {
+        await db.collection('playlists').doc(btn.dataset.id).delete();
+      }
+    });
+  });
+}
+
+function subscribePlaylists() {
+  db.collection('playlists').orderBy('createdAt', 'asc').onSnapshot(snap => {
+    globalPlaylists = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderPlaylistsList();
+    renderDraftTracks(globalTracks);
+  });
+}
+
+function subscribeTracks() {
+  if (!db) return console.warn('Firestore not initialized');
+  db.collection('tracks').orderBy('createdAt', 'desc').onSnapshot(snap => {
+    const role = getRole();
+    globalTracks = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(track => {
+        if (!isVisibleToRole(track, role)) return false;
+        if (track.playlistId) {
+          const pl = globalPlaylists.find(p => p.id === track.playlistId);
+          if (pl && !isVisibleToRole(pl, role)) return false;
+        }
+        return true;
+      });
+    renderDraftTracks(globalTracks);
+  }, err => {
+    console.warn('tracks snapshot error', err);
+  });
+}
+
+ async function uploadToWorker(file, folder, fileName) {
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('fileName', fileName);
+  fd.append('folder', folder);
+  const res = await fetch(WORKER_URL + '/upload', { method: 'POST', body: fd });
+  if (!res.ok) throw new Error('Upload failed: ' + res.status);
+  const data = await res.json();
+  return data.url;
+}
+
+async function deleteFromWorker(folder, fileName) {
+  await fetch(WORKER_URL + '/delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ folder, fileName })
+  });
+}
+
+function sanitizeBaseName(title) {
+  return title
+    .trim()
+    .replace(/[\/\\?%*:|"<>]/g, '_')
+    .replace(/\s+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
+function uniqueBaseName(candidate) {
+  const existing = new Set(globalTracks.map(t => t.baseName));
+  if (!existing.has(candidate)) return candidate;
+  let i = 1;
+  while (existing.has(`${candidate}_${i}`)) i++;
+  return `${candidate}_${i}`;
+}
+
+async function loadCommentsFromServer(trackId) {
+  const snap = await db.collection('tracks').doc(trackId)
+    .collection('comments').orderBy('timestamp', 'asc').get();
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+async function saveCommentToServer(trackId, comment) {
+  try {
+    await db.collection('tracks').doc(trackId).collection('comments').add(comment);
+    return true;
+  } catch (e) { console.error(e); return false; }
+}
+
+async function deleteCommentFromServer(trackId, commentId) {
+  try {
+    await db.collection('tracks').doc(trackId).collection('comments').doc(commentId).delete();
+    return true;
+  } catch (e) { console.error(e); return false; }
+}
+async function loadGenresToFilter() {
+    const genreSet = new Set();
+    globalTracks.forEach(track => {
+      if (track.genre) {
+        track.genre.split(',').map(g => g.trim()).filter(g => g).forEach(g => genreSet.add(g));
+      }
+    });
+    
+    const genreSelect = document.getElementById('siteGenre');
+    while (genreSelect.options.length > 1) genreSelect.remove(1);
+    
+    Array.from(genreSet).sort().forEach(genre => {
+      const option = document.createElement('option');
+      option.value = genre.toLowerCase();
+      option.textContent = genre;
+      genreSelect.appendChild(option);
+    });
+  }
+
+  function renderDraftTracks(tracks) {
+  tracks = tracks || globalTracks;
+  const list = document.getElementById('tracksList');
+
+  list.innerHTML = '';
+
+  if (tracks.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <h2>${t('noTracks')}</h2>
+        <p>${t('createFile')}</p>
+      </div>
+    `;
+    return;
+  }
+
+  // определяем текущий трек для подсветки
+  const currentTrackId = window.currentTrackId || null;
+
+  tracks.forEach((track, index) => {
+    const div = document.createElement('div');
+    div.className = 'track';
+    div.dataset.id = track.id;
+    div.dataset.src = track.audio;
+    div.dataset.title = track.title;
+    div.dataset.genre = track.genre;
+    div.dataset.lyrics = track.lyrics || '';
+    div.dataset.index = index;
+
+    // подсвечиваем если играет
+    if (track.id === currentTrackId) {
+      div.classList.add('playing');
+    }
+
+    const val = localStorage.getItem('like:user:' + track.id);
+
+    // определяем иконку play/pause
+    const isPlaying = track.id === currentTrackId && window.isPlaying;
+    const playIcon = isPlaying
+      ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
+      : '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3v18l15-9L5 3z"/></svg>';
+
+    div.innerHTML = `
+      <img class="thumb" src="${track.cover}" alt="${track.title}">
+      <div class="info">
+        <div class="title">${track.title}</div>
+        <div class="meta">${track.genre || ''} · ${track.duration || '—'}</div>
+        <!-- PLAYLIST BADGES -->
+        <div class="playlist-badges" style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px 0">
+          ${
+            track.playlistIds && track.playlistIds.length > 0
+              ? track.playlistIds.map(pid => {
+                  const pl = globalPlaylists.find(p => p.id === pid);
+                  if (!pl) return '';
+
+                  const icon =
+                    pl.visibility === 'public' ? '🌍' :
+                    pl.visibility === 'partner' ? '♥' : '🔒';
+
+                  const bg =
+                    pl.visibility === 'public' ? 'rgba(0,180,255,0.25)' :
+                    pl.visibility === 'partner' ? 'rgba(255,100,180,0.25)' :
+                    'rgba(255,255,255,0.15)';
+
+                  return `
+                    <span
+                      class="playlist-badge"
+                      data-id="${pl.id}"
+                      style="
+                        padding:2px 6px;
+                        font-size:10px;
+                        border-radius:6px;
+                        display:inline-flex;
+                        align-items:center;
+                        gap:4px;
+                        cursor:pointer;
+                        max-width:120px;
+                        white-space:nowrap;
+                        overflow:hidden;
+                        text-overflow:ellipsis;
+                        background:${bg};
+                        color:#fff;
+                      "
+                    >
+                      ${icon} ${pl.name}
+                    </span>
+                  `;
+                }).join('')
+              : ''
+          }
+        </div>
+
+        <div class="counts">
+          <div class="play-count" data-key="${track.id}">
+            <span class="num">${track.plays || 0}</span> ${t('plays')}
+          </div>
+          <div class="likes-count ${val === 'like' ? 'active' : ''}" data-key="${track.id}">
+            <span class="num">${track.likes || 0}</span> ❤
+          </div>
+          <div class="dislikes-count ${val === 'dislike' ? 'active' : ''}" data-key="${track.id}">
+            <span class="num">${track.dislikes || 0}</span> 👎
+          </div>
+        </div>
+
+        <div class="play-row">
+          <button class="btn icon play-btn ${isPlaying ? 'playing' : ''}" type="button" aria-label="Play">
+            ${playIcon}
+          </button>
+          <button class="btn icon open-text-btn" aria-label="Open full text">${t('text')}</button>
+          <button class="btn icon comment-btn" aria-label="Comments" title="${t('comments')}">💬</button>
+          <button class="btn icon share-btn" aria-label="Share" title="${t('share')}">🔗</button>
+          ${isAdmin ? `<button class="btn icon replace-track-btn" title="${t('replaceTrackFiles')}">🔄</button>` : ''}
+          ${isAdmin ? `<button class="btn icon delete-track-btn" title="${t('deleteTrack')}">🗑️</button>` : ''}
+          <button class="btn icon add-to-playlist-btn" title="${t('addToPlaylist')}">➕</button>
+          ${isAdmin ? `<button class="btn icon change-visibility-btn" title="${t('songVisibility')}">👁️</button>` : ''}
+          <a class="btn icon download-track-btn" href="${track.audio || '#'}" download="${(track.title || 'track').replace(/"/g,'')}.mp3" title="${t('download')}">⬇️</a>
+           </div>           
+      </div>
+    `;
+
+    list.appendChild(div);
+  });
+  // клики по бейджам
+  document.querySelectorAll('.playlist-badge').forEach(badge => {
+    badge.addEventListener('click', () => {
+      const pid = badge.dataset.id;
+      window.location.href = `playlist-view.html?id=${pid}`;
+    });
+  });
+
+  loadGenresToFilter();
+}
+
+  let currentEditingSrc = '';
+  let currentEditingId = '';
+  let currentReplacingTrackId = '';
+
+function getMyLocalPlaylist() {
+  return JSON.parse(localStorage.getItem('myPlaylist') || '[]');
+}
+function toggleMyLocalPlaylist(trackId) {
+  let list = getMyLocalPlaylist();
+  list = list.includes(trackId) ? list.filter(id => id !== trackId) : [...list, trackId];
+  localStorage.setItem('myPlaylist', JSON.stringify(list));
+}
+
+  function openText(trackEl) {
+    const lyrics = trackEl.dataset.lyrics || '';
+    const title = trackEl.dataset.title || '';
+    
+    currentEditingId = trackEl.dataset.id;
+    
+    document.getElementById('side-title').textContent = title;
+    document.getElementById('side-content').textContent = lyrics || t('noTracks');
+    document.getElementById('side-content-editor').value = lyrics;
+    document.getElementById('side-panel').classList.add('open');
+    document.getElementById('side-content').style.display = 'block';
+    document.getElementById('side-content-editor').style.display = 'none';
+    document.getElementById('edit-mode-actions').classList.remove('active');
+  }
+
+  async function loadComments(trackId) {
+    const list = document.getElementById('comments-list');
+    list.innerHTML = '<p style="color:#bfc3d6;text-align:center;padding:20px">⏳ Loading...</p>';
+    
+    const comments = await loadCommentsFromServer(trackId);
+    
+    list.innerHTML = '';
+    
+    if (comments.length === 0) {
+      list.innerHTML = `<p style="color:#bfc3d6;text-align:center;padding:20px">${t('noComments')}</p>`;
+      return;
+    }
+    
+    comments.forEach((comment) => {
+      const div = document.createElement('div');
+      div.className = 'comment-item';
+      div.style.cssText = 'background:rgba(255,255,255,0.03);padding:12px;border-radius:8px;margin-bottom:8px;position:relative';
+      
+      const date = new Date(comment.timestamp);
+      const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      
+      div.innerHTML = `
+        ${isAdmin ? `<button class="delete-comment" data-id="${comment.id}">✕</button>` : ''}
+        <div style="color:#ff4da6;font-size:12px;margin-bottom:4px">${comment.author || 'Anonymous'} · ${dateStr}</div>
+        <div style="color:#eaeaf2;white-space:pre-wrap">${comment.text}</div>
+      `;
+      
+      list.appendChild(div);
+    });
+
+    if (isAdmin) {
+      document.querySelectorAll('.delete-comment').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const commentId = btn.dataset.id;
+          if (confirm(t('deleteConfirm'))) {
+            btn.textContent = '⏳';
+            btn.disabled = true;
+
+            const success = await deleteCommentFromServer(trackId, commentId);
+            if (success) {
+              await loadComments(trackId);
+            } else {
+              alert(t('commentError'));
+              btn.textContent = '✕';
+              btn.disabled = false;
+            }
+          }
+        });
+      });
+    }
+  }
+async function openPlaylistPicker(trackId) {
+  const role = getRole();
+  const track = globalTracks.find(t => t.id === trackId);
+
+  // показываем ВСЕ плейлисты, которые видны роли
+  const myPlaylists = globalPlaylists.filter(p => isVisibleToRole(p, role));
+
+  const modal = document.getElementById('playlist-picker-modal');
+  const listEl = document.getElementById('playlist-picker-list');
+
+  listEl.innerHTML = '';
+
+  myPlaylists.forEach(p => {
+    const isInPlaylist = track.playlistIds?.includes(p.id);
+
+    // --- ПРАВА ---
+    const isAdmin = role === 'admin';
+    const isPartner = role === 'partner';
+    const isOwnerPartner = (p.ownerRole === 'partner');
+    const isOwnerAdmin = (p.ownerRole === 'admin');
+
+    // partner может добавлять/удалять только в свои плейлисты
+    let canAdd = false;
+    let canRemove = false;
+
+    if (isAdmin) {
+      canAdd = true;
+      canRemove = true;
+    } else if (isPartner && isOwnerPartner) {
+      canAdd = true;
+      canRemove = true;
+    }
+
+    // guest не может ничего
+    if (role === 'guest') {
+      canAdd = false;
+      canRemove = false;
+    }
+
+    const showPlus = (!isInPlaylist && canAdd);
+    const showMinus = (isInPlaylist && canRemove);
+
+    const visIcon = p.visibility === 'public' ? '🌍' :
+                    p.visibility === 'partner' ? '♥' : '🔒';
+
+    const div = document.createElement('div');
+    div.style.cssText = `
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:8px;
+      border-radius:8px;
+      background:rgba(255,255,255,0.04);
+      margin-bottom:6px;
+      position:relative;
+    `;
+
+    div.innerHTML = `
+      <img src="${p.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png'}"
+           style="width:40px;height:40px;border-radius:6px;object-fit:cover">
+
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+          ${p.name}
+        </div>
+        <div style="font-size:11px;color:#bfc3d6">
+          ${visIcon} ${p.visibility} • ${p.songCount || 0} tracks
+        </div>
+      </div>
+
+      ${showPlus || showMinus ? `
+        <button class="playlist-action-btn"
+          style="
+            background:${showMinus ? '#ff4da6' : '#4dff8a'};
+            border:none;
+            width:26px;
+            height:26px;
+            border-radius:6px;
+            font-weight:900;
+            cursor:pointer;
+          ">
+          ${showMinus ? '−' : '+'}
+        </button>
+      ` : ''}
+    `;
+
+    const btn = div.querySelector('.playlist-action-btn');
+    if (btn) {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+
+        const playlistRef = db.collection('playlists').doc(p.id);
+
+        // --- УДАЛЕНИЕ ---
+        if (isInPlaylist) {
+          if (!canRemove) {
+            alert('You cannot remove tracks from this playlist.');
+            return;
+          }
+
+          await db.collection('tracks').doc(trackId).update({
+            playlistIds: firebase.firestore.FieldValue.arrayRemove(p.id)
+          });
+
+          await playlistRef.update({
+            songCount: firebase.firestore.FieldValue.increment(-1)
+          });
+        }
+
+        // --- ДОБАВЛЕНИЕ ---
+        else {
+          if (!canAdd) {
+            alert('You cannot add tracks to this playlist.');
+            return;
+          }
+
+          await db.collection('tracks').doc(trackId).update({
+            playlistIds: firebase.firestore.FieldValue.arrayUnion(p.id)
+          });
+
+          await playlistRef.update({
+            songCount: firebase.firestore.FieldValue.increment(1)
+          });
+
+          // если нет обложки — ставим обложку трека
+          const playlistSnap = await playlistRef.get();
+          const playlistData = playlistSnap.data();
+
+          if (!playlistData.cover && track?.cover) {
+            await playlistRef.update({
+              cover: track.cover,
+              coverFileName: track.coverFileName
+            });
+          }
+        }
+
+        // обновляем глобальные данные
+        await loadGlobalPlaylists();
+
+        // перерисовываем окно без закрытия
+        openPlaylistPicker(trackId);
+      });
+    }
+
+    listEl.appendChild(div);
+  });
+
+  // --- КНОПКА СОЗДАНИЯ НОВОГО ПЛЕЙЛИСТА ---
+  if (role === 'admin' || role === 'partner') {
+    const createBtn = document.createElement('button');
+    createBtn.textContent = '+ Create new playlist';
+    createBtn.style.cssText = `
+      width:100%;
+      padding:10px;
+      margin-top:10px;
+      background:#4d8aff;
+      border:none;
+      border-radius:8px;
+      color:white;
+      font-weight:600;
+      cursor:pointer;
+    `;
+
+    createBtn.addEventListener('click', async () => {
+      const name = prompt('Enter playlist name');
+      if (!name) return;
+
+      const payload = {
+        name,
+        description: '',
+        ownerRole: role,
+        visibility: role === 'admin' ? 'public' : 'partner',
+        songCount: 0,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      const docRef = await db.collection('playlists').add(payload);
+
+      // обновляем глобальные данные
+      await loadGlobalPlaylists();
+
+      // сразу привязываем трек к новому плейлисту
+      await db.collection('tracks').doc(trackId).update({
+        playlistIds: firebase.firestore.FieldValue.arrayUnion(docRef.id)
+      });
+
+      // перерисовываем окно
+      openPlaylistPicker(trackId);
+    });
+
+    listEl.appendChild(createBtn);
+  }
+
+  modal.classList.add('open');
+
+  document.getElementById('playlist-picker-cancel').onclick = () => {
+    modal.classList.remove('open');
+  };
+}
+
+
+async function loadGlobalPlaylists() {
+  const snap = await db.collection('playlists').get();
+  globalPlaylists = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+
+function openVisibilityPicker(trackId) {
+  const choice = prompt(
+  `${t('songVisibility')}:\n\n1. ${t('public')}\n2. ${t('partner')}\n3. ${t('hidden')}`
+);
+const map = { '1': 'public', '2': 'partner', '3': 'hidden' };
+  const visibility = map[choice];
+  if (!visibility) return;
+  db.collection('tracks').doc(trackId).update({ visibility });
+}
+  function openComments(trackId) {
+    currentTrackId = trackId;
+    document.getElementById('comments-modal').classList.add('open');
+    loadComments(trackId);
+  }
+
+  const emojis = [
+    '😀','😃','😄','😁','😆','😅','🤣','😂','🙂','🙃','😉','😊','😇','🥰','😍','🤩','😘','😗','☺️','😚','😙',
+    '😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏','😒','🙄','😬','🤥',
+    '😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🤧','🥵','🥶','🥴','😵','🤯','🤠','🥳','😎','🤓',
+    '🧐','😕','😟','🙁','☹️','😮','😯','😲','😳','🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣',
+    '😞','😓','😩','😫','🥱','😤','😡','😠','🤬','😈','👿','💀','☠️','💩','🤡','👹','👺','👻','👽','👾',
+    '🤖','😺','😸','😹','😻','😼','😽','🙀','😿','😾','🙈','🙉','🙊','💋','💌','💘','💝','💖','💗','💓',
+    '💞','💕','💟','❣️','💔','❤️','🧡','💛','💚','💙','💜','🤎','🖤','🤍','💯','💢','💥','💫','💦','💨',
+    '🕳️','💣','💬','👁️‍🗨️','🗨️','🗯️','💭','💤','👋','🤚','🖐️','✋','🖖','👌','🤏','✌️','🤞','🤟','🤘','🤙',
+    '👈','👉','👆','🖕','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','👐','🤲','🤝','🙏','✍️','💅',
+    '🤳','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🧠','🦷','🦴','👀','👁️','👅','👄','💃','🕺','🎵','🎶',
+    '🎤','🎧','🎼','🎹','🥁','🎷','🎺','🎸','🪕','🎻','🎲','🎯','🎳','🎮','🎰','🧩','🚀','🛸','🌟','⭐',
+    '💫','✨','⚡','🔥','💥','🌈','☀️','🌙','⭐','🌟','💫','✨','☄️','🪐','🌍','🌎','🌏','🌕','🌖','🌗',
+    '🌘','🌑','🌒','🌓','🌔','☁️','⛅','⛈️','🌤️','🌥️','🌦️','🌧️','🌨️','🌩️','🌪️','🌫️','🌬️','🌀','🌈',
+    '⚡','❄️','☃️','⛄','☄️','🔥','💧','🌊','🎃','🎄','🎆','🎇','🧨','✨','🎈','🎉','🎊','🎋','🎍','🎎',
+    '🎏','🎐','🎑','🧧','🎀','🎁','🎗️','🎟️','🎫','🏆','🏅','🥇','🥈','🥉','⚽','⚾','🥎','🏀','🏐','🏈',
+    '🏉','🎾','🥏','🎳','🏏','🏑','🏒','🥍','🏓','🏸','🥊','🥋','🥅','⛳','⛸️','🎣','🤿','🎽','🎿','🛷'
+  ];
+
+  function initEmojiSystem() {
+    const emojiGrid = document.getElementById('emoji-popup-grid');
+    const quickAccess = document.getElementById('emoji-quick-access-popup');
+    
+    emojis.slice(0, 20).forEach(emoji => {
+      const btn = document.createElement('button');
+      btn.className = 'emoji-btn';
+      btn.textContent = emoji;
+      btn.addEventListener('click', () => insertEmoji(emoji));
+      quickAccess.appendChild(btn);
+    });
+    
+    emojis.forEach(emoji => {
+      const btn = document.createElement('button');
+      btn.className = 'emoji-popup-btn';
+      btn.textContent = emoji;
+      btn.addEventListener('click', () => insertEmoji(emoji));
+      emojiGrid.appendChild(btn);
+    });
+    
+    document.getElementById('emoji-show-all').addEventListener('click', () => {
+      document.getElementById('emoji-popup-modal').classList.add('open');
+    });
+    
+    document.getElementById('emoji-popup-close').addEventListener('click', () => {
+      document.getElementById('emoji-popup-modal').classList.remove('open');
+    });
+    
+    document.querySelectorAll('.quick-emoji').forEach(btn => {
+      btn.addEventListener('click', () => {
+        insertEmoji(btn.dataset.emoji);
+      });
+    });
+  }
+
+  function insertEmoji(emoji) {
+    const input = document.getElementById('comment-input');
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    const text = input.value;
+    
+    input.value = text.substring(0, start) + emoji + text.substring(end);
+    input.selectionStart = input.selectionEnd = start + emoji.length;
+    input.focus();
+
+    document.getElementById('emoji-popup-modal').classList.remove('open');
+  }
+
+  // 🎧 Загрузка своей песни (перенесено из insertEmoji — теперь настраивается один раз при загрузке)
+  let pendingUserTrack = null;
+
+  document.getElementById('u-audio-file').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    jsmediatags.read(file, {
+      onSuccess: (tag) => {
+        const tags = tag.tags;
+        const title = tags.title || file.name.replace(/\.[^.]+$/, '');
+        const artist = tags.artist || '';
+        const genre = tags.genre || '';
+
+        let coverBlob = null;
+        if (tags.picture) {
+          const { data, format } = tags.picture;
+          coverBlob = new Blob([new Uint8Array(data)], { type: format });
+        }
+
+        pendingUserTrack = { file, title, artist, genre, coverBlob };
+
+        document.getElementById('u-preview').style.display = 'block';
+        document.getElementById('u-preview-title').value = title;
+document.getElementById('u-preview-artist').value = artist;
+document.getElementById('u-preview-genre').value = genre;
+document.getElementById('u-preview-cover').src = coverBlob
+  ? URL.createObjectURL(coverBlob)
+  : 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
+        document.getElementById('u-save').disabled = false;
+      },
+      onError: (error) => {
+        console.error('Metadata read error:', error);
+        pendingUserTrack = { file, title: file.name.replace(/\.[^.]+$/, ''), artist: '', genre: '', coverBlob: null };
+        document.getElementById('u-save').disabled = false;
+      }
+    });
+  });
+
+  document.getElementById('u-save').addEventListener('click', async () => {
+  if (!pendingUserTrack) return;
+
+  const title = document.getElementById('u-preview-title').value.trim() || 'Без названия';
+  const artist = document.getElementById('u-preview-artist').value.trim();
+  const genre = document.getElementById('u-preview-genre').value.trim();
+  const { file, coverBlob } = pendingUserTrack;
+
+    const btn = document.getElementById('u-save');
+    btn.textContent = '⏳ Загрузка...';
+    btn.disabled = true;
+
+    try {
+      const displayTitle = artist ? `${artist} - ${title}` : title;
+      const baseName = uniqueBaseName(sanitizeBaseName(displayTitle));
+      const audioExt = file.name.split('.').pop();
+
+      const audioUrl = await uploadToWorker(file, STORAGE_FOLDER_AUDIO, `${baseName}.${audioExt}`);
+
+      let coverUrl = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
+      let coverFileName = null;
+      if (coverBlob) {
+        const coverFile = new File([coverBlob], `${baseName}.jpg`, { type: coverBlob.type || 'image/jpeg' });
+        coverFileName = `${baseName}.jpg`;
+        coverUrl = await uploadToWorker(coverFile, STORAGE_FOLDER_COVERS, coverFileName);
+      }
+
+      await db.collection('tracks').add({
+        title: displayTitle,
+        genre: genre || '',
+        playlist: '',
+        lyrics: '',
+        baseName,
+        audioFileName: `${baseName}.${audioExt}`,
+        coverFileName,
+        audio: audioUrl,
+        cover: coverUrl,
+        duration: '—',
+        likes: 0, dislikes: 0, plays: 0,
+        visibility: 'public',
+        uploadedByRole: getRole(),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      document.getElementById('user-upload-modal').classList.remove('open');
+      pendingUserTrack = null;
+      alert('✅ Песня загружена!');
+    } catch (e) {
+      console.error(e);
+      alert('❌ Ошибка: ' + e.message);
+    } finally {
+      btn.textContent = 'Загрузить';
+      btn.disabled = false;
+    }
+  });
+
+  document.getElementById('userUploadBtn').addEventListener('click', () => {
+    document.getElementById('user-upload-modal').classList.add('open');
+  });
+  document.getElementById('u-cancel').addEventListener('click', () => {
+    document.getElementById('user-upload-modal').classList.remove('open');
+  });
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 Init');
+
+    await loadAccessHashes();
+
+    const langBtn = document.getElementById('lang-' + currentLang);
+    if (langBtn) langBtn.classList.add('active');
+    
+    subscribeTracks();
+    subscribePlaylists();
+    initWavesurfer();
+    initEmojiSystem();
+    updateShuffleButton();
+    
+    applyTranslations();
+
+    if (isAdmin) {
+      const editBtn = document.getElementById('edit-text');
+      if (editBtn) editBtn.style.display = 'inline-block';
+    }
+
+    const langEn = document.getElementById('lang-en');
+    const langPl = document.getElementById('lang-pl');
+    const langUa = document.getElementById('lang-ua');
+    
+    if (langEn) langEn.addEventListener('click', () => switchLanguage('en'));
+    if (langPl) langPl.addEventListener('click', () => switchLanguage('pl'));
+    if (langUa) langUa.addEventListener('click', () => switchLanguage('ua'));
+
+    const searchInput = document.getElementById('siteSearch');
+    const genreSelect = document.getElementById('siteGenre');
+
+    function filterTracks() {
+      const query = searchInput.value.toLowerCase();
+      const selectedGenre = genreSelect.value.toLowerCase();
+
+      document.querySelectorAll('.track').forEach(trackEl => {
+        const title = trackEl.dataset.title.toLowerCase();
+        const genre = (trackEl.dataset.genre || '').toLowerCase();
+
+        const matchesSearch = title.includes(query) || genre.includes(query);
+        const matchesGenre = !selectedGenre || genre.includes(selectedGenre);
+
+        trackEl.style.display = (matchesSearch && matchesGenre) ? 'flex' : 'none';
+      });
+    }
+
+    searchInput.addEventListener('input', filterTracks);
+    genreSelect.addEventListener('change', filterTracks);
+
+    document.addEventListener('click', async (e) => {
+      const trackEl = e.target.closest('.track');
+      if (!trackEl) return;
+
+           // Play / Pause при клике на кнопку или на пустое место карточки
+      const isPlayBtn = e.target.closest('.play-btn');
+      const isOtherInteractive = e.target.closest('button:not(.play-btn), a, .likes-count, .dislikes-count, .play-count, .playlist-badge');
+
+      if (isPlayBtn || (!isOtherInteractive && trackEl)) {
+        e.preventDefault();
+        const tid = trackEl.dataset.id;
+
+        if (tid === window.currentTrackId && window.wavesurfer) {
+          window.wavesurfer.playPause();   // ← пауза, как в playlist-view
+        } else {
+          window.currentTrackId = tid;
+          playTrack(trackEl);
+        }
+        window.updateTrackPlayIcons();
+        return;   // ← важно! не даём идти дальше к другим if
+      }
+
+      if (e.target.closest('.open-text-btn')) {
+        e.preventDefault();
+        openText(trackEl);
+      }
+
+      if (e.target.closest('.likes-count')) {
+        e.preventDefault();
+        toggleLike(trackEl.dataset.id);
+      }
+
+      if (e.target.closest('.dislikes-count')) {
+        e.preventDefault();
+        toggleDislike(trackEl.dataset.id);
+      }
+
+      if (e.target.closest('.comment-btn')) {
+        e.preventDefault();
+        openComments(trackEl.dataset.id);
+      }
+
+      if (e.target.closest('.share-btn')) {
+        e.preventDefault();
+        const url = window.location.origin + window.location.pathname + '?track=' + encodeURIComponent(trackEl.dataset.src);
+        navigator.clipboard.writeText(url).then(() => {
+          const btn = e.target.closest('.share-btn');
+          const oldText = btn.textContent;
+          btn.textContent = '✓';
+          setTimeout(() => btn.textContent = oldText, 1500);
+        });
+      }
+
+      if (e.target.closest('.delete-track-btn')) {
+        e.preventDefault();
+
+        const id = trackEl.dataset.id;
+        const track = globalTracks.find(t => t.id === id);
+        if (!track) return;
+
+        if (!confirm(`Удалить трек "${track.title}"? Файлы также удалятся из Cloudflare.`)) return;
+
+        await deleteFromWorker(STORAGE_FOLDER_AUDIO, track.audioFileName);
+        await deleteFromWorker(STORAGE_FOLDER_COVERS, track.coverFileName);
+        await db.collection('tracks').doc(id).delete();
+      }
+if (e.target.closest('.add-to-playlist-btn')) {
+  e.preventDefault();
+  openPlaylistPicker(trackEl.dataset.id);
+}
+
+if (e.target.closest('.change-visibility-btn')) {
+  e.preventDefault();
+  openVisibilityPicker(trackEl.dataset.id);
+}
+      if (e.target.closest('.replace-track-btn')) {
+        e.preventDefault();
+
+        const id = trackEl.dataset.id;
+        const track = globalTracks.find(t => t.id === id);
+        if (!track) return;
+
+        currentReplacingTrackId = id;
+
+        document.getElementById('replace-track-title').textContent = track.title;
+        document.getElementById('replace-track-info').textContent =
+          `${t('genres')}: ${track.genre || '—'} | ❤️ ${track.likes || 0} | ${t('plays')}: ${track.plays || 0}`;
+        document.getElementById('r-audio-file').value = '';
+        document.getElementById('r-cover-file').value = '';
+
+        document.getElementById('replace-track-modal').classList.add('open');
+      }
+    });
+
+
+    document.getElementById('mini-open-text')?.addEventListener('click', () => {
+      const trackEl = document.querySelector(`.track[data-src="${currentTrackSrc}"]`);
+      if (trackEl) openText(trackEl);
+    });
+
+    document.getElementById('mini-comment')?.addEventListener('click', () => {
+      openComments(currentTrackId);
+    });
+
+    document.getElementById('mini-visualizer')?.addEventListener('click', () => {
+      toggleVisualizerFullscreen();
+    });
+    document.getElementById('site-logo')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (getRole() === 'admin' || getRole() === 'partner') {
+        window.location.href = 'CHAT/chat.html';
+      }
+    });
+    document.querySelectorAll('.visualizer-type-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        changeVisualizerType(btn.dataset.type);
+      });
+    });
+
+    const uploadPermission = await loadUploadPermission();
+
+const canUserUpload =
+  uploadPermission === 'everyone' ||
+  (uploadPermission === 'partner_only' && (isAdmin || isPartner)) ||
+  (uploadPermission === 'admin_only' && isAdmin);
+
+document.getElementById('userUploadBtn').style.display =
+  canUserUpload ? 'inline-block' : 'none';
+
+    document.getElementById('pl-save')?.addEventListener('click', async () => {
+  const name = document.getElementById('pl-name').value.trim();
+  const visibility = document.getElementById('pl-visibility').value;
+  if (!name) return alert(t('playlistName'));
+  await db.collection('playlists').add({
+    name, visibility,
+    ownerRole: getRole(),        // ← добавлено
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  document.getElementById('pl-name').value = '';
+});
+
+    document.getElementById('pl-cancel')?.addEventListener('click', () => {
+      document.getElementById('playlists-modal').classList.remove('open');
+    });
+
+    document.getElementById('managePlaylistsBtn')?.addEventListener('click', () => {
+  window.location.href = 'playlists.html';
+});
+
+    document.getElementById('side-close').addEventListener('click', () => {
+      document.getElementById('side-panel').classList.remove('open');
+      document.getElementById('side-content').style.display = 'block';
+      document.getElementById('side-content-editor').style.display = 'none';
+      document.getElementById('edit-mode-actions').classList.remove('active');
+    });
+
+    document.getElementById('copy-text').addEventListener('click', () => {
+      const text = document.getElementById('side-content').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copy-text');
+        const oldText = btn.textContent;
+        btn.textContent = t('copied');
+        setTimeout(() => btn.textContent = t('copy'), 1500);
+      });
+    });
+
+    document.getElementById('edit-text')?.addEventListener('click', () => {
+      const editor = document.getElementById('side-content-editor');
+      const content = document.getElementById('side-content');
+      
+      editor.value = content.textContent;
+      content.style.display = 'none';
+      editor.style.display = 'block';
+      document.getElementById('edit-mode-actions').classList.add('active');
+    });
+
+    document.getElementById('edit-cancel')?.addEventListener('click', () => {
+      document.getElementById('side-content').style.display = 'block';
+      document.getElementById('side-content-editor').style.display = 'none';
+      document.getElementById('edit-mode-actions').classList.remove('active');
+    });
+
+    document.getElementById('edit-save')?.addEventListener('click', async () => {
+      const newLyrics = document.getElementById('side-content-editor').value;
+      const trackId = currentEditingId;
+
+      await db.collection('tracks').doc(trackId).update({
+        lyrics: newLyrics
+      });
+
+      document.getElementById('side-content').textContent = newLyrics;
+      document.getElementById('side-content').style.display = 'block';
+      document.getElementById('side-content-editor').style.display = 'none';
+      document.getElementById('edit-mode-actions').classList.remove('active');
+
+      alert('💾 ' + t('commentSaved'));
+    });
+
+
+    document.getElementById('comment-cancel').addEventListener('click', () => {
+      document.getElementById('comments-modal').classList.remove('open');
+    });
+
+    document.getElementById('comment-send').addEventListener('click', async () => {
+      const input = document.getElementById('comment-input');
+      const text = input.value.trim();
+      
+      if (!text) {
+        alert('❌ ' + t('writeComment'));
+        return;
+      }
+      
+      const sendBtn = document.getElementById('comment-send');
+      const originalText = sendBtn.textContent;
+      sendBtn.textContent = '⏳...';
+      sendBtn.disabled = true;
+      
+      const comment = {
+        text: text,
+        author: 'User',
+        timestamp: Date.now()
+      };
+      
+      const success = await saveCommentToServer(currentTrackId, comment);
+      
+      if (success) {
+        input.value = '';
+        await loadComments(currentTrackId);
+        
+        sendBtn.textContent = '✅';
+        setTimeout(() => {
+          sendBtn.textContent = originalText;
+          sendBtn.disabled = false;
+        }, 1000);
+      } else {
+        alert(t('commentError'));
+        sendBtn.textContent = originalText;
+        sendBtn.disabled = false;
+      }
+    });
+
+    if (isAdmin) {
+      document.getElementById('addTrackBtn').addEventListener('click', () => {
+        const sel = document.getElementById('t-playlist-id');
+        sel.innerHTML = `<option value="">${t('noPlaylists')}</option>` +
+          globalPlaylists.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        document.getElementById('add-track-modal').classList.add('open');
+      });
+
+      document.getElementById('add-cancel').addEventListener('click', () => {
+        document.getElementById('add-track-modal').classList.remove('open');
+      });
+
+      document.getElementById('add-save').addEventListener('click', async () => {
+        const title = document.getElementById('t-title').value.trim();
+        const genre = document.getElementById('t-genre').value.trim();
+        const playlist = document.getElementById('t-playlist').value.trim();
+        const lyrics = document.getElementById('t-lyrics').value.trim();
+        const audioFile = document.getElementById('t-audio-file').files[0];
+        const coverFile = document.getElementById('t-cover-file').files[0];
+
+        if (!title || !audioFile || !coverFile) {
+          alert('Название, mp3 и фото обязательны');
+          return;
+        }
+
+        const btn = document.getElementById('add-save');
+        btn.textContent = '⏳ Загрузка...';
+        btn.disabled = true;
+
+        try {
+          const baseName = uniqueBaseName(sanitizeBaseName(title));
+          const audioExt = audioFile.name.split('.').pop();
+          const coverExt = coverFile.name.split('.').pop();
+
+          const audioUrl = await uploadToWorker(audioFile, STORAGE_FOLDER_AUDIO, `${baseName}.${audioExt}`);
+          const coverUrl = await uploadToWorker(coverFile, STORAGE_FOLDER_COVERS, `${baseName}.${coverExt}`);
+
+          await db.collection('tracks').add({
+            title,
+            genre,
+            playlist,
+            lyrics,
+            playlistId: document.getElementById('t-playlist-id').value || null,
+            visibility: document.getElementById('t-visibility').value || 'public',
+            baseName,
+            audioFileName: `${baseName}.${audioExt}`,
+            coverFileName: `${baseName}.${coverExt}`,
+            audio: audioUrl,
+            cover: coverUrl,
+            duration: '—',
+            likes: 0,
+            dislikes: 0,
+            plays: 0,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          document.getElementById('t-title').value = '';
+          document.getElementById('t-genre').value = '';
+          document.getElementById('t-playlist').value = '';
+          document.getElementById('t-lyrics').value = '';
+          document.getElementById('t-audio-file').value = '';
+          document.getElementById('t-cover-file').value = '';
+          document.getElementById('add-track-modal').classList.remove('open');
+          alert('✅ ' + title + ' добавлен!');
+        } catch (e) {
+          console.error(e);
+          alert('❌ Ошибка загрузки: ' + e.message);
+        } finally {
+          btn.textContent = 'Save';
+          btn.disabled = false;
+        }
+      });
+
+      document.getElementById('replace-cancel').addEventListener('click', () => {
+        document.getElementById('replace-track-modal').classList.remove('open');
+      });
+
+      document.getElementById('replace-save').addEventListener('click', async () => {
+        const audioFile = document.getElementById('r-audio-file').files[0];
+        const coverFile = document.getElementById('r-cover-file').files[0];
+
+        if (!audioFile && !coverFile) {
+          alert('Выберите хотя бы один файл для замены');
+          return;
+        }
+
+        const track = globalTracks.find(t => t.id === currentReplacingTrackId);
+        if (!track) return;
+
+        const btn = document.getElementById('replace-save');
+        btn.textContent = '⏳ Замена...';
+        btn.disabled = true;
+
+        try {
+          let updateData = {};
+
+          if (audioFile) {
+  await deleteFromWorker(STORAGE_FOLDER_AUDIO, track.audioFileName);
+  const audioExt = audioFile.name.split('.').pop();
+  const newAudioFileName = track.baseName + '.' + audioExt;
+  const newAudioUrl = await uploadToWorker(audioFile, STORAGE_FOLDER_AUDIO, newAudioFileName);
+  updateData.audio = newAudioUrl + '?v=' + Date.now();      // ← добавлено
+  updateData.audioFileName = newAudioFileName;               // имя файла оставляем чистым
+}
+
+if (coverFile) {
+  await deleteFromWorker(STORAGE_FOLDER_COVERS, track.coverFileName);
+  const coverExt = coverFile.name.split('.').pop();
+  const newCoverFileName = track.baseName + '.' + coverExt;
+  const newCoverUrl = await uploadToWorker(coverFile, STORAGE_FOLDER_COVERS, newCoverFileName);
+  updateData.cover = newCoverUrl + '?v=' + Date.now();       // ← добавлено
+  updateData.coverFileName = newCoverFileName;
+}
+
+          await db.collection('tracks').doc(currentReplacingTrackId).update(updateData);
+
+          document.getElementById('r-audio-file').value = '';
+          document.getElementById('r-cover-file').value = '';
+          document.getElementById('replace-track-modal').classList.remove('open');
+
+          alert('✅ Файлы успешно заменены! Статистика сохранена.');
+        } catch (e) {
+          console.error(e);
+          alert('❌ Ошибка замены: ' + e.message);
+        } finally {
+          btn.textContent = '🔄 Заменить';
+          btn.disabled = false;
+        }
+      });
+    }
+
+  }); // КОНЕЦ ПЕРВОГО DOMContentLoaded
+let tries = 0;// ========================================
+// 🔄 СБРОС СТАТИСТИКИ (ADMIN)
+// ========================================
+
+function getResetType() {
+  return document.querySelector('input[name="reset-type"]:checked')?.value || 'plays';
+}
+
+function loadPlaysForReset() {
+  const container = document.getElementById('plays-tracks-list');
+  if (!container) return;
+  
+  const resetType = getResetType();
+  
+  container.innerHTML = '';
+  
+  if (globalTracks.length === 0) {
+    container.innerHTML = '<p style="text-align:center;color:#bfc3d6;padding:20px">No tracks</p>';
+    return;
+  }
+  
+  globalTracks.forEach((track) => {
+    let count, icon, label;
+    
+    if (resetType === 'plays') {
+      count = track.plays || 0;
+      icon = '🎵';
+      label = 'plays';
+    } else if (resetType === 'likes') {
+      count = track.likes || 0;
+      icon = '❤️';
+      label = 'likes';
+    } else {
+      count = track.dislikes || 0;
+      icon = '💔';
+      label = 'dislikes';
+    }
+    
+    const div = document.createElement('div');
+    div.style.cssText = 'padding: 8px; margin-bottom: 6px; background: rgba(255,255,255,0.05); border-radius: 8px';
+    
+    div.innerHTML = `
+      <label style="display: flex; align-items: center; gap: 10px; cursor: pointer">
+        <input type="checkbox" class="play-checkbox" data-src="${track.audio}" style="width: 16px; height: 16px">
+        <img src="${track.cover}" style="width: 40px; height: 60px; object-fit: cover; border-radius: 4px" alt="">
+        <div style="flex: 1; min-width: 0">
+          <div style="font-weight: 600; color: #fff; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
+            ${track.title}
+          </div>
+          <div style="color: #bfc3d6; font-size: 12px">
+            ${icon} ${count} ${label}
+          </div>
+        </div>
+      </label>
+    `;
+    
+    container.appendChild(div);
+  });
+}
+
+function openResetPlaysModal() {
+  document.getElementById('reset-plays-modal').classList.add('open');
+  loadPlaysForReset();
+  document.getElementById('select-all-plays').checked = false;
+}
+
+async function resetPlaysCounters() {
+  const resetType = getResetType();
+  const selected = Array.from(document.querySelectorAll('.play-checkbox:checked'))
+    .map(cb => cb.dataset.src);
+  
+  if (selected.length === 0) {
+    alert('❌ Select at least one track!');
+    return;
+  }
+
+  const typeLabels = {
+    plays: 'PLAYS',
+    likes: 'LIKES',
+    dislikes: 'DISLIKES'
+  };
+
+  const confirmed = window.confirm(
+    `⚠️ RESET ${typeLabels[resetType]}?\n\n` +
+    `${selected.length} track(s) will have ${typeLabels[resetType].toLowerCase()} reset to 0.\n\n` +
+    `This cannot be undone!\n\n` +
+    `Continue?`
+  );
+
+  if (!confirmed) return;
+
+  const btn = document.getElementById('reset-plays-confirm');
+  btn.textContent = '⏳ Resetting...';
+  btn.disabled = true;
+
+  for (const src of selected) {
+    const track = globalTracks.find(t => t.audio === src);
+    if (!track) continue;
+    await db.collection('tracks').doc(track.id).update({ [resetType]: 0 });
+  }
+
+  btn.textContent = '🗑️ Reset';
+  btn.disabled = false;
+
+  document.getElementById('reset-plays-modal').classList.remove('open');
+
+  alert(`✅ Done!\n\n${selected.length} track(s) ${typeLabels[resetType].toLowerCase()} reset to 0`);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+
+  if (isAdmin) {
+    document.getElementById('resetPlaysBtn')?.addEventListener('click', openResetPlaysModal);
+
+    document.getElementById('reset-plays-cancel')?.addEventListener('click', () => {
+      document.getElementById('reset-plays-modal').classList.remove('open');
+    });
+
+    document.getElementById('reset-plays-confirm')?.addEventListener('click', resetPlaysCounters);
+
+    document.getElementById('select-all-plays')?.addEventListener('change', (e) => {
+      document.querySelectorAll('.play-checkbox').forEach(cb => cb.checked = e.target.checked);
+    });
+
+    document.querySelectorAll('input[name="reset-type"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        loadPlaysForReset();
+        document.getElementById('select-all-plays').checked = false;
+      });
+    });
+
+  } else {
+    const btn = document.getElementById('resetPlaysBtn');
+    if (btn) btn.style.display = 'none';
+  }
+
+  const loginBtn = document.getElementById('loginBtn');
+
+  function refreshLoginBtn() {
+    const r = getRole();
+    const logo = document.getElementById('site-logo');
+    if (logo) {
+      if (r === 'admin' || r === 'partner') logo.classList.add('clickable');
+      else logo.classList.remove('clickable');
+    }
+    loginBtn.innerHTML = '';
+    loginBtn.style.background = 'transparent';
+    loginBtn.style.border = 'none';
+    loginBtn.style.padding = '0';
+    loginBtn.style.width = 'auto';
+    loginBtn.style.height = 'auto';
+
+    const img = document.createElement('img');
+    img.style.width = '100%';
+    img.style.height = 'auto';
+    img.style.maxWidth = '120px';
+    img.style.display = 'block';
+
+    if (r === 'admin' || r === 'partner') {
+      img.src = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/Logout.png';
+    } else {
+      img.src = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/Login.png';
+    }
+
+    loginBtn.appendChild(img);
+
+    const addTrackBtn = document.getElementById('addTrackBtn');
+    const exportJsonBtn = document.getElementById('exportJsonBtn');
+    const resetPlaysBtn = document.getElementById('resetPlaysBtn');
+    const managePlaylistsBtn = document.getElementById('managePlaylistsBtn');
+
+    if (addTrackBtn) addTrackBtn.style.display = r === 'admin' ? 'inline-block' : 'none';
+if (exportJsonBtn) exportJsonBtn.style.display = r === 'admin' ? 'inline-block' : 'none';
+if (resetPlaysBtn) resetPlaysBtn.style.display = r === 'admin' ? 'inline-block' : 'none';
+if (managePlaylistsBtn) managePlaylistsBtn.style.display = 'inline-block';
+
+
+  }
+
+  async function exportToJson() {
+    try {
+      const btn = document.getElementById('exportJsonBtn');
+      btn.textContent = '⏳ Exporting...';
+      btn.disabled = true;
+
+      const snapshot = await db.collection('tracks').get();
+      const tracks = [];
+
+      snapshot.forEach(doc => {
+        tracks.push({ id: doc.id, ...doc.data() });
+      });
+
+      const jsonData = JSON.stringify(tracks, null, 2);
+      const blob = new Blob([jsonData], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tracks_backup_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      alert(`✅ ${tracks.length} ${t('tracks')} ${t('exported')}`);
+    } catch (error) {
+      alert('❌ Ошибка экспорта: ' + error.message);
+    } finally {
+      const btn = document.getElementById('exportJsonBtn');
+      btn.textContent = '📦 Export JSON';
+      btn.disabled = false;
+    }
+  }
+
+  document.getElementById('exportJsonBtn')?.addEventListener('click', exportToJson);
+
+  refreshLoginBtn();
+
+  loginBtn.addEventListener('click', () => {
+    if (getRole() !== 'guest') {
+      logoutRole();
+      return;
+    }
+    document.getElementById('login-modal').classList.add('open');
+  });
+
+  document.getElementById('login-cancel').addEventListener('click', () => {
+    document.getElementById('login-modal').classList.remove('open');
+    enteredPin = '';
+    updatePinDisplay();
+  });
+
+  let enteredPin = '';
+  const pinDisplay = document.getElementById('pin-display');
+  const loginModal = document.getElementById('login-modal');
+
+  function updatePinDisplay() {
+    if (enteredPin.length === 0) {
+      pinDisplay.textContent = '••••';
+    } else {
+      pinDisplay.textContent = enteredPin.padEnd(4, '•');
+    }
+  }
+
+  function flashError() {
+    loginModal.style.animation = 'none';
+    loginModal.offsetHeight;
+    loginModal.style.animation = 'flashRed 0.5s ease';
+  }
+
+  document.querySelectorAll('.pin-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const digit = btn.dataset.digit;
+      const action = btn.dataset.action;
+
+      if (digit !== undefined) {
+        enteredPin += digit;
+        updatePinDisplay();
+      } else if (action === 'clear') {
+        enteredPin = '';
+        updatePinDisplay();
+      } else if (action === 'confirm') {
+
+        if (enteredPin.length === 0) return;
+
+        const hash = await sha256(enteredPin);
+        const role =
+          hash === accessHashes?.adminHash ? 'admin' :
+          hash === accessHashes?.partnerHash ? 'partner' :
+          null;
+
+        if (role) {
+          setRole(role);
+          enteredPin = '';
+          updatePinDisplay();
+          document.getElementById('login-modal').classList.remove('open');
+          location.reload();
+        } else {
+          flashError();
+          enteredPin = '';
+          updatePinDisplay();
+        }
+      }
+    });
+  });
+
+});
+
+/* Обновление UI иконок play/pause без полного перерендера */
+window.updateTrackPlayIcons = function() {
+  const currentId = window.currentTrackId || null;
+  const isPlaying = window.isPlaying || false;
+
+  document.querySelectorAll('.track').forEach(el => {
+    const id = el.dataset.id;
+    const playBtn = el.querySelector('.play-btn');
+    if (!playBtn) return;
+
+    if (id === currentId) {
+      el.classList.add('playing');
+      playBtn.classList.add('playing');
+      playBtn.innerHTML = isPlaying
+        ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
+        : '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3v18l15-9L5 3z"/></svg>';
+    } else {
+      el.classList.remove('playing');
+      playBtn.classList.remove('playing');
+      playBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3v18l15-9L5 3z"/></svg>';
+    }
+  });
+};
+
+  </script>
+
+<div id="visualizer-fullscreen" style="
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #0a0a0f 0%, #050508 100%);
+  z-index: 9998;
+  display: none;
+  flex-direction: column;
+  touch-action: pan-y;
+">
+  <div style="
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 51;
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.8);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  " id="visualizer-name-indicator">
+    ⭕ Circular Spectrum
+  </div>
+  
+  <div style="
+    position: absolute;
+    top: 50%;
+    left: 15px;
+    transform: translateY(-50%);
+    z-index: 51;
+    opacity: 0.7;
+    font-size: 30px;
+    cursor: pointer;
+  " id="viz-prev-btn">◀</div>
+  
+  <div style="
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    z-index: 51;
+    opacity: 0.7;
+    font-size: 30px;
+    cursor: pointer;
+  " id="viz-next-btn">▶</div>
+  
+  <div style="
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    z-index: 51;
+  " id="visualizer-dots">
+  </div>
+
+  <div style="
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px 20px;
+  ">
+    <canvas id="audio-visualizer" style="
+      max-width: 100%;
+      max-height: 70vh;
+      border-radius: 12px;
+    "></canvas>
+    
+    <div style="
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      text-align: center;
+      padding: 15px 20px 0;
+      max-width: 90%;
+      margin-top: 20px;
+    " id="visualizer-track-title">Track Name</div>
+  </div>
+</div>
+	<!-- МОДАЛКА СБРОСА СТАТИСТИКИ -->
+<div id="reset-plays-modal" class="modal">
+  <div class="panel" style="max-width: 500px">
+    <h3>🔄 Reset Statistics</h3>
+    
+    <div style="margin: 16px 0; padding: 12px; background: rgba(255,77,77,0.1); border-radius: 8px">
+      <strong style="color: #ff4da6">⚠️ Warning:</strong> This cannot be undone!
+    </div>
+
+    <div style="display: flex; gap: 12px; margin: 16px 0; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px">
+      <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; flex: 1">
+        <input type="radio" name="reset-type" value="plays" checked style="width: 16px; height: 16px">
+        <span style="font-weight: 600">🎵 Plays</span>
+      </label>
+      <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; flex: 1">
+        <input type="radio" name="reset-type" value="likes" style="width: 16px; height: 16px">
+        <span style="font-weight: 600">❤️ Likes</span>
+      </label>
+      <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; flex: 1">
+        <input type="radio" name="reset-type" value="dislikes" style="width: 16px; height: 16px">
+        <span style="font-weight: 600">💔 Dislikes</span>
+      </label>
+    </div>
+
+    <div style="margin: 16px 0">
+      <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px">
+        <input type="checkbox" id="select-all-plays" style="width: 18px; height: 18px">
+        <span style="font-weight: 600">Select All</span>
+      </label>
+    </div>
+
+    <div id="plays-tracks-list" style="max-height: 300px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px; background: rgba(0,0,0,0.3)"></div>
+
+    <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px">
+      <button id="reset-plays-cancel" class="btn">Cancel</button>
+      <button id="reset-plays-confirm" class="btn active" style="background: linear-gradient(90deg, #ff4da6, #ff0000)">🗑️ Reset</button>
+    </div>
+  </div>
+</div>
+<div id="playlist-picker-modal" class="modal">
+  <div class="panel" style="max-width:420px">
+    <h3 style="margin-top:0">${t('addToPlaylist')}</h3>
+    <div id="playlist-picker-list" style="max-height:260px;overflow-y:auto;margin:10px 0"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
+      <button id="playlist-picker-cancel" class="btn">${t('cancel')}</button>
+    </div>
+  </div>
+</div>
+
+<script src="player-core.js"></script>
+<script src="visualizers.js"></script>
+<script src="language.js"></script>
+</body>
+</html>
