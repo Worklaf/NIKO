@@ -48,11 +48,22 @@
     padding:6px 8px;border-radius:8px;line-height:1;display:flex;align-items:center;justify-content:center;
   }
   .icon-btn:hover{color:#fff;background:rgba(255,255,255,0.06)}
-  .exit-btn{
-    background:linear-gradient(135deg,var(--accent),var(--accent2));color:#07060a;font-weight:700;font-size:13px;padding:8px 14px;
-  }
-  .exit-btn:hover{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#07060a;transform:scale(1.05)}
-
+  .exit-btn {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #07060a;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+.exit-btn:hover {
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  transform: scale(1.08);
+}
   #search-panel{
     display:none;position:fixed;top:60px;left:0;right:0;background:var(--card);
     border-bottom:1px solid rgba(255,255,255,0.08);padding:12px 14px;z-index:1000;
@@ -320,12 +331,43 @@
   #img-viewer-img{
     max-width:100%;max-height:100%;object-fit:contain;touch-action:pinch-zoom;
   }
-  #img-viewer-close,#img-viewer-download{
-    position:absolute;top:20px;width:40px;height:40px;border-radius:50%;border:none;
-    background:rgba(255,255,255,0.15);color:#fff;font-size:20px;cursor:pointer;
-  }
-  #img-viewer-close{right:20px}
-  #img-viewer-download{right:70px}
+  #img-viewer-close,
+#img-viewer-download {
+  position: absolute;
+  top: 20px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+#img-viewer-close:hover,
+#img-viewer-download:hover {
+  background: rgba(255,255,255,0.22);
+  transform: scale(1.08);
+}
+#img-viewer-close:active,
+#img-viewer-download:active {
+  transform: scale(0.95);
+}
+
+#img-viewer-close { right: 20px; }
+#img-viewer-download { right: 74px; }
+
+@media (max-width:480px){
+  #img-viewer-close,
+  #img-viewer-download { top: 12px; }
+  #img-viewer-close { right: 12px; }
+  #img-viewer-download { right: 64px; }
+}
 
   @media (max-width:480px){
     .msg-wrap{max-width:88%}
@@ -1006,6 +1048,124 @@ img.twemoji {
     font-size: 12px;
     opacity: 0.85;
   }
+  /* ===== ПРЕДОТВРАЩЕНИЕ FOUC ЭМОДЗИ ===== */
+
+/* До загрузки Twemoji — скрываем нативные эмодзи в сообщениях */
+.bubble:not(.twemoji-loaded) {
+  visibility: hidden;
+}
+
+/* После загрузки Twemoji — показываем */
+.bubble.twemoji-loaded {
+  visibility: visible;
+}
+
+/* Альтернатива: скрываем только эмодзи, не весь bubble */
+.bubble:not(.twemoji-loaded) .emoji-only {
+  visibility: hidden;
+}
+
+/* Белая подложка под реакции (как в Telegram) */
+.reactions-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 8px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.95) !important; /* ← БЕЛАЯ подложка */
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Реакции в сообщениях собеседника — тоже белая подложка */
+.msg-wrap.them .reactions-container {
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Реакции в моих сообщениях — белая подложка */
+.msg-wrap.me .reactions-container {
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Размер Twemoji в реакциях */
+.reactions-container img.twemoji,
+.reactions-container img.emoji {
+  width: 20px !important;
+  height: 20px !important;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Контейнер одной реакции */
+.reactions-container .reaction-item {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  color: #333;
+}
+
+/* Аватары в реакциях на белом фоне */
+.reactions-container .reaction-avatar {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #07060a;
+  font-size: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: -4px;
+  border: 1px solid #fff;
+  overflow: hidden;
+}
+
+/* "+N" счётчик в реакциях */
+.reactions-container .reaction-more {
+  font-size: 10px;
+  color: #666;
+  margin-left: 2px;
+  font-weight: 600;
+}
+.scroll-to-bottom {
+  position: fixed;
+  right: 16px;
+  bottom: 82px; /* чуть выше строки ввода */
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #07060a;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 18px rgba(255,77,166,0.35);
+  z-index: 90;
+  transition: transform .2s, opacity .2s;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px) scale(0.9);
+}
+.scroll-to-bottom.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+.scroll-to-bottom:hover {
+  transform: scale(1.1);
+}
+.scroll-to-bottom:active {
+  transform: scale(0.92);
+}
+@media (max-width:480px){
+  .scroll-to-bottom{right:10px;bottom:78px}
+}
 </style>
 <base target="_blank">
 </head>
@@ -1038,8 +1198,19 @@ img.twemoji {
 <button class="icon-btn" id="selection-mode-btn" title="Выбрать" data-key="select">✓</button>
 <button class="icon-btn" id="trash-btn" title="Корзина" data-key="trash">📦</button>
 <button class="icon-btn" id="profile-btn" title="Профиль" data-key="profile">👤</button>
-<button class="icon-btn exit-btn" id="exit-btn" title="Выйти" data-key="exit">🚪 <span data-key="exit_btn">Выйти</span></button>
-    </div>
+<button class="icon-btn exit-btn" id="exit-btn" title="Выйти" data-key="exit">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+    <polyline points="10 17 15 12 10 7"/>
+    <line x1="15" y1="12" x2="3" y2="12"/>
+  </svg>
+</button>
+<button id="scroll-to-bottom" class="scroll-to-bottom" title="Вниз" data-key="down">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 5v14M5 12l7 7 7-7"/>
+  </svg>
+</button>
+ </div>
   </header>
 
   <!-- ВЫНЕСЕНО из header — на уровень #app, рядом с #floating-date -->
@@ -1050,6 +1221,13 @@ img.twemoji {
         <path d="M12 20h9"/>
         <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/>
       </svg>
+    </button>
+    <button data-action="reply" title="">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 14L4 9l5-5"/>
+        <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/>
+      </svg>
+      <span></span>
     </button>
     <button data-action="copy">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -1131,7 +1309,7 @@ img.twemoji {
 
 <!-- Панель реакций -->
 <div id="reactions-panel" style="display:none;position:fixed;background:linear-gradient(180deg,rgba(10,10,12,0.98),rgba(6,6,8,0.98));border-radius:16px;padding:12px;box-shadow:0 8px 30px rgba(0,0,0,0.6);z-index:10060;min-width:280px">
-  <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
     <button class="reaction-btn" data-emoji="❤️" style="font-size:24px;background:none;border:none;cursor:pointer;padding:4px;border-radius:8px;transition:transform 0.15s">❤️</button>
     <button class="reaction-btn" data-emoji="👍" style="font-size:24px;background:none;border:none;cursor:pointer;padding:4px;border-radius:8px;transition:transform 0.15s">👍</button>
     <button class="reaction-btn" data-emoji="👎" style="font-size:24px;background:none;border:none;cursor:pointer;padding:4px;border-radius:8px;transition:transform 0.15s">👎</button>
@@ -1139,10 +1317,6 @@ img.twemoji {
     <button class="reaction-btn" data-emoji="😍" style="font-size:24px;background:none;border:none;cursor:pointer;padding:4px;border-radius:8px;transition:transform 0.15s">😍</button>
     <button class="reaction-btn" data-emoji="👏" style="font-size:24px;background:none;border:none;cursor:pointer;padding:4px;border-radius:8px;transition:transform 0.15s">👏</button>
     <button class="reaction-btn" data-emoji="😊" style="font-size:24px;background:none;border:none;cursor:pointer;padding:4px;border-radius:8px;transition:transform 0.15s">😊</button>
-  </div>
-  <div style="display:flex;gap:8px">
-    <button id="change-reactions-btn" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:#fff;padding:8px;border-radius:8px;cursor:pointer;font-size:12px;transition:background 0.15s">🔄 Изменить</button>
-    <button id="copy-from-reactions-btn" style="flex:1;background:rgba(0,209,255,0.1);border:1px solid rgba(0,209,255,0.3);color:#00d1ff;padding:8px;border-radius:8px;cursor:pointer;font-size:12px;transition:background 0.15s">📋 Копировать</button>
   </div>
 </div>
 
@@ -1217,14 +1391,13 @@ img.twemoji {
   <div class="input-wrap">
     <textarea id="msg-input" placeholder="Сообщение..." rows="1" data-key="input_placeholder"></textarea>
    <button id="emoji-btn" class="emoji-inline" title="Эмодзи" data-key="emoji">
-      <svg viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
-        <circle cx="8" cy="10" r="1.5" fill="currentColor"/>
-        <circle cx="16" cy="10" r="1.5" fill="currentColor"/>
-        <path d="M8 15c1.5 1 3.5 1 5 0"
-              stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-      </svg>
-    </button>
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+    <circle cx="9" cy="10" r="1.5" fill="currentColor" stroke="none"/>
+    <circle cx="15" cy="10" r="1.5" fill="currentColor" stroke="none"/>
+  </svg>
+</button>
   </div>
 
   <!-- МИКРОФОН -->
@@ -1335,8 +1508,21 @@ border-radius:4px;overflow:hidden;cursor:pointer"></div>
 
 <div id="img-viewer">
   <img id="img-viewer-img" src="">
-  <button id="img-viewer-download" title="Download" data-key="img_viewer_download">⬇</button>
-<button id="img-viewer-close" title="Close" data-key="img_viewer_close">✕</button>
+  
+  <button id="img-viewer-download" title="Download" data-key="img_viewer_download">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+  </button>
+
+  <button id="img-viewer-close" title="Close" data-key="img_viewer_close">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@14.1.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -1369,16 +1555,28 @@ console.log('currentLang will be:', localStorage.getItem('siteLang') || 'en');
   document.querySelectorAll('[data-key]').forEach(el => {
     const key = el.dataset.key;
     const tr = t(key);
+
+    // Перевод placeholder
     if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
       if (el.placeholder) el.placeholder = tr;
+
+    // Перевод текста кнопки
     } else if (el.tagName === 'BUTTON' && el.querySelector('span')) {
       const span = el.querySelector('span[data-key]');
       if (span) span.textContent = tr;
       else if (!el.querySelector('svg')) el.textContent = tr;
+
+    // Перевод обычного текста
     } else if (!el.querySelector('svg') && !el.querySelector('img')) {
       el.textContent = tr;
     }
+
+    // 🔥 Перевод title — вот то, чего не хватало
+    if (el.hasAttribute('title')) {
+      el.setAttribute('title', tr);
+    }
   });
+
 
   // Специальные элементы без data-key
   const blockedTitle = document.getElementById('blocked-title');
@@ -1701,14 +1899,14 @@ function updateAllReactionsAvatars() {
     if (parentWrap && parentWrap.dataset.reactions) {
       const reactions = JSON.parse(parentWrap.dataset.reactions);
       if (reactions && reactions.length > 0) {
-        // Перерисовываем контейнер реакций
         const meta = container.parentElement;
         container.remove();
-        
+
         const newReactionsContainer = document.createElement('div');
         newReactionsContainer.className = 'reactions-container';
-        newReactionsContainer.style.cssText = 'display:flex;align-items:center;gap:4px;margin-right:8px;padding:2px 6px;background:rgba(255,255,255,0.9);border-radius:8px;';
-        
+        // фон теперь единообразный с CSS (белая подложка как в Telegram)
+        newReactionsContainer.style.cssText = 'display:flex;align-items:center;gap:4px;margin-right:8px;padding:2px 6px;border-radius:8px;';
+
         // Группируем реакции по эмодзи
         const groupedReactions = {};
         reactions.forEach(r => {
@@ -1717,48 +1915,48 @@ function updateAllReactionsAvatars() {
           }
           groupedReactions[r.emoji].push(r.user);
         });
-        
-        // Отображаем каждую реакцию с аватарами
+
         Object.entries(groupedReactions).forEach(([emoji, users]) => {
           const reactionItem = document.createElement('div');
           reactionItem.style.cssText = 'display:flex;align-items:center;gap:2px;font-size:11px;';
-          
-          // Добавляем эмодзи
+
+          // ===== ИСПРАВЛЕНИЕ: Twemoji SVG вместо textContent =====
           const emojiSpan = document.createElement('span');
-          emojiSpan.textContent = emoji;
-          emojiSpan.style.fontSize = '14px';
+          emojiSpan.style.cssText = 'font-size:14px;display:inline-flex;align-items:center;';
+          if (window.twemoji) {
+            emojiSpan.innerHTML = twemoji.parse(emoji, { folder: 'svg', ext: '.svg' });
+          } else {
+            emojiSpan.textContent = emoji;
+          }
           reactionItem.appendChild(emojiSpan);
-          
-          // Добавляем аватары пользователей (максимум 3)
+          // =====================================================
+
+          // Аватары пользователей (максимум 3)
           users.slice(0, 3).forEach(user => {
             const avatar = document.createElement('div');
             avatar.style.cssText = 'width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#07060a;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-left:-4px;border:1px solid #fff;overflow:hidden;';
-            
+
             const userAvatar = getUserAvatar(user);
             if (userAvatar && userAvatar.startsWith('http')) {
-              // Показываем реальный аватар
               avatar.style.background = 'none';
               avatar.innerHTML = `<img src="${userAvatar}" style="width:100%;height:100%;object-fit:cover;">`;
             } else {
-              // Показываем букву если нет аватара
               const letter = LETTERS[user] || user.charAt(0).toUpperCase();
               avatar.textContent = letter;
             }
             reactionItem.appendChild(avatar);
           });
-          
-          // Если больше 3 пользователей, показываем "+N"
+
           if (users.length > 3) {
             const more = document.createElement('span');
             more.textContent = '+' + (users.length - 3);
             more.style.cssText = 'font-size:10px;color:#666;margin-left:2px;';
             reactionItem.appendChild(more);
           }
-          
+
           newReactionsContainer.appendChild(reactionItem);
         });
-        
-        // Вставляем перед временем
+
         const timeSpan = meta.querySelector('span');
         if (timeSpan) {
           meta.insertBefore(newReactionsContainer, timeSpan);
@@ -1919,6 +2117,7 @@ let longPressTimer = null;
 let selectedReactions = ['❤️', '👍', '👎', '🔥', '😍', '👏', '😊']; // Дефолтные реакции
 let currentReactionMessageId = null; // ID сообщения для которого открыта панель реакций
 let replyToMessage = null; // Сообщение на которое отвечаем
+let editingMessageId = null; // ID редактируемого сообщения
 
 // === Режим ответа (глобальная функция) ===
 function startReplyMode(messageId) {
@@ -1975,7 +2174,7 @@ function showReplyUI() {
   replyBar.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <div style="flex:1;">
-        <div style="font-size:11px;color:#00aaff;font-weight:600;margin-bottom:2px;">${t('reply_to')}: ${replyToMessage.senderName}</div>
+        <div style="font-size:11px;color:#00aaff;font-weight:600;margin-bottom:2px;">${replyToMessage.senderName}</div>
         <div style="font-size:12px;color:#ccc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">${replyToMessage.text || t('attachment')}</div>
       </div>
       <button id="cancel-reply-btn" style="background:none;border:none;color:#666;cursor:pointer;padding:4px;font-size:16px;">✕</button>
@@ -2112,7 +2311,7 @@ function enableLongPressSelection(row, id) {
       
       // Показываем панель реакций для нажатого сообщения
       const rect = row.getBoundingClientRect();
-      showReactionsPanel(rect.left, rect.top - 150, id);
+      showReactionsPanel(rect.left, rect.top - 50, id);
     }, 450);
   });
 
@@ -2153,7 +2352,7 @@ function enableLongPressSelection(row, id) {
       
       // Показываем панель реакций для нажатого сообщения
       const rect = row.getBoundingClientRect();
-      showReactionsPanel(rect.left, rect.top - 150, id);
+      showReactionsPanel(rect.left, rect.top - 50, id);
     }, 500);
   });
 
@@ -2629,7 +2828,12 @@ document.querySelector('#top-select-bar').addEventListener('click', (e) => {
   if (checked.length === 0) return;
 
   const ids = [...checked].map(cb => cb.dataset.messageId);
-
+// === REPLY ===
+  if (action === 'reply') {
+    if (ids.length !== 1) return;
+    startReplyMode(ids[0]);
+    return;
+  }
   // === EDIT ===
   if (action === 'edit') {
     if (ids.length !== 1) return;
@@ -3270,15 +3474,27 @@ function animateVoiceWaveform(waveContainer) {
 }
 function ensureTwemoji() {
   return new Promise((resolve) => {
-    if (window.twemoji) return resolve();
+    if (window.twemoji) {
+      document.querySelectorAll('.bubble').forEach(b => b.classList.add('twemoji-loaded'));
+      return resolve();
+    }
     const check = setInterval(() => {
       if (window.twemoji) {
         clearInterval(check);
+        // Парсим все существующие сообщения
+        document.querySelectorAll('.bubble').forEach(bubble => {
+          twemoji.parse(bubble, { folder: 'svg', ext: '.svg' });
+          bubble.classList.add('twemoji-loaded');
+        });
         resolve();
       }
     }, 100);
     // Таймаут 5 сек
-    setTimeout(() => { clearInterval(check); resolve(); }, 5000);
+    setTimeout(() => { 
+      clearInterval(check); 
+      document.querySelectorAll('.bubble').forEach(b => b.classList.add('twemoji-loaded'));
+      resolve(); 
+    }, 5000);
   });
 }
   async function initChat() {
@@ -3301,6 +3517,23 @@ if (typeof myRole !== 'undefined' && NAMES && NAMES[myRole]) {
     currentUserName = u.displayName || u.email || currentUserName;
   }
     const messagesEl = document.getElementById('messages');
+const scrollDownBtn = document.getElementById('scroll-to-bottom');
+
+function checkScrollBottom() {
+  const gap = messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight;
+  // показываем если отступ от низа больше 120px
+  scrollDownBtn.classList.toggle('visible', gap > 120);
+}
+
+messagesEl.addEventListener('scroll', () => {
+  updateFloatingDate();
+  checkScrollBottom();
+});
+
+scrollDownBtn.addEventListener('click', () => {
+  scrollToLastMessage();
+  scrollDownBtn.classList.remove('visible');
+});
     messagesEl.addEventListener('scroll', updateFloatingDate);
     const emptyEl = document.getElementById('empty-chat');
     const input = document.getElementById('msg-input');
@@ -3319,7 +3552,6 @@ if (typeof myRole !== 'undefined' && NAMES && NAMES[myRole]) {
     let otherTyping = false;
     let otherOnline = false;
     let otherLastSeen = null;
-    let editingMessageId = null;
 
     function renderHeaderSub() {
       if (otherTyping) {
@@ -3846,13 +4078,16 @@ else if (file.type.startsWith('video/')) {
         const meta = wrap.querySelector('.meta');
         const likeBadge = wrap.querySelector('.like-badge');
         
-        // Обновляем текст если изменился
+                // Обновляем текст если изменился
         if (oldText !== (m.text || '') && m.type === 'text') {
   const txtSpan = bubble.querySelector('span');
   if (txtSpan) {
-    txtSpan.innerHTML = await linkify(m.text);
+    const linkedText = await linkify(m.text);
     if (window.twemoji) {
-      twemoji.parse(txtSpan, { folder: 'svg', ext: '.svg' });
+      txtSpan.innerHTML = twemoji.parse(linkedText, { folder: 'svg', ext: '.svg' });
+      bubble.classList.add('twemoji-loaded');
+    } else {
+      txtSpan.innerHTML = linkedText;
     }
     wrap.dataset.text = m.text || '';
     
@@ -3863,8 +4098,7 @@ else if (file.type.startsWith('video/')) {
       bubble.classList.remove('emoji-only');
     }
   }
-}
-        
+}        
         // Обновляем статус редактирования
         if (oldEdited !== !!m.edited) {
           let ed = meta.querySelector('.edited');
@@ -3934,7 +4168,7 @@ if (
           if (m.reactions && m.reactions.length > 0) {
             const reactionsContainer = document.createElement('div');
             reactionsContainer.className = 'reactions-container';
-            reactionsContainer.style.cssText = 'display:flex;align-items:center;gap:4px;margin-right:8px;padding:2px 6px;background:rgba(255,255,255,0.9);border-radius:8px;';
+            reactionsContainer.style.cssText = 'display:flex;align-items:center;gap:4px;margin-right:8px;padding:2px 6px;background:rgba(0,0,0,0.3);border-radius:8px;';
             
             // Группируем реакции по эмодзи
             const groupedReactions = {};
@@ -3951,10 +4185,15 @@ if (
               reactionItem.style.cssText = 'display:flex;align-items:center;gap:2px;font-size:11px;';
               
               // Добавляем эмодзи
-              const emojiSpan = document.createElement('span');
-              emojiSpan.textContent = emoji;
-              emojiSpan.style.fontSize = '14px';
-              reactionItem.appendChild(emojiSpan);
+              // Добавляем эмодзи через Twemoji
+const emojiSpan = document.createElement('span');
+emojiSpan.style.cssText = 'font-size:14px;display:inline-flex;align-items:center;';
+if (window.twemoji) {
+  emojiSpan.innerHTML = twemoji.parse(emoji, { folder: 'svg', ext: '.svg' });
+} else {
+  emojiSpan.textContent = emoji;
+}
+reactionItem.appendChild(emojiSpan);
               
               // Добавляем аватары пользователей (максимум 3)
               users.slice(0, 3).forEach(user => {
@@ -4006,19 +4245,28 @@ if (
           }
           
           // Добавляем новый reply block
+                    // Добавляем новый reply block
           if (m.replyTo) {
             const replyBlock = document.createElement('div');
             replyBlock.className = 'reply-block';
-            replyBlock.style.cssText = 'padding:6px 10px;background:rgba(0,170,255,0.08);border-left:3px solid #00aaff;border-radius:4px;margin-bottom:8px;cursor:pointer;';
+            
+            // Разный фон для моих сообщений и сообщений собеседника
+            const isMe = m.sender === myRole;
+            if (isMe) {
+              replyBlock.style.cssText = 'padding:8px 12px;background:rgba(7,6,10,0.92);border:1px solid rgba(0,209,255,0.25);border-left:3px solid #00d1ff;border-radius:8px;margin-bottom:10px;cursor:pointer;';
+            } else {
+              replyBlock.style.cssText = 'padding:8px 12px;background:rgba(20,19,26,0.95);border:1px solid rgba(255,77,166,0.2);border-left:3px solid #ff4da6;border-radius:8px;margin-bottom:10px;cursor:pointer;';
+            }
+            
             replyBlock.dataset.replyToId = m.replyTo.id;
             
-            const replySender = document.createElement('div');
-            replySender.style.cssText = 'font-size:11px;color:#00aaff;font-weight:600;margin-bottom:2px;';
-            replySender.textContent = t('reply_to') + ': ' + (m.replyTo.senderName || NAMES[m.replyTo.sender] || m.replyTo.sender);
+                        const replySender = document.createElement('div');
+            replySender.style.cssText = 'font-size:11px;color:#00d1ff;font-weight:700;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;';
+            replySender.textContent = (m.replyTo.senderName || NAMES[m.replyTo.sender] || m.replyTo.sender);
             replyBlock.appendChild(replySender);
             
             const replyText = document.createElement('div');
-            replyText.style.cssText = 'font-size:12px;color:#999;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:250px;';
+            replyText.style.cssText = 'font-size:13px;color:#eaeaf2;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:250px;opacity:0.95;';
             replyText.textContent = m.replyTo.text || t('attachment');
             replyBlock.appendChild(replyText);
             
@@ -4146,20 +4394,34 @@ if (m.sender === myRole) {
       const bubble = document.createElement('div');
       bubble.className = 'bubble';
       
-      // Отображаем reply block если есть
+      console.log('Creating message with replyTo:', m.replyTo);
+      
+      // Сначала рендерим контент сообщения
+      await renderBubbleContent(bubble, m, id);
+      
+      // Затем добавляем reply block если есть (в начало bubble)
+            // Затем добавляем reply block если есть (в начало bubble)
       if (m.replyTo) {
+        console.log('Adding reply block to message');
         const replyBlock = document.createElement('div');
         replyBlock.className = 'reply-block';
-        replyBlock.style.cssText = 'padding:6px 10px;background:rgba(0,170,255,0.08);border-left:3px solid #00aaff;border-radius:4px;margin-bottom:8px;cursor:pointer;';
+        
+        // Разный фон для моих сообщений и сообщений собеседника
+        if (isMe) {
+          replyBlock.style.cssText = 'padding:8px 12px;background:rgba(7,6,10,0.92);border:1px solid rgba(0,209,255,0.25);border-left:3px solid #00d1ff;border-radius:8px;margin-bottom:10px;cursor:pointer;';
+        } else {
+          replyBlock.style.cssText = 'padding:8px 12px;background:rgba(20,19,26,0.95);border:1px solid rgba(255,77,166,0.2);border-left:3px solid #ff4da6;border-radius:8px;margin-bottom:10px;cursor:pointer;';
+        }
+        
         replyBlock.dataset.replyToId = m.replyTo.id;
         
-        const replySender = document.createElement('div');
-        replySender.style.cssText = 'font-size:11px;color:#00aaff;font-weight:600;margin-bottom:2px;';
-        replySender.textContent = t('reply_to') + ': ' + (m.replyTo.senderName || NAMES[m.replyTo.sender] || m.replyTo.sender);
+               const replySender = document.createElement('div');
+        replySender.style.cssText = 'font-size:11px;color:#00d1ff;font-weight:700;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px;';
+        replySender.textContent = (m.replyTo.senderName || NAMES[m.replyTo.sender] || m.replyTo.sender);
         replyBlock.appendChild(replySender);
         
         const replyText = document.createElement('div');
-        replyText.style.cssText = 'font-size:12px;color:#999;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:250px;';
+        replyText.style.cssText = 'font-size:13px;color:#eaeaf2;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:250px;opacity:0.95;';
         replyText.textContent = m.replyTo.text || t('attachment');
         replyBlock.appendChild(replyText);
         
@@ -4177,10 +4439,9 @@ if (m.sender === myRole) {
           }
         });
         
-        bubble.appendChild(replyBlock);
+        // Вставляем reply block в начало bubble
+        bubble.insertBefore(replyBlock, bubble.firstChild);
       }
-      
-      await renderBubbleContent(bubble, m, id);
 
       const meta = document.createElement('div');
       meta.className = 'meta';
@@ -4190,27 +4451,32 @@ if (m.sender === myRole) {
       if (m.reactions && m.reactions.length > 0) {
         const reactionsContainer = document.createElement('div');
         reactionsContainer.className = 'reactions-container';
-        reactionsContainer.style.cssText = 'display:flex;align-items:center;gap:4px;margin-right:8px;padding:2px 6px;background:rgba(255,255,255,0.9);border-radius:8px;';
+        reactionsContainer.style.cssText = 'display:flex;align-items:center;gap:4px;margin-right:8px;padding:2px 6px;background:rgba(0,0,0,0.3);border-radius:8px;';
         
         // Группируем реакции по эмодзи
-        const groupedReactions = {};
-        m.reactions.forEach(r => {
-          if (!groupedReactions[r.emoji]) {
-            groupedReactions[r.emoji] = [];
-          }
-          groupedReactions[r.emoji].push(r.user);
-        });
-        
-        // Отображаем каждую реакцию с аватарами
-        Object.entries(groupedReactions).forEach(([emoji, users]) => {
-          const reactionItem = document.createElement('div');
-          reactionItem.style.cssText = 'display:flex;align-items:center;gap:2px;font-size:11px;';
+                 // Группируем реакции по эмодзи
+          const groupedReactions = {};
+          m.reactions.forEach(r => {
+            if (!groupedReactions[r.emoji]) {
+              groupedReactions[r.emoji] = [];
+            }
+            groupedReactions[r.emoji].push(r.user);
+          });
           
-          // Добавляем эмодзи
-          const emojiSpan = document.createElement('span');
-          emojiSpan.textContent = emoji;
-          emojiSpan.style.fontSize = '14px';
-          reactionItem.appendChild(emojiSpan);
+          // Отображаем каждую реакцию с аватарами
+          Object.entries(groupedReactions).forEach(([emoji, users]) => {
+            const reactionItem = document.createElement('div');
+            reactionItem.style.cssText = 'display:flex;align-items:center;gap:2px;font-size:11px;';
+            
+            // Добавляем эмодзи через Twemoji для ярких цветов
+            const emojiSpan = document.createElement('span');
+            emojiSpan.style.cssText = 'font-size:14px;display:inline-flex;align-items:center;';
+            if (window.twemoji) {
+              emojiSpan.innerHTML = twemoji.parse(emoji, { folder: 'svg', ext: '.svg' });
+            } else {
+              emojiSpan.textContent = emoji;
+            }
+            reactionItem.appendChild(emojiSpan);
           
           // Добавляем аватары пользователей (максимум 3)
           users.slice(0, 3).forEach(user => {
@@ -4351,7 +4617,7 @@ else if (m.status === 'read') {
 
    async function renderBubbleContent(bubble, m, id) {
   bubble.innerHTML = '';
-
+ bubble.classList.add('twemoji-loaded');
   // === IMAGE ===
   if (m.type === 'image') {
     const img = document.createElement('img');
@@ -4648,10 +4914,15 @@ else if (m.status === 'read') {
   }
   // === TEXT ===
 const txt = document.createElement('span');
-// Парсим строку, а не DOM-элемент
-txt.innerHTML = window.twemoji 
-  ? twemoji.parse(await linkify(m.text), { folder: 'svg', ext: '.svg' })
-  : await linkify(m.text);
+const linkedText = await linkify(m.text);
+
+if (window.twemoji) {
+  // Парсим Twemoji и сразу добавляем класс
+  txt.innerHTML = twemoji.parse(linkedText, { folder: 'svg', ext: '.svg' });
+  bubble.classList.add('twemoji-loaded');
+} else {
+  txt.innerHTML = linkedText;
+}
 bubble.appendChild(txt);
 
 if (isEmojiOnly(m.text)) {
@@ -4763,36 +5034,6 @@ if (isEmojiOnly(m.text)) {
         hideReactionsPanel();
       });
     });
-
-    // Кнопка изменения реакций
-    document.getElementById('change-reactions-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      // TODO: Открыть модалку для выбора новых реакций
-      alert(t('reactions_coming_soon'));
-    });
-
-    // Кнопка копировать в панели реакций
-    document.getElementById('copy-from-reactions-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (currentReactionMessageId) {
-        const wrap = document.querySelector(`.msg-wrap[data-id="${currentReactionMessageId}"]`);
-        if (wrap) {
-          const text = wrap.dataset.text || '';
-          if (text) {
-            navigator.clipboard.writeText(text).then(() => {
-              const notification = document.createElement('div');
-              notification.textContent = t('copied');
-              notification.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,209,255,0.9);color:#07060a;padding:8px 16px;border-radius:12px;font-size:13px;font-weight:600;z-index:10070;animation:fadeIn 0.2s';
-              document.body.appendChild(notification);
-              setTimeout(() => notification.remove(), 2000);
-            }).catch(() => {
-              alert(t('copy_failed'));
-            });
-          }
-        }
-      }
-      hideReactionsPanel();
-    });
     
     async function sendMessage() {
       const text = input.value.trim();
@@ -4840,6 +5081,7 @@ if (isEmojiOnly(m.text)) {
         
         if (replyTo) {
           messageData.replyTo = replyTo;
+          console.log('Sending message with replyTo:', replyTo);
         }
         
         await db.collection('chat_messages').add(messageData);
