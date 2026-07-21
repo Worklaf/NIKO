@@ -2120,12 +2120,22 @@ function enableLongPressSelection(row, id) {
   row.addEventListener('mouseleave', () => clearTimeout(pressTimer));
 
   // Для мобильных устройств
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let hasMoved = false;
+  
   row.addEventListener('touchstart', (e) => {
     if (e.target.classList.contains('msg-checkbox')) return;
 
     longPressTriggered = false;
+    hasMoved = false;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
 
     pressTimer = setTimeout(() => {
+      // Не срабатываем если было движение
+      if (hasMoved) return;
+      
       longPressTriggered = true;
       
       // При длительном нажатии - режим выбора с чекбоксами + панель реакций для нажатого сообщения
@@ -2145,6 +2155,18 @@ function enableLongPressSelection(row, id) {
       const rect = row.getBoundingClientRect();
       showReactionsPanel(rect.left, rect.top - 150, id);
     }, 500);
+  });
+
+  row.addEventListener('touchmove', (e) => {
+    const touchX = e.touches[0].clientX;
+    const touchY = e.touches[0].clientY;
+    const moveDistance = Math.sqrt(Math.pow(touchX - touchStartX, 2) + Math.pow(touchY - touchStartY, 2));
+    
+    // Если палец сдвинулся более чем на 10px, считаем это прокруткой
+    if (moveDistance > 10) {
+      hasMoved = true;
+      clearTimeout(pressTimer);
+    }
   });
 
   row.addEventListener('touchend', () => clearTimeout(pressTimer));
@@ -2693,10 +2715,16 @@ document.querySelector('#top-select-bar').addEventListener('click', (e) => {
   originalCollection: 'chat_messages'
         });
         await messageRef.delete();
+        // Удаляем из DOM немедленно
+        const wrap = document.querySelector(`.msg-wrap[data-id="${messageId}"]`);
+        if (wrap) wrap.remove();
       } else {
         // админ — поведение зависит от permanent
         if (permanent) {
           await messageRef.delete();
+          // Удаляем из DOM немедленно
+          const wrap = document.querySelector(`.msg-wrap[data-id="${messageId}"]`);
+          if (wrap) wrap.remove();
         } else {
           await db.collection('deleted_messages').doc(messageId).set({
             ...messageData,
@@ -2706,6 +2734,9 @@ document.querySelector('#top-select-bar').addEventListener('click', (e) => {
             originalCollection: 'chat_messages'
           });
           await messageRef.delete();
+          // Удаляем из DOM немедленно
+          const wrap = document.querySelector(`.msg-wrap[data-id="${messageId}"]`);
+          if (wrap) wrap.remove();
         }
       }
     }
@@ -3795,13 +3826,18 @@ else if (file.type.startsWith('video/')) {
         // Проверяем реакции
         const oldReactions = JSON.stringify(wrap.dataset.reactions || []);
         const newReactions = JSON.stringify(m.reactions || []);
+        
+        // Проверяем replyTo
+        const oldReplyTo = wrap.dataset.replyTo || 'null';
+        const newReplyTo = JSON.stringify(m.replyTo || null);
 
         const needUpdate =
           oldText !== m.text ||
           oldEdited !== !!m.edited ||
           oldLikes !== ('❤ ' + (m.likes?.length || 0)) ||
           oldStatus !== (m.status === 'read' ? TICK_DOUBLE : TICK_SINGLE) ||
-          oldReactions !== newReactions;
+          oldReactions !== newReactions ||
+          oldReplyTo !== newReplyTo;
 
         if (!needUpdate) continue;
 
@@ -3958,6 +3994,52 @@ if (
             }
           }
         }
+        
+        // Обновляем reply block
+        if (oldReplyTo !== newReplyTo) {
+          wrap.dataset.replyTo = JSON.stringify(m.replyTo || null);
+          
+          // Удаляем старый reply block
+          const oldReplyBlock = bubble.querySelector('.reply-block');
+          if (oldReplyBlock) {
+            oldReplyBlock.remove();
+          }
+          
+          // Добавляем новый reply block
+          if (m.replyTo) {
+            const replyBlock = document.createElement('div');
+            replyBlock.className = 'reply-block';
+            replyBlock.style.cssText = 'padding:6px 10px;background:rgba(0,170,255,0.08);border-left:3px solid #00aaff;border-radius:4px;margin-bottom:8px;cursor:pointer;';
+            replyBlock.dataset.replyToId = m.replyTo.id;
+            
+            const replySender = document.createElement('div');
+            replySender.style.cssText = 'font-size:11px;color:#00aaff;font-weight:600;margin-bottom:2px;';
+            replySender.textContent = t('reply_to') + ': ' + (m.replyTo.senderName || NAMES[m.replyTo.sender] || m.replyTo.sender);
+            replyBlock.appendChild(replySender);
+            
+            const replyText = document.createElement('div');
+            replyText.style.cssText = 'font-size:12px;color:#999;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:250px;';
+            replyText.textContent = m.replyTo.text || t('attachment');
+            replyBlock.appendChild(replyText);
+            
+            // Клик по reply block для скролла к оригиналу
+            replyBlock.addEventListener('click', () => {
+              const originalMessage = document.querySelector(`.msg-wrap[data-id="${m.replyTo.id}"]`);
+              if (originalMessage) {
+                originalMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Подсветка оригинального сообщения
+                originalMessage.style.transition = 'background 0.3s';
+                originalMessage.style.background = 'rgba(0,170,255,0.2)';
+                setTimeout(() => {
+                  originalMessage.style.background = '';
+                }, 1000);
+              }
+            });
+            
+            // Вставляем reply block в начало bubble
+            bubble.insertBefore(replyBlock, bubble.firstChild);
+          }
+        }
 
         continue;
       }
@@ -3968,6 +4050,9 @@ if (
       const wrap = document.createElement('div');
       wrap.className = 'msg-wrap ' + (isMe ? 'me' : 'them');
       wrap.dataset.id = id;
+      wrap.dataset.sender = m.sender;
+      wrap.dataset.type = m.type || 'text';
+      wrap.dataset.replyTo = JSON.stringify(m.replyTo || null);
       if (!isMe && m.status !== 'read') {
         wrap.dataset.unread = "true";
       }
