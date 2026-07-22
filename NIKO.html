@@ -22,6 +22,7 @@
       <button id="lang-pl" class="btn icon" style="padding:4px 8px;font-size:11px;border-radius:6px" title="Polski">PL</button>
       <button id="lang-ua" class="btn icon" style="padding:4px 8px;font-size:11px;border-radius:6px" title="Українська">UA</button>
       <button id="managePlaylistsBtn" class="btn playlists-chip" style="display:none">🎵 <span data-i18n="playlists"></span></button>
+      <button id="filterMyTracksBtn" class="btn playlists-chip" style="display:none">🎧 <span data-i18n="myTracks"></span></button>
     </div>
 
     <div class="search-wrap" role="search" aria-label="Search tracks">
@@ -29,6 +30,9 @@
       <select id="siteGenre" class="search-select" aria-label="Genre">
         <option value="">All genres</option>
       </select>
+    </div>
+    <div class="search-wrap" role="search" aria-label="Search lyrics">
+      <input id="lyricsSearch" class="search-input" placeholder="Search: lyrics">
     </div>
 
  <button id="addTrackBtn" class="btn" style="display:none"><span data-i18n="uploadTrack"></span></button>
@@ -201,6 +205,7 @@
 
     <!-- Поля -->
     <input id="t-title" class="search-input" data-i18n-placeholder="trackTitle" placeholder="" style="width:100%;margin-bottom:12px">
+    <input id="t-artist" class="search-input" data-i18n-placeholder="songArtist" placeholder="" style="width:100%;margin-bottom:12px">
     <input id="t-genre" class="search-input" data-i18n-placeholder="genres" placeholder="" style="width:100%;margin-bottom:12px">
     <input id="t-playlist" class="search-input" data-i18n-placeholder="playlistName" placeholder="" style="width:100%;margin-bottom:12px">
 
@@ -279,6 +284,24 @@
       <div style="font-weight:600;color:#fff;margin-bottom:4px" id="replace-track-title"></div>
       <div style="color:var(--muted);font-size:12px" id="replace-track-info"></div>
     </div>
+
+    <!-- Редактирование названия -->
+    <label style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px">
+      Название
+    </label>
+    <input id="r-title" type="text" style="width:100%;margin-bottom:12px;padding:8px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:#fff">
+
+    <!-- Редактирование автора -->
+    <label style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px">
+      Автор
+    </label>
+    <input id="r-artist" type="text" style="width:100%;margin-bottom:12px;padding:8px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:#fff">
+
+    <!-- Редактирование жанра -->
+    <label style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px">
+      Жанр
+    </label>
+    <input id="r-genre" type="text" style="width:100%;margin-bottom:12px;padding:8px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:#fff">
 
     <!-- Новый MP3 -->
     <label data-i18n="newMp3Optional" style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px">
@@ -533,8 +556,10 @@ async function loadGenresToFilter() {
     div.dataset.id = track.id;
     div.dataset.src = track.audio;
     div.dataset.title = track.title;
+    div.dataset.artist = track.artist || '';
     div.dataset.genre = track.genre;
     div.dataset.lyrics = track.lyrics || '';
+    div.dataset.uploadedBy = track.uploadedBy || '';
     div.dataset.index = index;
 
     // подсвечиваем если играет
@@ -553,7 +578,7 @@ async function loadGenresToFilter() {
     div.innerHTML = `
       <img class="thumb" src="${track.cover}" alt="${track.title}">
       <div class="info">
-        <div class="title">${track.title}</div>
+        <div class="title">${track.artist ? `${track.artist} - ${track.title}` : track.title}</div>
         <div class="meta">${track.genre || ''} · ${track.duration || '—'}</div>
         <!-- PLAYLIST BADGES -->
         <div class="playlist-badges" style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px 0">
@@ -620,7 +645,7 @@ async function loadGenresToFilter() {
           <button class="btn icon comment-btn" aria-label="Comments" title="${t('comments')}">💬</button>
           <button class="btn icon share-btn" aria-label="Share" title="${t('share')}">🔗</button>
           ${isAdmin ? `<button class="btn icon replace-track-btn" title="${t('replaceTrackFiles')}">🔄</button>` : ''}
-          ${isAdmin ? `<button class="btn icon delete-track-btn" title="${t('deleteTrack')}">🗑️</button>` : ''}
+          ${(isAdmin || (isPartner && track.uploadedBy === window.currentUserRole)) ? `<button class="btn icon delete-track-btn" title="${t('deleteTrack')}">🗑️</button>` : ''}
           <button class="btn icon add-to-playlist-btn" title="${t('addToPlaylist')}">➕</button>
           ${isAdmin ? `<button class="btn icon change-visibility-btn" title="${t('songVisibility')}">👁️</button>` : ''}
           <a class="btn icon download-track-btn" href="${track.audio || '#'}" download="${(track.title || 'track').replace(/"/g,'')}.mp3" title="${t('download')}">⬇️</a>
@@ -629,6 +654,29 @@ async function loadGenresToFilter() {
     `;
 
     list.appendChild(div);
+
+    // Добавляем обработчики свайпа для мобильных
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    div.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    div.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, { passive: true });
+
+    function handleSwipe() {
+      const swipeThreshold = 50;
+      const diff = touchStartX - touchEndX;
+
+      // Свайп справа налево - открыть текст
+      if (diff > swipeThreshold) {
+        openText(div);
+      }
+    }
   });
   // клики по бейджам
   document.querySelectorAll('.playlist-badge').forEach(badge => {
@@ -657,9 +705,9 @@ function toggleMyLocalPlaylist(trackId) {
   function openText(trackEl) {
     const lyrics = trackEl.dataset.lyrics || '';
     const title = trackEl.dataset.title || '';
-    
+
     currentEditingId = trackEl.dataset.id;
-    
+
     document.getElementById('side-title').textContent = title;
     document.getElementById('side-content').textContent = lyrics || t('noTracks');
     document.getElementById('side-content-editor').value = lyrics;
@@ -667,6 +715,48 @@ function toggleMyLocalPlaylist(trackId) {
     document.getElementById('side-content').style.display = 'block';
     document.getElementById('side-content-editor').style.display = 'none';
     document.getElementById('edit-mode-actions').classList.remove('active');
+
+    // Добавляем обработчик свайпа для закрытия
+    setupSidePanelSwipe();
+  }
+
+  function setupSidePanelSwipe() {
+    const sidePanel = document.getElementById('side-panel');
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    // Удаляем предыдущие обработчики если есть
+    const oldHandler = sidePanel.getAttribute('data-swipe-handler');
+    if (oldHandler) {
+      sidePanel.removeEventListener('touchstart', window[oldHandler].start);
+      sidePanel.removeEventListener('touchend', window[oldHandler].end);
+    }
+
+    const startHandler = (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    };
+
+    const endHandler = (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const swipeThreshold = 50;
+      const diff = touchEndX - touchStartX;
+
+      // Свайп слева направо - закрыть панель
+      if (diff > swipeThreshold) {
+        document.getElementById('side-panel').classList.remove('open');
+        document.getElementById('side-content').style.display = 'block';
+        document.getElementById('side-content-editor').style.display = 'none';
+        document.getElementById('edit-mode-actions').classList.remove('active');
+      }
+    };
+
+    sidePanel.addEventListener('touchstart', startHandler, { passive: true });
+    sidePanel.addEventListener('touchend', endHandler, { passive: true });
+
+    // Сохраняем ссылки для последующего удаления
+    const handlerId = 'swipeHandler_' + Date.now();
+    window[handlerId] = { start: startHandler, end: endHandler };
+    sidePanel.setAttribute('data-swipe-handler', handlerId);
   }
 
   async function loadComments(trackId) {
@@ -1142,24 +1232,53 @@ document.getElementById('u-preview-cover').src = coverBlob
 
     const searchInput = document.getElementById('siteSearch');
     const genreSelect = document.getElementById('siteGenre');
+    const lyricsSearchInput = document.getElementById('lyricsSearch');
+
+    // Глобальная переменная для фильтрации моих песен
+    let showMyTracksOnly = false;
 
     function filterTracks() {
       const query = searchInput.value.toLowerCase();
       const selectedGenre = genreSelect.value.toLowerCase();
+      const lyricsQuery = lyricsSearchInput.value.toLowerCase();
+      const role = getRole();
+      const isAdmin = role === 'admin';
+      const isPartner = role === 'partner';
 
       document.querySelectorAll('.track').forEach(trackEl => {
         const title = trackEl.dataset.title.toLowerCase();
+        const artist = (trackEl.dataset.artist || '').toLowerCase();
         const genre = (trackEl.dataset.genre || '').toLowerCase();
+        const lyrics = (trackEl.dataset.lyrics || '').toLowerCase();
+        const uploadedBy = trackEl.dataset.uploadedBy || '';
 
-        const matchesSearch = title.includes(query) || genre.includes(query);
+        const matchesSearch = title.includes(query) || artist.includes(query) || genre.includes(query);
         const matchesGenre = !selectedGenre || genre.includes(selectedGenre);
+        const matchesLyrics = !lyricsQuery || lyrics.includes(lyricsQuery);
+        
+        // Фильтрация по моим/не моим песням
+        let matchesMyTracks = true;
+        if (showMyTracksOnly) {
+          if (isAdmin) {
+            matchesMyTracks = uploadedBy === 'admin';
+          } else if (isPartner) {
+            matchesMyTracks = uploadedBy === 'partner';
+          }
+        } else {
+          if (isAdmin) {
+            matchesMyTracks = uploadedBy === 'partner';
+          } else if (isPartner) {
+            matchesMyTracks = uploadedBy === 'admin';
+          }
+        }
 
-        trackEl.style.display = (matchesSearch && matchesGenre) ? 'flex' : 'none';
+        trackEl.style.display = (matchesSearch && matchesGenre && matchesLyrics && matchesMyTracks) ? 'flex' : 'none';
       });
     }
 
     searchInput.addEventListener('input', filterTracks);
     genreSelect.addEventListener('change', filterTracks);
+    lyricsSearchInput.addEventListener('input', filterTracks);
 
     document.addEventListener('click', async (e) => {
       const trackEl = e.target.closest('.track');
@@ -1248,6 +1367,9 @@ if (e.target.closest('.change-visibility-btn')) {
         document.getElementById('replace-track-title').textContent = track.title;
         document.getElementById('replace-track-info').textContent =
           `${t('genres')}: ${track.genre || '—'} | ❤️ ${track.likes || 0} | ${t('plays')}: ${track.plays || 0}`;
+        document.getElementById('r-title').value = track.title || '';
+        document.getElementById('r-artist').value = track.artist || '';
+        document.getElementById('r-genre').value = track.genre || '';
         document.getElementById('r-audio-file').value = '';
         document.getElementById('r-cover-file').value = '';
 
@@ -1287,8 +1409,9 @@ const canUserUpload =
   (uploadPermission === 'partner_only' && (isAdmin || isPartner)) ||
   (uploadPermission === 'admin_only' && isAdmin);
 
+// Скрываем userUploadBtn для партнера, используем только addTrackBtn
 document.getElementById('userUploadBtn').style.display =
-  canUserUpload ? 'inline-block' : 'none';
+  (canUserUpload && !isPartner) ? 'inline-block' : 'none';
 
     document.getElementById('pl-save')?.addEventListener('click', async () => {
   const name = document.getElementById('pl-name').value.trim();
@@ -1402,20 +1525,31 @@ document.getElementById('userUploadBtn').style.display =
       }
     });
 
-    if (isAdmin) {
-      document.getElementById('addTrackBtn').addEventListener('click', () => {
-        const sel = document.getElementById('t-playlist-id');
-        sel.innerHTML = `<option value="">${t('noPlaylists')}</option>` +
-          globalPlaylists.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-        document.getElementById('add-track-modal').classList.add('open');
-      });
+    // Кнопка фильтрации моих песен (для админа и партнера)
+    document.getElementById('filterMyTracksBtn').addEventListener('click', () => {
+      showMyTracksOnly = !showMyTracksOnly;
+      const btn = document.getElementById('filterMyTracksBtn');
+      btn.innerHTML = showMyTracksOnly ? `🎧 ${t('allTracks')}` : `🎧 ${t('myTracks')}`;
+      filterTracks();
+    });
 
-      document.getElementById('add-cancel').addEventListener('click', () => {
-        document.getElementById('add-track-modal').classList.remove('open');
-      });
+    // Обработчик загрузки трека (для админа и партнера)
+    document.getElementById('addTrackBtn').addEventListener('click', () => {
+      const sel = document.getElementById('t-playlist-id');
+      sel.innerHTML = `<option value="">${t('noPlaylists')}</option>` +
+        globalPlaylists.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+      document.getElementById('add-track-modal').classList.add('open');
+    });
+
+    document.getElementById('add-cancel').addEventListener('click', () => {
+      document.getElementById('add-track-modal').classList.remove('open');
+    });
+
+    if (isAdmin) {
 
       document.getElementById('add-save').addEventListener('click', async () => {
         const title = document.getElementById('t-title').value.trim();
+        const artist = document.getElementById('t-artist').value.trim();
         const genre = document.getElementById('t-genre').value.trim();
         const playlist = document.getElementById('t-playlist').value.trim();
         const lyrics = document.getElementById('t-lyrics').value.trim();
@@ -1441,6 +1575,7 @@ document.getElementById('userUploadBtn').style.display =
 
           await db.collection('tracks').add({
             title,
+            artist,
             genre,
             playlist,
             lyrics,
@@ -1455,10 +1590,12 @@ document.getElementById('userUploadBtn').style.display =
             likes: 0,
             dislikes: 0,
             plays: 0,
+            uploadedBy: window.currentUserRole,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
 
           document.getElementById('t-title').value = '';
+          document.getElementById('t-artist').value = '';
           document.getElementById('t-genre').value = '';
           document.getElementById('t-playlist').value = '';
           document.getElementById('t-lyrics').value = '';
@@ -1474,7 +1611,89 @@ document.getElementById('userUploadBtn').style.display =
           btn.disabled = false;
         }
       });
+    }
 
+    // Обработчик загрузки трека (для админа и партнера)
+    if (isAdmin || isPartner) {
+      document.getElementById('addTrackBtn').addEventListener('click', () => {
+        const sel = document.getElementById('t-playlist-id');
+        sel.innerHTML = `<option value="">${t('noPlaylists')}</option>` +
+          globalPlaylists.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        document.getElementById('add-track-modal').classList.add('open');
+      });
+
+      document.getElementById('add-cancel').addEventListener('click', () => {
+        document.getElementById('add-track-modal').classList.remove('open');
+      });
+
+      document.getElementById('add-save').addEventListener('click', async () => {
+        const title = document.getElementById('t-title').value.trim();
+        const artist = document.getElementById('t-artist').value.trim();
+        const genre = document.getElementById('t-genre').value.trim();
+        const playlist = document.getElementById('t-playlist').value.trim();
+        const lyrics = document.getElementById('t-lyrics').value.trim();
+        const audioFile = document.getElementById('t-audio-file').files[0];
+        const coverFile = document.getElementById('t-cover-file').files[0];
+
+        if (!title || !audioFile || !coverFile) {
+          alert('Название, mp3 и фото обязательны');
+          return;
+        }
+
+        const btn = document.getElementById('add-save');
+        btn.textContent = '⏳ Загрузка...';
+        btn.disabled = true;
+
+        try {
+          const baseName = uniqueBaseName(sanitizeBaseName(title));
+          const audioExt = audioFile.name.split('.').pop();
+          const coverExt = coverFile.name.split('.').pop();
+
+          const audioUrl = await uploadToWorker(audioFile, STORAGE_FOLDER_AUDIO, `${baseName}.${audioExt}`);
+          const coverUrl = await uploadToWorker(coverFile, STORAGE_FOLDER_COVERS, `${baseName}.${coverExt}`);
+
+          await db.collection('tracks').add({
+            title,
+            artist,
+            genre,
+            playlist,
+            lyrics,
+            playlistId: document.getElementById('t-playlist-id').value || null,
+            visibility: 'partner', // Партнер может загружать только для себя и админа
+            baseName,
+            audioFileName: `${baseName}.${audioExt}`,
+            coverFileName: `${baseName}.${coverExt}`,
+            audio: audioUrl,
+            cover: coverUrl,
+            duration: '—',
+            likes: 0,
+            dislikes: 0,
+            plays: 0,
+            uploadedBy: window.currentUserRole,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          document.getElementById('t-title').value = '';
+          document.getElementById('t-artist').value = '';
+          document.getElementById('t-genre').value = '';
+          document.getElementById('t-playlist').value = '';
+          document.getElementById('t-lyrics').value = '';
+          document.getElementById('t-audio-file').value = '';
+          document.getElementById('t-cover-file').value = '';
+          document.getElementById('add-track-modal').classList.remove('open');
+          alert('✅ ' + title + ' добавлен!');
+        } catch (e) {
+          console.error(e);
+          alert('❌ Ошибка загрузки: ' + e.message);
+        } finally {
+          btn.textContent = 'Save';
+          btn.disabled = false;
+        }
+      });
+    }
+
+    // Обработчики замены файлов (только для админа)
+    if (isAdmin) {
       document.getElementById('replace-cancel').addEventListener('click', () => {
         document.getElementById('replace-track-modal').classList.remove('open');
       });
@@ -1482,9 +1701,12 @@ document.getElementById('userUploadBtn').style.display =
       document.getElementById('replace-save').addEventListener('click', async () => {
         const audioFile = document.getElementById('r-audio-file').files[0];
         const coverFile = document.getElementById('r-cover-file').files[0];
+        const newTitle = document.getElementById('r-title').value.trim();
+        const newArtist = document.getElementById('r-artist').value.trim();
+        const newGenre = document.getElementById('r-genre').value.trim();
 
-        if (!audioFile && !coverFile) {
-          alert('Выберите хотя бы один файл для замены');
+        if (!audioFile && !coverFile && !newTitle && !newArtist && !newGenre) {
+          alert('Выберите хотя бы что-то для изменения');
           return;
         }
 
@@ -1498,13 +1720,18 @@ document.getElementById('userUploadBtn').style.display =
         try {
           let updateData = {};
 
+          // Сохраняем текстовые поля
+          if (newTitle) updateData.title = newTitle;
+          if (newArtist) updateData.artist = newArtist;
+          if (newGenre) updateData.genre = newGenre;
+
           if (audioFile) {
   await deleteFromWorker(STORAGE_FOLDER_AUDIO, track.audioFileName);
   const audioExt = audioFile.name.split('.').pop();
   const newAudioFileName = track.baseName + '.' + audioExt;
   const newAudioUrl = await uploadToWorker(audioFile, STORAGE_FOLDER_AUDIO, newAudioFileName);
-  updateData.audio = newAudioUrl + '?v=' + Date.now();      // ← добавлено
-  updateData.audioFileName = newAudioFileName;               // имя файла оставляем чистым
+  updateData.audio = newAudioUrl + '?v=' + Date.now();
+  updateData.audioFileName = newAudioFileName;
 }
 
 if (coverFile) {
@@ -1512,7 +1739,7 @@ if (coverFile) {
   const coverExt = coverFile.name.split('.').pop();
   const newCoverFileName = track.baseName + '.' + coverExt;
   const newCoverUrl = await uploadToWorker(coverFile, STORAGE_FOLDER_COVERS, newCoverFileName);
-  updateData.cover = newCoverUrl + '?v=' + Date.now();       // ← добавлено
+  updateData.cover = newCoverUrl + '?v=' + Date.now();
   updateData.coverFileName = newCoverFileName;
 }
 
@@ -1520,6 +1747,9 @@ if (coverFile) {
 
           document.getElementById('r-audio-file').value = '';
           document.getElementById('r-cover-file').value = '';
+          document.getElementById('r-title').value = '';
+          document.getElementById('r-artist').value = '';
+          document.getElementById('r-genre').value = '';
           document.getElementById('replace-track-modal').classList.remove('open');
 
           alert('✅ Файлы успешно заменены! Статистика сохранена.');
@@ -1704,11 +1934,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const exportJsonBtn = document.getElementById('exportJsonBtn');
     const resetPlaysBtn = document.getElementById('resetPlaysBtn');
     const managePlaylistsBtn = document.getElementById('managePlaylistsBtn');
+    const filterMyTracksBtn = document.getElementById('filterMyTracksBtn');
 
-    if (addTrackBtn) addTrackBtn.style.display = r === 'admin' ? 'inline-block' : 'none';
+    if (addTrackBtn) {
+      addTrackBtn.style.display = (r === 'admin' || r === 'partner') ? 'inline-block' : 'none';
+      // Меняем текст кнопки для партнера
+      if (r === 'partner') {
+        addTrackBtn.querySelector('span').setAttribute('data-i18n', 'uploadPartnerTrack');
+      } else {
+        addTrackBtn.querySelector('span').setAttribute('data-i18n', 'uploadTrack');
+      }
+    }
 if (exportJsonBtn) exportJsonBtn.style.display = r === 'admin' ? 'inline-block' : 'none';
 if (resetPlaysBtn) resetPlaysBtn.style.display = r === 'admin' ? 'inline-block' : 'none';
 if (managePlaylistsBtn) managePlaylistsBtn.style.display = 'inline-block';
+if (filterMyTracksBtn) filterMyTracksBtn.style.display = (r === 'admin' || r === 'partner') ? 'inline-block' : 'none';
 
 
   }
