@@ -1,7 +1,4 @@
-
-# Создаю полностью исправленный language.js с испанским языком
-
-language_js = '''const translations = {
+const translations = {
   en: {
     searchPlaceholder: "Search: title, artist or genre",
     allGenres: "All genres",
@@ -382,7 +379,7 @@ language_js = '''const translations = {
     filterPartnerOnly: "Solo pareja",
     filterAdmin: "Admin",
   }
-};
+};  
 
 let currentLang = localStorage.getItem('language') || 'en';
 
