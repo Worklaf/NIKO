@@ -96,15 +96,17 @@
           margin-bottom: 12px;
       }
 
-      .search-main {
-          flex: 0 0 60%;
+            .search-main {
+          flex: 1;
           display: flex;
           gap: 6px;
+          flex-wrap: wrap;
       }
 
       .search-lyrics {
-          flex: 0 0 40%;
+          flex: 0 0 35%;
           display: flex;
+          min-width: 120px;
       }
 
       .search-main .search-input {
@@ -121,23 +123,13 @@
           transition: all 0.3s ease;
       }
 
-          /* Растягивание поля поиска по тексту при фокусе */
+                    /* Поиск по тексту — обычное поведение, без полноэкранного режима */
           .lyrics-input:focus {
-              position: fixed;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-              width: 90vw;
-              max-width: 500px;
-              z-index: 10000;
-              font-size: 16px;
-              padding: 14px 18px;
-              box-shadow: 0 0 0 9999px rgba(0,0,0,0.8), 0 10px 40px rgba(0,0,0,0.5);
-              border-radius: 12px;
-              background: #0a0a0f;
+              outline: none;
+              border-color: rgba(0, 229, 255, 0.5);
           }
 
-      /* На десктопе — обычное поведение */
+            /* На десктопе — вертикальное расположение поисковых полей */
       @media (min-width: 769px) {
           .search-row {
               flex-direction: column;
@@ -147,15 +139,6 @@
           .search-lyrics {
               flex: none;
               width: 100%;
-          }
-
-          .lyrics-input:focus {
-              position: static;
-              transform: none;
-              width: 100%;
-              box-shadow: none;
-              font-size: inherit;
-              padding: 8px 12px;
           }
       }
 
@@ -171,14 +154,24 @@
                   padding: 3px 8px;
               }
 
-          .search-main {
-              flex: 0 0 55%;
+                   .search-main {
+              flex: 1;
           }
 
           .search-lyrics {
-              flex: 0 0 45%;
+              flex: 0 0 40%;
+              min-width: 100px;
+          }
+                    .search-main .search-select {
+              font-size: 11px;
+              padding: 4px 6px;
+              min-width: auto;
           }
       }
+          /* === Отступ снизу для списка треков, чтобы плеер не перекрывал === */
+    #tracksList {
+        padding-bottom: 200px !important;
+    }
   </style>
 <base target="_blank">
 </head>
@@ -195,15 +188,11 @@
         <button id="lang-en" class="btn icon" style="padding:4px 8px;font-size:11px;border-radius:6px" title="English">EN</button>
         <button id="lang-pl" class="btn icon" style="padding:4px 8px;font-size:11px;border-radius:6px" title="Polski">PL</button>
         <button id="lang-ua" class="btn icon" style="padding:4px 8px;font-size:11px;border-radius:6px" title="Українська">UA</button>
-        <button id="managePlaylistsBtn" class="btn playlists-chip" style="display:none">🎵 <span data-i18n="playlists"></span></button>
-        <div class="top-actions-row">
+               <div class="top-actions-row">
             <button id="managePlaylistsBtn" class="btn playlists-chip" style="display:none">🎵 <span data-i18n="playlists"></span></button>
-            <select id="filterMyTracksSelect" class="search-select filter-select-mobile" style="display:none">
-                <option value="all">🎧 Все</option>
-            </select>
-            <button id="userUploadBtn" class="btn playlists-chip" style="display:none">⬆️ <span data-i18n="userUpload">Загрузить</span></button>
+            <button id="newTracksBtn" class="btn playlists-chip new-tracks-btn" style="display:none"><span data-i18n="newTracksShort">NEW</span><span class="badge" id="newTracksBadge" style="display:none">0</span></button>
+            <button id="userUploadBtn" class="btn playlists-chip" style="display:none"><span data-i18n="uploadShort">Upload</span></button>
         </div>
-        <button id="newTracksBtn" class="btn playlists-chip new-tracks-btn" style="display:none">✨ <span data-i18n="newTracks">Новые</span><span class="badge" id="newTracksBadge" style="display:none">0</span></button>
 
         <div class="sort-controls" id="adminSortControls" style="display:none">
             <select id="sortMode">
@@ -218,11 +207,14 @@
             <span style="color:var(--muted);font-size:12px">Перетаскивайте треки для смены порядка</span>
         </div>
 
-        <div class="search-row">
+               <div class="search-row">
             <div class="search-wrap search-main" role="search" aria-label="Search tracks">
                 <input id="siteSearch" class="search-input" placeholder="Search: title, artist or genre">
                 <select id="siteGenre" class="search-select" aria-label="Genre">
                     <option value="">All genres</option>
+                </select>
+                <select id="filterMyTracksSelect" class="search-select filter-select-mobile" style="display:none">
+                    <option value="all">🎧 Все</option>
                 </select>
             </div>
             <div class="search-wrap search-lyrics" role="search" aria-label="Search lyrics">
@@ -230,9 +222,7 @@
             </div>
         </div>
 
-        <button id="addTrackBtn" class="btn" style="display:none"><span data-i18n="uploadTrack">Загрузить трек</span></button>
-        <button id="userUploadBtn" class="btn" style="display:none">🎧 <span data-i18n="userUpload">Загрузить с метаданными</span></button>
-        <button id="exportJsonBtn" class="btn" style="display:none"><span data-i18n="exportJson">Export JSON</span></button>
+               <button id="addTrackBtn" class="btn" style="display:none"><span data-i18n="uploadTrack">Загрузить трек</span></button> <button id="exportJsonBtn" class="btn" style="display:none"><span data-i18n="exportJson">Export JSON</span></button>
         <button id="resetPlaysBtn" class="btn" style="display:none;background:rgba(255,77,77,0.1);border-color:rgba(255,77,77,0.3)"><span data-i18n="resetPlays">Reset Plays</span></button>
         <select id="upload-permission-select" class="search-select" style="display:none">
             <option value="admin_only" data-i18n="uploadAdminOnly">Только админ</option>
@@ -1822,35 +1812,35 @@ function refreshLoginBtn() {
             filterSelect.style.display = 'inline-block';
             filterSelect.innerHTML = '';
 
-            const optAll = document.createElement('option');
+                        const optAll = document.createElement('option');
             optAll.value = 'all';
-            optAll.textContent = '🎧 Все песни';
+            optAll.textContent = '🎧 ' + (t('filterAllSongs') || 'Все песни');
             filterSelect.appendChild(optAll);
 
             const optMine = document.createElement('option');
             optMine.value = 'mine';
-            optMine.textContent = '👤 Мои песни';
+            optMine.textContent = '👤 ' + (t('filterMySongs') || 'Мои песни');
             filterSelect.appendChild(optMine);
 
             if (r === 'admin') {
                 const optPartnerUploader = document.createElement('option');
                 optPartnerUploader.value = 'partner-uploader';
-                optPartnerUploader.textContent = '💑 Партнёр';
+                optPartnerUploader.textContent = '💑 ' + (t('filterPartner') || 'Партнёр');
                 filterSelect.appendChild(optPartnerUploader);
 
                 const optHidden = document.createElement('option');
                 optHidden.value = 'visibility-hidden';
-                optHidden.textContent = '🔒 Скрытые от всех';
+                optHidden.textContent = '🔒 ' + (t('filterHidden') || 'Скрытые от всех');
                 filterSelect.appendChild(optHidden);
 
                 const optPartnerVisible = document.createElement('option');
                 optPartnerVisible.value = 'visibility-partner';
-                optPartnerVisible.textContent = '♥ Видны только партнёру';
+                optPartnerVisible.textContent = '♥ ' + (t('filterPartnerOnly') || 'Видны только партнёру');
                 filterSelect.appendChild(optPartnerVisible);
             } else if (r === 'partner') {
                 const optAdmin = document.createElement('option');
                 optAdmin.value = 'admin';
-                optAdmin.textContent = '👑 Админ';
+                optAdmin.textContent = '👑 ' + (t('filterAdmin') || 'Админ');
                 filterSelect.appendChild(optAdmin);
             }
 
