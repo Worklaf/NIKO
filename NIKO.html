@@ -96,11 +96,26 @@
           margin-bottom: 12px;
       }
 
-            .search-main {
+      .search-main {
           flex: 1;
           display: flex;
-          gap: 6px;
-          flex-wrap: wrap;
+          gap: 4px;
+          flex-wrap: nowrap;
+          align-items: stretch;
+          min-width: 0;
+      }
+
+      .search-main .search-input {
+          min-width: 0;
+          flex: 1 1 auto;
+      }
+
+      .search-main .search-select {
+          flex: 0 0 auto;
+          min-width: 0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
       }
 
       .search-lyrics {
@@ -154,25 +169,42 @@
                   padding: 3px 8px;
               }
 
-                   .search-main {
+          .search-main {
               flex: 1;
+              gap: 3px;
+          }
+
+          .search-main .search-input {
+              flex: 1 1 45%;
+              min-width: 0;
+              font-size: 12px;
+              padding: 6px 8px;
+          }
+
+          .search-main .search-select {
+              flex: 0 0 auto;
+              font-size: 11px;
+              padding: 4px 5px;
+              min-width: 70px;
+              max-width: 100px;
           }
 
           .search-lyrics {
-              flex: 0 0 40%;
-              min-width: 100px;
+              flex: 0 0 35%;
+              min-width: 90px;
           }
-                    .search-main .search-select {
-              font-size: 11px;
-              padding: 4px 6px;
-              min-width: auto;
+
+          .search-lyrics .lyrics-input {
+              font-size: 12px;
+              padding: 6px 8px;
           }
       }
           /* === Отступ снизу для списка треков, чтобы плеер не перекрывал === */
     #tracksList {
-        padding-bottom: 200px !important;
+        padding-bottom: 260px !important;
     }
   </style>
+<base target="_blank">
 <base target="_blank">
 </head>
 <body>
@@ -188,7 +220,8 @@
         <button id="lang-en" class="btn icon" style="padding:4px 8px;font-size:11px;border-radius:6px" title="English">EN</button>
         <button id="lang-pl" class="btn icon" style="padding:4px 8px;font-size:11px;border-radius:6px" title="Polski">PL</button>
         <button id="lang-ua" class="btn icon" style="padding:4px 8px;font-size:11px;border-radius:6px" title="Українська">UA</button>
-               <div class="top-actions-row">
+        <button id="lang-es" class="btn icon" style="padding:4px 8px;font-size:11px;border-radius:6px" title="Español">ES</button>
+                <div class="top-actions-row">
             <button id="managePlaylistsBtn" class="btn playlists-chip" style="display:none">🎵 <span data-i18n="playlists"></span></button>
             <button id="newTracksBtn" class="btn playlists-chip new-tracks-btn" style="display:none"><span data-i18n="newTracksShort">NEW</span><span class="badge" id="newTracksBadge" style="display:none">0</span></button>
             <button id="userUploadBtn" class="btn playlists-chip" style="display:none"><span data-i18n="uploadShort">Upload</span></button>
@@ -222,7 +255,8 @@
             </div>
         </div>
 
-               <button id="addTrackBtn" class="btn" style="display:none"><span data-i18n="uploadTrack">Загрузить трек</span></button> <button id="exportJsonBtn" class="btn" style="display:none"><span data-i18n="exportJson">Export JSON</span></button>
+        <button id="addTrackBtn" class="btn" style="display:none"><span data-i18n="uploadTrack">Загрузить трек</span></button>
+        <button id="exportJsonBtn" class="btn" style="display:none"><span data-i18n="exportJson">Export JSON</span></button>
         <button id="resetPlaysBtn" class="btn" style="display:none;background:rgba(255,77,77,0.1);border-color:rgba(255,77,77,0.3)"><span data-i18n="resetPlays">Reset Plays</span></button>
         <select id="upload-permission-select" class="search-select" style="display:none">
             <option value="admin_only" data-i18n="uploadAdminOnly">Только админ</option>
@@ -807,7 +841,6 @@ function renderDraftTracks(tracks) {
       if (!trackUploader && track.visibility === 'partner') trackUploader = 'partner';
       if (!trackUploader) trackUploader = 'admin';
       div.dataset.visibility = track.visibility || 'public';
-    div.dataset.visibility = track.visibility || 'public';
     const role = getRole();
     
     // Партнёр может удалять: явно свои треки, ИЛИ partner-only без владельца (старые)
@@ -1270,9 +1303,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const langEn = document.getElementById('lang-en');
   const langPl = document.getElementById('lang-pl');
   const langUa = document.getElementById('lang-ua');
+  const langEs = document.getElementById('lang-es');
   if (langEn) langEn.addEventListener('click', () => switchLanguage('en'));
   if (langPl) langPl.addEventListener('click', () => switchLanguage('pl'));
   if (langUa) langUa.addEventListener('click', () => switchLanguage('ua'));
+  if (langEs) langEs.addEventListener('click', () => switchLanguage('es'));
 
   const searchInput = document.getElementById('siteSearch');
   const genreSelect = document.getElementById('siteGenre');
@@ -1812,35 +1847,35 @@ function refreshLoginBtn() {
             filterSelect.style.display = 'inline-block';
             filterSelect.innerHTML = '';
 
-                        const optAll = document.createElement('option');
+            const optAll = document.createElement('option');
             optAll.value = 'all';
-            optAll.textContent = '🎧 ' + (t('filterAllSongs') || 'Все песни');
+            optAll.textContent = '🎧 ' + (t('filterAllSongs') || 'All songs');
             filterSelect.appendChild(optAll);
 
             const optMine = document.createElement('option');
             optMine.value = 'mine';
-            optMine.textContent = '👤 ' + (t('filterMySongs') || 'Мои песни');
+            optMine.textContent = '👤 ' + (t('filterMySongs') || 'My songs');
             filterSelect.appendChild(optMine);
 
             if (r === 'admin') {
                 const optPartnerUploader = document.createElement('option');
                 optPartnerUploader.value = 'partner-uploader';
-                optPartnerUploader.textContent = '💑 ' + (t('filterPartner') || 'Партнёр');
+                optPartnerUploader.textContent = '💑 ' + (t('filterPartner') || 'Partner');
                 filterSelect.appendChild(optPartnerUploader);
 
                 const optHidden = document.createElement('option');
                 optHidden.value = 'visibility-hidden';
-                optHidden.textContent = '🔒 ' + (t('filterHidden') || 'Скрытые от всех');
+                optHidden.textContent = '🔒 ' + (t('filterHidden') || 'Hidden from all');
                 filterSelect.appendChild(optHidden);
 
                 const optPartnerVisible = document.createElement('option');
                 optPartnerVisible.value = 'visibility-partner';
-                optPartnerVisible.textContent = '♥ ' + (t('filterPartnerOnly') || 'Видны только партнёру');
+                optPartnerVisible.textContent = '♥ ' + (t('filterPartnerOnly') || 'Partner only');
                 filterSelect.appendChild(optPartnerVisible);
             } else if (r === 'partner') {
                 const optAdmin = document.createElement('option');
                 optAdmin.value = 'admin';
-                optAdmin.textContent = '👑 ' + (t('filterAdmin') || 'Админ');
+                optAdmin.textContent = '👑 ' + (t('filterAdmin') || 'Admin');
                 filterSelect.appendChild(optAdmin);
             }
 
