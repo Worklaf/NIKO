@@ -1,7 +1,17 @@
 const translations = {
   en: {
     searchPlaceholder: "Search: title, artist or genre",
+    searchLyricsPlaceholder: "Search: lyrics",
     allGenres: "All genres",
+    showMusic: "Show",
+    sortDefault: "📅 Default",
+    sortPlaysDesc: "▲ Plays",
+    sortPlaysAsc: "▼ Plays",
+    sortLikesDesc: "▲ Likes",
+    sortLikesAsc: "▼ Likes",
+    sortTitleAsc: "A-Z Title",
+    sortTitleDesc: "Z-A Title",
+    dragToReorder: "Drag tracks to reorder",
     uploadTrack: "⬆ Upload Track",
     uploadPartnerTrack: "🎧 Upload your song",
     exportJson: "📦 Export JSON",
@@ -93,10 +103,21 @@ const translations = {
     filterHidden: "Hidden from all",
     filterPartnerOnly: "Partner only",
     filterAdmin: "Admin",
+    multiSelect: "Multi-select",
   },
   pl: {
     searchPlaceholder: "Szukaj: tytuł, artysta lub gatunek",
+    searchLyricsPlaceholder: "Szukaj: tekst piosenki",
     allGenres: "Wszystkie gatunki",
+    showMusic: "Pokaż",
+    sortDefault: "📅 Domyślnie",
+    sortPlaysDesc: "▲ Odtworzenia",
+    sortPlaysAsc: "▼ Odtworzenia",
+    sortLikesDesc: "▲ Polubienia",
+    sortLikesAsc: "▼ Polubienia",
+    sortTitleAsc: "A-Z Tytuł",
+    sortTitleDesc: "Z-A Tytuł",
+    dragToReorder: "Przeciągnij utwory, aby zmienić kolejność",
     uploadTrack: "⬆ Dodaj utwór",
     uploadPartnerTrack: "🎧 Dodaj swoją piosenkę",
     exportJson: "📦 Eksportuj JSON",
@@ -188,10 +209,21 @@ const translations = {
     filterHidden: "Ukryte",
     filterPartnerOnly: "Tylko partner",
     filterAdmin: "Admin",
+    multiSelect: "Wielokrotny wybór",
   },
   ua: {
     searchPlaceholder: "Пошук: назва, виконавець або жанр",
+    searchLyricsPlaceholder: "Пошук: текст пісні",
     allGenres: "Усі жанри",
+    showMusic: "Показати",
+    sortDefault: "📅 За замовчуванням",
+    sortPlaysDesc: "▲ Прослуховування",
+    sortPlaysAsc: "▼ Прослуховування",
+    sortLikesDesc: "▲ Лайки",
+    sortLikesAsc: "▼ Лайки",
+    sortTitleAsc: "А-Я Назва",
+    sortTitleDesc: "Я-А Назва",
+    dragToReorder: "Перетягніть треки для зміни порядку",
     uploadTrack: "⬆ Завантажити трек",
     uploadPartnerTrack: "🎧 Завантажити свою пісню",
     exportJson: "📦 Експорт JSON",
@@ -283,10 +315,21 @@ const translations = {
     filterHidden: "Приховані від всіх",
     filterPartnerOnly: "Видно тільки партнеру",
     filterAdmin: "Адмін",
+    multiSelect: "Мультивибір",
   },
   es: {
     searchPlaceholder: "Buscar: título, artista o género",
+    searchLyricsPlaceholder: "Buscar: letra",
     allGenres: "Todos los géneros",
+    showMusic: "Mostrar",
+    sortDefault: "📅 Por defecto",
+    sortPlaysDesc: "▲ Reproducciones",
+    sortPlaysAsc: "▼ Reproducciones",
+    sortLikesDesc: "▲ Me gusta",
+    sortLikesAsc: "▼ Me gusta",
+    sortTitleAsc: "A-Z Título",
+    sortTitleDesc: "Z-A Título",
+    dragToReorder: "Arrastra las pistas para reordenar",
     uploadTrack: "⬆ Subir pista",
     uploadPartnerTrack: "🎧 Subir tu canción",
     exportJson: "📦 Exportar JSON",
@@ -378,8 +421,9 @@ const translations = {
     filterHidden: "Ocultas",
     filterPartnerOnly: "Solo pareja",
     filterAdmin: "Admin",
+    multiSelect: "Selección múltiple",
   }
-};  
+};
 
 let currentLang = localStorage.getItem('language') || 'en';
 
@@ -388,14 +432,43 @@ function t(key) {
 }
 
 function switchLanguage(lang) {
-  currentLang = lang;
-  localStorage.setItem('language', lang);
-  
-  document.querySelectorAll('[id^="lang-"]').forEach(btn => btn.classList.remove('active'));
-  const langBtn = document.getElementById('lang-' + lang);
-  if (langBtn) langBtn.classList.add('active');
-  
-  applyTranslations();
+  window.currentLang = lang;
+  localStorage.setItem('siteLanguage', lang);
+
+  // Переводим textContent
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (key && translations[lang] && translations[lang][key]) {
+      el.textContent = translations[lang][key];
+    }
+  });
+
+  // Переводим placeholder'ы
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.dataset.i18nPlaceholder;
+    if (key && translations[lang] && translations[lang][key]) {
+      el.placeholder = translations[lang][key];
+    }
+  });
+
+  // 🔥 Переводим title-атрибуты
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const key = el.dataset.i18nTitle;
+    if (key && translations[lang] && translations[lang][key]) {
+      el.title = translations[lang][key];
+    }
+  });
+
+  // Обновляем кнопку логина
+  if (typeof refreshLoginBtn === 'function') {
+    refreshLoginBtn();
+  }
+
+  // Placeholder'ы поиска
+  const siteSearch = document.getElementById('siteSearch');
+  const lyricsSearch = document.getElementById('lyricsSearch');
+  if (siteSearch) siteSearch.placeholder = t('searchPlaceholder') || 'Search: title, artist or genre';
+  if (lyricsSearch) lyricsSearch.placeholder = t('searchLyricsPlaceholder') || 'Search: lyrics';
 }
 
 function applyTranslations() {
@@ -411,14 +484,21 @@ function applyTranslations() {
     if (key) node.textContent = t(key);
   });
 
-  // options (general)
+  // options with data-i18n
   document.querySelectorAll('option[data-i18n]').forEach(opt => {
-    opt.textContent = t(opt.dataset.i18n);
+    const key = opt.dataset.i18n;
+    if (key && translations[currentLang]?.[key]) {
+      const prefix = opt.textContent.match(/^[^\w\s]*/)?.[0] || '';
+      opt.textContent = prefix + t(key);
+    }
   });
 
   // special cases
   const siteSearch = document.getElementById('siteSearch');
   if (siteSearch) siteSearch.placeholder = t('searchPlaceholder');
+
+  const lyricsSearch = document.getElementById('lyricsSearch');
+  if (lyricsSearch) lyricsSearch.placeholder = t('searchLyricsPlaceholder');
 
   const emptyGenre = document.querySelector('#siteGenre option[value=""]');
   if (emptyGenre) emptyGenre.textContent = t('allGenres');
