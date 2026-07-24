@@ -25,20 +25,41 @@
       z-index: 2;
     }
     .track.partner-listened { border-left: 3px solid #4dff8a; }
-    .sort-controls {
-      display: flex;
-      gap: 8px;
+         .sort-controls {
+      display: inline-flex;
+      gap: 6px;
       align-items: center;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
+      flex-shrink: 0;
+      flex-wrap: nowrap;
     }
     .sort-controls select {
       padding: 6px 10px;
+      border-radius: 50px;
+      background: linear-gradient(90deg, #ff4da6, #ff7a4d);
+      border: none;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(255, 77, 166, 0.3);
+      white-space: nowrap;
+      min-width: 0;
+    }
+    .sort-controls select option {
+      background: #0b0b10;
+      color: #eaeaf2;
+    }
+        .sort-controls select {
+      padding: 6px 10px;
       border-radius: 6px;
-      background: rgba(255,255,255,0.05);
+      background: #0b0b10;
       border: 1px solid rgba(255,255,255,0.1);
       color: #eaeaf2;
       font-size: 13px;
+    }
+    .sort-controls select option {
+      background: #0b0b10;
+      color: #eaeaf2;
     }
     .new-tracks-btn { position: relative; }
     .new-tracks-btn .badge {
@@ -119,10 +140,10 @@
       }
 
       .search-lyrics {
-          flex: 0 0 35%;
-          display: flex;
-          min-width: 120px;
-      }
+    flex: 1;
+    display: flex;
+    min-width: 0;
+}
 
       .search-main .search-input {
           flex: 1;
@@ -144,19 +165,6 @@
               border-color: rgba(0, 229, 255, 0.5);
           }
 
-            /* На десктопе — вертикальное расположение поисковых полей */
-      @media (min-width: 769px) {
-          .search-row {
-              flex-direction: column;
-          }
-
-          .search-main,
-          .search-lyrics {
-              flex: none;
-              width: 100%;
-          }
-      }
-
       /* На мобильных — компактнее */
       @media (max-width: 480px) {
           .top-actions-row {
@@ -177,13 +185,13 @@
           .search-main .search-input {
               flex: 1 1 45%;
               min-width: 0;
-              font-size: 12px;
+              font-size: 15px;
               padding: 6px 8px;
           }
 
           .search-main .search-select {
               flex: 0 0 auto;
-              font-size: 11px;
+              font-size: 15px;
               padding: 4px 5px;
               min-width: 70px;
               max-width: 100px;
@@ -195,7 +203,7 @@
           }
 
           .search-lyrics .lyrics-input {
-              font-size: 12px;
+              font-size: 15px;
               padding: 6px 8px;
           }
       }
@@ -211,48 +219,71 @@
   <div class="container">
   <header>
     <a id="site-logo" class="site-logo" href="#">
-      <span class="logo-text">N1K∅</span>
-    </a>
-    <div class="login-wrap">
-      <button id="loginBtn" class="btn" style="padding:4px 10px;font-size:12px">🔑 Войти</button>
+  <span class="logo-text">N1K∅</span>
+  <span id="chat-unread-indicator" class="chat-unread-indicator" style="display:none;"></span>
+</a>
+       <div class="header-right">
+      <div class="lang-dropdown">
+              <button id="lang-toggle" class="btn lang-toggle-btn">
+          <img id="current-lang-flag" src="https://flagcdn.com/w20/us.png" alt="" style="width:18px;height:13px;border-radius:2px;object-fit:cover;display:inline-block;vertical-align:middle;"> 
+          <span id="current-lang-code">EN</span>
+        </button>
+        <div id="lang-menu" class="lang-menu">
+          <button class="lang-option" data-lang="en"><img src="https://flagcdn.com/w20/us.png" alt="" class="flag-img"> English</button>
+          <button class="lang-option" data-lang="pl"><img src="https://flagcdn.com/w20/pl.png" alt="" class="flag-img"> Polski</button>
+          <button class="lang-option" data-lang="ua"><img src="https://flagcdn.com/w20/ua.png" alt="" class="flag-img"> Українська</button>
+          <button class="lang-option" data-lang="es"><img src="https://flagcdn.com/w20/es.png" alt="" class="flag-img"> Español</button>
+        </div>
+      </div>
+      <div class="login-wrap">
+        <button id="loginBtn" class="btn login-niko-btn">
+  <span class="login-icon">🔐</span>
+  <span id="login-text" data-i18n="login">Войти</span>
+</button>
+      </div>
     </div>
-    <div class="lang-bar">
-        <button id="lang-en" class="btn icon" style="padding:4px 8px;font-size:11px;border-radius:6px" title="English">EN</button>
-        <button id="lang-pl" class="btn icon" style="padding:4px 8px;font-size:11px;border-radius:6px" title="Polski">PL</button>
-        <button id="lang-ua" class="btn icon" style="padding:4px 8px;font-size:11px;border-radius:6px" title="Українська">UA</button>
-        <button id="lang-es" class="btn icon" style="padding:4px 8px;font-size:11px;border-radius:6px" title="Español">ES</button>
-                <div class="top-actions-row">
+                                <div class="top-actions-row">
             <button id="managePlaylistsBtn" class="btn playlists-chip" style="display:none">🎵 <span data-i18n="playlists"></span></button>
             <button id="newTracksBtn" class="btn playlists-chip new-tracks-btn" style="display:none"><span data-i18n="newTracksShort">NEW</span><span class="badge" id="newTracksBadge" style="display:none">0</span></button>
             <button id="userUploadBtn" class="btn playlists-chip" style="display:none"><span data-i18n="uploadShort">Upload</span></button>
+            <div class="sort-controls" id="adminSortControls" style="display:none">
+                <select id="sortMode">
+                    <option value="default" data-i18n="sortDefault">📅 Default</option>
+                    <option value="plays-desc" data-i18n="sortPlaysDesc">▲ Plays</option>
+                    <option value="plays-asc" data-i18n="sortPlaysAsc">▼ Plays</option>
+                    <option value="likes-desc" data-i18n="sortLikesDesc">▲ Likes</option>
+                    <option value="likes-asc" data-i18n="sortLikesAsc">▼ Likes</option>
+                    <option value="title-asc" data-i18n="sortTitleAsc">A-Z Title</option>
+                    <option value="title-desc" data-i18n="sortTitleDesc">Z-A Title</option>
+                </select>
+            </div>
         </div>
-
-        <div class="sort-controls" id="adminSortControls" style="display:none">
-            <select id="sortMode">
-                <option value="default">📅 По умолчанию</option>
-                <option value="plays-desc">▲ Прослушивания</option>
-                <option value="plays-asc">▼ Прослушивания</option>
-                <option value="likes-desc">▲ Лайки</option>
-                <option value="likes-asc">▼ Лайки</option>
-                <option value="title-asc">А-Я Название</option>
-                <option value="title-desc">Я-А Название</option>
-            </select>
-            <span style="color:var(--muted);font-size:12px">Перетаскивайте треки для смены порядка</span>
-        </div>
-
-               <div class="search-row">
+                      <div class="search-row">
             <div class="search-wrap search-main" role="search" aria-label="Search tracks">
                 <input id="siteSearch" class="search-input" placeholder="Search: title, artist or genre">
-                <select id="siteGenre" class="search-select" aria-label="Genre">
-                    <option value="">All genres</option>
-                </select>
-                <select id="filterMyTracksSelect" class="search-select filter-select-mobile" style="display:none">
-                    <option value="all">🎧 Все</option>
-                </select>
             </div>
             <div class="search-wrap search-lyrics" role="search" aria-label="Search lyrics">
                 <input id="lyricsSearch" class="search-input lyrics-input" placeholder="Search: lyrics">
             </div>
+        </div>
+
+        <div class="filter-row">
+          <div class="filter-col filter-genre-col">
+           
+            <select id="siteGenre" class="search-select" aria-label="Genre">
+              <option value="">All genres</option>
+            </select>
+            <div id="selected-genres" class="selected-genres"></div>
+          </div>
+                   <div class="filter-col filter-owner-col">
+            <div class="filter-header">
+              <button id="genre-multi-btn" class="btn icon" data-i18n-title="multiSelect" title="Multi-select">☐</button>
+              <select id="filterMyTracksSelect"class="search-select filter-select-mobile" style="display:none">
+              <option value="all">🎧 Все</option>
+            </select>
+            </div>
+            
+          </div>
         </div>
 
         <button id="addTrackBtn" class="btn" style="display:none"><span data-i18n="uploadTrack">Загрузить трек</span></button>
@@ -513,7 +544,10 @@ let myTracksFilter = 'all';
 let showNewOnly = false;
 let currentSortMode = 'default';
 let partnerListensData = {};
-
+function getLangStorageKey() {
+  const role = getRole();
+  return role === 'guest' ? 'siteLanguage' : `siteLanguage_${role}`;
+}
 function getListenedTracks() {
   const role = getRole();
   if (role === 'guest') {
@@ -528,7 +562,56 @@ function setListenedTracks(arr) {
   if (role === 'guest') localStorage.setItem('listenedTracks', JSON.stringify(arr));
   window._listenedTracks = arr;
 }
+// ===== ИНДИКАТОР НЕПРОЧИТАННЫХ СООБЩЕНИЙ ЧАТА =====
+// Проверяет ТОЛЬКО последнее сообщение. Если оно непрочитано — показываем цвет отправителя.
+(function initChatUnreadIndicator() {
+  const indicator = document.getElementById('chat-unread-indicator');
+  if (!indicator) return;
 
+  // Подписываемся на последнее сообщение (limit(1) + desc)
+  db.collection('chat_messages')
+    .orderBy('createdAt', 'desc')
+    .limit(1)
+    .onSnapshot(snap => {
+      if (snap.empty) {
+        hideIndicator();
+        return;
+      }
+
+      const msg = snap.docs[0].data();
+      const status = msg.status || 'read'; // Старые сообщения без status = прочитанные
+
+      // Если статус 'read' — прячем индикатор
+      if (status === 'read') {
+        hideIndicator();
+        return;
+      }
+
+      // Статус 'sent' или 'delivered' = непрочитано → показываем цвет отправителя
+      if (msg.sender === 'admin') {
+        showIndicator('admin-unread');   // 🔵 Синий
+      } else if (msg.sender === 'partner') {
+        showIndicator('partner-unread'); // 🔴 Красный
+      } else {
+        hideIndicator();
+      }
+    }, err => {
+      console.warn('Chat unread indicator error:', err);
+      hideIndicator();
+    });
+
+  function showIndicator(colorClass) {
+    indicator.classList.remove('admin-unread', 'partner-unread', 'no-unread');
+    indicator.classList.add(colorClass);
+    indicator.style.display = '';
+  }
+
+  function hideIndicator() {
+    indicator.classList.remove('admin-unread', 'partner-unread');
+    indicator.classList.add('no-unread');
+    indicator.style.display = 'none';
+  }
+})();
 async function loadListenedFromFirebase() {
   const role = getRole();
   if (role === 'guest') return;
@@ -546,9 +629,21 @@ async function saveListenToFirebase(trackId) {
     return;
   }
   try {
-    await db.collection('userListens').doc(role).collection('tracks').doc(trackId).set({
-      listenedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    const docRef = db.collection('userListens').doc(role).collection('tracks').doc(trackId);
+    const doc = await docRef.get();
+    if (doc.exists) {
+      // Уже слушал — инкрементируем счётчик
+      await docRef.update({
+        listenedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        count: firebase.firestore.FieldValue.increment(1)
+      });
+    } else {
+      // Первое прослушивание — создаём с count = 1
+      await docRef.set({
+        listenedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        count: 1
+      });
+    }
     const list = getListenedTracks();
     if (!list.includes(trackId)) { list.push(trackId); window._listenedTracks = list; }
   } catch (e) { console.error('saveListen error', e); }
@@ -559,7 +654,12 @@ async function loadPartnerListens() {
   try {
     const snap = await db.collection('userListens').doc('partner').collection('tracks').get();
     partnerListensData = {};
-    snap.docs.forEach(d => { partnerListensData[d.id] = d.data().listenedAt; });
+    snap.docs.forEach(d => { 
+      partnerListensData[d.id] = { 
+        listenedAt: d.data().listenedAt,
+        count: d.data().count || 1 
+      }; 
+    });
   } catch (e) { console.error('partner listens error', e); }
 }
 
@@ -714,18 +814,46 @@ async function deleteCommentFromServer(trackId, commentId) {
   catch (e) { console.error(e); return false; }
 }
 
-async function loadGenresToFilter() {
+let selectedGenres = [];
+let isMultiGenreMode = false;
+let isGenreSorted = false;
+
+function loadGenresToFilter() {
   const genreSet = new Set();
   globalTracks.forEach(track => {
     if (track.genre) track.genre.split(',').map(g => g.trim()).filter(g => g).forEach(g => genreSet.add(g));
   });
+  
+  let genres = Array.from(genreSet);
+  if (isGenreSorted) genres.sort((a, b) => a.localeCompare(b));
+  
   const genreSelect = document.getElementById('siteGenre');
+  const currentVal = genreSelect.value;
   while (genreSelect.options.length > 1) genreSelect.remove(1);
-  Array.from(genreSet).sort().forEach(genre => {
+  
+  genres.forEach(genre => {
     const option = document.createElement('option');
     option.value = genre.toLowerCase();
     option.textContent = genre;
     genreSelect.appendChild(option);
+  });
+  
+  if (currentVal && !isMultiGenreMode) genreSelect.value = currentVal;
+}
+
+function renderSelectedGenres() {
+  const container = document.getElementById('selected-genres');
+  if (!container) return;
+  if (selectedGenres.length === 0) { container.innerHTML = ''; return; }
+  container.innerHTML = selectedGenres.map(g => `
+    <span class="genre-tag">${g} <span class="remove-genre" data-genre="${g}">×</span></span>
+  `).join('');
+  container.querySelectorAll('.remove-genre').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedGenres = selectedGenres.filter(x => x !== btn.dataset.genre);
+      renderSelectedGenres();
+      filterTracks();
+    });
   });
 }
 
@@ -815,7 +943,6 @@ function renderDraftTracks(tracks) {
       let timeStr = '';
       if (ts && ts.toDate) timeStr = ts.toDate().toLocaleString();
       else if (ts) timeStr = new Date(ts).toLocaleString();
-      div.dataset.partnerListenTime = timeStr;
     }
 
     if (track.id === curTrackId) div.classList.add('playing');
@@ -831,9 +958,16 @@ function renderDraftTracks(tracks) {
       <button class="btn icon order-btn move-down-btn" data-id="${track.id}" title="Вниз">↓</button>
     ` : '';
 
-    const partnerListenInfo = (isAdmin && partnerListensData[track.id]) ? `
-      <div class="partner-listen-info">👤 Партнёр слушал: ${div.dataset.partnerListenTime}</div>
-    ` : '';
+       let partnerListenInfo = '';
+    if (isAdmin && partnerListensData[track.id]) {
+      const plData = partnerListensData[track.id];
+      const ts = plData.listenedAt;
+      let timeStr = '';
+      if (ts && ts.toDate) timeStr = ts.toDate().toLocaleString();
+      else if (ts) timeStr = new Date(ts).toLocaleString();
+      const count = plData.count || 1;
+      partnerListenInfo = `<div class="partner-listen-info">👤 Партнёр слушал: ${timeStr} (${count}x)</div>`;
+    }
         // === FIX: определяем владельца трека ===
         // === FIX: старые треки: guest = пусто, partner-only без владельца = partner, остальное = admin ===
       let trackUploader = track.uploadedBy || track.uploadedByRole || '';
@@ -894,11 +1028,16 @@ function renderDraftTracks(tracks) {
 
     list.appendChild(div);
 
-    let touchStartX = 0;
-    div.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+        let touchStartX = 0;
+    let touchStartY = 0;
+    div.addEventListener('touchstart', (e) => { 
+      touchStartX = e.changedTouches[0].screenX; 
+      touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
     div.addEventListener('touchend', (e) => {
-      const diff = touchStartX - e.changedTouches[0].screenX;
-      if (diff > 50) openText(div);
+      const diffX = touchStartX - e.changedTouches[0].screenX;
+      const diffY = Math.abs(touchStartY - e.changedTouches[0].screenY);
+      if (diffX > 120 && diffY < 80) openText(div);
     }, { passive: true });
   });
 
@@ -1293,21 +1432,130 @@ document.addEventListener('DOMContentLoaded', async () => {
   initEmojiSystem();
   updateShuffleButton();
   if (typeof applyTranslations === 'function') applyTranslations();
-
+  // Перевод placeholder'ов поиска
+  const siteSearch = document.getElementById('siteSearch');
+const lyricsSearch = document.getElementById('lyricsSearch');
+if (siteSearch) siteSearch.placeholder = t('searchPlaceholder') || 'Search: title, artist or genre';
+if (lyricsSearch) lyricsSearch.placeholder = t('searchLyricsPlaceholder') || 'Search: lyrics';
+   // Сортировка видна всем
+  const sortControls = document.getElementById('adminSortControls');
+  if (sortControls) sortControls.style.display = 'flex';
+  // Edit text только для admin
   if (isAdmin) {
     const editBtn = document.getElementById('edit-text');
     if (editBtn) editBtn.style.display = 'inline-block';
-    document.getElementById('adminSortControls').style.display = 'flex';
   }
 
-  const langEn = document.getElementById('lang-en');
-  const langPl = document.getElementById('lang-pl');
-  const langUa = document.getElementById('lang-ua');
-  const langEs = document.getElementById('lang-es');
-  if (langEn) langEn.addEventListener('click', () => switchLanguage('en'));
-  if (langPl) langPl.addEventListener('click', () => switchLanguage('pl'));
-  if (langUa) langUa.addEventListener('click', () => switchLanguage('ua'));
-  if (langEs) langEs.addEventListener('click', () => switchLanguage('es'));
+    // Language dropdown
+  const langToggle = document.getElementById('lang-toggle');
+  const langMenu = document.getElementById('lang-menu');
+  const currentLangFlag = document.getElementById('current-lang-flag');
+  const currentLangCode = document.getElementById('current-lang-code');
+  
+    const langMap = {
+    en: { flag: 'https://flagcdn.com/w20/us.png', name: 'EN' },
+    pl: { flag: 'https://flagcdn.com/w20/pl.png', name: 'PL' },
+    ua: { flag: 'https://flagcdn.com/w20/ua.png', name: 'UA' },
+    es: { flag: 'https://flagcdn.com/w20/es.png', name: 'ES' }
+  };
+  
+  function updateLangDisplay(lang) {
+    const info = langMap[lang] || langMap['en'];
+    const flagImg = document.getElementById('current-lang-flag');
+    if (flagImg) flagImg.src = info.flag;
+    if (currentLangCode) currentLangCode.textContent = info.name;
+  }
+  
+  langToggle?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    langMenu?.classList.toggle('open');
+  });
+  
+  document.querySelectorAll('.lang-option').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const lang = btn.dataset.lang;
+    window.currentLang = lang;
+    switchLanguage(lang);
+    updateLangDisplay(lang);
+    langMenu?.classList.remove('open');
+    
+    const role = getRole();
+    const storageKey = getLangStorageKey();
+    
+    // Сохраняем в localStorage под роль-специфичным ключом
+    localStorage.setItem(storageKey, lang);
+    // Также в общий ключ для guest (обратная совместимость)
+    if (role === 'guest') {
+      localStorage.setItem('language', lang);
+    }
+    
+    // Сохраняем в Firebase для admin/partner
+    if (role !== 'guest') {
+      try {
+        await db.collection('userSettings').doc(role).set({ language: lang }, { merge: true });
+        console.log('✅ Language saved:', lang, 'for role:', role);
+      } catch (e) {
+        console.error('❌ Firebase save failed:', e);
+      }
+    }
+  });
+});
+  
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.lang-dropdown')) {
+      langMenu?.classList.remove('open');
+    }
+  });
+  
+    // Загрузка сохранённого языка
+  async function loadSavedLanguage() {
+  const role = getRole();
+  const storageKey = getLangStorageKey();
+  let savedLang = 'en';
+  
+  // Шаг 1: Читаем из роль-специфичного localStorage ключа
+  const localLang = localStorage.getItem(storageKey);
+  if (localLang) {
+    savedLang = localLang;
+    console.log('📦 Language from localStorage [' + storageKey + ']:', savedLang);
+  } else {
+    // Fallback на старый общий ключ (миграция)
+    const oldLang = localStorage.getItem('siteLanguage') || localStorage.getItem('language');
+    if (oldLang) {
+      savedLang = oldLang;
+      // Мигрируем в новый ключ
+      localStorage.setItem(storageKey, oldLang);
+      console.log('🔄 Migrated language to new key [' + storageKey + ']:', savedLang);
+    }
+  }
+  
+  // Шаг 2: Для admin/partner — сверяемся с Firebase (источник правды)
+  if (role !== 'guest') {
+    try {
+      const doc = await db.collection('userSettings').doc(role).get();
+      if (doc.exists && doc.data().language) {
+        const fbLang = doc.data().language;
+        if (fbLang !== savedLang) {
+          // Firebase имеет приоритет — обновляем localStorage
+          savedLang = fbLang;
+          localStorage.setItem(storageKey, fbLang);
+          console.log('☁️ Language from Firebase (override):', fbLang);
+        }
+      } else {
+        // Нет документа — создаём из localStorage
+        await db.collection('userSettings').doc(role).set({ language: savedLang }, { merge: true });
+        console.log('🆕 Created Firebase settings for', role, ':', savedLang);
+      }
+    } catch (e) {
+      console.error('❌ Firebase failed, using localStorage:', e);
+    }
+  }
+  
+  window.currentLang = savedLang;
+  switchLanguage(savedLang);
+  updateLangDisplay(savedLang);
+}
+await loadSavedLanguage();
 
   const searchInput = document.getElementById('siteSearch');
   const genreSelect = document.getElementById('siteGenre');
@@ -1316,7 +1564,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // === FIX: фильтрация треков — три состояния: all, mine, others ===
     function filterTracks() {
         const query = (searchInput.value || '').toLowerCase();
-        const selectedGenre = (genreSelect.value || '').toLowerCase();
+  
         const lyricsQuery = (lyricsSearchInput.value || '').toLowerCase();
         const role = getRole();
 
@@ -1330,7 +1578,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             const effectiveUploader = trackEl.dataset.uploadedBy || 'admin';
 
             const matchesSearch = title.includes(query) || artist.includes(query) || genre.includes(query);
-            const matchesGenre = !selectedGenre || genre.includes(selectedGenre);
+            let matchesGenre = true;
+      if (isMultiGenreMode) {
+        if (selectedGenres.length > 0) {
+          const trackGenres = genre.split(',').map(g => g.trim()).filter(g => g).map(g => g.toLowerCase());
+          matchesGenre = selectedGenres.some(sg => trackGenres.includes(sg));
+        }
+      } else {
+        const selectedGenre = (document.getElementById('siteGenre').value || '').toLowerCase();
+        matchesGenre = !selectedGenre || genre.includes(selectedGenre);
+      }
             const matchesLyrics = !lyricsQuery || lyrics.includes(lyricsQuery);
 
             let matchesMyTracks = true;
@@ -1360,7 +1617,36 @@ document.addEventListener('DOMContentLoaded', async () => {
   searchInput.addEventListener('input', filterTracks);
   genreSelect.addEventListener('change', filterTracks);
   lyricsSearchInput.addEventListener('input', filterTracks);
+  document.getElementById('genre-sort-btn')?.addEventListener('click', () => {
+    isGenreSorted = !isGenreSorted;
+    document.getElementById('genre-sort-btn').classList.toggle('active', isGenreSorted);
+    loadGenresToFilter();
+  });
 
+  document.getElementById('genre-multi-btn')?.addEventListener('click', () => {
+    isMultiGenreMode = !isMultiGenreMode;
+    const btn = document.getElementById('genre-multi-btn');
+    btn.classList.toggle('active', isMultiGenreMode);
+    btn.textContent = isMultiGenreMode ? '☑' : '☐';
+    if (!isMultiGenreMode) {
+      selectedGenres = [];
+      document.getElementById('siteGenre').value = '';
+      renderSelectedGenres();
+    }
+    filterTracks();
+  });
+
+  document.getElementById('siteGenre')?.addEventListener('change', (e) => {
+    if (isMultiGenreMode) {
+      const val = e.target.value;
+      if (val && !selectedGenres.includes(val)) {
+        selectedGenres.push(val);
+        renderSelectedGenres();
+      }
+      e.target.value = '';
+    }
+    filterTracks();
+  });
   // === FIX: сортировка ===
   document.getElementById('sortMode')?.addEventListener('change', (e) => {
     currentSortMode = e.target.value;
@@ -1804,88 +2090,67 @@ function refreshLoginBtn() {
   }
 
   const loginBtn = document.getElementById('loginBtn');
-  loginBtn.innerHTML = '';
-  loginBtn.style.background = 'transparent';
-  loginBtn.style.border = 'none';
-  loginBtn.style.padding = '0';
-  loginBtn.style.width = 'auto';
-  loginBtn.style.height = 'auto';
-  const img = document.createElement('img');
-  img.style.width = '100%';
-  img.style.height = 'auto';
-  img.style.maxWidth = '120px';
-  img.style.display = 'block';
-  if (r === 'admin' || r === 'partner') {
-    img.src = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/Logout.png';
-  } else {
-    img.src = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/Login.png';
+  const loginText = document.getElementById('login-text');
+  const loginIcon = loginBtn?.querySelector('.login-icon');
+
+  // Обновляем иконку
+  if (loginIcon) {
+    loginIcon.textContent = (r === 'guest') ? '🔐' : '🚪';
   }
-  loginBtn.appendChild(img);
+
+  // Обновляем текст через data-i18n для мгновенного перевода
+  if (loginText) {
+    const key = (r === 'guest') ? 'login' : 'logout';
+    loginText.dataset.i18n = key;
+    const translated = t(key);
+if (translated) {
+  loginText.textContent = translated;
+}
+  }
 
   const addTrackBtn = document.getElementById('addTrackBtn');
   const exportJsonBtn = document.getElementById('exportJsonBtn');
   const resetPlaysBtn = document.getElementById('resetPlaysBtn');
   const managePlaylistsBtn = document.getElementById('managePlaylistsBtn');
-  const filterMyTracksBtn = document.getElementById('filterMyTracksBtn');
   const newTracksBtn = document.getElementById('newTracksBtn');
   const userUploadBtn = document.getElementById('userUploadBtn');
 
-   if (addTrackBtn) {
-    // Только админ видит ручную загрузку (addTrackBtn)
-    addTrackBtn.style.display = (r === 'admin') ? 'inline-block' : 'none';
-  }
-      if (userUploadBtn) {
-    // Админ и партнёр видят загрузку с метаданными (userUploadBtn)
-    userUploadBtn.style.display = (r === 'admin' || r === 'partner') ? 'inline-block' : 'none';
-	}
-  if (exportJsonBtn) exportJsonBtn.style.display = r === 'admin' ? 'inline-block' : 'none';
-  if (resetPlaysBtn) resetPlaysBtn.style.display = r === 'admin' ? 'inline-block' : 'none';
-  if (managePlaylistsBtn) managePlaylistsBtn.style.display = 'inline-block';
-    const filterSelect = document.getElementById('filterMyTracksSelect');
-    if (filterSelect) {
-        if (r === 'admin' || r === 'partner') {
-            filterSelect.style.display = 'inline-block';
-            filterSelect.innerHTML = '';
+  if (addTrackBtn) addTrackBtn.style.display = (r === 'admin') ? 'inline-flex' : 'none';
+  if (userUploadBtn) userUploadBtn.style.display = (r === 'admin' || r === 'partner') ? 'inline-flex' : 'none';
+  if (exportJsonBtn) exportJsonBtn.style.display = r === 'admin' ? 'inline-flex' : 'none';
+  if (resetPlaysBtn) resetPlaysBtn.style.display = r === 'admin' ? 'inline-flex' : 'none';
+  if (managePlaylistsBtn) managePlaylistsBtn.style.display = 'inline-flex';
+  if (newTracksBtn) newTracksBtn.style.display = 'inline-flex';
 
-            const optAll = document.createElement('option');
-            optAll.value = 'all';
-            optAll.textContent = '🎧 ' + (t('filterAllSongs') || 'All songs');
-            filterSelect.appendChild(optAll);
-
-            const optMine = document.createElement('option');
-            optMine.value = 'mine';
-            optMine.textContent = '👤 ' + (t('filterMySongs') || 'My songs');
-            filterSelect.appendChild(optMine);
-
-            if (r === 'admin') {
-                const optPartnerUploader = document.createElement('option');
-                optPartnerUploader.value = 'partner-uploader';
-                optPartnerUploader.textContent = '💑 ' + (t('filterPartner') || 'Partner');
-                filterSelect.appendChild(optPartnerUploader);
-
-                const optHidden = document.createElement('option');
-                optHidden.value = 'visibility-hidden';
-                optHidden.textContent = '🔒 ' + (t('filterHidden') || 'Hidden from all');
-                filterSelect.appendChild(optHidden);
-
-                const optPartnerVisible = document.createElement('option');
-                optPartnerVisible.value = 'visibility-partner';
-                optPartnerVisible.textContent = '♥ ' + (t('filterPartnerOnly') || 'Partner only');
-                filterSelect.appendChild(optPartnerVisible);
-            } else if (r === 'partner') {
-                const optAdmin = document.createElement('option');
-                optAdmin.value = 'admin';
-                optAdmin.textContent = '👑 ' + (t('filterAdmin') || 'Admin');
-                filterSelect.appendChild(optAdmin);
-            }
-
-            filterSelect.value = 'all';
-            myTracksFilter = 'all';
-        } else {
-            filterSelect.style.display = 'none';
-        }
+  const filterSelect = document.getElementById('filterMyTracksSelect');
+  if (filterSelect) {
+    if (r === 'admin' || r === 'partner') {
+      filterSelect.style.display = 'inline-block';
+      filterSelect.innerHTML = '';
+      const opts = [
+        { val: 'all', key: 'filterAllSongs', icon: '🎧', def: 'All songs' },
+        { val: 'mine', key: 'filterMySongs', icon: '👤', def: 'My songs' }
+      ];
+      if (r === 'admin') {
+        opts.push({ val: 'partner-uploader', key: 'filterPartner', icon: '💑', def: 'Partner' });
+        opts.push({ val: 'visibility-hidden', key: 'filterHidden', icon: '🔒', def: 'Hidden from all' });
+        opts.push({ val: 'visibility-partner', key: 'filterPartnerOnly', icon: '♥', def: 'Partner only' });
+      } else if (r === 'partner') {
+        opts.push({ val: 'admin', key: 'filterAdmin', icon: '👑', def: 'Admin' });
+      }
+      opts.forEach(o => {
+        const opt = document.createElement('option');
+        opt.value = o.val;
+        opt.dataset.i18n = o.key;
+        opt.textContent = `${o.icon} ${t(o.key) || o.def}`;
+        filterSelect.appendChild(opt);
+      });
+      filterSelect.value = 'all';
+      myTracksFilter = 'all';
+    } else {
+      filterSelect.style.display = 'none';
     }
-  if (newTracksBtn) newTracksBtn.style.display = 'inline-block';
+  }
 }
 
 async function exportToJson() {
@@ -1959,8 +2224,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const loginModal = document.getElementById('login-modal');
 
   function updatePinDisplay() {
-    pinDisplay.textContent = enteredPin.length === 0 ? '••••' : enteredPin.padEnd(4, '•');
-  }
+  pinDisplay.textContent = '••••';
+}
 
   function flashError() {
     loginModal.style.animation = 'none';
@@ -1999,6 +2264,48 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   });
+  function initFloatingLogout() {
+  const btn = document.getElementById('floating-logout-btn');
+  if (!btn) {
+    console.log('❌ Кнопка не найдена');
+    return;
+  }
+
+  function updateVisibility() {
+    const role = getRole();
+    console.log('🔍 Роль:', role, '| Кнопка:', btn);
+    if (role !== 'guest') {
+      btn.classList.add('visible');
+      console.log('✅ Кнопка показана');
+    } else {
+      btn.classList.remove('visible');
+      console.log('❌ Кнопка скрыта (guest)');
+    }
+  }
+
+  btn.addEventListener('click', () => {
+    if (getRole() === 'guest') return;
+    if (!confirm(t('exit_confirm') || 'Выйти из аккаунта?')) return;
+    logoutRole();
+  });
+
+  // Обновляем при смене роли
+  const originalRefresh = window.refreshLoginBtn;
+  window.refreshLoginBtn = function() {
+    originalRefresh();
+    updateVisibility();
+  };
+
+  setTimeout(updateVisibility, 100);
+}
+
+// Запускаем после загрузки
+document.addEventListener('DOMContentLoaded', () => {
+  // ... ваш существующий код ...
+
+  // Запускаем кнопку ПОСЛЕ всего
+  setTimeout(initFloatingLogout, 500);
+});
 });
 
 /* Обновление UI иконок play/pause */
@@ -2022,6 +2329,94 @@ window.updateTrackPlayIcons = function() {
     }
   });
 };
+// ========================================
+// ⏱️ АВТО-ВЫХОД ПОСЛЕ 2 МИНУТ БЕЗДЕЙСТВИЯ
+// ========================================
+(function initAutoLogout() {
+  const INACTIVITY_TIMEOUT = 2 * 60 * 1000; // 2 минуты
+  let lastActivity = Date.now();
+  let checkInterval = null;
+
+  function isMusicPlaying() {
+    // Проверяем, играет ли музыка
+    return window.isPlaying === true && window.wavesurfer && !window.wavesurfer.isPaused();
+  }
+
+  function resetActivity() {
+    // Не сбрасываем таймер если музыка играет — считаем это активностью
+    lastActivity = Date.now();
+  }
+
+  function checkInactivity() {
+    const role = getRole();
+    if (role === 'guest') return; // Только для admin/partner
+
+    const now = Date.now();
+    const idleTime = now - lastActivity;
+
+    // Если музыка играет — считаем пользователя активным
+    if (isMusicPlaying()) {
+      lastActivity = now;
+      return;
+    }
+
+    if (idleTime >= INACTIVITY_TIMEOUT) {
+      console.log('⏱️ Auto-logout: inactive for', Math.round(idleTime / 1000), 'seconds');
+      clearInterval(checkInterval);
+      // Удаляем роль и перезагружаем
+      logoutRole();
+    }
+  }
+
+  function startAutoLogout() {
+    if (checkInterval) clearInterval(checkInterval);
+    lastActivity = Date.now();
+    checkInterval = setInterval(checkInactivity, 1000); // проверка каждую секунду
+  }
+
+  function stopAutoLogout() {
+    if (checkInterval) {
+      clearInterval(checkInterval);
+      checkInterval = null;
+    }
+  }
+
+  // События активности (с дебаунсом 100мс чтобы не грузить CPU)
+  let debounceTimer;
+  const activityEvents = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
+  
+  activityEvents.forEach(event => {
+    document.addEventListener(event, () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(resetActivity, 100);
+    }, { passive: true });
+  });
+
+  // При смене видимости вкладки — проверяем
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      // Вернулись на вкладку — проверим не истёк ли таймер
+      checkInactivity();
+    }
+  });
+
+  // Запускаем только если пользователь залогинен
+  if (getRole() !== 'guest') {
+    startAutoLogout();
+  }
+
+  // Слушаем изменение роли (после логина/логаута)
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'siteRole') {
+      if (e.newValue && e.newValue !== 'guest') {
+        startAutoLogout();
+      } else {
+        stopAutoLogout();
+      }
+    }
+  });
+})();
+
 </script>
 
 <div id="visualizer-fullscreen" style="
@@ -2149,9 +2544,58 @@ window.updateTrackPlayIcons = function() {
     </div>
   </div>
 </div>
-
+<!-- Плавающая кнопка выхода -->
+<button id="floating-logout-btn" title="Выйти">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+    <polyline points="10 17 15 12 10 7"/>
+    <line x1="15" y1="12" x2="3" y2="12"/>
+  </svg>
+</button>
 <script src="player-core.js"></script>
 <script src="visualizers.js"></script>
 <script src="language.js"></script>
+<script>
+(function() {
+  const btn = document.getElementById('floating-logout-btn');
+  if (!btn) return;
+
+  const SCROLL_THRESHOLD = 80; // показать после скролла на 80px
+
+  function checkScroll() {
+    const scrollY = window.scrollY || document.documentElement.scrollTop;
+    const role = localStorage.getItem('siteRole') || 'guest';
+
+    // Показываем только если:
+    // 1. Пользователь залогинен (не guest)
+    // 2. Проскроллили вниз достаточно (обычная кнопка скрылась)
+    if (role !== 'guest' && scrollY > SCROLL_THRESHOLD) {
+      btn.classList.add('show');
+    } else {
+      btn.classList.remove('show');
+    }
+  }
+
+  // Клик — выход
+  btn.addEventListener('click', function() {
+    if (!confirm('Выйти из аккаунта?')) return;
+    localStorage.removeItem('siteRole');
+    location.reload();
+  });
+
+  // Слушаем скролл
+  window.addEventListener('scroll', checkScroll, { passive: true });
+
+  // Слушаем изменения роли в других вкладках
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'siteRole') checkScroll();
+  });
+
+  // Первичная проверка
+  checkScroll();
+
+  console.log('✅ Плавающая кнопка (верх-справа, при скролле) инициализирована');
+})();
+</script>
 </body>
 </html>
