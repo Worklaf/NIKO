@@ -74,7 +74,7 @@ h1{margin:0;font-size:24px;color:#fff}
   display: flex;
   align-items: center;
 }
-.search-wrap{margin-left:auto;display:flex;gap:8px;align-items:center}
+.search-wrap{display:flex;gap:8px;align-items:center}
 .search-input{padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(11,11,16,0.6);color:#fff;min-width:220px}
 .search-select{padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(11,11,16,0.6);color:#fff}
 
@@ -390,7 +390,33 @@ h1{margin:0;font-size:24px;color:#fff}
 @media (max-width:880px){
   body{padding:12px;padding-bottom:160px}
   h1{font-size:18px}
-  
+    .filter-row {
+    gap: 8px;
+  }
+      .top-actions-row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px;
+    align-items: center;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .top-actions-row::-webkit-scrollbar {
+    display: none;
+  }
+  .top-actions-row .btn.playlists-chip {
+    flex-shrink: 0;
+    font-size: 11px;
+    padding: 5px 12px;
+  }
+  .sort-controls {
+    order: 4;
+    flex-shrink: 0;
+  }
+  .sort-controls select {
+    font-size: 11px;
+    padding: 5px 8px;
+  }
     header{
     flex-direction:row;
     flex-wrap:wrap;
@@ -398,10 +424,12 @@ h1{margin:0;font-size:24px;color:#fff}
     gap:8px;
     margin-bottom:12px;
   }
-       .site-logo{order:1}
-  .login-wrap{order:2;margin-left:auto;position:static}
-    .search-wrap{order:4;width:100%;margin-left:0;margin-top:4px}
-  .lang-bar{order:3;width:100%;display:flex;justify-content:flex-start;align-items:center;margin-left:0;margin-top:8px;padding:0 2px;gap:8px}
+         .site-logo { order: 0; }
+  .header-right { order: 0; margin-left: auto; }
+  .search-row,
+  .filter-row,
+  .top-actions-row,
+  
   .playlists-chip{font-size:13px;padding:7px 16px!important}
   .site-logo .logo-text {
     font-size: 22px;
@@ -958,4 +986,360 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
 .remove-from-playlist-btn:hover {
   background: rgba(255, 77, 166, 0.2);
   transform: scale(1.05);
+}
+/* ===== Header right group ===== */
+.header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.login-wrap {
+  margin-left: 0;
+}
+
+/* ===== Language dropdown ===== */
+.lang-dropdown {
+  position: relative;
+  display: inline-block;
+}
+.lang-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px !important;
+  font-size: 13px;
+  background: rgba(11,11,16,0.6) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  color: #eaeaf2 !important;
+}
+.lang-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 6px;
+  background: #0b0b10;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 6px;
+  min-width: 160px;
+  z-index: 100;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.lang-menu.open {
+  display: block;
+}
+.lang-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  color: #eaeaf2;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+}
+.lang-option:hover {
+  background: rgba(255,255,255,0.05);
+}
+.flag {
+  font-size: 16px;
+}
+
+/* ===== Login button NIKO style ===== */
+.login-niko-btn {
+  background: linear-gradient(135deg, #000000 0%, #3a3939 30%, #30be70 70%, #0d0e0d 100%) !important;
+  color: #ffffff!important;
+  border: none !important;
+  font-weight: 800 !important;
+  font-size: 17px !important;
+  padding: 8px 18px !important;
+  border-radius: 50px !important;
+  box-shadow: 0 0 15px rgba(255, 77, 166, 0.4),
+              0 0 30px rgba(0, 209, 255, 0.2),
+              inset 0 1px 0 rgba(255,255,255,0.2) !important;
+  position: relative;
+  overflow: hidden;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  animation: loginGlow 3s ease-in-out infinite alternate;
+  transition: transform 0.2s, filter 0.2s;
+}
+
+.login-niko-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  animation: loginShine 3s ease-in-out infinite;
+}
+
+.login-niko-btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  filter: brightness(1.15);
+}
+
+.login-niko-btn .login-icon {
+  font-size: 17px;
+  filter: drop-shadow(0 0 4px rgba(255,255,255,0.5));
+  margin-right: 4px;
+}
+
+@keyframes loginGlow {
+  0% { box-shadow: 0 0 15px rgba(255,77,166,0.3), 0 0 30px rgba(0,209,255,0.15), inset 0 1px 0 rgba(255,255,255,0.15); }
+  100% { box-shadow: 0 0 25px rgba(255,77,166,0.6), 0 0 50px rgba(0,209,255,0.3), inset 0 1px 0 rgba(255,255,255,0.25); }
+}
+
+@keyframes loginShine {
+  0% { left: -100%; }
+  50% { left: 100%; }
+  100% { left: 100%; }
+}
+
+/* ===== Filter row: genres | owner ===== */
+.filter-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: flex-start;
+}
+.filter-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  min-height: 28px;
+}
+.filter-actions {
+  display: flex;
+  gap: 4px;
+}
+.filter-actions .btn.icon {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.filter-actions .btn.icon.active {
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  color: #07060a;
+  border-color: transparent;
+}
+.selected-genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+.genre-tag {
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  color: #07060a;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.genre-tag .remove-genre {
+  cursor: pointer;
+  font-weight: 700;
+  opacity: 0.7;
+}
+.genre-tag .remove-genre:hover {
+  opacity: 1;
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 880px) {
+  .header-right {
+    order: 2;
+    margin-left: auto;
+  }
+  .filter-row {
+    gap: 8px;
+  }
+  .filter-actions .btn.icon {
+    width: 28px;
+    height: 28px;
+  }
+}
+/* ===== Мобильный порядок: логотип + язык/логин наверху, остальное ниже ===== */
+@media (max-width: 880px) {
+  .site-logo { order: 0; }
+  .header-right {
+    order: 0;
+    margin-left: auto;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .top-actions-row,
+  .search-row,
+  .filter-row {
+    order: 10;
+    width: 100%;
+    flex-basis: 100%;
+  }
+  /* Сортировка остаётся ВНУТРИ top-actions-row */
+  .sort-controls {
+    order: 4;
+    flex-shrink: 0;
+  }
+  /* Поиск на мобильном — одной строкой */
+  .search-main,
+  .search-lyrics {
+    flex: 1 !important;
+    width: auto !important;
+  }
+}
+
+/* ===== Равные селекты фильтров (жанры и владелец) ===== */
+.filter-row select,
+.filter-row .search-select,
+.filter-row .filter-select-mobile {
+  font-size: 13px !important;
+  padding: 8px 10px !important;
+  border-radius: 8px !important;
+  width: 100%;
+  min-width: 0 !important;
+}
+
+/* ===== Заголовки фильтров на одной высоте ===== */
+.filter-header,
+.filter-col > .filter-label {
+  display: flex;
+  align-items: center;
+  min-height: 28px;
+  margin-bottom: 6px;
+}
+
+/* ===== Фикс флагов (emoji) на Windows ===== */
+.flag,
+#current-lang-flag {
+  font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+  display: inline-block;
+  min-width: 18px;
+  text-align: center;
+}
+.flag-img {
+  width: 18px;
+  height: 13px;
+  border-radius: 2px;
+  object-fit: cover;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+#lyrics-translator {
+  transition: opacity 0.3s ease;
+}
+#lyrics-translator.translating {
+  opacity: 0.7;
+  pointer-events: none;
+}
+#translate-target-lang option {
+  background: #0b0b10;
+  color: #eaeaf2;
+}
+#translate-status.error {
+  color: #ff4da6;
+}
+/* ===== Индикатор непрочитанных сообщений чата ===== */
+.chat-unread-indicator {
+  position: absolute;
+  top: -4px;
+  right: -10px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 8px currentColor;
+  animation: unreadPulse 2s ease-in-out infinite;
+  z-index: 10;
+}
+
+.chat-unread-indicator.admin-unread {
+  display: inline-block !important;
+  background: #00d1ff;
+  color: #00d1ff;
+}
+
+.chat-unread-indicator.partner-unread {
+  display: inline-block !important;
+  background: #ff4da6;
+  color: #ff4da6;
+}
+
+.chat-unread-indicator.no-unread {
+  display: none !important;
+}
+
+@keyframes unreadPulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.3); opacity: 1; }
+}
+
+.site-logo {
+  position: relative;
+}
+#floating-logout-btn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  z-index: 99999;
+  background: linear-gradient(135deg, #ff4da6, #00d1ff);
+  color: #07060a;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 18px rgba(255, 77, 166, 0.4);
+  display: none;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#floating-logout-btn.show {
+  display: flex !important;
+  opacity: 1;
+  transform: scale(1);
+}
+
+#floating-logout-btn:hover {
+  transform: scale(1.12);
+  box-shadow: 0 6px 24px rgba(255, 77, 166, 0.5);
+}
+
+@media (max-width: 880px) {
+  #floating-logout-btn {
+    top: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+  }
+  #floating-logout-btn svg {
+    width: 18px;
+    height: 18px;
+  }
 }
