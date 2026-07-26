@@ -13,8 +13,32 @@ window.tries = 0;
 window.isPlaying = false;
 
 window.globalTracks = window.globalTracks || [];
+// Если index.html использовал let globalTracks, синхронизируем
+if (typeof globalTracks !== 'undefined' && Array.isArray(globalTracks) && globalTracks.length > 0) {
+  window.globalTracks = globalTracks;
+}
+window.currentFilteredIds = window.currentFilteredIds || [];
 
+// ===============================
+// FILTERED PLAYLIST HELPERS
+// ===============================
 
+window.getFilteredPlaylist = function () {
+  if (!Array.isArray(window.currentFilteredIds) || window.currentFilteredIds.length === 0) {
+    return window.globalTracks || [];
+  }
+  return window.currentFilteredIds
+    .map(id => window.globalTracks.find(t => t && t.id === id))
+    .filter(Boolean);
+};
+
+window.getFilteredIndex = function () {
+  if (!window.currentTrackId) return -1;
+  if (Array.isArray(window.currentFilteredIds) && window.currentFilteredIds.length > 0) {
+    return window.currentFilteredIds.indexOf(window.currentTrackId);
+  }
+  return window.globalTracks.findIndex(t => t && t.id === window.currentTrackId);
+};
 // ===============================
 // FIRESTORE HELPERS
 // ===============================
@@ -442,50 +466,45 @@ window.playTrackById = function (id) {
 // ===============================
 
 window.playNext = function () {
-  // Защита: если нет глобального списка — ничего не делаем
-  if (!Array.isArray(globalTracks) || globalTracks.length === 0) {
+  const playlist = window.getFilteredPlaylist();
+  if (!Array.isArray(playlist) || playlist.length === 0) {
     console.warn('playNext: no tracks available');
     return;
   }
 
-  // Если shuffle — выбираем случайный индекс, отличный от текущего (если возможно)
+  let nextIdx;
+  const currentFilteredIdx = window.getFilteredIndex();
+
   if (window.isShuffleMode) {
-    if (globalTracks.length === 1) {
-      // только один трек — перезапускаем
-      return window.playTrackByIndex(0);
+    if (playlist.length === 1) {
+      nextIdx = 0;
+    } else {
+      let attempts = 0;
+      do {
+        nextIdx = Math.floor(Math.random() * playlist.length);
+        attempts++;
+      } while (nextIdx === currentFilteredIdx && attempts < 10);
     }
-    let next;
-    let attempts = 0;
-    do {
-      next = Math.floor(Math.random() * globalTracks.length);
-      attempts++;
-    } while (next === window.currentTrackIndex && attempts < 10);
-    return window.playTrackByIndex(next);
+  } else {
+    nextIdx = (currentFilteredIdx + 1) % playlist.length;
   }
 
-  // Последовательный режим
-  const nextIndex = (Number.isFinite(window.currentTrackIndex) ? window.currentTrackIndex : -1) + 1;
-  if (nextIndex >= globalTracks.length) {
-    // достигли конца — останавливаемся или можно зациклить
-    console.info('playNext: reached end of playlist');
-    // если нужен loop: uncomment next lines
-    // window.playTrackByIndex(0);
-    return;
+  const nextTrack = playlist[nextIdx];
+  if (!nextTrack) return;
+
+  const el = document.querySelector(`.track[data-id="${nextTrack.id}"]`);
+  if (el) {
+    window.playTrack(el);
+  } else {
+    window.playTrackById(nextTrack.id);
   }
-  window.playTrackByIndex(nextIndex);
 };
 
 window.playPrev = function () {
-  if (!Array.isArray(globalTracks) || globalTracks.length === 0) {
-    console.warn('playPrev: no tracks available');
-    return;
-  }
-
-  // если прошло мало времени — можно перемотать к началу, иначе перейти к предыдущему
+  // Сначала проверяем, не нужно ли перемотать текущий трек
   try {
     const currentTime = wavesurfer ? wavesurfer.getCurrentTime() : 0;
     if (currentTime > 3) {
-      // просто перематываем в начало текущего трека
       if (wavesurfer) wavesurfer.seekTo(0);
       return;
     }
@@ -493,12 +512,38 @@ window.playPrev = function () {
     // ignore
   }
 
-  const prevIndex = (Number.isFinite(window.currentTrackIndex) ? window.currentTrackIndex : 0) - 1;
-  if (prevIndex < 0) {
-    console.info('playPrev: at start of playlist');
+  const playlist = window.getFilteredPlaylist();
+  if (!Array.isArray(playlist) || playlist.length === 0) {
+    console.warn('playPrev: no tracks available');
     return;
   }
-  window.playTrackByIndex(prevIndex);
+
+  const currentFilteredIdx = window.getFilteredIndex();
+  let prevIdx;
+
+  if (window.isShuffleMode) {
+    if (playlist.length === 1) {
+      prevIdx = 0;
+    } else {
+      let attempts = 0;
+      do {
+        prevIdx = Math.floor(Math.random() * playlist.length);
+        attempts++;
+      } while (prevIdx === currentFilteredIdx && attempts < 10);
+    }
+  } else {
+    prevIdx = (currentFilteredIdx - 1 + playlist.length) % playlist.length;
+  }
+
+  const prevTrack = playlist[prevIdx];
+  if (!prevTrack) return;
+
+  const el = document.querySelector(`.track[data-id="${prevTrack.id}"]`);
+  if (el) {
+    window.playTrack(el);
+  } else {
+    window.playTrackById(prevTrack.id);
+  }
 };
 
 
