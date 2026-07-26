@@ -1,88 +1,42 @@
 {
   "name": "NIKO Music",
   "short_name": "NIKO",
-  "description": "Modern music player with playlists, visualizers, and chat",
   "start_url": "/NIKO.html",
   "display": "standalone",
   "background_color": "#07060a",
   "theme_color": "#ff4da6",
   "orientation": "portrait-primary",
   "scope": "/",
+  "description": "Modern music player with playlists, visualizers, and chat",
+  "categories": ["music", "entertainment"],
   "icons": [
     {
-      "src": "/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-512x512.png",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect fill='%23ff4da6' width='512' height='512' rx='128'/%3E%3Ctext x='256' y='340' font-size='280' text-anchor='middle' fill='white' font-family='Arial'%3EN%3C/text%3E%3C/svg%3E",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect fill='%23ff4da6' width='192' height='192' rx='48'/%3E%3Ctext x='96' y='130' font-size='110' text-anchor='middle' fill='white' font-family='Arial'%3EN%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ],
-  "categories": ["music", "entertainment"],
   "shortcuts": [
     {
       "name": "Playlists",
       "short_name": "Playlists",
       "description": "View your playlists",
       "url": "/playlists.html",
-      "icons": [
-        {
-          "src": "/icon-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
+      "icons": [{ "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect fill='%234d8aff' width='96' height='96' rx='24'/%3E%3Ctext x='48' y='68' font-size='50' text-anchor='middle' fill='white'%3E🎵%3C/text%3E%3C/svg%3E", "sizes": "96x96" }]
     },
     {
       "name": "Chat",
       "short_name": "Chat",
       "description": "Open chat",
       "url": "/CHAT/chat.html",
-      "icons": [
-        {
-          "src": "/icon-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
+      "icons": [{ "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect fill='%2300E5FF' width='96' height='96' rx='24'/%3E%3Ctext x='48' y='68' font-size='50' text-anchor='middle' fill='white'%3E💬%3C/text%3E%3C/svg%3E", "sizes": "96x96" }]
     }
   ]
 }
