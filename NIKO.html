@@ -1561,13 +1561,18 @@ const chatOverlay = document.getElementById('chat-overlay');
 const chatFrame    = document.getElementById('chat-frame');
 let chatOpen = false;
 
-function openChatOverlay() {
+function openChatOverlay(fromSwipe = false) {
   const role = getRole();
   if (role === 'guest') return;
   // Не открываем, если сейчас открыт текст песни (side-panel)
   if (document.getElementById('side-panel').classList.contains('open')) return;
 
-  chatFrame.src = 'CHAT/chat.html';
+  const chatFrame = document.getElementById('chat-frame');
+  const chatOverlay = document.getElementById('chat-overlay');
+
+  // Передаём флаг в URL: если открыто свайпом — чат получит ?swipe=1
+  chatFrame.src = fromSwipe ? 'CHAT/chat.html?swipe=1' : 'CHAT/chat.html';
+
   chatOverlay.style.display = 'block';
   chatOverlay.offsetHeight; // reflow
   chatOverlay.classList.add('open');
@@ -1629,8 +1634,8 @@ document.addEventListener('touchend', (e) => {
 
   // Чёткий горизонтальный свайп вправо
   if (diffX > 100 && diffY < 60) {
-    openChatOverlay();
-  }
+  openChatOverlay(true); // ← явно говорим, что открыто свайпом
+}
 
   chatSwipeActive = false;
 }, { passive: true });
@@ -1641,7 +1646,7 @@ document.addEventListener('touchend', (e) => {
 document.getElementById('site-logo')?.addEventListener('click', (e) => {
   e.preventDefault();
   if (getRole() === 'admin' || getRole() === 'partner') {
-    openChatOverlay(); // ← теперь открывает поверх, а не перезагружает страницу
+    openChatOverlay(); // обычный overlay
   }
 });
 });
