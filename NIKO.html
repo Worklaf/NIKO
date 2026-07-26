@@ -1623,18 +1623,6 @@ document.getElementById('site-logo')?.addEventListener('click', (e) => {
     openChatOverlay(); // ← теперь открывает поверх, а не перезагружает страницу
   }
 });
-// ===== Автоскролл к треку при Next / Prev / Shuffle =====
-function scrollToPlayingTrack() {
-  if (!window.currentTrackId) return;
-  const el = document.querySelector(`.track[data-id="${window.currentTrackId}"]`);
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
-
-// Вешаем на кнопки мини-плеера
-['mini-next','mini-prev','shuffle-btn'].forEach(id => {
-  const btn = document.getElementById(id);
-  if (btn) btn.addEventListener('click', () => setTimeout(scrollToPlayingTrack, 250));
-});
 });
   
   document.addEventListener('click', (e) => {
