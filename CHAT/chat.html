@@ -5303,17 +5303,27 @@ function updateFloatingDate() {
   floatDate.style.display = 'inline-block';
 }
 // ===== Закрытие чата свайпом по header (только в оверлее) =====
+// ===== Закрытие чата свайпом по header (только в оверлее) =====
 (function(){
-  if (window.parent === window) return; // не в iframe — не нужно
+  if (window.parent === window) return;
   const header = document.querySelector('header');
   if (!header) return;
   let hStart = 0;
+  let hStartY = 0;
+
   header.addEventListener('touchstart', e => {
     hStart = e.touches[0].clientX;
+    hStartY = e.touches[0].clientY;
   }, { passive: true });
+
   header.addEventListener('touchend', e => {
-    const diff = e.changedTouches[0].clientX - hStart; // >0 = вправо
-    if (diff > 60) window.parent.postMessage('close-chat', '*');
+    const diffX = hStart - e.changedTouches[0].clientX; // >0 = влево (справа налево)
+    const diffY = Math.abs(hStartY - e.changedTouches[0].clientY);
+
+    // Свайп справа налево по верхней полоске (header)
+    if (diffX > 60 && diffY < 40) {
+      window.parent.postMessage('close-chat', '*');
+    }
   }, { passive: true });
 })();
 </script>
