@@ -3340,14 +3340,14 @@ function getCurrentTrackForShare() {
 // ===============================
 // PWA: Service Worker Registration
 // ===============================
-
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
+    // [FIX] ./sw.js вместо /sw.js — работает и в подпапке GitHub Pages
+    navigator.serviceWorker.register('./sw.js')
       .then(reg => {
         console.log('✅ SW registered:', reg.scope);
         
-        // Проверяем обновления
+        // Обновления
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           newWorker.addEventListener('statechange', () => {
@@ -3377,7 +3377,6 @@ function showUpdateToast() {
     z-index: 99999;
     box-shadow: 0 4px 24px rgba(77,255,138,0.4);
     cursor: pointer;
-    animation: toastSlideUp 0.4s ease;
   `;
   toast.innerHTML = '🔄 Доступно обновление — нажмите для перезагрузки';
   toast.onclick = () => location.reload();
