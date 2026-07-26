@@ -6,8 +6,35 @@
   <title>N1K∅ — Tracks</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="https://unpkg.com/modern-normalize/modern-normalize.css">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
+  
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Theme Color -->
+  <meta name="theme-color" content="#ff4da6">
+  
+  <!-- Apple PWA Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="N1K∅">
+  
   <base target="_blank">
   <style>
+    .track.ready-to-play {
+  animation: pulseReady 1s ease 2;
+  border: 2px solid #ff4da6;
+}
+
+@keyframes pulseReady {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 77, 166, 0.4); }
+  50% { box-shadow: 0 0 20px 5px rgba(255, 77, 166, 0.2); }
+}
     .track.dragging { opacity: 0.5; border: 2px dashed #00E5FF; }
     .track.drag-over { border: 2px dashed #4dff8a; }
     .track.new-track { border-left: 3px solid #ff4da6; position: relative; }
@@ -208,10 +235,109 @@
           }
       }
           /* === Отступ снизу для списка треков, чтобы плеер не перекрывал === */
-    #tracksList {
-        padding-bottom: 260px !important;
-    }
+      #tracksList {
+    padding-bottom: 0 !important; /* убрать, отступ теперь у pagination-bar */
+  }
+  /* ===== Pagination ===== */
+        .pagination-bar {
+    display: flex; gap: 8px; justify-content: center; align-items: center;
+    margin: 20px 0 0; /
+    flex-wrap: wrap;
+  }
+    .pagination-spacer {
+    height: 220px; /* ← отступ чтобы треки не прятались под плеер */
+    width: 100%;
+  }
+  .pagination-bar button {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    color: #eaeaf2; padding: 6px 14px; border-radius: 8px; cursor: pointer;
+    font-size: 13px; font-weight: 600; transition: all .2s;
+  }
+  .pagination-bar button:hover { background: rgba(255,255,255,0.1); }
+  .pagination-bar button.active {
+    background: linear-gradient(90deg,#ff4da6,#ff7a4d); color: #fff; border-color: transparent;
+  }
+  .pagination-bar button:disabled { opacity: 0.3; cursor: not-allowed; }
+  .pagination-bar span.dots { color: #666; padding: 6px; font-size: 13px; }
+
+  /* ===== Iframe Overlays ===== */
+  .app-iframe {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border: none;
+    z-index: 10000;
+    background: var(--bg);
+    display: none;
+  }
+  #mini-player { z-index: 100001 !important; }
+.share-svg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.share-svg-btn svg {
+  transition: all 0.2s ease;
+}
+.share-svg-btn:hover svg {
+  stroke: #ff4da6;
+  filter: drop-shadow(0 0 6px rgba(255,77,166,0.5));
+  transform: scale(1.1);
+}
+/* Share modal social buttons hover effects */
+.social-btn {
+  transition: all 0.25s ease;
+}
+.social-btn:hover {
+  background: rgba(255,255,255,0.08) !important;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.social-btn:hover .soc-icon-wrap {
+  transform: scale(1.12);
+}
+.social-btn[data-platform="twitter"]:hover .soc-icon-wrap {
+  background: rgba(29,161,242,0.2);
+  box-shadow: 0 0 16px rgba(29,161,242,0.35);
+}
+.social-btn[data-platform="facebook"]:hover .soc-icon-wrap {
+  background: rgba(24,119,242,0.2);
+  box-shadow: 0 0 16px rgba(24,119,242,0.35);
+}
+.social-btn[data-platform="messenger"]:hover .soc-icon-wrap {
+  background: rgba(0,132,255,0.2);
+  box-shadow: 0 0 16px rgba(0,132,255,0.35);
+}
+.social-btn[data-platform="telegram"]:hover .soc-icon-wrap {
+  background: rgba(34,158,217,0.2);
+  box-shadow: 0 0 16px rgba(34,158,217,0.35);
+}
+.social-btn[data-platform="viber"]:hover .soc-icon-wrap {
+  background: rgba(115,96,242,0.2);
+  box-shadow: 0 0 16px rgba(115,96,242,0.35);
+}
+.social-btn[data-platform="tiktok"]:hover .soc-icon-wrap {
+  background: rgba(255,255,255,0.12);
+  box-shadow: 0 0 16px rgba(255,255,255,0.2);
+}
+.social-btn[data-platform="whatsapp"]:hover .soc-icon-wrap {
+  background: rgba(37,211,102,0.2);
+  box-shadow: 0 0 16px rgba(37,211,102,0.35);
+}
+.social-btn[data-platform="native"]:hover .soc-icon-wrap {
+  background: rgba(255,77,166,0.2);
+  box-shadow: 0 0 16px rgba(255,77,166,0.35);
+}
+.share-option {
+  transition: all 0.2s ease;
+}
+.share-option:hover {
+  background: rgba(255,255,255,0.06) !important;
+  border-color: rgba(255,77,166,0.3) !important;
+}
   </style>
+<base target="_blank">
+<base target="_blank">
 <base target="_blank">
 <base target="_blank">
 </head>
@@ -302,6 +428,8 @@
         <h2>⏳ Loading tracks...</h2>
       </div>
     </div>
+    <div id="pagination-bar" class="pagination-bar"></div>
+    <div class="pagination-spacer"></div>
   </main>
 </div>
 
@@ -369,8 +497,111 @@
       <button id="mini-dislike" class="btn icon" aria-label="Dislike" title="Dislike">👎</button>
       <button id="mini-visualizer" class="btn icon visualizer-btn" aria-label="Visualizer" title="Visualizer">🌀</button>
       <button id="mini-comment" class="btn icon" aria-label="Comments" title="Comments">💬</button>
-      <button id="mini-share" class="btn icon" aria-label="Share" title="Share">🔗</button>
+      <button id="mini-share" class="btn icon share-svg-btn" aria-label="Share" title="Share">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="18" cy="5" r="3"/>
+    <circle cx="6" cy="12" r="3"/>
+    <circle cx="18" cy="19" r="3"/>
+    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+  </svg>
+</button>
       <a id="mini-download" class="btn icon" href="#" download aria-label="Download" title="Download">⬇️</a>
+    </div>
+  </div>
+</div>
+<div id="share-modal" class="share-modal">
+  <div class="share-modal-content" style="max-width:360px;">
+    <div class="share-modal-header">
+      <h3 class="share-modal-title" style="font-size:15px; color:#eaeaf2;">Share Track</h3>
+      <button class="share-modal-close" id="share-modal-close" style="font-size:20px; color:#bfc3d6;">×</button>
+    </div>
+    
+    <div class="share-options" style="margin-bottom:16px;">
+      <div class="share-option" id="share-copy-link" style="display:flex; align-items:center; gap:12px; padding:12px; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid rgba(255,255,255,0.06); cursor:pointer; transition:all 0.2s;">
+        <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,77,166,0.15);display:flex;align-items:center;justify-content:center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff4da6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+        </div>
+        <div>
+          <div style="color:#eaeaf2;font-size:13px;font-weight:600;">Copy Link</div>
+          <div style="color:#666;font-size:11px;">Copy to clipboard</div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="color:#bfc3d6;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Share to</div>
+    
+    <div class="share-modal-socials" id="share-socials" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+      
+      <!-- X (Twitter) -->
+      <div class="social-btn" data-platform="twitter" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">X</span>
+      </div>
+      
+      <!-- Facebook -->
+      <div class="social-btn" data-platform="facebook" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">Facebook</span>
+      </div>
+      
+      <!-- Messenger -->
+      <div class="social-btn" data-platform="messenger" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M12 0C5.373 0 0 4.975 0 11.111c0 3.497 1.744 6.616 4.472 8.652V24l4.086-2.242c1.09.301 2.246.464 3.442.464 6.627 0 12-4.975 12-11.111C24 4.975 18.627 0 12 0zm1.193 14.963l-3.056-3.26-5.963 3.26 6.559-6.963 3.13 3.26 5.889-3.26-6.559 6.963z"/></svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">Messenger</span>
+      </div>
+      
+      <!-- Telegram -->
+      <div class="social-btn" data-platform="telegram" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">Telegram</span>
+      </div>
+      
+      <!-- Viber -->
+      <div class="social-btn" data-platform="viber" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M12.026 0C5.376 0 .002 5.374.002 12.024c0 2.574.81 4.96 2.192 6.916L.936 23.999l5.342-1.256A11.95 11.95 0 0 0 12.026 24c6.65 0 12.024-5.374 12.024-12.024C24.05 5.374 18.676 0 12.026 0zm6.826 16.964c-.274.772-1.362 1.408-1.89 1.498-.51.086-1.01.194-3.364-.706-2.85-1.12-4.68-4.02-4.82-4.206-.14-.186-1.15-1.53-1.15-2.92 0-1.39.73-2.07.988-2.354.26-.286.548-.358.73-.358.18 0 .36 0 .518.008.166.006.39-.064.61.466.22.53.748 1.848.814 1.982.066.134.11.29.022.468-.088.178-.132.29-.262.446-.13.156-.272.348-.388.466-.13.134-.266.28-.114.552.152.27.676 1.116 1.45 1.806.996.888 1.838 1.164 2.1 1.292.262.128.416.106.57-.064.152-.168.656-.762.83-1.024.174-.262.348-.22.584-.132.238.088 1.51.712 1.77.84.26.13.434.194.498.302.064.11.048.636-.226 1.408zM10.96 6.796c2.694.154 4.89 2.236 5.17 4.916.03.29-.19.546-.48.576a.553.553 0 0 1-.576-.48 4.684 4.684 0 0 0-4.18-4.18.553.553 0 0 1-.48-.576c.03-.29.286-.51.576-.48l-.03.224zm-.954 2.384c1.616.092 2.934 1.342 3.102 2.95.03.29-.19.546-.48.576a.553.553 0 0 1-.576-.48 2.31 2.31 0 0 0-2.066-2.066.553.553 0 0 1-.48-.576c.03-.29.286-.51.576-.48l-.076.076zm-.954 2.384c.538.03.976.446 1.034.984a.553.553 0 0 1-.528.576.553.553 0 0 1-.576-.528 1.107 1.107 0 0 0-.984-1.034.553.553 0 0 1-.528-.576c.03-.29.286-.51.576-.48l.006.058z"/></svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">Viber</span>
+      </div>
+      
+      <!-- TikTok -->
+      <div class="social-btn" data-platform="tiktok" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">TikTok</span>
+      </div>
+      
+      <!-- WhatsApp -->
+      <div class="social-btn" data-platform="whatsapp" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">WhatsApp</span>
+      </div>
+      
+      <!-- More / Native -->
+      <div class="social-btn" data-platform="native" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+          </svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">More</span>
+      </div>
+      
     </div>
   </div>
 </div>
@@ -543,7 +774,12 @@ window.currentUserRole = '';
 let myTracksFilter = 'all';
 let showNewOnly = false;
 let currentFilteredIds = [];
+
+
 function filterTracks() {
+    if (!window.homeState) {
+      window.homeState = { filteredIds: [], currentPage: 1, perPage: 10 };
+    }
     const searchInput = document.getElementById('siteSearch');
     const lyricsSearchInput = document.getElementById('lyricsSearch');
     const query = (searchInput?.value || '').toLowerCase();
@@ -599,6 +835,80 @@ function filterTracks() {
     window.currentFilteredIds = Array.from(document.querySelectorAll('.track'))
     .filter(el => el.style.display !== 'none')
     .map(el => el.dataset.id);
+
+    // === PAGINATION: сохраняем отфильтрованные ID ===
+    if (window.homeState) {
+      window.homeState.filteredIds = [...window.currentFilteredIds];
+      window.homeState.currentPage = 1;
+      renderHomePage();
+    }
+}
+document.getElementById('share-copy-link').addEventListener('click', async () => {
+  // [FIX] Используем window.currentTrackId вместо currentTrackSrc
+  let trackId = window.currentTrackId;
+  let track = null;
+  
+  if (trackId) {
+    track = window.globalTracks.find(t => t.id === trackId);
+  }
+  
+  // Если не играет ничего — берем первый видимый трек
+  if (!track) {
+    const firstVisible = document.querySelector('.track:not([style*="none"])');
+    if (firstVisible) {
+      trackId = firstVisible.dataset.id;
+      track = window.globalTracks.find(t => t.id === trackId);
+    }
+  }
+  
+  if (!trackId) {
+    showCopyFeedback('❌ ' + (t('noTrackSelected') || 'No track selected'));
+    return;
+  }
+  
+  const shareUrl = window.location.origin + window.location.pathname + '?track=' + encodeURIComponent(trackId);
+  
+  try {
+    await navigator.clipboard.writeText(shareUrl);
+    showCopyFeedback(' ' + (t('copied') || 'Copied!'));
+  } catch (err) {
+    const textArea = document.createElement('textarea');
+    textArea.value = shareUrl;
+    textArea.style.cssText = 'position:fixed;left:-9999px;top:0;';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      showCopyFeedback(' ' + (t('copied') || 'Copied!'));
+    } catch (e) {
+      showCopyFeedback('❌ ' + (t('copyFailed') || 'Failed to copy'));
+    }
+    document.body.removeChild(textArea);
+  }
+});
+
+// Вспомогательная функция для показа feedback
+function showCopyFeedback(text) {
+  const btn = document.getElementById('share-copy-link');
+  const originalHTML = btn.innerHTML;
+  
+  // Меняем содержимое на feedback
+  btn.innerHTML = `
+    <div style="width:36px;height:36px;border-radius:10px;background:rgba(77,255,138,0.15);display:flex;align-items:center;justify-content:center;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4dff8a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </div>
+    <div>
+      <div style="color:#4dff8a;font-size:13px;font-weight:600;">${text}</div>
+    </div>
+  `;
+  
+  // Возвращаем оригинал через 2 секунды
+  setTimeout(() => {
+    btn.innerHTML = originalHTML;
+  }, 2000);
 }
 let currentSortMode = 'default';
 let partnerListensData = {};
@@ -847,7 +1157,8 @@ async function deleteFromWorker(folder, fileName) {
 }
 
 function sanitizeBaseName(title) {
-  return title.trim().replace(/[\/\\?%*:|"<>]/g, '_').replace(/\s+/g, '_').replace(/_+/g, '_').replace(/^_+|_+$/g, '');
+  return title.trim().normalize('NFC')  // нормализуем Unicode
+.replace(/[^a-zA-Z0-9\u0100-\u017F\u0180-\u024F\u0400-\u04FF]/g, '_').replace(/\s+/g, '_').replace(/_+/g, '_').replace(/^_+|_+$/g, '');
 }
 
 function uniqueBaseName(candidate) {
@@ -1072,7 +1383,15 @@ function renderDraftTracks(tracks) {
           <button class="btn icon play-btn ${isPlaying ? 'playing' : ''}" type="button" aria-label="Play">${playIcon}</button>
           <button class="btn icon open-text-btn" aria-label="Open full text">${t('text') || 'Текст'}</button>
           <button class="btn icon comment-btn" aria-label="Comments" title="${t('comments') || 'Комментарии'}">💬</button>
-          <button class="btn icon share-btn" aria-label="Share" title="${t('share') || 'Поделиться'}">🔗</button>
+          <button class="btn icon share-btn" aria-label="Share" title="${t('share') || 'Поделиться'}">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle">
+    <circle cx="18" cy="5" r="3"/>
+    <circle cx="6" cy="12" r="3"/>
+    <circle cx="18" cy="19" r="3"/>
+    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+  </svg>
+</button>
           ${isAdmin ? `<button class="btn icon replace-track-btn" title="${t('replaceTrackFiles') || 'Заменить'}">🔄</button>` : ''}
           ${canDelete ? `<button class="btn icon delete-track-btn" title="Удалить">🗑️</button>` : ''}
           <button class="btn icon add-to-playlist-btn" title="${t('addToPlaylist') || 'В плейлист'}">➕</button>
@@ -1131,6 +1450,9 @@ function renderDraftTracks(tracks) {
   }
 
   loadGenresToFilter();
+
+  // [FIX] Применяем пагинацию сразу после рендера — показываем только 1-ю страницу
+  applyPaginationOnLoad();
 }
 
 function getMyLocalPlaylist() {
@@ -1398,74 +1720,83 @@ document.getElementById('u-audio-file').addEventListener('change', (e) => {
   });
 });
 
-document.getElementById('u-save').addEventListener('click', async () => {
-  if (!pendingUserTrack) return;
-  
-  const title = document.getElementById('u-preview-title').value.trim() || 'Без названия';
-  const artist = document.getElementById('u-preview-artist').value.trim();
-  const genre = document.getElementById('u-preview-genre').value.trim();
-  const { file, coverBlob } = pendingUserTrack;
-  
-  // === FIX: displayTitle определяем ДО try ===
-    const finalTitle = title;
-    const finalArtist = artist;
-  
-  const btn = document.getElementById('u-save');
-  btn.textContent = '⏳ Загрузка...';
-  btn.disabled = true;
+  document.getElementById('u-save').addEventListener('click', async () => {
+    try {
+      if (!pendingUserTrack) {
+        alert('❌ Сначала выберите файл для загрузки');
+        return;
+      }
+      
+      const file = pendingUserTrack.file;
+      if (!file) {
+        alert('❌ Файл не найден. Выберите файл заново');
+        return;
+      }
+      
+      const title = document.getElementById('u-preview-title').value.trim() || 'Без названия';
+      const artist = document.getElementById('u-preview-artist').value.trim();
+      const genre = document.getElementById('u-preview-genre').value.trim();
+      const coverBlob = pendingUserTrack.coverBlob || null;
+            const displayTitle = title;
+      const safeBaseName = uniqueBaseName(sanitizeBaseName(displayTitle));
+      // Если sanitize убрал всё — используем timestamp
+      const baseName = safeBaseName || 'track_' + Date.now();
+      const audioExt = file.name.split('.').pop().replace(/[^a-zA-Z0-9]/g, '');
 
-  try {
-    const baseName = uniqueBaseName(sanitizeBaseName(displayTitle));
-    const audioExt = file.name.split('.').pop();
-    const audioUrl = await uploadToWorker(file, STORAGE_FOLDER_AUDIO, `${baseName}.${audioExt}`);
+      const btn = document.getElementById('u-save');
+       btn.textContent = t('uploading') || '⏳ Uploading...';
+      btn.disabled = true;
 
-    let coverUrl = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
-    let coverFileName = null;
-    if (coverBlob) {
-      const coverFile = new File([coverBlob], `${baseName}.jpg`, { type: coverBlob.type || 'image/jpeg' });
-      coverFileName = `${baseName}.jpg`;
-      coverUrl = await uploadToWorker(coverFile, STORAGE_FOLDER_COVERS, coverFileName);
-    }
-    
-    const role = getRole();
-    const visibility = role === 'admin' ? 'public' : 'partner';
-    
+      const audioUrl = await uploadToWorker(file, STORAGE_FOLDER_AUDIO, `${baseName}.${audioExt}`);
+
+      let coverUrl = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
+      let coverFileName = null;
+      if (coverBlob) {
+        const coverFile = new File([coverBlob], `${baseName}.jpg`, { type: coverBlob.type || 'image/jpeg' });
+        coverFileName = `${baseName}.jpg`;
+        coverUrl = await uploadToWorker(coverFile, STORAGE_FOLDER_COVERS, coverFileName);
+      }
+
+      const role = getRole();
+      const visibility = role === 'admin' ? 'public' : 'partner';
+
       await db.collection('tracks').add({
-          title: finalTitle,
-          artist: finalArtist,
-      genre: genre || '',
-      playlist: '',
-      lyrics: '',
-      baseName,
-      audioFileName: `${baseName}.${audioExt}`,
-      coverFileName,
-      audio: audioUrl,
-      cover: coverUrl,
-      duration: '—',
-      likes: 0, dislikes: 0, plays: 0,
-      visibility: visibility,
-      uploadedBy: role,           // ← обязательно заполняем
-      uploadedByRole: role,       // ← дублируем для надёжности
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+        title: displayTitle,
+        artist: artist,
+        genre: genre || '',
+        playlist: '',
+        lyrics: '',
+        baseName,
+        audioFileName: `${baseName}.${audioExt}`,
+        coverFileName,
+        audio: audioUrl,
+        cover: coverUrl,
+        duration: '—',
+        likes: 0, dislikes: 0, plays: 0,
+        visibility: visibility,
+        uploadedBy: role,
+        uploadedByRole: role,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
 
-    document.getElementById('user-upload-modal').classList.remove('open');
-    pendingUserTrack = null;
-    document.getElementById('u-audio-file').value = '';
-    document.getElementById('u-preview').style.display = 'none';
-    document.getElementById('u-preview-title').value = '';
-    document.getElementById('u-preview-artist').value = '';
-    document.getElementById('u-preview-genre').value = '';
-    document.getElementById('u-save').disabled = true;
-    btn.textContent = 'Загрузить';
-    alert('✅ Песня загружена!');
-  } catch (e) {
-    console.error(e);
-    alert('❌ Ошибка: ' + e.message);
-    btn.textContent = 'Загрузить';
-    btn.disabled = false;
-  }
-});
+      document.getElementById('user-upload-modal').classList.remove('open');
+      pendingUserTrack = null;
+      document.getElementById('u-audio-file').value = '';
+      document.getElementById('u-preview').style.display = 'none';
+      document.getElementById('u-preview-title').value = '';
+      document.getElementById('u-preview-artist').value = '';
+      document.getElementById('u-preview-genre').value = '';
+      document.getElementById('u-save').disabled = true;
+       btn.textContent = t('uploadBtn') || 'Upload';
+      alert(t('uploadSuccess') || '✅ Song uploaded!');
+    } catch (e) {
+      console.error(e);
+      alert((t('uploadError') || '❌ Error: ') + e.message);
+      const btn = document.getElementById('u-save');
+      btn.textContent = t('uploadBtn') || 'Upload';
+      btn.disabled = false;
+    }
+  });
 
 document.getElementById('userUploadBtn').addEventListener('click', () => {
   document.getElementById('user-upload-modal').classList.add('open');
@@ -1779,7 +2110,10 @@ await loadSavedLanguage();
       } else {
         window.currentTrackId = tid;
         currentTrackId = tid;
-        playTrack(trackEl);
+        const ctxTracks = window.homeState.filteredIds
+          .map(id => window.globalTracks.find(t => t.id === id))
+          .filter(Boolean);
+        playTrack(trackEl, {tracks: ctxTracks, source: 'home'});
         // === FIX: сохраняем прослушивание ===
         await saveListenToFirebase(tid);
         updateNewTracksBadge();
@@ -1807,15 +2141,18 @@ await loadSavedLanguage();
       openComments(trackEl.dataset.id);
     }
     if (e.target.closest('.share-btn')) {
-      e.preventDefault();
-      const url = window.location.origin + window.location.pathname + '?track=' + encodeURIComponent(trackEl.dataset.src);
-      navigator.clipboard.writeText(url).then(() => {
-        const btn = e.target.closest('.share-btn');
-        const oldText = btn.textContent;
-        btn.textContent = '✓';
-        setTimeout(() => btn.textContent = oldText, 1500);
-      });
-    }
+  e.preventDefault();
+  // [FIX] Устанавливаем currentTrackId из трека, на который нажали
+  const tid = trackEl.dataset.id;
+  window.currentTrackId = tid;
+  currentTrackId = tid;
+  currentTrackSrc = trackEl.dataset.src;
+  
+  const modal = document.getElementById('share-modal');
+  if (modal) {
+    modal.classList.add('open');
+  }
+}
     if (e.target.closest('.delete-track-btn')) {
       e.preventDefault();
       const id = trackEl.dataset.id;
@@ -1897,8 +2234,10 @@ await loadSavedLanguage();
     document.getElementById('playlists-modal').classList.remove('open');
   });
 
-  document.getElementById('managePlaylistsBtn')?.addEventListener('click', () => {
-    window.location.href = 'playlists.html';
+  document.getElementById('managePlaylistsBtn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (window.openPlaylistsOverlay) window.openPlaylistsOverlay();
+    else window.location.href = 'playlists.html';
   });
 
   document.getElementById('side-close').addEventListener('click', () => {
@@ -1994,7 +2333,7 @@ await loadSavedLanguage();
         return;
       }
       const btn = document.getElementById('add-save');
-      btn.textContent = '⏳ Загрузка...';
+       btn.textContent = t('uploading') || '⏳ Uploading...';
       btn.disabled = true;
       try {
         const baseName = uniqueBaseName(sanitizeBaseName(title));
@@ -2648,6 +2987,7 @@ window.updateTrackPlayIcons = function() {
     <line x1="15" y1="12" x2="3" y2="12"/>
   </svg>
 </button>
+<script src="offline-cache.js"></script>
 <script src="player-core.js"></script>
 <script src="visualizers.js"></script>
 <script src="language.js"></script>
@@ -2692,11 +3032,372 @@ window.updateTrackPlayIcons = function() {
 
   console.log('✅ Плавающая кнопка (верх-справа, при скролле) инициализирована');
 })();
+
+
+
+
+
+
+// ===============================
+// PAGINATION — FIXED
+// ===============================
+
+// [FIX 1] Применяет пагинацию при первой загрузке и после фильтрации
+function applyPaginationOnLoad() {
+  if (!window.homeState) {
+    window.homeState = { filteredIds: [], currentPage: 1, perPage: 10 };
+  }
+
+  // Берём ВСЕ видимые треки (не скрытые фильтрами)
+  const allVisibleIds = Array.from(document.querySelectorAll('.track'))
+    .filter(el => el.style.display !== 'none')
+    .map(el => el.dataset.id);
+
+  window.homeState.filteredIds = allVisibleIds;
+  window.homeState.currentPage = 1;
+
+  renderHomePage();
+}
+
+function renderHomePage() {
+  const ids = window.homeState.filteredIds;
+  const page = window.homeState.currentPage;
+  const perPage = window.homeState.perPage;
+  const total = Math.ceil(ids.length / perPage);
+  const start = (page - 1) * perPage;
+  const end = start + perPage;
+  const pageIds = new Set(ids.slice(start, end));
+
+  document.querySelectorAll('.track').forEach(el => {
+    el.style.display = pageIds.has(el.dataset.id) ? 'flex' : 'none';
+  });
+
+  renderPagination(total, page);
+}
+
+function renderPagination(total, current) {
+  const bar = document.getElementById('pagination-bar');
+  if (!bar) return;
+  if (total <= 1) { bar.innerHTML = ''; return; }
+
+  let html = `<button onclick="changeHomePage(${current-1})" ${current===1?'disabled':''}>◀</button>`;
+
+  const pages = [];
+  if (total <= 7) {
+    for (let i=1; i<=total; i++) pages.push(i);
+  } else {
+    pages.push(1,2,3);
+    if (current > 4) pages.push('...');
+    const s = Math.max(4, current-1);
+    const e = Math.min(total-1, current+1);
+    for (let i=s; i<=e; i++) if (!pages.includes(i)) pages.push(i);
+    if (current < total-2) pages.push('...');
+    if (!pages.includes(total)) pages.push(total);
+  }
+
+  pages.forEach(p => {
+    if (p === '...') html += `<span class="dots">…</span>`;
+    else html += `<button class="${p===current?'active':''}" onclick="changeHomePage(${p})">${p}</button>`;
+  });
+
+  html += `<button onclick="changeHomePage(${current+1})" ${current===total?'disabled':''}>▶</button>`;
+  bar.innerHTML = html;
+}
+
+window.changeHomePage = function(page) {
+  window.homeState.currentPage = page;
+  renderHomePage();
+  document.getElementById('tracksList')?.scrollIntoView({behavior:'smooth'});
+};
+
+window.onPlayerTrackChanged = function(trackId) {
+  if (!document.getElementById('pagination-bar')) return;
+  const idx = window.homeState.filteredIds.indexOf(trackId);
+  if (idx === -1) return;
+  const page = Math.floor(idx / window.homeState.perPage) + 1;
+  if (page !== window.homeState.currentPage) {
+    window.homeState.currentPage = page;
+    renderHomePage();
+    setTimeout(() => {
+      const el = document.querySelector(`.track[data-id="${trackId}"]`);
+      if (el) el.scrollIntoView({behavior:'smooth', block:'center'});
+    }, 150);
+  }
+};
+
+// ===============================
+// IFRAME OVERLAY MANAGER
+// ===============================
+
+(function() {
+  const playlistsIframe = document.getElementById('iframe-playlists');
+  const playlistIframe = document.getElementById('iframe-playlist');
+
+  // Открыть список плейлистов
+  window.openPlaylistsOverlay = function() {
+    if (playlistsIframe) {
+      playlistsIframe.src = 'playlists.html?embed=1';
+      playlistsIframe.style.display = 'block';
+    }
+  };
+
+  // Открыть конкретный плейлист
+  window.openPlaylistOverlay = function(id) {
+    if (playlistIframe) {
+      playlistIframe.src = 'playlist-view.html?id=' + encodeURIComponent(id) + '&embed=1';
+      playlistIframe.style.display = 'block';
+    }
+    if (playlistsIframe) playlistsIframe.style.display = 'none';
+  };
+
+  // Закрыть все оверлеи
+  window.closeOverlays = function() {
+    if (playlistsIframe) { playlistsIframe.style.display = 'none'; playlistsIframe.src = ''; }
+    if (playlistIframe) { playlistIframe.style.display = 'none'; playlistIframe.src = ''; }
+  };
+
+  // Слушаем команды от iframe'ов
+  window.addEventListener('message', (e) => {
+    const data = e.data;
+    if (!data) return;
+
+    if (data === 'close-playlists') {
+      closeOverlays();
+    }
+    else if (data.type === 'open-playlist') {
+      openPlaylistOverlay(data.id);
+    }
+    else if (data === 'close-playlist' || data === 'go-home') {
+      closeOverlays();
+    }
+    else if (data === 'show-playlists') {
+      if (playlistIframe) { playlistIframe.style.display = 'none'; playlistIframe.src = ''; }
+      if (playlistsIframe) {
+        playlistsIframe.src = 'playlists.html?embed=1';
+        playlistsIframe.style.display = 'block';
+      }
+    }
+        else if (data.type === 'play-track') {
+      // Если тот же трек уже играет — просто play/pause
+      if (window.currentTrackId === data.trackId && window.wavesurfer) {
+        window.wavesurfer.playPause();
+        return;
+      }
+      // Загружаем треки плейлиста для контекста
+      const playlistId = data.playlistId;
+      db.collection('tracks').where('playlistIds', 'array-contains', playlistId).get()
+        .then(snap => {
+          const ctxTracks = snap.docs.map(d => ({id: d.id, ...d.data()}));
+          window.setPlayerContext(ctxTracks, 'playlist', playlistId);
+          const track = window.globalTracks.find(t => t.id === data.trackId);
+          if (track) {
+            window.loadAndPlayTrack(track);
+          } else {
+            // Трек может быть не в globalTracks, ищем в контексте
+            const ctxTrack = ctxTracks.find(t => t.id === data.trackId);
+            if (ctxTrack) window.loadAndPlayTrack(ctxTrack);
+          }
+        })
+        .catch(err => console.error('play-track error:', err));
+    }
+  });
+
+  // Обработчик кнопки Playlists (оригинальной)
+})();
+// ===============================
+// IFRAME OVERLAY MANAGER
+// ===============================
+
+(function() {
+  let playlistsIframe = null;
+  let playlistIframe = null;
+
+  function createIframe(id) {
+    const iframe = document.createElement('iframe');
+    iframe.id = id;
+    iframe.className = 'app-iframe';
+    iframe.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:10000;background:var(--bg);display:none;';
+    document.body.appendChild(iframe);
+    return iframe;
+  }
+
+  window.openPlaylistsOverlay = function() {
+    if (!playlistsIframe) playlistsIframe = createIframe('iframe-playlists');
+    playlistsIframe.src = 'playlists.html?embed=1';
+    playlistsIframe.style.display = 'block';
+    if (playlistIframe) playlistIframe.style.display = 'none';
+  };
+
+  window.openPlaylistOverlay = function(id) {
+    if (!playlistIframe) playlistIframe = createIframe('iframe-playlist');
+    playlistIframe.src = 'playlist-view.html?id=' + encodeURIComponent(id) + '&embed=1';
+    playlistIframe.style.display = 'block';
+    if (playlistsIframe) playlistsIframe.style.display = 'none';
+  };
+
+  window.closeOverlays = function() {
+    if (playlistsIframe) { playlistsIframe.style.display = 'none'; playlistsIframe.src = ''; }
+    if (playlistIframe) { playlistIframe.style.display = 'none'; playlistIframe.src = ''; }
+  };
+
+  window.addEventListener('message', (e) => {
+    const data = e.data;
+    if (!data) return;
+    if (data === 'close-playlists' || data === 'close-playlist' || data === 'go-home') {
+      closeOverlays();
+    }
+    else if (data.type === 'open-playlist') {
+      openPlaylistOverlay(data.id);
+    }
+    else if (data === 'show-playlists') {
+      if (playlistIframe) playlistIframe.style.display = 'none';
+      openPlaylistsOverlay();
+    }
+    else if (data.type === 'play-track') {
+      db.collection('tracks').where('playlistIds', 'array-contains', data.playlistId).get()
+        .then(snap => {
+          const ctxTracks = snap.docs.map(d => ({id: d.id, ...d.data()}));
+          window.setPlayerContext(ctxTracks, 'playlist', data.playlistId);
+          const track = ctxTracks.find(t => t.id === data.trackId);
+          if (track) window.loadAndPlayTrack(track);
+        });
+    }
+  });
+})();
+// === Handle like/dislike/state requests from iframe playlists ===
+window.addEventListener('message', function(e) {
+  var data = e.data;
+  if (!data) return;
+
+  if (data === 'get-player-state') {
+    if (e.source && e.source !== window) {
+      e.source.postMessage({
+        type: 'player-state',
+        trackId: window.currentTrackId,
+        isPlaying: window.isPlaying
+      }, '*');
+    }
+  }
+  else if (data.type === 'like') {
+    if (window.toggleLike) window.toggleLike(data.trackId);
+  }
+  else if (data.type === 'dislike') {
+    if (window.toggleDislike) window.toggleDislike(data.trackId);
+  }
+    else if (data.type === 'toggle-play-pause') {
+    if (window.wavesurfer) {
+      window.wavesurfer.playPause();
+    }
+  }
+});
+// ===============================
+// SHARE FIX + DEEP LINKING
+// ===============================
+
+// [FIX 1] Получаем актуальный track из DOM или глобальных данных
+function getCurrentTrackForShare() {
+  // Сначала ищем по currentTrackId (самый надёжный способ)
+  if (window.currentTrackId) {
+    const track = window.globalTracks.find(t => t.id === window.currentTrackId);
+    if (track) return track;
+  }
+  // Fallback: ищем по currentTrackSrc
+  if (currentTrackSrc) {
+    const track = window.globalTracks.find(t => t.audio === currentTrackSrc);
+    if (track) return track;
+  }
+  // Если ничего не играет — берём первый видимый трек
+  const firstVisible = document.querySelector('.track[style*="flex"]');
+  if (firstVisible) {
+    const id = firstVisible.dataset.id;
+    return window.globalTracks.find(t => t.id === id);
+  }
+  return null;
+}
+
+
 </script>
 <!-- Чат поверх главной -->
+<!-- [FIX] Индикатор офлайн-режима -->
+<div id="offline-indicator" style="display:none;position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(255,77,166,0.9);color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(255,77,166,0.4);"></div>
+
 <div id="chat-overlay">
   <iframe id="chat-frame" src=""></iframe>
 </div>
 <div id="chat-swipe-zone"></div>
+
+<script>
+  // ===============================
+// OFFLINE INDICATOR
+// ===============================
+
+(function initOfflineIndicator() {
+  const indicator = document.getElementById('offline-indicator');
+  if (!indicator) return;
+  
+  function updateOnlineStatus() {
+    if (navigator.onLine) {
+      indicator.style.display = 'none';
+    } else {
+      indicator.textContent = '📴 Офлайн-режим — доступны кэшированные треки';
+      indicator.style.display = 'block';
+      setTimeout(() => {
+        indicator.style.display = 'none';
+      }, 4000);
+    }
+  }
+  
+  window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  
+  // Проверка при старте
+  if (!navigator.onLine) updateOnlineStatus();
+})();
+// ===============================
+// PWA: Service Worker Registration
+// ===============================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // [FIX] ./sw.js вместо /sw.js — работает и в подпапке GitHub Pages
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => {
+        console.log('✅ SW registered:', reg.scope);
+        
+        // Обновления
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              showUpdateToast();
+            }
+          });
+        });
+      })
+      .catch(err => console.log('❌ SW failed:', err));
+  });
+}
+
+function showUpdateToast() {
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, #4dff8a, #00E5FF);
+    color: #0a0a0f;
+    padding: 14px 28px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 700;
+    z-index: 99999;
+    box-shadow: 0 4px 24px rgba(77,255,138,0.4);
+    cursor: pointer;
+  `;
+  toast.innerHTML = '🔄 Доступно обновление — нажмите для перезагрузки';
+  toast.onclick = () => location.reload();
+  document.body.appendChild(toast);
+}
+</script>
 </body>
 </html>
