@@ -529,7 +529,7 @@
 <script>
 let accessHashes = null;
 let globalCounts = {};
-let globalTracks = [];
+window.globalTracks = [];
 let isShuffleMode = localStorage.getItem('shuffleMode') === 'true';
 let globalPlaylists = [];
 let currentTrackId = '';
@@ -542,6 +542,64 @@ let pendingUserTrack = null;
 window.currentUserRole = '';
 let myTracksFilter = 'all';
 let showNewOnly = false;
+let currentFilteredIds = [];
+function filterTracks() {
+    const searchInput = document.getElementById('siteSearch');
+    const lyricsSearchInput = document.getElementById('lyricsSearch');
+    const query = (searchInput?.value || '').toLowerCase();
+    const lyricsQuery = (lyricsSearchInput?.value || '').toLowerCase();
+    const role = getRole();
+
+    document.querySelectorAll('.track').forEach(trackEl => {
+        const title = (trackEl.dataset.title || '').toLowerCase();
+        const artist = (trackEl.dataset.artist || '').toLowerCase();
+        const genre = (trackEl.dataset.genre || '').toLowerCase();
+        const lyrics = (trackEl.dataset.lyrics || '').toLowerCase();
+        const trackId = trackEl.dataset.id;
+
+        const effectiveUploader = trackEl.dataset.uploadedBy || 'admin';
+
+        const matchesSearch = title.includes(query) || artist.includes(query) || genre.includes(query);
+        let matchesGenre = true;
+        if (isMultiGenreMode) {
+            if (selectedGenres.length > 0) {
+                const trackGenres = genre.split(',').map(g => g.trim()).filter(g => g).map(g => g.toLowerCase());
+                matchesGenre = selectedGenres.some(sg => trackGenres.includes(sg));
+            }
+        } else {
+            const selectedGenre = (document.getElementById('siteGenre').value || '').toLowerCase();
+            matchesGenre = !selectedGenre || genre.includes(selectedGenre);
+        }
+        const matchesLyrics = !lyricsQuery || lyrics.includes(lyricsQuery);
+
+        let matchesMyTracks = true;
+        const trackVisibility = trackEl.dataset.visibility || 'public';
+
+        if (myTracksFilter === 'mine') {
+            matchesMyTracks = effectiveUploader === role;
+        } else if (myTracksFilter === 'partner-uploader') {
+            matchesMyTracks = effectiveUploader === 'partner';
+        } else if (myTracksFilter === 'admin') {
+            matchesMyTracks = effectiveUploader === 'admin';
+        } else if (myTracksFilter === 'visibility-hidden') {
+            matchesMyTracks = trackVisibility === 'hidden';
+        } else if (myTracksFilter === 'visibility-partner') {
+            matchesMyTracks = trackVisibility === 'partner';
+        }
+
+        let matchesNew = true;
+        if (showNewOnly) {
+            const listened = getListenedTracks();
+            matchesNew = !listened.includes(trackId);
+        }
+
+        trackEl.style.display = (matchesSearch && matchesGenre && matchesLyrics && matchesMyTracks && matchesNew) ? 'flex' : 'none';
+    });
+    // Обновляем глобальный список отфильтрованных ID
+    window.currentFilteredIds = Array.from(document.querySelectorAll('.track'))
+    .filter(el => el.style.display !== 'none')
+    .map(el => el.dataset.id);
+}
 let currentSortMode = 'default';
 let partnerListensData = {};
 function getLangStorageKey() {
@@ -766,6 +824,7 @@ function applySortAndRender() {
   else if (currentSortMode === 'title-desc') tracks.sort((a, b) => (b.title || '').localeCompare(a.title || ''));
   renderDraftTracks(tracks);
   updateNewTracksBadge();
+  filterTracks();
 }
 
 async function uploadToWorker(file, folder, fileName) {
@@ -967,13 +1026,11 @@ function renderDraftTracks(tracks) {
       else if (ts) timeStr = new Date(ts).toLocaleString();
       const count = plData.count || 1;
       partnerListenInfo = `<div class="partner-listen-info">👤 Партнёр слушал: ${timeStr} (${count}x)</div>`;
-    }
-        // === FIX: определяем владельца трека ===
-        // === FIX: старые треки: guest = пусто, partner-only без владельца = partner, остальное = admin ===
-      let trackUploader = track.uploadedBy || track.uploadedByRole || '';
+    }      let trackUploader = track.uploadedBy || track.uploadedByRole || '';
       if (trackUploader === 'guest') trackUploader = '';
       if (!trackUploader && track.visibility === 'partner') trackUploader = 'partner';
       if (!trackUploader) trackUploader = 'admin';
+      div.dataset.uploadedBy = trackUploader; // <-- ИСПРАВЛЕНИЕ
       div.dataset.visibility = track.visibility || 'public';
     const role = getRole();
     
@@ -1499,6 +1556,85 @@ if (lyricsSearch) lyricsSearch.placeholder = t('searchLyricsPlaceholder') || 'Se
       }
     }
   });
+  // ===== ОВЕРЛЕЙ ЧАТА (без перехода на новую страницу) =====
+const chatOverlay = document.getElementById('chat-overlay');
+const chatFrame    = document.getElementById('chat-frame');
+let chatOpen = false;
+
+function openChatOverlay() {
+  const role = getRole();
+  if (role === 'guest') return;
+  // Не открываем, если сейчас открыт текст песни (side-panel)
+  if (document.getElementById('side-panel').classList.contains('open')) return;
+
+  chatFrame.src = 'CHAT/chat.html';
+  chatOverlay.style.display = 'block';
+  chatOverlay.offsetHeight; // reflow
+  chatOverlay.classList.add('open');
+  chatOpen = true;
+}
+
+function closeChatOverlay() {
+  chatOverlay.classList.remove('open');
+  setTimeout(() => {
+    if (!chatOverlay.classList.contains('open')) {
+      chatOverlay.style.display = 'none';
+      chatFrame.src = ''; // выгружаем, чтобы не жрало ресурсы
+    }
+  }, 350);
+  chatOpen = false;
+}
+
+// Слушаем команды от чата (закрыть)
+window.addEventListener('message', (e) => {
+  if (e.data === 'close-chat') closeChatOverlay();
+});
+
+// --- Свайп с правого края экрана для открытия чата ---
+const EDGE_WIDTH = 24; // px от правого края
+let edgeStartX = 0;
+let edgeStartY = 0;
+
+document.addEventListener('touchstart', (e) => {
+  if (chatOpen) return;
+  if (getRole() === 'guest') return;
+  const t = e.touches[0];
+  if (window.innerWidth - t.clientX <= EDGE_WIDTH) {
+    edgeStartX = t.clientX;
+    edgeStartY = t.clientY;
+  }
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+  if (!edgeStartX) return;
+  const t = e.changedTouches[0];
+  const diffX = edgeStartX - t.clientX; // >0 = влево
+  const diffY = Math.abs(t.clientY - edgeStartY);
+  if (diffX > 80 && diffY < 70) openChatOverlay();
+  edgeStartX = 0;
+}, { passive: true });
+
+// (Опционально) если хочешь, чтобы и логотип тоже открывал чат поверх,
+// замени его обработчик ниже. Если оставить как есть — логотип будет
+// по-прежнему вести на отдельную страницу, а свайп — открывать поверх.
+document.getElementById('site-logo')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  if (getRole() === 'admin' || getRole() === 'partner') {
+    openChatOverlay(); // ← теперь открывает поверх, а не перезагружает страницу
+  }
+});
+// ===== Автоскролл к треку при Next / Prev / Shuffle =====
+function scrollToPlayingTrack() {
+  if (!window.currentTrackId) return;
+  const el = document.querySelector(`.track[data-id="${window.currentTrackId}"]`);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// Вешаем на кнопки мини-плеера
+['mini-next','mini-prev','shuffle-btn'].forEach(id => {
+  const btn = document.getElementById(id);
+  if (btn) btn.addEventListener('click', () => setTimeout(scrollToPlayingTrack, 250));
+});
 });
   
   document.addEventListener('click', (e) => {
@@ -1561,59 +1697,6 @@ await loadSavedLanguage();
   const genreSelect = document.getElementById('siteGenre');
   const lyricsSearchInput = document.getElementById('lyricsSearch');
 
-  // === FIX: фильтрация треков — три состояния: all, mine, others ===
-    function filterTracks() {
-        const query = (searchInput.value || '').toLowerCase();
-  
-        const lyricsQuery = (lyricsSearchInput.value || '').toLowerCase();
-        const role = getRole();
-
-        document.querySelectorAll('.track').forEach(trackEl => {
-            const title = (trackEl.dataset.title || '').toLowerCase();
-            const artist = (trackEl.dataset.artist || '').toLowerCase();
-            const genre = (trackEl.dataset.genre || '').toLowerCase();
-            const lyrics = (trackEl.dataset.lyrics || '').toLowerCase();
-            const trackId = trackEl.dataset.id;
-
-            const effectiveUploader = trackEl.dataset.uploadedBy || 'admin';
-
-            const matchesSearch = title.includes(query) || artist.includes(query) || genre.includes(query);
-            let matchesGenre = true;
-      if (isMultiGenreMode) {
-        if (selectedGenres.length > 0) {
-          const trackGenres = genre.split(',').map(g => g.trim()).filter(g => g).map(g => g.toLowerCase());
-          matchesGenre = selectedGenres.some(sg => trackGenres.includes(sg));
-        }
-      } else {
-        const selectedGenre = (document.getElementById('siteGenre').value || '').toLowerCase();
-        matchesGenre = !selectedGenre || genre.includes(selectedGenre);
-      }
-            const matchesLyrics = !lyricsQuery || lyrics.includes(lyricsQuery);
-
-            let matchesMyTracks = true;
-            const trackVisibility = trackEl.dataset.visibility || 'public';
-
-            if (myTracksFilter === 'mine') {
-                matchesMyTracks = effectiveUploader === role;
-            } else if (myTracksFilter === 'partner-uploader') {
-                matchesMyTracks = effectiveUploader === 'partner';
-            } else if (myTracksFilter === 'admin') {
-                matchesMyTracks = effectiveUploader === 'admin';
-            } else if (myTracksFilter === 'visibility-hidden') {
-                matchesMyTracks = trackVisibility === 'hidden';
-            } else if (myTracksFilter === 'visibility-partner') {
-                matchesMyTracks = trackVisibility === 'partner';
-            }
-
-            let matchesNew = true;
-            if (showNewOnly) {
-                const listened = getListenedTracks();
-                matchesNew = !listened.includes(trackId);
-            }
-
-            trackEl.style.display = (matchesSearch && matchesGenre && matchesLyrics && matchesMyTracks && matchesNew) ? 'flex' : 'none';
-        });
-    }
   searchInput.addEventListener('input', filterTracks);
   genreSelect.addEventListener('change', filterTracks);
   lyricsSearchInput.addEventListener('input', filterTracks);
@@ -2338,8 +2421,7 @@ window.updateTrackPlayIcons = function() {
   let checkInterval = null;
 
   function isMusicPlaying() {
-    // Проверяем, играет ли музыка
-    return window.isPlaying === true && window.wavesurfer && !window.wavesurfer.isPaused();
+    return window.isPlaying === true && window.wavesurfer != null;
   }
 
   function resetActivity() {
@@ -2597,5 +2679,10 @@ window.updateTrackPlayIcons = function() {
   console.log('✅ Плавающая кнопка (верх-справа, при скролле) инициализирована');
 })();
 </script>
+<!-- Чат поверх главной -->
+<div id="chat-overlay">
+  <iframe id="chat-frame" src=""></iframe>
+</div>
+<div id="chat-swipe-zone"></div>
 </body>
 </html>
