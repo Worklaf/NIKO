@@ -71,26 +71,31 @@
 
     /* ===== Сетка ===== */
     .content-wrap {
-      padding: 0 16px 40px;
+      padding: 0 10px 40px;
       max-width: 1200px;
       margin: 0 auto;
-    }
-    .playlists-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
+      width: 100%;
     }
     @media (min-width: 480px) {
-      .playlists-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      .content-wrap { padding: 0 16px 40px; }
+    }
+        /* ===== Сетка ===== */
+    .playlists-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    @media (min-width: 480px) {
+      .playlists-grid { gap: 14px; }
     }
     @media (min-width: 640px) {
-      .playlists-grid { grid-template-columns: repeat(4, 1fr); }
+      .playlists-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; }
     }
     @media (min-width: 900px) {
       .playlists-grid { grid-template-columns: repeat(5, 1fr); }
     }
     @media (min-width: 1200px) {
-      .playlists-grid { grid-template-columns: repeat(6, 1fr); }
+      .playlists-grid { grid-template-columns: repeat(6, 1fr); gap: 18px; }
     }
 
     /* ===== Карточка ===== */
