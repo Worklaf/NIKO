@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>NIKO – Playlists</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ff4da6">
+  <style>
+    /* ===== СБРОС глобальных стилей styles.css ===== */
+    html, body {
+      display: block !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow-x: hidden;
+      background: #05050a;
+      color: #eaeaf2;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* Отменяем, если styles.css делает header сайдбаром */
+    body > header, body > .top-bar {
+      position: relative !important;
+      left: auto !important;
+      top: auto !important;
+      width: 100% !important;
+      height: auto !important;
+    }
+    main, #playlistsContainer {
+      margin-left: 0 !important;
+      width: 100% !important;
+      max-width: none !important;
+    }
+
+    /* ===== Верхняя полоска ===== */
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: rgba(5,5,10,0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .back-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      line-height: 1;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.15); }
+
+    /* ===== Заголовок ===== */
+    .page-title {
+      font-size: 24px;
+      font-weight: 800;
+      margin: 18px 16px 14px;
+      letter-spacing: -0.3px;
+    }
+
+    /* ===== Сетка ===== */
+    .content-wrap {
+      padding: 0 10px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    @media (min-width: 480px) {
+      .content-wrap { padding: 0 16px 40px; }
+    }
+        /* ===== Сетка ===== */
+    .playlists-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    @media (min-width: 480px) {
+      .playlists-grid { gap: 14px; }
+    }
+    @media (min-width: 640px) {
+      .playlists-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    }
+    @media (min-width: 900px) {
+      .playlists-grid { grid-template-columns: repeat(5, 1fr); }
+    }
+    @media (min-width: 1200px) {
+      .playlists-grid { grid-template-columns: repeat(6, 1fr); gap: 18px; }
+    }
+
+    /* ===== Карточка ===== */
+    .playlist-card {
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      transition: transform 0.2s ease;
+    }
+    .playlist-card:active { transform: scale(0.97); }
+    .playlist-cover-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #111;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+    .playlist-cover-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+    .playlist-card:hover .playlist-cover-wrap img { transform: scale(1.05); }
+
+    /* Бейдж владельца */
+    .owner-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      backdrop-filter: blur(6px);
+      z-index: 2;
+      pointer-events: none;
+    }
+    .owner-badge.my {
+      background: rgba(255, 77, 166, 0.9);
+      color: #fff;
+    }
+    .owner-badge.partner {
+      background: rgba(77, 255, 138, 0.9);
+      color: #000;
+    }
+
+    /* Overlay */
+    .playlist-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 55%);
+      opacity: 0;
+      transition: opacity 0.2s;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-end;
+      padding: 8px;
+      gap: 6px;
+    }
+    .playlist-card:hover .playlist-overlay { opacity: 1; }
+
+    .overlay-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(4px);
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .overlay-btn:hover { background: rgba(255,255,255,0.3); }
+    .overlay-btn.danger { color: #ff4da6; }
+
+    .playlist-info { margin-top: 8px; }
+    .playlist-name {
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.3;
+    }
+    .playlist-meta {
+      font-size: 11px;
+      color: #8b8fa3;
+      margin-top: 3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .playlist-meta .dot {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: #555;
+      display: inline-block;
+    }
+
+    /* ===== Карточка "Добавить" ===== */
+    .add-card .playlist-cover-wrap {
+      background: linear-gradient(135deg, #ff4da6, #ff7a4d);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 4px 16px rgba(255,77,166,0.25);
+    }
+    .add-icon {
+      font-size: 36px;
+      font-weight: 300;
+      line-height: 1;
+      opacity: 0.95;
+    }
+    .add-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      opacity: 0.9;
+    }
+
+    /* ===== Модалка ===== */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 16px;
+    }
+    .modal.open { display: flex; }
+    .panel {
+      background: #0f0f14;
+      border-radius: 20px;
+      padding: 20px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.7);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .panel h3 {
+      margin: 0 0 16px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .panel-row { margin-bottom: 12px; }
+    .panel-row label {
+      display: block;
+      font-size: 12px;
+      color: #8b8fa3;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    .panel-row input,
+    .panel-row textarea,
+    .panel-row select {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: #07070a;
+      color: #eaeaf2;
+      padding: 10px 12px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .panel-row input:focus,
+    .panel-row textarea:focus,
+    .panel-row select:focus {
+      border-color: rgba(255,77,166,0.5);
+    }
+    .panel-row textarea {
+      min-height: 70px;
+      resize: vertical;
+    }
+    .panel-cover-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .panel-cover-row img {
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+      object-fit: cover;
+      background: #111;
+      flex-shrink: 0;
+    }
+    .panel-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .btn {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-size: 13px;
+      cursor: pointer;
+      background: rgba(255,255,255,0.08);
+      color: #eaeaf2;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: rgba(255,255,255,0.14); }
+    .btn.active {
+      background: linear-gradient(90deg, #ff4da6, #ff0000);
+      color: #fff;
+    }
+    .btn.danger {
+      background: rgba(255,0,0,0.12);
+      color: #ff4da6;
+    }
+    .btn.danger:hover { background: rgba(255,0,0,0.2); }
+  </style>
+<base target="_blank">
+</head>
+<body>
+<div id="spa-playlists-content">
+
+  <!-- Верхняя полоска -->
+  <div class="top-bar">
+    <a href="#" class="back-btn" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage('close-playlists','*');return false;}location.href='NIKO.html';return false;" title="Back to player">←</a>
+  </div>
+
+  <!-- Заголовок -->
+  <h1 class="page-title">🎵 Playlists</h1>
+
+  <!-- Контент -->
+  <div class="content-wrap">
+    <div id="playlistsContainer" class="playlists-grid"></div>
+  </div>
+
+  <!-- Модалка -->
+  <div id="playlistModal" class="modal">
+    <div class="panel">
+      <h3 id="playlistModalTitle">New playlist</h3>
+
+      <div class="panel-cover-row">
+        <img id="playlistCoverPreview" src="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png" alt="Cover">
+        <div style="flex:1">
+          <div class="panel-row">
+            <label>Cover image</label>
+            <input type="file" id="playlistCoverFile" accept="image/*">
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-row">
+        <label>Name</label>
+        <input id="playlistNameInput" placeholder="Playlist name">
+      </div>
+
+      <div class="panel-row">
+        <label>Description</label>
+        <textarea id="playlistDescriptionInput" placeholder="Short description"></textarea>
+      </div>
+
+      <div class="panel-row" id="visibilityRow">
+        <label>Visibility</label>
+        <select id="playlistVisibilitySelect">
+          <option value="public">🌍 Everyone</option>
+          <option value="partner">♥ Admin + partner</option>
+          <option value="admin">🔒 Only admin</option>
+        </select>
+      </div>
+
+      <div class="panel-actions">
+        <button id="playlistCancelBtn" class="btn">Cancel</button>
+        <button id="playlistSaveBtn" class="btn active">💾 Save</button>
+      </div>
+
+      <div class="panel-actions" id="playlistDeleteRow" style="margin-top:8px;display:none">
+        <button id="playlistDeleteBtn" class="btn danger">🗑️ Delete playlist</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="language.js"></script>
+  <script>
+window.initPlaylistsView = function() {
+  const isEmbed = new URLSearchParams(location.search).get('embed') === '1';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBzCiSmy714eAS_sDQffBHHhN3HkPniIKk",
+      authDomain: "niko-music-1d585.firebaseapp.com",
+      projectId: "niko-music-1d585",
+      storageBucket: "niko-music-1d585.firebasestorage.app",
+      messagingSenderId: "223346886059",
+      appId: "1:223346886059:web:e6e76ad23663de701b7eee",
+      measurementId: "G-L9ZY3FYN1R"
+    };
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    const db = firebase.firestore();
+
+    function getRole() { return localStorage.getItem('siteRole') || 'guest'; }
+    const role = getRole();
+    const isAdmin = role === 'admin';
+    const isPartner = role === 'partner';
+
+    let currentPlaylistId = null;
+    let currentCoverBlob = null;
+
+    function isVisibleToRole(p) {
+      if (p.visibility === 'admin') return role === 'admin';
+      if (p.visibility === 'partner') return role === 'admin' || role === 'partner';
+      return true;
+    }
+
+    const WORKER_URL = "https://r2-upload-proxy.nikolfar91.workers.dev/upload";
+
+    async function uploadToWorker(file, folder, fileName) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', folder);
+      formData.append('fileName', fileName);
+      const response = await fetch(WORKER_URL, { method: 'POST', body: formData });
+      const data = await response.json();
+      return data.url;
+    }
+
+    function createAddCard() {
+      const div = document.createElement('div');
+      div.className = 'playlist-card add-card';
+      div.innerHTML = `
+        <div class="playlist-cover-wrap">
+          <span class="add-icon">+</span>
+          <span class="add-label">New</span>
+        </div>
+        <div class="playlist-info">
+          <div class="playlist-name">Create playlist</div>
+          <div class="playlist-meta">Add your songs</div>
+        </div>
+      `;
+      div.addEventListener('click', () => openPlaylistModal(null, null));
+      return div;
+    }
+
+    function getOwnerBadge(ownerRole) {
+      if (isPartner && ownerRole === 'partner') return { text: 'My', cls: 'my' };
+      if (isAdmin && ownerRole === 'partner') return { text: 'Partner', cls: 'partner' };
+      return null;
+    }
+
+    function canManagePlaylist(ownerRole) {
+      if (isAdmin) return true;
+      if (isPartner && ownerRole === 'partner') return true;
+      return false;
+    }
+
+    async function loadPlaylists() {
+      const container = document.getElementById('playlistsContainer');
+      container.innerHTML = '';
+      container.appendChild(createAddCard());
+
+      const snap = await db.collection('playlists').orderBy('createdAt', 'desc').get();
+      if (snap.empty) return;
+
+      snap.docs.forEach(doc => {
+        const p = doc.data();
+        if (!isVisibleToRole(p)) return;
+
+        const cover = p.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
+        const songCount = p.songCount || 0;
+        const ownerRole = p.ownerRole || 'user';
+        const vis = p.visibility || 'public';
+        const visIcon = vis === 'admin' ? '🔒' : vis === 'partner' ? '♥' : '🌍';
+
+        const badge = getOwnerBadge(ownerRole);
+        const manageable = canManagePlaylist(ownerRole);
+
+        const div = document.createElement('div');
+        div.className = 'playlist-card';
+        div.dataset.id = doc.id;
+
+        div.innerHTML = `
+          <div class="playlist-cover-wrap">
+            ${badge ? `<div class="owner-badge ${badge.cls}">${badge.text}</div>` : ''}
+            <img src="${cover}" alt="${p.name}" loading="lazy">
+            <div class="playlist-overlay">
+              ${manageable ? '<button class="overlay-btn edit-btn" title="Edit">✏️</button>' : ''}
+              ${manageable ? '<button class="overlay-btn danger delete-btn" title="Delete">🗑️</button>' : ''}
+            </div>
+          </div>
+          <div class="playlist-info">
+            <div class="playlist-name">${p.name}</div>
+            <div class="playlist-meta">${songCount} tracks <span class="dot"></span> ${visIcon}</div>
+          </div>
+        `;
+
+        div.addEventListener('click', (e) => {
+          if (e.target.closest('.overlay-btn')) return;
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({type: 'open-playlist', id: doc.id}, '*');
+          } else {
+            window.location.href = `playlist-view.html?id=${doc.id}`;
+          }
+        });
+
+        const editBtn = div.querySelector('.edit-btn');
+        if (editBtn) {
+          editBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openPlaylistModal(doc.id, p);
+          });
+        }
+
+        const delBtn = div.querySelector('.delete-btn');
+        if (delBtn) {
+          delBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!confirm('Delete this playlist?')) return;
+            db.collection('playlists').doc(doc.id).delete().then(() => loadPlaylists());
+          });
+        }
+
+        container.appendChild(div);
+      });
+    }
+
+    function openPlaylistModal(id, data) {
+      currentPlaylistId = id || null;
+      currentCoverBlob = null;
+
+      const modal = document.getElementById('playlistModal');
+      const titleEl = document.getElementById('playlistModalTitle');
+      const nameInput = document.getElementById('playlistNameInput');
+      const descInput = document.getElementById('playlistDescriptionInput');
+      const visSelect = document.getElementById('playlistVisibilitySelect');
+      const visRow = document.getElementById('visibilityRow');
+      const coverPreview = document.getElementById('playlistCoverPreview');
+      const deleteRow = document.getElementById('playlistDeleteRow');
+
+      if (visRow) visRow.style.display = isAdmin ? 'block' : 'none';
+
+      if (data) {
+        titleEl.textContent = 'Edit playlist';
+        nameInput.value = data.name || '';
+        descInput.value = data.description || '';
+        visSelect.value = data.visibility || 'public';
+        coverPreview.src = data.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
+        deleteRow.style.display = canManagePlaylist(data.ownerRole || '') ? 'flex' : 'none';
+      } else {
+        titleEl.textContent = 'New playlist';
+        nameInput.value = '';
+        descInput.value = '';
+        visSelect.value = 'public';
+        coverPreview.src = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
+        deleteRow.style.display = 'none';
+      }
+
+      modal.classList.add('open');
+    }
+
+    document.getElementById('playlistCancelBtn').addEventListener('click', () => {
+      document.getElementById('playlistModal').classList.remove('open');
+    });
+
+    document.getElementById('playlistCoverFile').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      currentCoverBlob = file;
+      document.getElementById('playlistCoverPreview').src = URL.createObjectURL(file);
+    });
+
+    async function uploadCoverIfNeeded(baseName) {
+      if (!currentCoverBlob) return null;
+      const ext = currentCoverBlob.name.split('.').pop();
+      const fileName = `${baseName}.${ext}`;
+      const coverUrl = await uploadToWorker(currentCoverBlob, 'NIKO_music_covers', fileName);
+      return { coverUrl, coverFileName: fileName };
+    }
+
+    document.getElementById('playlistSaveBtn').addEventListener('click', async () => {
+      const name = document.getElementById('playlistNameInput').value.trim();
+      const description = document.getElementById('playlistDescriptionInput').value.trim();
+      if (!name) { alert('Enter playlist name'); return; }
+
+      const visibility = isAdmin
+        ? (document.getElementById('playlistVisibilitySelect').value || 'public')
+        : 'partner';
+
+      const baseName = name.toLowerCase().replace(/\s+/g, '_').replace(/[^\w\-]/g, '');
+
+      let coverData = null;
+      try { coverData = await uploadCoverIfNeeded(baseName); }
+      catch (e) { console.error(e); alert('Cover upload error: ' + e.message); }
+
+      const payload = {
+        name, description, visibility,
+        ownerRole: role,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      if (coverData && coverData.coverUrl) {
+        payload.cover = coverData.coverUrl;
+        payload.coverFileName = coverData.coverFileName;
+      }
+
+      try {
+        if (currentPlaylistId) {
+          await db.collection('playlists').doc(currentPlaylistId).update(payload);
+        } else {
+          payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+          payload.songCount = 0;
+          await db.collection('playlists').add(payload);
+        }
+        document.getElementById('playlistModal').classList.remove('open');
+        await loadPlaylists();
+      } catch (e) {
+        console.error(e);
+        alert('Save error: ' + e.message);
+      }
+    });
+
+    document.getElementById('playlistDeleteBtn').addEventListener('click', async () => {
+      if (!currentPlaylistId) return;
+      if (!confirm('Delete this playlist?')) return;
+      await db.collection('playlists').doc(currentPlaylistId).delete();
+      document.getElementById('playlistModal').classList.remove('open');
+      await loadPlaylists();
+    });
+
+    loadPlaylists();
+};
+
+if (!false /* __appShell removed */) {
+  window.initPlaylistsView();
+}
+</script>
+</div>
+</body>
+</html>
