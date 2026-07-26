@@ -1343,3 +1343,38 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
     height: 18px;
   }
 }
+/* ===== ОВЕРЛЕЙ ЧАТА поверх всего ===== */
+#chat-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20000;              /* выше модалок, плеера и side-panel */
+  background: var(--bg);
+  transform: translateX(100%);
+  transition: transform .35s cubic-bezier(.4,0,.2,1);
+  display: none;
+  will-change: transform;
+}
+#chat-overlay.open {
+  display: block;
+  transform: translateX(0);
+}
+#chat-overlay iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--bg);
+}
+
+/* Невидимая зона свайпа справа (только мобила) */
+#chat-swipe-zone {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  z-index: 19999;
+  display: none;
+}
+@media (max-width: 880px) {
+  #chat-swipe-zone { display: block; }
+}
