@@ -1,19 +1,18 @@
 // ===============================
-// N1K∅ Service Worker — Offline Audio Cache
+// N1K∅ Service Worker — v3 (fixed scope)
 // ===============================
 
 const CACHE_NAME = 'niko-music-v3';
 const AUDIO_CACHE = 'niko-audio-v3';
 
-// [FIX] Относительные пути — работают и на localhost, и на GitHub Pages
 const STATIC_ASSETS = [
-  './NIKO.html',
-  './styles.css',
-  './player-core.js',
-  './visualizers.js',
-  './language.js',
-  './offline-cache.js',
-  './manifest.json'
+  'NIKO.html',
+  'styles.css',
+  'player-core.js',
+  'visualizers.js',
+  'language.js',
+  'offline-cache.js',
+  'manifest.json'
 ];
 
 const EXTERNAL_ASSETS = [
@@ -25,11 +24,9 @@ const EXTERNAL_ASSETS = [
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
-      // Кэшируем локальные ресурсы
       await cache.addAll(STATIC_ASSETS).catch(err => {
         console.warn('SW: Some static assets failed:', err);
       });
-      // Кэшируем внешние скрипты
       for (const url of EXTERNAL_ASSETS) {
         try {
           const response = await fetch(url, { mode: 'no-cors' });
@@ -57,13 +54,10 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
 
-  // Только GET
   if (e.request.method !== 'GET') return;
-  
-  // Игнорируем chrome-extension
   if (!url.protocol.startsWith('http')) return;
 
-  // Firebase / API — Network First
+  // Firebase / API
   if (url.hostname.includes('googleapis.com') || 
       url.hostname.includes('firebase') ||
       url.hostname.includes('gstatic.com') ||
@@ -74,25 +68,25 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Worker (R2 proxy) — только сеть
+  // Worker (R2 proxy)
   if (url.hostname.includes('workers.dev')) {
     e.respondWith(fetch(e.request));
     return;
   }
 
-  // Аудио — Cache First
+  // Аудио
   if (e.request.destination === 'audio' || url.pathname.match(/\.(mp3|wav|ogg|m4a|aac|flac)$/i)) {
     e.respondWith(audioCacheStrategy(e.request));
     return;
   }
 
-  // Обложки — Cache First
+  // Обложки
   if (e.request.destination === 'image' || url.pathname.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i)) {
     e.respondWith(imageCacheStrategy(e.request));
     return;
   }
 
-  // Внешние скрипты — Cache First
+  // Внешние скрипты
   if (EXTERNAL_ASSETS.includes(e.request.url)) {
     e.respondWith(cacheFirstStrategy(e.request, CACHE_NAME));
     return;
@@ -143,7 +137,7 @@ async function networkFirstStrategy(request) {
     const cached = await caches.match(request);
     if (cached) return cached;
     if (request.mode === 'navigate') {
-      return caches.match('./NIKO.html');
+      return caches.match('NIKO.html');
     }
     return new Response('Offline', { status: 503 });
   }
