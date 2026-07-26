@@ -10,7 +10,7 @@ const STATIC_ASSETS = [
   '/visualizers.js',
   '/language.js',
   '/offline-cache.js',
-  '/manifest.json'
+  '/manifest.json',
 ];
 
 const AUDIO_CACHE = 'niko-audio-v1';
