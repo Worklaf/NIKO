@@ -1742,8 +1742,12 @@ console.log('currentLang will be:', localStorage.getItem('siteLang') || 'en');
 const LETTERS = { admin: 'N', partner: 'P' };
 
   document.getElementById('back-btn').addEventListener('click', () => {
+  if (window.parent !== window) {
+    window.parent.postMessage('close-chat', '*');
+  } else {
     window.location.href = '../NIKO.html';
-  });
+  }
+});
 
     document.getElementById('exit-btn').addEventListener('click', () => {
     if (!confirm(t('exit_confirm'))) return;
@@ -5298,6 +5302,20 @@ function updateFloatingDate() {
   floatDate.textContent = day;
   floatDate.style.display = 'inline-block';
 }
+// ===== Закрытие чата свайпом по header (только в оверлее) =====
+(function(){
+  if (window.parent === window) return; // не в iframe — не нужно
+  const header = document.querySelector('header');
+  if (!header) return;
+  let hStart = 0;
+  header.addEventListener('touchstart', e => {
+    hStart = e.touches[0].clientX;
+  }, { passive: true });
+  header.addEventListener('touchend', e => {
+    const diff = e.changedTouches[0].clientX - hStart; // >0 = вправо
+    if (diff > 60) window.parent.postMessage('close-chat', '*');
+  }, { passive: true });
+})();
 </script>
 </body>
 </html>
