@@ -1590,28 +1590,50 @@ window.addEventListener('message', (e) => {
   if (e.data === 'close-chat') closeChatOverlay();
 });
 
-// --- Свайп с правого края экрана для открытия чата ---
-const EDGE_WIDTH = 24; // px от правого края
-let edgeStartX = 0;
-let edgeStartY = 0;
+// --- Свайп слева направо в любом месте экрана для открытия чата ---
+let chatSwipeStartX = 0;
+let chatSwipeStartY = 0;
+let chatSwipeActive = false;
 
 document.addEventListener('touchstart', (e) => {
   if (chatOpen) return;
   if (getRole() === 'guest') return;
+
+  // Не перехватываем свайп на интерактивных элементах и треках,
+  // чтобы не мешать кнопкам, поиску, скроллу плейлистов и свайпу текста песни
+  if (e.target.closest('button, a, input, textarea, select, .track, #mini-player, .side-panel, .modal, .lang-dropdown, .search-wrap')) return;
+
   const t = e.touches[0];
-  if (window.innerWidth - t.clientX <= EDGE_WIDTH) {
-    edgeStartX = t.clientX;
-    edgeStartY = t.clientY;
+  chatSwipeStartX = t.clientX;
+  chatSwipeStartY = t.clientY;
+  chatSwipeActive = true;
+}, { passive: true });
+
+document.addEventListener('touchmove', (e) => {
+  if (!chatSwipeActive || chatOpen || getRole() === 'guest') return;
+  const t = e.touches[0];
+  const diffX = t.clientX - chatSwipeStartX;
+  const diffY = Math.abs(t.clientY - chatSwipeStartY);
+
+  // Если ушли сильно вверх/вниз — отменяем свайп чата
+  if (diffY > 60 && diffY > diffX) {
+    chatSwipeActive = false;
   }
 }, { passive: true });
 
 document.addEventListener('touchend', (e) => {
-  if (!edgeStartX) return;
+  if (!chatSwipeActive || chatOpen || getRole() === 'guest') return;
+
   const t = e.changedTouches[0];
-  const diffX = edgeStartX - t.clientX; // >0 = влево
-  const diffY = Math.abs(t.clientY - edgeStartY);
-  if (diffX > 80 && diffY < 70) openChatOverlay();
-  edgeStartX = 0;
+  const diffX = t.clientX - chatSwipeStartX; // >0 = вправо
+  const diffY = Math.abs(t.clientY - chatSwipeStartY);
+
+  // Чёткий горизонтальный свайп вправо
+  if (diffX > 100 && diffY < 60) {
+    openChatOverlay();
+  }
+
+  chatSwipeActive = false;
 }, { passive: true });
 
 // (Опционально) если хочешь, чтобы и логотип тоже открывал чат поверх,
