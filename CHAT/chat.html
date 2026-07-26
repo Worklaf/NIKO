@@ -5326,6 +5326,55 @@ function updateFloatingDate() {
     }
   }, { passive: true });
 })();
+// === Глобальный свайп закрытия по пустому месту (только если открыт через свайп) ===
+const isSwipeOpened = window.location.search.includes('swipe=1');
+const isInIframe = window.parent !== window;
+
+if (isSwipeOpened && isInIframe) {
+  let closeSwipeStartX = 0;
+  let closeSwipeStartY = 0;
+  let closeSwipeActive = false;
+
+  document.addEventListener('touchstart', (e) => {
+    // Игнорируем всё интерактивное и сами сообщения
+    if (e.target.closest(
+      'button, a, input, textarea, select, .msg-wrap, .bubble, #input-bar, ' +
+      '.emoji-panel, #search-panel, .modal, #img-viewer, #recording-bar, ' +
+      '.file-card, .voice-msg, .link-preview, video, audio, img, .day-sep, ' +
+      '.msg-context-menu, #delete-modal, #trash-modal, #profile-modal'
+    )) return;
+
+    const t = e.touches[0];
+    closeSwipeStartX = t.clientX;
+    closeSwipeStartY = t.clientY;
+    closeSwipeActive = true;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!closeSwipeActive) return;
+    const t = e.touches[0];
+    const diffX = closeSwipeStartX - t.clientX; // >0 = влево (справа налево)
+    const diffY = Math.abs(t.clientY - closeSwipeStartY);
+
+    // Если ушли сильнее вверх/вниз — отменяем
+    if (diffY > 60 && diffY > diffX) {
+      closeSwipeActive = false;
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    if (!closeSwipeActive) return;
+    const t = e.changedTouches[0];
+    const diffX = closeSwipeStartX - t.clientX;
+    const diffY = Math.abs(t.clientY - closeSwipeStartY);
+
+    // Чёткий горизонтальный свайп влево по пустому месту
+    if (diffX > 80 && diffY < 60) {
+      window.parent.postMessage('close-chat', '*');
+    }
+    closeSwipeActive = false;
+  }, { passive: true });
+}
 </script>
 </body>
 </html>
