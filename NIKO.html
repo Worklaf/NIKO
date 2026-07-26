@@ -1599,10 +1599,9 @@ document.addEventListener('touchstart', (e) => {
   if (chatOpen) return;
   if (getRole() === 'guest') return;
 
-  // Не перехватываем свайп на интерактивных элементах и треках,
-  // чтобы не мешать кнопкам, поиску, скроллу плейлистов и свайпу текста песни
-  if (e.target.closest('button, a, input, textarea, select, .track, #mini-player, .side-panel, .modal, .lang-dropdown, .search-wrap')) return;
-
+    // Не перехватываем свайп только на интерактивных элементах,
+  // мини-плеере и открытых модалках/панелях
+  if (e.target.closest('button, a, input, textarea, select, #mini-player, .side-panel.open, .modal.open')) return;
   const t = e.touches[0];
   chatSwipeStartX = t.clientX;
   chatSwipeStartY = t.clientY;
