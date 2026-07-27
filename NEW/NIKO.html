@@ -1160,14 +1160,12 @@ async function loadOfflineTracksFirst() {
     const role = getRole();
     globalTracks = offlineTracks.filter(track => isVisibleToRole(track, role));
     console.log('✅ Loaded', globalTracks.length, 'tracks from IndexedDB');
-    
-    // [CRITICAL] Рендерим СРАЗУ, не ждем Firestore
     applySortAndRender();
-    updateOfflineIndicator();
+    if (typeof updateOfflineIndicator === 'function') {
+      updateOfflineIndicator();
+    }
     return true;
   }
-  
-  console.log('⚠️ No tracks in IndexedDB');
   return false;
 }
 
