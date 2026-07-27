@@ -6,6 +6,7 @@ const CACHE_NAME = 'niko-music-v3';
 const AUDIO_CACHE = 'niko-audio-v3';
 
 const STATIC_ASSETS = [
+  './',
   './NIKO.html',
   './styles.css',
   './player-core.js',
@@ -194,9 +195,15 @@ async function networkFirstStrategy(request) {
   } catch {
     const cached = await caches.match(request);
     if (cached) return cached;
+    
+    // [FIX] Для навигации — отдаём главную страницу
     if (request.mode === 'navigate') {
-      return caches.match('./NIKO.html');
+      const cachedMain = await caches.match('./index.html') || 
+                        await caches.match('./') ||
+                        await caches.match('./NIKO.html');
+      if (cachedMain) return cachedMain;
     }
+    
     return new Response('Offline', { status: 503 });
   }
 }
