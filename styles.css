@@ -1343,6 +1343,243 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
     height: 18px;
   }
 }
+/* ===== SKELETON LOADERS ===== */
+.skeleton {
+  background: linear-gradient(90deg, 
+    rgba(255,255,255,0.03) 25%, 
+    rgba(255,255,255,0.08) 50%, 
+    rgba(255,255,255,0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-track {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background: linear-gradient(180deg, var(--card), #0a0910);
+  border-radius: var(--radius);
+  border: 1px solid rgba(255,255,255,0.02);
+}
+
+.skeleton-thumb {
+  width: 120px;
+  height: 200px;
+  flex: 0 0 120px;
+  border-radius: 8px;
+}
+
+.skeleton-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-title {
+  height: 24px;
+  width: 80%;
+  border-radius: 6px;
+}
+
+.skeleton-meta {
+  height: 16px;
+  width: 60%;
+  border-radius: 4px;
+}
+
+.skeleton-btn {
+  height: 36px;
+  width: 80px;
+  border-radius: 8px;
+  margin-top: auto;
+}
+
+.skeleton-playlist {
+  width: 100%;
+  height: 180px;
+  border-radius: 12px;
+  margin-bottom: 14px;
+}
+
+.skeleton-mini-player {
+  height: 96px;
+  width: 100%;
+  border-radius: 12px;
+}
+
+/* ===== DOWNLOAD BUTTON FIX ===== */
+#mini-download, .download-btn {
+  cursor: pointer;
+}
+
+/* ===== SHARE MODAL ===== */
+.share-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100000;
+  backdrop-filter: blur(8px);
+}
+
+.share-modal.open {
+  display: flex;
+}
+
+.share-modal-content {
+  background: linear-gradient(180deg, #0b0b10, #07060a);
+  border-radius: 20px;
+  padding: 24px;
+  width: 90%;
+  max-width: 400px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  animation: modalSlideUp 0.3s ease;
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.share-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.share-modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.share-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.share-modal-close:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.share-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.share-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.share-option:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 77, 166, 0.3);
+  transform: translateY(-2px);
+}
+
+.share-option-icon {
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.share-option-text {
+  flex: 1;
+  font-weight: 600;
+  color: #eaeaf2;
+}
+
+.share-modal-socials {
+  display: none;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.share-modal-socials.open {
+  display: grid;
+}
+
+.social-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.social-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 77, 166, 0.3);
+  transform: translateY(-2px);
+}
+
+.social-icon {
+  font-size: 28px;
+}
+
+.social-name {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .share-modal-socials {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 /* ===== ОВЕРЛЕЙ ЧАТА поверх всего ===== */
 #chat-overlay {
   position: fixed;
@@ -1377,4 +1614,99 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
 }
 @media (max-width: 880px) {
   #chat-swipe-zone { display: block; }
+}
+
+/* ===== MINI-PLAYER & TRACK BUTTON HOVER GLOWS ===== */
+.mini-actions .btn.icon,
+#mini-right .btn.icon,
+.track .actions .btn.icon,
+.track .play-row .btn.icon {
+  transition: all 0.2s ease;
+}
+
+/* Share — Pink glow */
+#mini-share:hover svg,
+.mini-actions .share-svg-btn:hover svg,
+.track .share-btn:hover svg {
+  stroke: #ff4da6;
+  filter: drop-shadow(0 0 6px rgba(255, 77, 166, 0.5));
+  transform: scale(1.1);
+}
+
+/* Download — Cyan glow */
+#mini-download:hover svg,
+.mini-actions .download-btn:hover svg,
+.track .play-row .download-btn:hover svg {
+  stroke: #00E5FF;
+  filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.5));
+  transform: scale(1.1);
+}
+
+/* Text — Orange glow */
+#mini-open-text:hover,
+.track .play-row .open-text-btn:hover {
+  color: #ff7a4d;
+  filter: drop-shadow(0 0 6px rgba(255, 122, 77, 0.5));
+  transform: scale(1.1);
+}
+
+/* Comments — Green glow */
+#mini-comment:hover,
+.track .play-row .comment-btn:hover {
+  color: #4dff8a;
+  filter: drop-shadow(0 0 6px rgba(77, 255, 138, 0.5));
+  transform: scale(1.1);
+}
+
+/* Like — Pink glow */
+#mini-like:hover {
+  color: #ff4da6;
+  filter: drop-shadow(0 0 6px rgba(255, 77, 166, 0.5));
+  transform: scale(1.1);
+}
+
+/* Dislike — Red glow */
+#mini-dislike:hover {
+  color: #ff4d4d;
+  filter: drop-shadow(0 0 6px rgba(255, 77, 77, 0.5));
+  transform: scale(1.1);
+}
+
+/* Visualizer — Cyan glow */
+#mini-visualizer:hover {
+  color: #00E5FF;
+  filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.5));
+  transform: scale(1.1);
+}
+
+/* Playlist "Add tracks" button — unify with other nav buttons */
+#open-add-to-playlist-top.nav-btn {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #eaeaf2;
+  box-shadow: none;
+}
+#open-add-to-playlist-top.nav-btn:hover {
+  background: rgba(255,255,255,0.09);
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,0.14);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  color: #fff;
+}
+
+/* Add to playlist — Gold glow */
+.track .play-row .add-to-playlist-btn:hover,
+.track .actions .add-to-playlist-btn:hover {
+  color: #ffd700;
+  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.5));
+  transform: scale(1.1);
+}
+
+/* Open text — Orange glow (unified for all pages) */
+.track .play-row .open-text-btn:hover,
+.track .actions .open-text-btn:hover,
+#mini-open-text:hover {
+  color: #ff7a4d;
+  filter: drop-shadow(0 0 6px rgba(255, 122, 77, 0.5));
+  transform: scale(1.1);
 }
