@@ -1,4 +1,4 @@
-// db.js — ЗАГРУЖАТЬ ПЕРВЫМ, до всех остальных скриптов
+// db.js — ТОЛЬКО IndexedDB, без Service Worker!
 
 const DB_NAME = 'niko-offline-db';
 const DB_VERSION = 1;
@@ -52,6 +52,5 @@ async function getTracksFromDB() {
   }
 }
 
-// Глобальные алиасы
 window.saveTracksToDB = saveTracksToDB;
 window.getTracksFromDB = getTracksFromDB;
