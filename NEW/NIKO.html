@@ -733,22 +733,11 @@
     </div>
   </div>
 </div>
-<script src="db.js"></script>
-	<script src="offline-cache.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script>
-  // ВРЕМЕННЫЙ ДЕБАГ — удали после проверки
-  window.addEventListener('error', (e) => console.error('GLOBAL ERROR:', e.message, e.filename, e.lineno));
-  window.addEventListener('unhandledrejection', (e) => console.reject('UNHANDLED:', e.reason));
-  
-  // Логируем каждый шаг загрузки
-  const originalLog = console.log;
-  console.log = function(...args) {
-    originalLog.apply(console, ['[NIKO]', ...args]);
-  };
-</script>
+
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyBzCiSmy714eAS_sDQffBHHhN3HkPniIKk",
@@ -1119,116 +1108,75 @@ function subscribePlaylists() {
 }
 
 function subscribeTracks() {
-  if (!db) {
-    console.warn('Firestore not initialized — loading from IndexedDB only');
-    loadOfflineTracksOnly();
-    return;
-  }
-
-  // [CRITICAL] Сначала показываем кэш мгновенно
-  loadOfflineTracksFirst().then(() => {
-    // Потом подписываемся на Firestore (если онлайн)
-    db.collection('tracks').orderBy('createdAt', 'desc').onSnapshot(snap => {
-      const role = getRole();
-      let tracks = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(track => {
-        if (!isVisibleToRole(track, role)) return false;
-        if (track.playlistId) {
-          const pl = globalPlaylists.find(p => p.id === track.playlistId);
-          if (pl && !isVisibleToRole(pl, role)) return false;
-        }
-        return true;
-      });
-      
-      globalTracks = tracks;
-      saveTracksToDB(tracks).catch(e => console.warn('DB save failed:', e));
-      
-      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({
-          type: 'SAVE_TRACKS',
-          tracks: tracks
-        });
-      }
-      
-      applySortAndRender();
-    }, err => { 
-      console.warn('Firestore error (offline?):', err);
-      // IndexedDB уже загружен выше
-    });
-  });
-}
-// [NEW] Загружает из IndexedDB и рендерит — с защитой от гонки
-async function loadOfflineTracksFirst() {
-  console.log('📦 Loading offline tracks...');
+  if (!db) return console.warn('Firestore not initialized');
   
-  // [CRITICAL] Ждём готовности DOM
-  if (document.readyState === 'loading') {
-    await new Promise(resolve => {
-      document.addEventListener('DOMContentLoaded', resolve, { once: true });
-    });
-  }
-  
-  const offlineTracks = await getTracksFromDB();
-  
-  if (offlineTracks && offlineTracks.length > 0) {
+  db.collection('tracks').orderBy('createdAt', 'desc').onSnapshot(snap => {
     const role = getRole();
-    globalTracks = offlineTracks.filter(track => isVisibleToRole(track, role));
-    console.log('✅ Loaded', globalTracks.length, 'tracks from IndexedDB');
-    
-    // [CRITICAL] Рендерим через setTimeout чтобы не блокировать поток
-    setTimeout(() => {
-      applySortAndRender();
-      updateOfflineIndicator?.();
-    }, 0);
-    
-    return true;
-  }
-  
-  console.log('⚠️ No tracks in IndexedDB');
-  return false;
-}
-
-// [NEW] Только IndexedDB, без Firestore
-async function loadOfflineTracksOnly() {
-  const hasTracks = await loadOfflineTracksFirst();
-  
-  if (!hasTracks) {
-    // [CRITICAL] Показываем сообщение даже если DOM ещё не готов
-    const showEmpty = () => {
-      const list = document.getElementById('tracksList');
-      if (list) {
-        list.innerHTML = `
-          <div class="empty-state">
-            <h2>📴 Офлайн-режим</h2>
-            <p>Нет кэшированных треков. Подключитесь к интернету для загрузки.</p>
-          </div>
-        `;
+    let tracks = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(track => {
+      if (!isVisibleToRole(track, role)) return false;
+      if (track.playlistId) {
+        const pl = globalPlaylists.find(p => p.id === track.playlistId);
+        if (pl && !isVisibleToRole(pl, role)) return false;
       }
-    };
+      return true;
+    });
     
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', showEmpty, { once: true });
-    } else {
-      showEmpty();
+    globalTracks = tracks;
+    
+    // [NEW] Сохраняем треки для offline
+    saveTracksToDB(tracks).catch(e => console.warn('DB save failed:', e));
+    
+    // [NEW] Также шлём в SW
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: 'SAVE_TRACKS',
+        tracks: tracks
+      });
     }
-  }
+    
+    applySortAndRender();
+  }, async err => { 
+    console.warn('tracks snapshot error', err);
+    
+    // [NEW] Offline fallback: загружаем из IndexedDB
+    if (!navigator.onLine) {
+      console.log('📴 Offline mode — loading from IndexedDB');
+      try {
+        const offlineTracks = await getTracksFromDB();
+        if (offlineTracks && offlineTracks.length > 0) {
+          const role = getRole();
+          globalTracks = offlineTracks.filter(track => isVisibleToRole(track, role));
+          applySortAndRender();
+          
+          // Обновляем индикатор
+          const indicator = document.getElementById('offline-indicator');
+          if (indicator) {
+            indicator.textContent = '📴 Офлайн — показаны кэшированные треки (' + globalTracks.length + ')';
+            indicator.style.display = 'block';
+          }
+        } else {
+          document.getElementById('tracksList').innerHTML = `
+            <div class="empty-state">
+              <h2>📴 Офлайн-режим</h2>
+              <p>Нет кэшированных треков. Подключитесь к интернету для загрузки.</p>
+            </div>
+          `;
+        }
+      } catch (e) {
+        console.error('Offline load failed:', e);
+      }
+    }
+  });
 }
 
 function applySortAndRender() {
   let tracks = [...globalTracks];
-  
-  // [NEW] Если треков нет — не ломаем UI
-  if (tracks.length === 0) {
-    console.log('⚠️ No tracks to render');
-    return;
-  }
-  
   if (currentSortMode === 'plays-desc') tracks.sort((a, b) => (b.plays || 0) - (a.plays || 0));
   else if (currentSortMode === 'plays-asc') tracks.sort((a, b) => (a.plays || 0) - (b.plays || 0));
   else if (currentSortMode === 'likes-desc') tracks.sort((a, b) => (b.likes || 0) - (a.likes || 0));
   else if (currentSortMode === 'likes-asc') tracks.sort((a, b) => (a.likes || 0) - (b.likes || 0));
   else if (currentSortMode === 'title-asc') tracks.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
   else if (currentSortMode === 'title-desc') tracks.sort((a, b) => (b.title || '').localeCompare(a.title || ''));
-  
   renderDraftTracks(tracks);
   updateNewTracksBadge();
   filterTracks();
@@ -1907,17 +1855,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadAccessHashes();
   await loadListenedFromFirebase();
   await loadPartnerListens();
-  
-  // [CRITICAL] Подписка на треки — сначала кэш, потом Firestore
-  subscribeTracks();
-  
-  subscribePlaylists();
-  initWavesurfer();
 
   const langBtn = document.getElementById('lang-' + (window.currentLang || 'en'));
   if (langBtn) langBtn.classList.add('active');
 
-  
+  subscribeTracks();
+  subscribePlaylists();
+  initWavesurfer();
   initEmojiSystem();
   updateShuffleButton();
   if (typeof applyTranslations === 'function') applyTranslations();
@@ -3088,7 +3032,7 @@ window.updateTrackPlayIcons = function() {
     <line x1="15" y1="12" x2="3" y2="12"/>
   </svg>
 </button>
-
+<script src="offline-cache.js"></script>
 <script src="player-core.js"></script>
 <script src="visualizers.js"></script>
 <script src="language.js"></script>
@@ -3499,18 +3443,6 @@ function showUpdateToast() {
   toast.onclick = () => location.reload();
   document.body.appendChild(toast);
 }
-	// PWA Install prompt
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  console.log('PWA install available');
-});
-
-window.addEventListener('appinstalled', () => {
-  console.log('PWA installed');
-  deferredPrompt = null;
-});
 </script>
 </body>
 </html>
