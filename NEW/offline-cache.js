@@ -8,56 +8,7 @@ const STATIC_CACHE_NAME = 'niko-music-v3';     // ДОЛЖНО совпадат�
 const DB_NAME = 'niko-offline-db';
 const DB_VERSION = 1;
 const TRACKS_STORE = 'tracks';
-// ===============================
-// IndexedDB для offline-треков
-// ===============================
 
-const DB_NAME = 'niko-offline-db';
-const DB_VERSION = 1;
-const TRACKS_STORE = 'tracks';
-
-function openTracksDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onerror = () => reject(req.error);
-    req.onsuccess = () => resolve(req.result);
-    req.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(TRACKS_STORE)) {
-        db.createObjectStore(TRACKS_STORE, { keyPath: 'id' });
-      }
-    };
-  });
-}
-
-async function saveTracksToDB(tracks) {
-  const db = await openTracksDB();
-  const tx = db.transaction(TRACKS_STORE, 'readwrite');
-  const store = tx.objectStore(TRACKS_STORE);
-  await store.clear();
-  for (const track of tracks) {
-    store.put(track);
-  }
-  return new Promise((resolve, reject) => {
-    tx.oncomplete = resolve;
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-async function getTracksFromDB() {
-  const db = await openTracksDB();
-  const tx = db.transaction(TRACKS_STORE, 'readonly');
-  const store = tx.objectStore(TRACKS_STORE);
-  return new Promise((resolve, reject) => {
-    const req = store.getAll();
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-// Экспортируем глобально
-window.saveTracksToDB = saveTracksToDB;
-window.getTracksFromDB = getTracksFromDB;
 // === 1. Регистрация Service Worker (если ещё не зарегистрирован) ===
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -86,54 +37,7 @@ function openOfflineDB() {
   });
 }
 
-// === 3. INDEXEDDB: Сохранение треков ===
-async function saveTracksToDB(tracks) {
-  if (!tracks || !tracks.length) return;
-  try {
-    const db = await openOfflineDB();
-    const tx = db.transaction(TRACKS_STORE, 'readwrite');
-    const store = tx.objectStore(TRACKS_STORE);
-    
-    // Очищаем старые треки
-    await new Promise((resolve, reject) => {
-      const clearReq = store.clear();
-      clearReq.onsuccess = () => resolve();
-      clearReq.onerror = () => reject(clearReq.error);
-    });
-    
-    // Сохраняем новые
-    for (const track of tracks) {
-      store.put(track);
-    }
-    
-    await new Promise((resolve, reject) => {
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error);
-    });
-    
-    console.log('💾 Saved', tracks.length, 'tracks to IndexedDB');
-  } catch (e) {
-    console.warn('❌ saveTracksToDB failed:', e);
-  }
-}
 
-// === 4. INDEXEDDB: Загрузка треков ===
-async function getTracksFromDB() {
-  try {
-    const db = await openOfflineDB();
-    const tx = db.transaction(TRACKS_STORE, 'readonly');
-    const store = tx.objectStore(TRACKS_STORE);
-    
-    return new Promise((resolve, reject) => {
-      const req = store.getAll();
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = () => reject(req.error);
-    });
-  } catch (e) {
-    console.warn('❌ getTracksFromDB failed:', e);
-    return [];
-  }
-}
 
 // === 5. CACHE API: Проверка, закэширован ли аудио-файл ===
 async function isTrackCached(url) {
