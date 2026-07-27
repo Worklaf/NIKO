@@ -5,6 +5,8 @@
   <title>NIKO – Playlists</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ff4da6">
   <style>
     /* ===== СБРОС глобальных стилей styles.css ===== */
     html, body {
@@ -328,12 +330,15 @@
     }
     .btn.danger:hover { background: rgba(255,0,0,0.2); }
   </style>
+<base target="_blank">
+<base target="_blank">
 </head>
 <body>
+<div id="spa-playlists-content">
 
   <!-- Верхняя полоска -->
   <div class="top-bar">
-    <a href="NIKO.html" class="back-btn" title="Back to player">←</a>
+    <a href="#" class="back-btn" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage('close-playlists','*');return false;}location.href='NIKO.html';return false;" title="Back to player">←</a>
   </div>
 
   <!-- Заголовок -->
@@ -377,6 +382,10 @@
           <option value="admin">🔒 Only admin</option>
         </select>
       </div>
+      <div class="panel-row" id="hideFromHomeRow" style="display:flex;align-items:center;gap:10px;background:rgba(255,77,166,0.08);border:1px solid rgba(255,77,166,0.2);border-radius:10px;padding:10px 12px;">
+        <input type="checkbox" id="playlistHideFromHome" style="width:20px;height:20px;cursor:pointer;accent-color:#ff4da6;flex-shrink:0;">
+        <label for="playlistHideFromHome" style="margin:0;cursor:pointer;color:#eaeaf2;font-weight:600;font-size:13px;">👁️‍🗨️ Hide tracks from home page</label>
+      </div>
 
       <div class="panel-actions">
         <button id="playlistCancelBtn" class="btn">Cancel</button>
@@ -393,6 +402,9 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
   <script src="language.js"></script>
   <script>
+window.initPlaylistsView = function() {
+  const isEmbed = new URLSearchParams(location.search).get('embed') === '1';
+
     const firebaseConfig = {
       apiKey: "AIzaSyBzCiSmy714eAS_sDQffBHHhN3HkPniIKk",
       authDomain: "niko-music-1d585.firebaseapp.com",
@@ -402,7 +414,7 @@
       appId: "1:223346886059:web:e6e76ad23663de701b7eee",
       measurementId: "G-L9ZY3FYN1R"
     };
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
     function getRole() { return localStorage.getItem('siteRole') || 'guest'; }
@@ -432,21 +444,36 @@
     }
 
     function createAddCard() {
-      const div = document.createElement('div');
-      div.className = 'playlist-card add-card';
-      div.innerHTML = `
-        <div class="playlist-cover-wrap">
-          <span class="add-icon">+</span>
-          <span class="add-label">New</span>
-        </div>
-        <div class="playlist-info">
-          <div class="playlist-name">Create playlist</div>
-          <div class="playlist-meta">Add your songs</div>
-        </div>
-      `;
-      div.addEventListener('click', () => openPlaylistModal(null, null));
-      return div;
+  const div = document.createElement('div');
+  div.className = 'playlist-card add-card';
+  div.innerHTML = `
+    <div class="playlist-cover-wrap">
+      <span class="add-icon">+</span>
+      <span class="add-label">New</span>
+    </div>
+    <div class="playlist-info">
+      <div class="playlist-name">Create playlist</div>
+      <div class="playlist-meta">Add your songs</div>
+    </div>
+  `;
+  
+  div.addEventListener('click', () => {
+    if (role === 'guest') {
+      // Гость → переход на главную с флагом открытия логина
+      if (window.parent && window.parent !== window) {
+        // Внутри iframe — шлём команду родителю
+        window.parent.postMessage('open-login', '*');
+      } else {
+        // Обычный переход
+        window.location.href = 'NIKO.html?openLogin=1';
+      }
+      return;
     }
+    openPlaylistModal(null, null);
+  });
+  
+  return div;
+}
 
     function getOwnerBadge(ownerRole) {
       if (isPartner && ownerRole === 'partner') return { text: 'My', cls: 'my' };
@@ -496,13 +523,17 @@
           </div>
           <div class="playlist-info">
             <div class="playlist-name">${p.name}</div>
-            <div class="playlist-meta">${songCount} tracks <span class="dot"></span> ${visIcon}</div>
+            <div class="playlist-meta">${songCount} tracks <span class="dot"></span> ${visIcon}${p.hideFromHome ? ' <span style="opacity:.6;margin-left:4px;" title="Hidden from home">👁️‍🗨️</span>' : ''}</div>
           </div>
         `;
 
         div.addEventListener('click', (e) => {
           if (e.target.closest('.overlay-btn')) return;
-          window.location.href = `playlist-view.html?id=${doc.id}`;
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({type: 'open-playlist', id: doc.id}, '*');
+          } else {
+            window.location.href = `playlist-view.html?id=${doc.id}`;
+          }
         });
 
         const editBtn = div.querySelector('.edit-btn');
@@ -540,12 +571,16 @@
       const deleteRow = document.getElementById('playlistDeleteRow');
 
       if (visRow) visRow.style.display = isAdmin ? 'block' : 'none';
+      const hideRow = document.getElementById('hideFromHomeRow');
+      if (hideRow) hideRow.style.display = isAdmin ? 'flex' : 'none';
 
+      const hideCheck = document.getElementById('playlistHideFromHome');
       if (data) {
         titleEl.textContent = 'Edit playlist';
         nameInput.value = data.name || '';
         descInput.value = data.description || '';
         visSelect.value = data.visibility || 'public';
+        if (hideCheck) hideCheck.checked = !!data.hideFromHome;
         coverPreview.src = data.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
         deleteRow.style.display = canManagePlaylist(data.ownerRole || '') ? 'flex' : 'none';
       } else {
@@ -553,6 +588,7 @@
         nameInput.value = '';
         descInput.value = '';
         visSelect.value = 'public';
+        if (hideCheck) hideCheck.checked = false;
         coverPreview.src = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
         deleteRow.style.display = 'none';
       }
@@ -594,8 +630,9 @@
       try { coverData = await uploadCoverIfNeeded(baseName); }
       catch (e) { console.error(e); alert('Cover upload error: ' + e.message); }
 
+      const hideFromHome = !!document.getElementById('playlistHideFromHome')?.checked;
       const payload = {
-        name, description, visibility,
+        name, description, visibility, hideFromHome,
         ownerRole: role,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       };
@@ -628,9 +665,13 @@
       await loadPlaylists();
     });
 
-    document.addEventListener('DOMContentLoaded', () => {
-      loadPlaylists();
-    });
-  </script>
+    loadPlaylists();
+};
+
+if (!false /* __appShell removed */) {
+  window.initPlaylistsView();
+}
+</script>
+</div>
 </body>
 </html>
