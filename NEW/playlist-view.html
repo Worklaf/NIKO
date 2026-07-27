@@ -588,6 +588,8 @@
   <base target="_self">
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
+<base target="_blank">
 </head>
 <body>
 <!-- [FIX] Индикатор офлайн-режима -->
@@ -604,7 +606,7 @@
         <div class="playlist-meta">
           <h1 id="playlistName">Playlist</h1>
           <p id="playlistDesc"></p>
-          <p id="playlistCount">0 track(s)</p>
+          <p id="playlistCount">0 track(s) <span id="playlistHiddenBadge" style="display:none;font-size:12px;opacity:.6;margin-left:8px;">👁️‍🗨️ Hidden from home</span></p>
           <div class="playlist-bg-toggle">
             <label for="bg-selector">🎨 Background</label>
             <select id="bg-selector">
@@ -618,6 +620,12 @@
               <option value="none">Solid color</option>
             </select>
           </div>
+          <div class="playlist-bg-toggle" id="hideFromHomeWrap" style="margin-top:12px;display:none;background:rgba(255,77,166,0.08);border:1px solid rgba(255,77,166,0.2);border-radius:10px;padding:10px 12px;">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;font-weight:600;">
+              <input type="checkbox" id="playlistHideFromHomeToggle" style="width:20px;height:20px;cursor:pointer;accent-color:#ff4da6;flex-shrink:0;">
+              <span>👁️‍🗨️ Hide tracks from home page</span>
+            </label>
+          </div>
         </div>
       </div>
     </div>
@@ -628,7 +636,7 @@
       <div class="playlist-actions-bar">
         <a class="nav-btn" href="#" title="Home" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage('go-home','*');return false;}location.href='NIKO.html';return false;">🏠 Home</a>
         <a class="nav-btn" href="#" title="Playlists" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage('show-playlists','*');return false;}location.href='playlists.html';return false;">📁 Playlists</a>
-        <button id="open-add-to-playlist-top" class="nav-btn nav-btn-primary">➕ Add tracks</button>
+        <button id="open-add-to-playlist-top" class="nav-btn">➕ Add tracks</button>
       </div>
 
       <!-- Filters -->
@@ -709,8 +717,22 @@
         <button id="mini-dislike" class="btn icon" aria-label="Dislike" title="Dislike">👎</button>
         <button id="mini-visualizer" class="btn icon visualizer-btn" aria-label="Visualizer" title="Visualizer">🌀</button>
         <button id="mini-comment" class="btn icon" aria-label="Comments" title="Comments">💬</button>
-        <button id="mini-share" class="btn icon" aria-label="Share" title="Share">🔗</button>
-        <a id="mini-download" class="btn icon" href="#" download aria-label="Download" title="Download">⬇️</a>
+        <button id="mini-share" class="btn icon share-svg-btn" aria-label="Share" title="Share">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="18" cy="5" r="3"/>
+          <circle cx="6" cy="12" r="3"/>
+          <circle cx="18" cy="19" r="3"/>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+        </svg>
+      </button>
+        <a id="mini-download" class="btn icon download-btn" href="#" download aria-label="Download" title="Download">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+      </a>
       </div>
     </div>
   </div>
@@ -875,9 +897,28 @@
       if (descEl) descEl.textContent = playlist.description || '';
       const countEl = document.getElementById('playlistCount');
       if (countEl) countEl.textContent = (playlist.songCount || 0) + ' track(s)';
+      const hiddenBadge = document.getElementById('playlistHiddenBadge');
+      if (hiddenBadge) hiddenBadge.style.display = playlist.hideFromHome ? 'inline' : 'none';
 
       window.playlistCover = playlist.cover || '';
       applyBackground();
+
+      // Toggle "Hide from home" — показываем только для admin/partner-владельца
+      const role = localStorage.getItem('siteRole') || 'guest';
+      const hideWrap = document.getElementById('hideFromHomeWrap');
+      const hideToggle = document.getElementById('playlistHideFromHomeToggle');
+      if (hideWrap && hideToggle) {
+        const canEdit = (role === 'admin');
+        hideWrap.style.display = canEdit ? 'block' : 'none';
+        hideToggle.checked = !!playlist.hideFromHome;
+        hideToggle.onchange = async () => {
+          try {
+            await db.collection('playlists').doc(playlistId).update({ hideFromHome: hideToggle.checked });
+            const badge = document.getElementById('playlistHiddenBadge');
+            if (badge) badge.style.display = hideToggle.checked ? 'inline' : 'none';
+          } catch (e) { console.error(e); alert('Update failed'); }
+        };
+      }
 
       const snap = await db.collection('tracks')
         .where('playlistIds', 'array-contains', playlistId)
@@ -995,29 +1036,53 @@
         }
 
         const isPlaying = t.id === currentTrackId && window.isPlaying;
-        const playIcon = isPlaying
-          ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>'
-          : '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3v18l15-9L5 3z"/></svg>';
 
-                div.innerHTML =
-          '<img class="thumb" src="' + escapeHtml(cover) + '" alt="' + escapeHtml(title) + '">' +
-          '<div class="meta">' +
-            '<div class="title">' + escapeHtml(title) + '</div>' +
-            '<div class="sub">' + escapeHtml(t.genre || '') + ' · ' + escapeHtml(t.duration || '—') + '</div>' +
-            '<div class="counts" style="display:flex;gap:10px;align-items:center;margin:6px 0;">' +
-              '<button class="play-count btn small" data-key="' + t.id + '" type="button"><span class="num">' + playsNum + '</span> plays</button>' +
-              '<button class="likes-count btn small ' + (likeState === 'like' ? 'active' : '') + '" data-key="' + t.id + '" type="button"><span class="num">' + likesNum + '</span> ❤</button>' +
-              '<button class="dislikes-count btn small ' + (likeState === 'dislike' ? 'active' : '') + '" data-key="' + t.id + '" type="button"><span class="num">' + dislikesNum + '</span> 👎</button>' +
-            '</div>' +
-            '<div class="play-row" style="display:flex;gap:8px;align-items:center;margin-top:6px;">' +
-              '<button class="btn icon play-btn ' + (isPlaying ? 'playing' : '') + '" type="button" aria-label="Play">' + playIcon + '</button>' +
-              '<button class="btn icon open-text-btn" type="button" aria-label="Open text">📜</button>' +
-              '<button class="btn icon comment-btn" type="button" aria-label="Comments">💬</button>' +
-              '<button class="btn icon share-btn" type="button" aria-label="Share">🔗</button>' +
-              addRemoveBtnHtml +
-              '<a class="btn icon download-track-btn" href="' + escapeHtml(src || '#') + '" download="' + escapeHtml((title || 'track').replace(/"/g,'')) + '.mp3" title="Download">⬇️</a>' +
-            '</div>' +
-          '</div>';
+const playIcon = isPlaying
+  ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>'
+  : '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3v18l15-9L5 3z"/></svg>';
+
+div.innerHTML =
+  '<img class="thumb" src="' + escapeHtml(cover) + '" alt="' + escapeHtml(title) + '">' +
+  '<div class="meta">' +
+    '<div class="title">' + escapeHtml(title) + '</div>' +
+    '<div class="sub">' + escapeHtml(t.genre || '') + ' · ' + escapeHtml(t.duration || '—') + '</div>' +
+
+    '<div class="counts" style="display:flex;gap:10px;align-items:center;margin:6px 0;">' +
+      '<button class="play-count btn small" data-key="' + t.id + '" type="button"><span class="num">' + playsNum + '</span> plays</button>' +
+      '<button class="likes-count btn small ' + (likeState === "like" ? "active" : "") + '" data-key="' + t.id + '" type="button"><span class="num">' + likesNum + '</span> ❤</button>' +
+      '<button class="dislikes-count btn small ' + (likeState === "dislike" ? "active" : "") + '" data-key="' + t.id + '" type="button"><span class="num">' + dislikesNum + '</span> 👎</button>' +
+    '</div>' +
+
+    '<div class="play-row" style="display:flex;gap:8px;align-items:center;margin-top:6px;">' +
+      '<button class="btn icon play-btn ' + (isPlaying ? 'playing' : '') + '" type="button" aria-label="Play">' + playIcon + '</button>' +
+      '<button class="btn icon open-text-btn" type="button" aria-label="Open text" title="Text">📜</button>' +
+      '<button class="btn icon comment-btn" type="button" aria-label="Comments">💬</button>' +
+
+      // ✔ ИСПРАВЛЕННАЯ SHARE-КНОПКА
+      '<button class="btn icon share-btn" type="button" aria-label="Share" title="Share">' +
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+          '<circle cx="18" cy="5" r="3"/>' +
+          '<circle cx="6" cy="12" r="3"/>' +
+          '<circle cx="18" cy="19" r="3"/>' +
+          '<line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>' +
+          '<line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>' +
+        '</svg>' +
+      '</button>' +
+
+      addRemoveBtnHtml +
+
+      // ✔ ИСПРАВЛЕННАЯ DOWNLOAD-КНОПКА
+      '<a class="btn icon download-btn" href="' + escapeHtml(src || "#") + '" download="' + escapeHtml((title || "track").replace(/"/g, "")) + '.mp3" title="Download" aria-label="Download">' +
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+          '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>' +
+          '<polyline points="7 10 12 15 17 10"/>' +
+          '<line x1="12" y1="15" x2="12" y2="3"/>' +
+        '</svg>' +
+      '</a>' +
+
+    '</div>' +
+  '</div>';
+
 
         // ===== СВАЙП ДЛЯ ОТКРЫТИЯ ТЕКСТА =====
         let touchStartX = 0;
@@ -1080,14 +1145,8 @@
           }
           const shareBtn = clicked.closest('.share-btn');
           if (shareBtn) {
-            const src = trackEl.dataset.src || '';
-            const url = window.location.origin + window.location.pathname + '?track=' + encodeURIComponent(src);
-            try {
-              await navigator.clipboard.writeText(url);
-              const old = shareBtn.innerHTML;
-              shareBtn.innerHTML = '✓';
-              setTimeout(() => shareBtn.innerHTML = old, 1200);
-            } catch (e) { console.warn('Clipboard write failed', e); }
+            window.currentTrackId = trackEl.dataset.id;
+            document.getElementById('share-modal')?.classList.add('open');
             return;
           }
           const addBtn = clicked.closest('.add-to-playlist-btn');
@@ -2047,6 +2106,54 @@
   }
 })();
 
+
+// ===== SHARE MODAL LOGIC =====
+(function() {
+  const modal = document.getElementById('share-modal');
+  const closeBtn = document.getElementById('share-modal-close');
+  const copyBtn = document.getElementById('share-copy-link');
+
+  closeBtn?.addEventListener('click', () => modal?.classList.remove('open'));
+
+  copyBtn?.addEventListener('click', async () => {
+    const track = (window.globalTracks || []).find(t => t.id === window.currentTrackId) ||
+                  (window.currentPlaylistTracks || []).find(t => t.id === window.currentTrackId);
+    const trackId = track?.id || window.currentTrackId || '';
+    if (!trackId) { alert('No track selected'); return; }
+    const shareUrl = window.location.origin + '/NIKO.html?track=' + encodeURIComponent(trackId);
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      const original = copyBtn.innerHTML;
+      copyBtn.innerHTML = '<div style="width:36px;height:36px;border-radius:10px;background:rgba(77,255,138,0.15);display:flex;align-items:center;justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4dff8a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div><div style="color:#4dff8a;font-size:13px;font-weight:600;">Copied!</div></div>';
+      setTimeout(() => copyBtn.innerHTML = original, 2000);
+    } catch (e) { console.error(e); }
+  });
+
+  document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const platform = btn.dataset.platform;
+      const track = (window.globalTracks || []).find(t => t.id === window.currentTrackId) ||
+                    (window.currentPlaylistTracks || []).find(t => t.id === window.currentTrackId);
+      const shareUrl = window.location.origin + '/NIKO.html?track=' + encodeURIComponent(track?.id || '');
+      const text = encodeURIComponent('Check out: ' + (track?.title || 'Track'));
+      const urls = {
+        twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${text}`,
+        facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+        telegram: `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${text}`,
+        whatsapp: `https://wa.me/?text=${text}%20${encodeURIComponent(shareUrl)}`,
+        viber: `viber://forward?text=${text}%20${encodeURIComponent(shareUrl)}`,
+        messenger: `fb-messenger://share/?link=${encodeURIComponent(shareUrl)}`,
+        tiktok: `https://www.tiktok.com/`,
+        native: () => { if (navigator.share) navigator.share({title: track?.title || 'Track', url: shareUrl}); else alert('Web Share not supported'); }
+      };
+      if (platform === 'native') { urls.native(); }
+      else if (urls[platform]) { window.open(urls[platform], '_blank'); }
+    });
+  });
+
+  // Закрытие по клику на фон
+  modal?.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+})();
 </script>
 
 </div>
