@@ -1,10 +1,12 @@
+// ===============================
+// N1K∅ Service Worker — Offline Audio Cache
+// ===============================
+
 const CACHE_NAME = 'niko-music-v3';
 const AUDIO_CACHE = 'niko-audio-v3';
 
-// [FIX] Убран './' — в подпапке без index.html это кэширует 404
 const STATIC_ASSETS = [
-  './NIKO.html',           // ← Главная страница
-  './db.js',
+  './NIKO.html',
   './styles.css',
   './player-core.js',
   './visualizers.js',
@@ -19,15 +21,54 @@ const EXTERNAL_ASSETS = [
   'https://unpkg.com/modern-normalize/modern-normalize.css'
 ];
 
-// ========== INSTALL ==========
+// [NEW] Храним треки в IndexedDB для offline-доступа
+const DB_NAME = 'niko-offline-db';
+const DB_VERSION = 1;
+const TRACKS_STORE = 'tracks';
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onerror = () => reject(req.error);
+    req.onsuccess = () => resolve(req.result);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(TRACKS_STORE)) {
+        db.createObjectStore(TRACKS_STORE, { keyPath: 'id' });
+      }
+    };
+  });
+}
+
+async function saveTracksToIndexedDB(tracks) {
+  const db = await openDB();
+  const tx = db.transaction(TRACKS_STORE, 'readwrite');
+  const store = tx.objectStore(TRACKS_STORE);
+  // Очищаем старые
+  await store.clear();
+  for (const track of tracks) {
+    store.put(track);
+  }
+  return tx.complete;
+}
+
+async function getTracksFromIndexedDB() {
+  const db = await openDB();
+  const tx = db.transaction(TRACKS_STORE, 'readonly');
+  const store = tx.objectStore(TRACKS_STORE);
+  return new Promise((resolve, reject) => {
+    const req = store.getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
-      // Кэшируем статику
       await cache.addAll(STATIC_ASSETS).catch(err => {
         console.warn('SW: Some static assets failed:', err);
       });
-      // Кэшируем внешние скрипты
       for (const url of EXTERNAL_ASSETS) {
         try {
           const response = await fetch(url, { mode: 'no-cors' });
@@ -41,7 +82,6 @@ self.addEventListener('install', (e) => {
   self.skipWaiting();
 });
 
-// ========== ACTIVATE ==========
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then(keys => 
@@ -53,22 +93,25 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
-// ========== FETCH ==========
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
 
   if (e.request.method !== 'GET') return;
   if (!url.protocol.startsWith('http')) return;
 
-  // Firebase — Network First
+  // [NEW] Firebase Firestore — Network First + IndexedDB fallback
   if (url.hostname.includes('googleapis.com') || 
       url.hostname.includes('firebase') ||
       url.hostname.includes('gstatic.com') ||
       url.hostname.includes('firebasestorage')) {
+    
     e.respondWith(
       fetch(e.request).catch(async () => {
+        // Пытаемся вернуть кэшированный ответ
         const cached = await caches.match(e.request);
         if (cached) return cached;
+        // Если это запрос треков — возвращаем пустой успешный ответ
+        // Клиент сам возьмет из IndexedDB
         return new Response('[]', { 
           status: 200, 
           headers: { 'Content-Type': 'application/json' } 
@@ -78,10 +121,10 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Worker (аудио/обложки)
   if (url.hostname.includes('workers.dev')) {
     e.respondWith(
       fetch(e.request).catch(async () => {
+        // [NEW] Fallback для аудио из кэша
         if (e.request.destination === 'audio' || url.pathname.match(/\.(mp3|wav|ogg|m4a|aac|flac)$/i)) {
           const cache = await caches.open(AUDIO_CACHE);
           const cached = await cache.match(e.request);
@@ -93,29 +136,23 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Аудио
   if (e.request.destination === 'audio' || url.pathname.match(/\.(mp3|wav|ogg|m4a|aac|flac)$/i)) {
     e.respondWith(audioCacheStrategy(e.request));
     return;
   }
 
-  // Картинки
   if (e.request.destination === 'image' || url.pathname.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i)) {
     e.respondWith(imageCacheStrategy(e.request));
     return;
   }
 
-  // Внешние ассеты
   if (EXTERNAL_ASSETS.includes(e.request.url)) {
     e.respondWith(cacheFirstStrategy(e.request, CACHE_NAME));
     return;
   }
 
-  // Всё остальное (HTML, CSS, JS)
   e.respondWith(networkFirstStrategy(e.request));
 });
-
-// ========== СТРАТЕГИИ ==========
 
 async function audioCacheStrategy(request) {
   const cache = await caches.open(AUDIO_CACHE);
@@ -157,14 +194,9 @@ async function networkFirstStrategy(request) {
   } catch {
     const cached = await caches.match(request);
     if (cached) return cached;
-    
-    // [FIX] Навигация: отдаём NIKO.html, не index.html
     if (request.mode === 'navigate') {
-      const cachedMain = await caches.match('./NIKO.html') || 
-                        await caches.match('./');
-      if (cachedMain) return cachedMain;
+      return caches.match('./NIKO.html');
     }
-    
     return new Response('Offline', { status: 503 });
   }
 }
@@ -189,9 +221,26 @@ async function fetchAndCache(request, cache) {
   } catch (e) {}
 }
 
-// ========== MESSAGE ==========
 self.addEventListener('message', (e) => {
   if (e.data === 'skipWaiting') self.skipWaiting();
+  
+  // [NEW] Сохраняем треки в IndexedDB
+  if (e.data.type === 'SAVE_TRACKS') {
+    saveTracksToIndexedDB(e.data.tracks).then(() => {
+      e.source.postMessage({ type: 'TRACKS_SAVED', count: e.data.tracks.length });
+    }).catch(err => {
+      console.warn('SAVE_TRACKS failed:', err);
+    });
+  }
+  
+  // [NEW] Получаем треки из IndexedDB
+  if (e.data.type === 'GET_OFFLINE_TRACKS') {
+    getTracksFromIndexedDB().then(tracks => {
+      e.source.postMessage({ type: 'OFFLINE_TRACKS', tracks });
+    }).catch(err => {
+      e.source.postMessage({ type: 'OFFLINE_TRACKS', tracks: [] });
+    });
+  }
   
   if (e.data.type === 'CACHE_AUDIO') {
     caches.open(AUDIO_CACHE).then(cache => {
