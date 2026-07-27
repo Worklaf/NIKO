@@ -1119,41 +1119,77 @@ function subscribePlaylists() {
 }
 
 function subscribeTracks() {
+  // [CRITICAL] Сначала и сразу показываем кэш
+  renderOfflineTracks();
+  
+  // Firestore — только если онлайн, и не блокируем
+  if (!navigator.onLine) {
+    console.log('📴 Offline — skipped Firestore');
+    return;
+  }
+  
   if (!db) {
-    console.warn('Firestore not initialized — loading from IndexedDB only');
-    loadOfflineTracksOnly();
+    console.warn('Firestore not initialized');
     return;
   }
 
-  // [CRITICAL] Сначала показываем кэш мгновенно
-  loadOfflineTracksFirst().then(() => {
-    // Потом подписываемся на Firestore (если онлайн)
-    db.collection('tracks').orderBy('createdAt', 'desc').onSnapshot(snap => {
-      const role = getRole();
-      let tracks = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(track => {
-        if (!isVisibleToRole(track, role)) return false;
-        if (track.playlistId) {
-          const pl = globalPlaylists.find(p => p.id === track.playlistId);
-          if (pl && !isVisibleToRole(pl, role)) return false;
-        }
-        return true;
-      });
-      
-      globalTracks = tracks;
-      saveTracksToDB(tracks).catch(e => console.warn('DB save failed:', e));
-      
-      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({
-          type: 'SAVE_TRACKS',
-          tracks: tracks
-        });
+  // Подписываемся на Firestore отдельно, без await
+  db.collection('tracks').orderBy('createdAt', 'desc').onSnapshot(snap => {
+    const role = getRole();
+    let tracks = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(track => {
+      if (!isVisibleToRole(track, role)) return false;
+      if (track.playlistId) {
+        const pl = globalPlaylists.find(p => p.id === track.playlistId);
+        if (pl && !isVisibleToRole(pl, role)) return false;
       }
-      
-      applySortAndRender();
-    }, err => { 
-      console.warn('Firestore error (offline?):', err);
-      // IndexedDB уже загружен выше
+      return true;
     });
+    
+    globalTracks = tracks;
+    saveTracksToDB(tracks).catch(e => console.warn('DB save failed:', e));
+    
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: 'SAVE_TRACKS',
+        tracks: tracks
+      });
+    }
+    
+    applySortAndRender();
+  }, err => { 
+    console.warn('Firestore error:', err);
+    // Ничего не делаем — кэш уже показан
+  });
+}
+
+// [NEW] Отдельная функция — только IndexedDB, никаких await
+function renderOfflineTracks() {
+  console.log('📦 Loading offline tracks...');
+  
+  getTracksFromDB().then(offlineTracks => {
+    if (!offlineTracks || offlineTracks.length === 0) {
+      console.log('⚠️ No tracks in IndexedDB');
+      // Не трогаем "Loading tracks..." — пусть висит, Firestore может загрузить
+      if (!navigator.onLine) {
+        document.getElementById('tracksList').innerHTML = `
+          <div class="empty-state">
+            <h2>📴 Офлайн-режим</h2>
+            <p>Нет кэшированных треков. Подключитесь к интернету.</p>
+          </div>
+        `;
+      }
+      return;
+    }
+    
+    const role = getRole();
+    globalTracks = offlineTracks.filter(track => isVisibleToRole(track, role));
+    console.log('✅ Loaded', globalTracks.length, 'tracks from IndexedDB');
+    
+    // Рендерим СРАЗУ, синхронно
+    applySortAndRender();
+    
+  }).catch(err => {
+    console.error('IndexedDB error:', err);
   });
 }
 
@@ -1216,17 +1252,39 @@ async function loadOfflineTracksOnly() {
 
 function applySortAndRender() {
   let tracks = [...globalTracks];
+  
+  // [NEW] Если треков нет — не ломаем UI
+  if (tracks.length === 0) {
+    console.log('⚠️ No tracks to render');
+    return;
+  }
+  
   if (currentSortMode === 'plays-desc') tracks.sort((a, b) => (b.plays || 0) - (a.plays || 0));
   else if (currentSortMode === 'plays-asc') tracks.sort((a, b) => (a.plays || 0) - (b.plays || 0));
   else if (currentSortMode === 'likes-desc') tracks.sort((a, b) => (b.likes || 0) - (a.likes || 0));
   else if (currentSortMode === 'likes-asc') tracks.sort((a, b) => (a.likes || 0) - (b.likes || 0));
   else if (currentSortMode === 'title-asc') tracks.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
   else if (currentSortMode === 'title-desc') tracks.sort((a, b) => (b.title || '').localeCompare(a.title || ''));
+  
   renderDraftTracks(tracks);
   updateNewTracksBadge();
   filterTracks();
 }
-
+// ВРЕМЕННО: принудительно обновить SW и очистить старые кэши
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(async regs => {
+    for (const reg of regs) {
+      await reg.unregister();
+    }
+    const keys = await caches.keys();
+    for (const key of keys) {
+      await caches.delete(key);
+    }
+    console.log('🧹 All caches cleared');
+    // Перезагружаем страницу чтобы новый SW установился
+    // location.reload();
+  });
+}
 async function uploadToWorker(file, folder, fileName) {
   const fd = new FormData();
   fd.append('file', file);
