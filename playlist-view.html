@@ -5,6 +5,8 @@
   <title>Playlist</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ff4da6">
   <style>
     :root{
       --bg:#05050a;
@@ -545,11 +547,55 @@
     .emoji-popup-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 6px; cursor: pointer; font-size: 20px; transition: background .2s; }
     .emoji-popup-btn:hover { background: rgba(255,255,255,0.12); }
     .delete-comment { position:absolute; top:8px; right:8px; background:none; border:none; color:#ff4da6; cursor:pointer; font-size:14px; }
-
+    /* ========== SIDE PANEL ========== */
+    .side-panel {
+      position: fixed;
+      top: 0; right: 0;
+      width: 100%; max-width: 480px;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(14,14,18,0.98), rgba(8,8,10,0.98));
+      z-index: 10050;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 20px;
+      box-sizing: border-box;
+      overflow-y: auto;
+      border-left: 1px solid rgba(255,255,255,0.06);
+    }
+    .side-panel.open { transform: translateX(0); }
+    .side-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .side-panel-actions { display: flex; gap: 8px; }
+    .side-panel-actions button {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #eaeaf2;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .side-panel-actions button:hover { background: rgba(255,255,255,0.1); }
+    .edit-mode-actions.active { display: flex !important; }
+    @media (max-width: 640px) {
+      .side-panel { max-width: 100%; }
+    }
   </style>
   <base target="_self">
+<base target="_blank">
+<base target="_blank">
+<base target="_blank">
+<base target="_blank">
 </head>
 <body>
+<!-- [FIX] Индикатор офлайн-режима -->
+<div id="offline-indicator" style="display:none;position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(255,77,166,0.9);color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(255,77,166,0.4);"></div>
+
+<div id="spa-playlist-content">
 
   <!-- ===== PAGE ===== -->
   <div class="page">
@@ -560,7 +606,7 @@
         <div class="playlist-meta">
           <h1 id="playlistName">Playlist</h1>
           <p id="playlistDesc"></p>
-          <p id="playlistCount">0 track(s)</p>
+          <p id="playlistCount">0 track(s) <span id="playlistHiddenBadge" style="display:none;font-size:12px;opacity:.6;margin-left:8px;">👁️‍🗨️ Hidden from home</span></p>
           <div class="playlist-bg-toggle">
             <label for="bg-selector">🎨 Background</label>
             <select id="bg-selector">
@@ -574,6 +620,12 @@
               <option value="none">Solid color</option>
             </select>
           </div>
+          <div class="playlist-bg-toggle" id="hideFromHomeWrap" style="margin-top:12px;display:none;background:rgba(255,77,166,0.08);border:1px solid rgba(255,77,166,0.2);border-radius:10px;padding:10px 12px;">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;font-weight:600;">
+              <input type="checkbox" id="playlistHideFromHomeToggle" style="width:20px;height:20px;cursor:pointer;accent-color:#ff4da6;flex-shrink:0;">
+              <span>👁️‍🗨️ Hide tracks from home page</span>
+            </label>
+          </div>
         </div>
       </div>
     </div>
@@ -582,9 +634,9 @@
     <div class="right-col">
       <!-- Actions Bar -->
       <div class="playlist-actions-bar">
-        <a class="nav-btn" href="NIKO.html" title="Home">🏠 Home</a>
-        <a class="nav-btn" href="playlists.html" title="Playlists">📁 Playlists</a>
-        <button id="open-add-to-playlist-top" class="nav-btn nav-btn-primary">➕ Add tracks</button>
+        <a class="nav-btn" href="#" title="Home" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage('go-home','*');return false;}location.href='NIKO.html';return false;">🏠 Home</a>
+        <a class="nav-btn" href="#" title="Playlists" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage('show-playlists','*');return false;}location.href='playlists.html';return false;">📁 Playlists</a>
+        <button id="open-add-to-playlist-top" class="nav-btn">➕ Add tracks</button>
       </div>
 
       <!-- Filters -->
@@ -613,24 +665,7 @@
     </div>
   </div>
 
-  <!-- ===== LYRICS MODAL ===== -->
-  <div id="lyrics-modal" class="modal" style="display:none">
-    <div class="panel" style="max-width:640px; margin:0 auto;">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <h3 id="lyrics-modal-title">📜 Song text</h3>
-        <button id="lyrics-modal-close" class="btn">✕</button>
-      </div>
-      <div id="lyrics-modal-body" style="margin-top:14px; max-height:420px; overflow:auto; padding:14px; background:rgba(255,255,255,0.02); border-radius:10px;">
-        <pre id="lyrics-modal-text" style="white-space:pre-wrap; margin:0; font-family:inherit; line-height:1.5;"></pre>
-        <textarea id="lyrics-modal-edit" style="display:none; width:100%; min-height:220px; box-sizing:border-box; padding:12px; border-radius:10px; background:#0f0f12; color:#fff; border:1px solid rgba(255,255,255,0.06); font-family:inherit; font-size:14px;"></textarea>
-      </div>
-      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px;">
-        <button id="lyrics-modal-cancel" class="btn">Close</button>
-        <button id="lyrics-modal-edit-btn" class="btn" style="display:none">Edit</button>
-        <button id="lyrics-modal-save" class="btn active" style="display:none;">Save</button>
-      </div>
-    </div>
-  </div>
+   
 
   <!-- ===== ADD TO PLAYLIST MODAL ===== -->
   <div id="add-to-playlist-modal" class="modal" style="display:none">
@@ -682,11 +717,120 @@
         <button id="mini-dislike" class="btn icon" aria-label="Dislike" title="Dislike">👎</button>
         <button id="mini-visualizer" class="btn icon visualizer-btn" aria-label="Visualizer" title="Visualizer">🌀</button>
         <button id="mini-comment" class="btn icon" aria-label="Comments" title="Comments">💬</button>
-        <button id="mini-share" class="btn icon" aria-label="Share" title="Share">🔗</button>
-        <a id="mini-download" class="btn icon" href="#" download aria-label="Download" title="Download">⬇️</a>
+        <button id="mini-share" class="btn icon share-svg-btn" aria-label="Share" title="Share">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="18" cy="5" r="3"/>
+          <circle cx="6" cy="12" r="3"/>
+          <circle cx="18" cy="19" r="3"/>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+        </svg>
+      </button>
+        <a id="mini-download" class="btn icon download-btn" href="#" download aria-label="Download" title="Download">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+      </a>
       </div>
     </div>
   </div>
+<div id="share-modal" class="share-modal">
+  <div class="share-modal-content" style="max-width:360px;">
+    <div class="share-modal-header">
+      <h3 class="share-modal-title" style="font-size:15px; color:#eaeaf2;">Share Track</h3>
+      <button class="share-modal-close" id="share-modal-close" style="font-size:20px; color:#bfc3d6;">×</button>
+    </div>
+    
+    <div class="share-options" style="margin-bottom:16px;">
+      <div class="share-option" id="share-copy-link" style="display:flex; align-items:center; gap:12px; padding:12px; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid rgba(255,255,255,0.06); cursor:pointer; transition:all 0.2s;">
+        <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,77,166,0.15);display:flex;align-items:center;justify-content:center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff4da6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+        </div>
+        <div>
+          <div style="color:#eaeaf2;font-size:13px;font-weight:600;">Copy Link</div>
+          <div style="color:#666;font-size:11px;">Copy to clipboard</div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="color:#bfc3d6;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Share to</div>
+    
+    <div class="share-modal-socials" id="share-socials" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+      
+      <!-- X (Twitter) -->
+      <div class="social-btn" data-platform="twitter" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">X</span>
+      </div>
+      
+      <!-- Facebook -->
+      <div class="social-btn" data-platform="facebook" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">Facebook</span>
+      </div>
+      
+      <!-- Messenger -->
+      <div class="social-btn" data-platform="messenger" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M12 0C5.373 0 0 4.975 0 11.111c0 3.497 1.744 6.616 4.472 8.652V24l4.086-2.242c1.09.301 2.246.464 3.442.464 6.627 0 12-4.975 12-11.111C24 4.975 18.627 0 12 0zm1.193 14.963l-3.056-3.26-5.963 3.26 6.559-6.963 3.13 3.26 5.889-3.26-6.559 6.963z"/></svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">Messenger</span>
+      </div>
+      
+      <!-- Telegram -->
+      <div class="social-btn" data-platform="telegram" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">Telegram</span>
+      </div>
+      
+      <!-- Viber -->
+      <div class="social-btn" data-platform="viber" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M12.026 0C5.376 0 .002 5.374.002 12.024c0 2.574.81 4.96 2.192 6.916L.936 23.999l5.342-1.256A11.95 11.95 0 0 0 12.026 24c6.65 0 12.024-5.374 12.024-12.024C24.05 5.374 18.676 0 12.026 0zm6.826 16.964c-.274.772-1.362 1.408-1.89 1.498-.51.086-1.01.194-3.364-.706-2.85-1.12-4.68-4.02-4.82-4.206-.14-.186-1.15-1.53-1.15-2.92 0-1.39.73-2.07.988-2.354.26-.286.548-.358.73-.358.18 0 .36 0 .518.008.166.006.39-.064.61.466.22.53.748 1.848.814 1.982.066.134.11.29.022.468-.088.178-.132.29-.262.446-.13.156-.272.348-.388.466-.13.134-.266.28-.114.552.152.27.676 1.116 1.45 1.806.996.888 1.838 1.164 2.1 1.292.262.128.416.106.57-.064.152-.168.656-.762.83-1.024.174-.262.348-.22.584-.132.238.088 1.51.712 1.77.84.26.13.434.194.498.302.064.11.048.636-.226 1.408zM10.96 6.796c2.694.154 4.89 2.236 5.17 4.916.03.29-.19.546-.48.576a.553.553 0 0 1-.576-.48 4.684 4.684 0 0 0-4.18-4.18.553.553 0 0 1-.48-.576c.03-.29.286-.51.576-.48l-.03.224zm-.954 2.384c1.616.092 2.934 1.342 3.102 2.95.03.29-.19.546-.48.576a.553.553 0 0 1-.576-.48 2.31 2.31 0 0 0-2.066-2.066.553.553 0 0 1-.48-.576c.03-.29.286-.51.576-.48l-.076.076zm-.954 2.384c.538.03.976.446 1.034.984a.553.553 0 0 1-.528.576.553.553 0 0 1-.576-.528 1.107 1.107 0 0 0-.984-1.034.553.553 0 0 1-.528-.576c.03-.29.286-.51.576-.48l.006.058z"/></svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">Viber</span>
+      </div>
+      
+      <!-- TikTok -->
+      <div class="social-btn" data-platform="tiktok" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">TikTok</span>
+      </div>
+      
+      <!-- WhatsApp -->
+      <div class="social-btn" data-platform="whatsapp" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">WhatsApp</span>
+      </div>
+      
+      <!-- More / Native -->
+      <div class="social-btn" data-platform="native" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+          </svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">More</span>
+      </div>
+      
+    </div>
+  </div>
+</div>
 
   <!-- ===== FIREBASE ===== -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -694,8 +838,10 @@
 
   <!-- ===== WAVESURFER & CORE ===== -->
   <script src="https://unpkg.com/wavesurfer.js" defer></script>
+  <script src="offline-cache.js"></script>
   <script src="player-core.js"></script>
   <script src="visualizers.js"></script>
+<script>window.initPlaylistView = function(pid){};</script>
   
 
   <!-- ===== MAIN LOGIC ===== -->
@@ -709,11 +855,20 @@
       appId: "1:223346886059:web:e6e76ad23663de701b7eee",
       measurementId: "G-L9ZY3FYN1R"
     };
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.firestore();
 
     const params = new URLSearchParams(window.location.search);
+    const isEmbed = new URLSearchParams(location.search).get('embed') === '1';
     const playlistId = params.get('id');
+    window.playlistId = playlistId;
+
+    // В embed-режиме скрываем свой mini-player (плеер родителя работает)
+    if (isEmbed) {
+      const mp = document.getElementById('mini-player');
+      if (mp) mp.style.display = 'none !important';
+    }
+    window.playlistId = playlistId;
 
     let allTracksFull = [];
     let visibleTracks = [];
@@ -742,15 +897,35 @@
       if (descEl) descEl.textContent = playlist.description || '';
       const countEl = document.getElementById('playlistCount');
       if (countEl) countEl.textContent = (playlist.songCount || 0) + ' track(s)';
+      const hiddenBadge = document.getElementById('playlistHiddenBadge');
+      if (hiddenBadge) hiddenBadge.style.display = playlist.hideFromHome ? 'inline' : 'none';
 
       window.playlistCover = playlist.cover || '';
       applyBackground();
+
+      // Toggle "Hide from home" — показываем только для admin/partner-владельца
+      const role = localStorage.getItem('siteRole') || 'guest';
+      const hideWrap = document.getElementById('hideFromHomeWrap');
+      const hideToggle = document.getElementById('playlistHideFromHomeToggle');
+      if (hideWrap && hideToggle) {
+        const canEdit = (role === 'admin');
+        hideWrap.style.display = canEdit ? 'block' : 'none';
+        hideToggle.checked = !!playlist.hideFromHome;
+        hideToggle.onchange = async () => {
+          try {
+            await db.collection('playlists').doc(playlistId).update({ hideFromHome: hideToggle.checked });
+            const badge = document.getElementById('playlistHiddenBadge');
+            if (badge) badge.style.display = hideToggle.checked ? 'inline' : 'none';
+          } catch (e) { console.error(e); alert('Update failed'); }
+        };
+      }
 
       const snap = await db.collection('tracks')
         .where('playlistIds', 'array-contains', playlistId)
         .get();
 
       allTracksFull = snap.docs.map((d, i) => ({ __fullIndex: i, id: d.id, ...d.data() }));
+      window.currentPlaylistTracks = allTracksFull;
       window.globalTracks = allTracksFull;
 
       visibleTracks = allTracksFull.slice();
@@ -786,7 +961,41 @@
       visibleCount = INITIAL_VISIBLE;
       renderTracksPage();
     }
+    let currentEditingId = '';
 
+    function openText(trackEl) {
+      const lyrics = trackEl.dataset.lyrics || '';
+      const title = trackEl.dataset.title || '';
+      currentEditingId = trackEl.dataset.id;
+      document.getElementById('side-title').textContent = title;
+      document.getElementById('side-content').textContent = lyrics || 'No lyrics available';
+      document.getElementById('side-content-editor').value = lyrics;
+      document.getElementById('side-panel').classList.add('open');
+      document.getElementById('side-content').style.display = 'block';
+      document.getElementById('side-content-editor').style.display = 'none';
+      document.getElementById('edit-mode-actions').classList.remove('active');
+      setupSidePanelSwipe();
+    }
+    window.openText = openText;
+    function setupSidePanelSwipe() {
+      const sidePanel = document.getElementById('side-panel');
+      let touchStartX = 0;
+      sidePanel.addEventListener('touchstart', (e) => { 
+        touchStartX = e.changedTouches[0].screenX; 
+      }, { passive: true });
+      sidePanel.addEventListener('touchend', (e) => {
+        if (e.changedTouches[0].screenX - touchStartX > 50) {
+          closeSidePanel();
+        }
+      }, { passive: true });
+    }
+
+    function closeSidePanel() {
+      document.getElementById('side-panel').classList.remove('open');
+      document.getElementById('side-content').style.display = 'block';
+      document.getElementById('side-content-editor').style.display = 'none';
+      document.getElementById('edit-mode-actions').classList.remove('active');
+    }
     function renderTracksPage() {
       const container = document.getElementById('tracksContainer');
       if (!container) return;
@@ -827,29 +1036,66 @@
         }
 
         const isPlaying = t.id === currentTrackId && window.isPlaying;
-        const playIcon = isPlaying
-          ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>'
-          : '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3v18l15-9L5 3z"/></svg>';
 
-        div.innerHTML =
-          '<img class="thumb" src="' + escapeHtml(cover) + '" alt="' + escapeHtml(title) + '">' +
-          '<div class="meta">' +
-            '<div class="title">' + escapeHtml(title) + '</div>' +
-            '<div class="sub">' + escapeHtml(t.genre || '') + ' · ' + escapeHtml(t.duration || '—') + '</div>' +
-            '<div class="counts" style="display:flex;gap:10px;align-items:center;margin:6px 0;">' +
-              '<button class="play-count btn small" data-key="' + t.id + '" type="button"><span class="num">' + playsNum + '</span> plays</button>' +
-              '<button class="likes-count btn small ' + (likeState === 'like' ? 'active' : '') + '" data-key="' + t.id + '" type="button"><span class="num">' + likesNum + '</span> ❤</button>' +
-              '<button class="dislikes-count btn small ' + (likeState === 'dislike' ? 'active' : '') + '" data-key="' + t.id + '" type="button"><span class="num">' + dislikesNum + '</span> 👎</button>' +
-            '</div>' +
-            '<div class="play-row" style="display:flex;gap:8px;align-items:center;margin-top:6px;">' +
-              '<button class="btn icon play-btn ' + (isPlaying ? 'playing' : '') + '" type="button" aria-label="Play">' + playIcon + '</button>' +
-              '<button class="btn icon open-text-btn" type="button" aria-label="Open text">📜</button>' +
-              '<button class="btn icon comment-btn" type="button" aria-label="Comments">💬</button>' +
-              '<button class="btn icon share-btn" type="button" aria-label="Share">🔗</button>' +
-              addRemoveBtnHtml +
-              '<a class="btn icon download-track-btn" href="' + escapeHtml(src || '#') + '" download="' + escapeHtml((title || 'track').replace(/"/g,'')) + '.mp3" title="Download">⬇️</a>' +
-            '</div>' +
-          '</div>';
+const playIcon = isPlaying
+  ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>'
+  : '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3v18l15-9L5 3z"/></svg>';
+
+div.innerHTML =
+  '<img class="thumb" src="' + escapeHtml(cover) + '" alt="' + escapeHtml(title) + '">' +
+  '<div class="meta">' +
+    '<div class="title">' + escapeHtml(title) + '</div>' +
+    '<div class="sub">' + escapeHtml(t.genre || '') + ' · ' + escapeHtml(t.duration || '—') + '</div>' +
+
+    '<div class="counts" style="display:flex;gap:10px;align-items:center;margin:6px 0;">' +
+      '<button class="play-count btn small" data-key="' + t.id + '" type="button"><span class="num">' + playsNum + '</span> plays</button>' +
+      '<button class="likes-count btn small ' + (likeState === "like" ? "active" : "") + '" data-key="' + t.id + '" type="button"><span class="num">' + likesNum + '</span> ❤</button>' +
+      '<button class="dislikes-count btn small ' + (likeState === "dislike" ? "active" : "") + '" data-key="' + t.id + '" type="button"><span class="num">' + dislikesNum + '</span> 👎</button>' +
+    '</div>' +
+
+    '<div class="play-row" style="display:flex;gap:8px;align-items:center;margin-top:6px;">' +
+      '<button class="btn icon play-btn ' + (isPlaying ? 'playing' : '') + '" type="button" aria-label="Play">' + playIcon + '</button>' +
+      '<button class="btn icon open-text-btn" type="button" aria-label="Open text" title="Text">📜</button>' +
+      '<button class="btn icon comment-btn" type="button" aria-label="Comments">💬</button>' +
+
+      // ✔ ИСПРАВЛЕННАЯ SHARE-КНОПКА
+      '<button class="btn icon share-btn" type="button" aria-label="Share" title="Share">' +
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+          '<circle cx="18" cy="5" r="3"/>' +
+          '<circle cx="6" cy="12" r="3"/>' +
+          '<circle cx="18" cy="19" r="3"/>' +
+          '<line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>' +
+          '<line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>' +
+        '</svg>' +
+      '</button>' +
+
+      addRemoveBtnHtml +
+
+      // ✔ ИСПРАВЛЕННАЯ DOWNLOAD-КНОПКА
+      '<a class="btn icon download-btn" href="' + escapeHtml(src || "#") + '" download="' + escapeHtml((title || "track").replace(/"/g, "")) + '.mp3" title="Download" aria-label="Download">' +
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+          '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>' +
+          '<polyline points="7 10 12 15 17 10"/>' +
+          '<line x1="12" y1="15" x2="12" y2="3"/>' +
+        '</svg>' +
+      '</a>' +
+
+    '</div>' +
+  '</div>';
+
+
+        // ===== СВАЙП ДЛЯ ОТКРЫТИЯ ТЕКСТА =====
+        let touchStartX = 0;
+        let touchStartY = 0;
+        div.addEventListener('touchstart', (e) => { 
+          touchStartX = e.changedTouches[0].screenX; 
+          touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+        div.addEventListener('touchend', (e) => {
+          const diffX = touchStartX - e.changedTouches[0].screenX;
+          const diffY = Math.abs(touchStartY - e.changedTouches[0].screenY);
+          if (diffX > 120 && diffY < 80) openText(div);
+        }, { passive: true });
 
         container.appendChild(div);
       });
@@ -887,11 +1133,9 @@
         const isPlayBtn = clicked.closest('.play-btn');
 
         if (isButton && !isPlayBtn) {
-          const textBtn = clicked.closest('.open-text-btn');
+                 const textBtn = clicked.closest('.open-text-btn');
           if (textBtn) {
-            if (typeof openText === 'function') openText(trackEl);
-            else if (typeof openLyricsModal === 'function') openLyricsModal(trackEl);
-            else alert(trackEl.dataset.lyrics || 'No lyrics available');
+            openText(trackEl);  // ← теперь открывает side panel
             return;
           }
           const commentBtn = clicked.closest('.comment-btn');
@@ -901,14 +1145,8 @@
           }
           const shareBtn = clicked.closest('.share-btn');
           if (shareBtn) {
-            const src = trackEl.dataset.src || '';
-            const url = window.location.origin + window.location.pathname + '?track=' + encodeURIComponent(src);
-            try {
-              await navigator.clipboard.writeText(url);
-              const old = shareBtn.innerHTML;
-              shareBtn.innerHTML = '✓';
-              setTimeout(() => shareBtn.innerHTML = old, 1200);
-            } catch (e) { console.warn('Clipboard write failed', e); }
+            window.currentTrackId = trackEl.dataset.id;
+            document.getElementById('share-modal')?.classList.add('open');
             return;
           }
           const addBtn = clicked.closest('.add-to-playlist-btn');
@@ -922,49 +1160,99 @@
             if (typeof playlistId !== 'undefined' && playlistId) removeTrackFromPlaylist(tid, playlistId);
             return;
           }
-          const likeBtn = clicked.closest('.likes-count');
-          if (likeBtn) {
-            const key = likeBtn.dataset.key;
-            if (key && window.toggleLike) window.toggleLike(key);
-            return;
-          }
-          const dislikeBtn = clicked.closest('.dislikes-count');
-          if (dislikeBtn) {
-            const key = dislikeBtn.dataset.key;
-            if (key && window.toggleDislike) window.toggleDislike(key);
-            return;
+                  const likeBtn = clicked.closest('.likes-count');
+        if (likeBtn) {
+          const key = likeBtn.dataset.key;
+          if (!key) return;
+          if (isEmbed && window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'like', trackId: key }, '*');
+          } else {
+            if (window.toggleLike) window.toggleLike(key);
           }
           return;
         }
+        const dislikeBtn = clicked.closest('.dislikes-count');
+        if (dislikeBtn) {
+          const key = dislikeBtn.dataset.key;
+          if (!key) return;
+          if (isEmbed && window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'dislike', trackId: key }, '*');
+          } else {
+            if (window.toggleDislike) window.toggleDislike(key);
+          }
+          return;
+        }
+          return;
+        }
 
-        const currentTrackId = window.currentTrackId || '';
-        if (trackId === currentTrackId && window.wavesurfer) {
-          window.wavesurfer.playPause();
+                    const currentTrackId = window.currentTrackId || '';
+        const isCurrentTrack = trackId === currentTrackId;
+
+        if (isCurrentTrack) {
+          if (isEmbed && window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'toggle-play-pause' }, '*');
+            return;  // ← ВАЖНО! Останавливаем выполнение
+          } else if (window.wavesurfer) {
+            window.wavesurfer.playPause();
+            return;  // ← И здесь тоже
+          }
+        }
+        
+        // Если дошли сюда — это другой трек, запускаем его
+        if (isEmbed && window.parent && window.parent !== window) {
+          window.parent.postMessage({
+            type: 'play-track',
+            trackId: trackId,
+            playlistId: playlistId
+          }, '*');
         } else {
-          playTrack(trackEl);
+          const ctxTracks = window.currentPlaylistTracks || [];
+          // [FIX] Задержка перед загрузкой нового трека чтобы избежать AbortError
+          if (window.wavesurfer && window.wavesurfer.isPlaying && window.wavesurfer.isPlaying()) {
+            window.wavesurfer.stop();
+          }
+          setTimeout(() => {
+            try {
+            playTrack(trackEl, {tracks: ctxTracks, source: "playlist", playlistId: playlistId});
+          } catch (e) {
+            console.warn('Play error:', e);
+          }
+          }, 50);
         }
       });
     }
 
     window.updateLikeUI = function(trackId, likesDelta = 0, dislikesDelta = 0) {
-      const likeEl = document.querySelector('.likes-count[data-key="' + trackId + '"]');
-      const dislikeEl = document.querySelector('.dislikes-count[data-key="' + trackId + '"]');
-      if (likeEl) {
-        const numEl = likeEl.querySelector('.num');
-        if (numEl) numEl.textContent = Math.max(0, Number(numEl.textContent || 0) + likesDelta);
-        likeEl.classList.toggle('active', localStorage.getItem('like:user:' + trackId) === 'like');
-      }
-      if (dislikeEl) {
-        const numEl = dislikeEl.querySelector('.num');
-        if (numEl) numEl.textContent = Math.max(0, Number(numEl.textContent || 0) + dislikesDelta);
-        dislikeEl.classList.toggle('active', localStorage.getItem('like:user:' + trackId) === 'dislike');
-      }
-      const g = (window.globalTracks || []).find(x => x && x.id === trackId);
-      if (g) {
-        if (likesDelta) g.likes = Math.max(0, (g.likes || 0) + likesDelta);
-        if (dislikesDelta) g.dislikes = Math.max(0, (g.dislikes || 0) + dislikesDelta);
-      }
-    };
+  const likeEl = document.querySelector('.likes-count[data-key="' + trackId + '"]');
+  const dislikeEl = document.querySelector('.dislikes-count[data-key="' + trackId + '"]');
+  const userVote = localStorage.getItem('like:user:' + trackId);
+  
+  if (likeEl) {
+    const numEl = likeEl.querySelector('.num');
+    if (numEl) {
+      // Используем текущее значение из DOM + delta
+      const current = parseInt(numEl.textContent, 10) || 0;
+      numEl.textContent = Math.max(0, current + likesDelta);
+    }
+    likeEl.classList.toggle('active', userVote === 'like');
+  }
+  
+  if (dislikeEl) {
+    const numEl = dislikeEl.querySelector('.num');
+    if (numEl) {
+      const current = parseInt(numEl.textContent, 10) || 0;
+      numEl.textContent = Math.max(0, current + dislikesDelta);
+    }
+    dislikeEl.classList.toggle('active', userVote === 'dislike');
+  }
+  
+  // Обновляем globalTracks
+  const g = (window.globalTracks || []).find(x => x && x.id === trackId);
+  if (g) {
+    if (likesDelta) g.likes = Math.max(0, (g.likes || 0) + likesDelta);
+    if (dislikesDelta) g.dislikes = Math.max(0, (g.dislikes || 0) + dislikesDelta);
+  }
+};
 
     function escapeHtml(str) {
       return String(str || '')
@@ -1010,6 +1298,58 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+            // ===== SIDE PANEL EVENTS =====
+      document.getElementById('side-close')?.addEventListener('click', closeSidePanel);
+      
+      document.getElementById('copy-text')?.addEventListener('click', () => {
+        const text = document.getElementById('side-content').textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          const btn = document.getElementById('copy-text');
+          const oldText = btn.textContent;
+          btn.textContent = 'Copied!';
+          setTimeout(() => btn.textContent = oldText, 1500);
+        });
+      });
+
+      // Edit button (admin only)
+      const editBtn = document.getElementById('edit-text');
+      if (editBtn) {
+        const role = localStorage.getItem('siteRole') || 'guest';
+        editBtn.style.display = role === 'admin' ? 'inline-block' : 'none';
+        editBtn.addEventListener('click', () => {
+          const editor = document.getElementById('side-content-editor');
+          const content = document.getElementById('side-content');
+          editor.value = content.textContent;
+          content.style.display = 'none';
+          editor.style.display = 'block';
+          document.getElementById('edit-mode-actions').classList.add('active');
+        });
+      }
+
+      document.getElementById('edit-cancel')?.addEventListener('click', () => {
+        document.getElementById('side-content').style.display = 'block';
+        document.getElementById('side-content-editor').style.display = 'none';
+        document.getElementById('edit-mode-actions').classList.remove('active');
+      });
+
+      document.getElementById('edit-save')?.addEventListener('click', async () => {
+        if (!currentEditingId) return;
+        const newLyrics = document.getElementById('side-content-editor').value;
+        try {
+          await db.collection('tracks').doc(currentEditingId).update({ lyrics: newLyrics });
+          const g = (window.globalTracks || []).find(t => t && t.id === currentEditingId);
+          if (g) g.lyrics = newLyrics;
+          const card = document.querySelector('.track[data-id="' + currentEditingId + '"]');
+          if (card) card.dataset.lyrics = newLyrics;
+          document.getElementById('side-content').textContent = newLyrics;
+          document.getElementById('side-content').style.display = 'block';
+          document.getElementById('side-content-editor').style.display = 'none';
+          document.getElementById('edit-mode-actions').classList.remove('active');
+        } catch (e) {
+          console.error('Failed to save lyrics', e);
+          alert('Save failed');
+        }
+      });
       const bgSelector = document.getElementById('bg-selector');
       if (bgSelector) {
         const savedBg = localStorage.getItem('playlistBg');
@@ -1048,100 +1388,8 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       await loadPlaylist();
-      if (typeof initPlayer === 'function') initPlayer();
+      if (!isEmbed && typeof initPlayer === 'function') initPlayer();
     });
-  </script>
-
-  <!-- ===== LYRICS MODAL SCRIPT ===== -->
-  <script>
-  (function() {
-    const modal = document.getElementById('lyrics-modal');
-    const titleEl = document.getElementById('lyrics-modal-title');
-    const textEl = document.getElementById('lyrics-modal-text');
-    const editArea = document.getElementById('lyrics-modal-edit');
-    const editBtn = document.getElementById('lyrics-modal-edit-btn');
-    const saveBtn = document.getElementById('lyrics-modal-save');
-    const closeBtn = document.getElementById('lyrics-modal-close');
-    const cancelBtn = document.getElementById('lyrics-modal-cancel');
-    let currentLyricsTrackId = null;
-
-    function checkIsAdmin() {
-      if (typeof window.isAdmin !== 'undefined') return !!window.isAdmin;
-      if (typeof getRole === 'function') return getRole() === 'admin';
-      return (localStorage.getItem('siteRole') || '') === 'admin';
-    }
-
-    window.openLyricsModal = function(trackEl) {
-      if (!modal || !trackEl) return;
-      const id = trackEl.dataset.id;
-      const title = trackEl.dataset.title || '';
-      const lyrics = trackEl.dataset.lyrics || ((window.globalTracks || []).find(t => t && t.id === id)?.lyrics) || '';
-
-      currentLyricsTrackId = id;
-      if (titleEl) titleEl.textContent = '📜 ' + title;
-      if (textEl) textEl.textContent = lyrics || 'No lyrics available';
-      if (editArea) editArea.value = lyrics || '';
-
-      const userIsAdmin = checkIsAdmin();
-      window.isAdmin = userIsAdmin;
-
-      if (editBtn) editBtn.style.display = userIsAdmin ? 'inline-block' : 'none';
-      if (saveBtn) saveBtn.style.display = 'none';
-      if (editArea) editArea.style.display = 'none';
-      if (textEl) textEl.style.display = 'block';
-
-      modal.style.display = 'flex';
-      setTimeout(() => {
-        const panel = modal.querySelector('.panel');
-        if (panel) panel.scrollTop = 0;
-      }, 10);
-    };
-
-    function closeModal() {
-      if (!modal) return;
-      modal.style.display = 'none';
-      if (editArea) editArea.style.display = 'none';
-      if (textEl) textEl.style.display = 'block';
-      if (saveBtn) saveBtn.style.display = 'none';
-      if (editBtn) editBtn.style.display = checkIsAdmin() ? 'inline-block' : 'none';
-      currentLyricsTrackId = null;
-    }
-
-    editBtn?.addEventListener('click', () => {
-      if (!checkIsAdmin()) return;
-      if (textEl) textEl.style.display = 'none';
-      if (editArea) editArea.style.display = 'block';
-      if (saveBtn) saveBtn.style.display = 'inline-block';
-      if (editBtn) editBtn.style.display = 'none';
-      if (editArea) editArea.focus();
-    });
-
-    saveBtn?.addEventListener('click', async () => {
-      if (!currentLyricsTrackId) return;
-      if (!checkIsAdmin()) { alert('Permission denied'); return; }
-      const newText = (editArea?.value || '').trim();
-      try {
-        await db.collection('tracks').doc(currentLyricsTrackId).update({ lyrics: newText });
-        const g = (window.globalTracks || []).find(t => t && t.id === currentLyricsTrackId);
-        if (g) g.lyrics = newText;
-        if (textEl) textEl.textContent = newText || 'No lyrics available';
-        const card = document.querySelector('.track[data-id="' + currentLyricsTrackId + '"]');
-        if (card) card.dataset.lyrics = newText;
-        if (editArea) editArea.style.display = 'none';
-        if (textEl) textEl.style.display = 'block';
-        if (saveBtn) saveBtn.style.display = 'none';
-        if (editBtn) editBtn.style.display = checkIsAdmin() ? 'inline-block' : 'none';
-      } catch (e) {
-        console.error('Failed to save lyrics', e);
-        alert('Save failed');
-      }
-    });
-
-    closeBtn?.addEventListener('click', closeModal);
-    cancelBtn?.addEventListener('click', closeModal);
-    modal?.addEventListener('click', (ev) => { if (ev.target === modal) closeModal(); });
-    window.openText = window.openText || function(trackEl) { openLyricsModal(trackEl); };
-  })();
   </script>
 
   <!-- ===== ADD TO PLAYLIST SCRIPT ===== -->
@@ -1792,7 +2040,139 @@
     });
   });
 })();
+
+
+// ===============================
+// SYNC WITH PARENT PLAYER
+// ===============================
+
+(function() {
+  const isEmbed = new URLSearchParams(location.search).get('embed') === '1';
+  if (!isEmbed) return;
+
+  // Запрашиваем текущее состояние плеера при загрузке
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage('get-player-state', '*');
+  }
+
+  // Слушаем сообщения от родителя
+  window.addEventListener('message', (e) => {
+    const data = e.data;
+    if (!data || !data.type) return;
+
+    if (data.type === 'player-state') {
+      // Обновляем визуальное выделение играющего трека
+      window.currentTrackId = data.trackId;
+      window.isPlaying = data.isPlaying;
+      updatePlaylistPlayIcons();
+    }
+    else if (data.type === 'counters-update') {
+      // Обновляем счётчики лайков/дизлайков
+      updatePlaylistCounters(data.trackId, data.likes, data.dislikes, data.userVote);
+    }
+  });
+
+  function updatePlaylistPlayIcons() {
+    document.querySelectorAll('.track').forEach(el => {
+      const id = el.dataset.id;
+      const playBtn = el.querySelector('.play-btn');
+      if (!playBtn) return;
+
+      if (id === window.currentTrackId && window.isPlaying) {
+        el.classList.add('playing');
+        playBtn.classList.add('playing');
+        playBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
+      } else {
+        el.classList.remove('playing');
+        playBtn.classList.remove('playing');
+        playBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3v18l15-9L5 3z"/></svg>';
+      }
+    });
+  }
+
+  function updatePlaylistCounters(trackId, likes, dislikes, userVote) {
+    const likeEl = document.querySelector('.likes-count[data-key="' + trackId + '"]');
+    const dislikeEl = document.querySelector('.dislikes-count[data-key="' + trackId + '"]');
+    if (likeEl) {
+      const num = likeEl.querySelector('.num');
+      if (num) num.textContent = likes;
+      likeEl.classList.toggle('active', userVote === 'like');
+    }
+    if (dislikeEl) {
+      const num = dislikeEl.querySelector('.num');
+      if (num) num.textContent = dislikes;
+      dislikeEl.classList.toggle('active', userVote === 'dislike');
+    }
+  }
+})();
+
+
+// ===== SHARE MODAL LOGIC =====
+(function() {
+  const modal = document.getElementById('share-modal');
+  const closeBtn = document.getElementById('share-modal-close');
+  const copyBtn = document.getElementById('share-copy-link');
+
+  closeBtn?.addEventListener('click', () => modal?.classList.remove('open'));
+
+  copyBtn?.addEventListener('click', async () => {
+    const track = (window.globalTracks || []).find(t => t.id === window.currentTrackId) ||
+                  (window.currentPlaylistTracks || []).find(t => t.id === window.currentTrackId);
+    const trackId = track?.id || window.currentTrackId || '';
+    if (!trackId) { alert('No track selected'); return; }
+    const shareUrl = window.location.origin + '/NIKO.html?track=' + encodeURIComponent(trackId);
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      const original = copyBtn.innerHTML;
+      copyBtn.innerHTML = '<div style="width:36px;height:36px;border-radius:10px;background:rgba(77,255,138,0.15);display:flex;align-items:center;justify-content:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4dff8a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div><div style="color:#4dff8a;font-size:13px;font-weight:600;">Copied!</div></div>';
+      setTimeout(() => copyBtn.innerHTML = original, 2000);
+    } catch (e) { console.error(e); }
+  });
+
+  document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const platform = btn.dataset.platform;
+      const track = (window.globalTracks || []).find(t => t.id === window.currentTrackId) ||
+                    (window.currentPlaylistTracks || []).find(t => t.id === window.currentTrackId);
+      const shareUrl = window.location.origin + '/NIKO.html?track=' + encodeURIComponent(track?.id || '');
+      const text = encodeURIComponent('Check out: ' + (track?.title || 'Track'));
+      const urls = {
+        twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${text}`,
+        facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+        telegram: `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${text}`,
+        whatsapp: `https://wa.me/?text=${text}%20${encodeURIComponent(shareUrl)}`,
+        viber: `viber://forward?text=${text}%20${encodeURIComponent(shareUrl)}`,
+        messenger: `fb-messenger://share/?link=${encodeURIComponent(shareUrl)}`,
+        tiktok: `https://www.tiktok.com/`,
+        native: () => { if (navigator.share) navigator.share({title: track?.title || 'Track', url: shareUrl}); else alert('Web Share not supported'); }
+      };
+      if (platform === 'native') { urls.native(); }
+      else if (urls[platform]) { window.open(urls[platform], '_blank'); }
+    });
+  });
+
+  // Закрытие по клику на фон
+  modal?.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+})();
 </script>
 
+</div>
+  <!-- ===== SIDE PANEL (как на главной) ===== -->
+  <div id="side-panel" class="side-panel" aria-hidden="true">
+    <div class="side-panel-header">
+      <button id="side-close" class="btn">Close</button>
+      <div class="side-panel-actions">
+        <button id="copy-text">📋 Copy</button>
+        <button id="edit-text" style="display:none">✏️ Edit</button>
+      </div>
+    </div>
+    <h3 id="side-title">Full text</h3>
+    <div id="side-content" style="white-space:pre-wrap;color:#eaeaf2;margin-top:8px"></div>
+    <textarea id="side-content-editor" style="display:none;width:100%;min-height:300px;padding:12px;border-radius:10px;background:#0f0f12;color:#fff;border:1px solid rgba(255,255,255,0.06);font-family:inherit;font-size:14px;box-sizing:border-box;resize:vertical;"></textarea>
+    <div class="edit-mode-actions" id="edit-mode-actions" style="display:none;gap:8px;margin-top:12px;">
+      <button id="edit-cancel" class="btn">Cancel</button>
+      <button id="edit-save" class="btn active">💾 Save</button>
+    </div>
+  </div>
 </body>
 </html>
