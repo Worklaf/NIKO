@@ -733,7 +733,7 @@
     </div>
   </div>
 </div>
-
+<script src="db.js"></script> 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -1108,66 +1108,76 @@ function subscribePlaylists() {
 }
 
 function subscribeTracks() {
-  if (!db) return console.warn('Firestore not initialized');
+  if (!db) {
+    console.warn('Firestore not initialized');
+    // [CRITICAL] Даже без Firebase пытаемся загрузить из IndexedDB
+    loadOfflineTracksOnly();
+    return;
+  }
 
-  // [NEW] Сначала показываем кэшированные треки (мгновенно)
-  // Это ключевое исправление — пользователь видит треки сразу, даже offline
-  loadOfflineTracksFirst();
-
-  db.collection('tracks').orderBy('createdAt', 'desc').onSnapshot(snap => {
-    const role = getRole();
-    let tracks = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(track => {
-      if (!isVisibleToRole(track, role)) return false;
-      if (track.playlistId) {
-        const pl = globalPlaylists.find(p => p.id === track.playlistId);
-        if (pl && !isVisibleToRole(pl, role)) return false;
-      }
-      return true;
-    });
-    
-    globalTracks = tracks;
-    
-    // Сохраняем треки для offline
-    saveTracksToDB(tracks).catch(e => console.warn('DB save failed:', e));
-    
-    // Шлём в SW
-    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-      navigator.serviceWorker.controller.postMessage({
-        type: 'SAVE_TRACKS',
-        tracks: tracks
+  // [CRITICAL] Сначала показываем кэш, потом подписываемся на Firestore
+  loadOfflineTracksFirst().then(() => {
+    // Только после рендера кэша подписываемся на Firestore
+    db.collection('tracks').orderBy('createdAt', 'desc').onSnapshot(snap => {
+      const role = getRole();
+      let tracks = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(track => {
+        if (!isVisibleToRole(track, role)) return false;
+        if (track.playlistId) {
+          const pl = globalPlaylists.find(p => p.id === track.playlistId);
+          if (pl && !isVisibleToRole(pl, role)) return false;
+        }
+        return true;
       });
-    }
-    
-    applySortAndRender();
-  }, async err => { 
-    console.warn('tracks snapshot error', err);
-    
-    // Offline fallback уже сработал выше, но на всякий случай:
-    if (!navigator.onLine) {
-      console.log('📴 Firestore failed — offline mode active');
-      // Треки уже загружены из IndexedDB выше
-    }
+      
+      globalTracks = tracks;
+      saveTracksToDB(tracks).catch(e => console.warn('DB save failed:', e));
+      
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: 'SAVE_TRACKS',
+          tracks: tracks
+        });
+      }
+      
+      applySortAndRender();
+    }, err => { 
+      console.warn('Firestore error (offline?):', err);
+      // IndexedDB уже загружен выше, ничего не делаем
+    });
   });
 }
 
-// [NEW] Новая функция — загрузка из IndexedDB ПЕРЕД подпиской Firestore
+// [NEW] Загружает из IndexedDB и рендерит
 async function loadOfflineTracksFirst() {
-  try {
-    const offlineTracks = await getTracksFromDB();
-    if (offlineTracks && offlineTracks.length > 0) {
-      const role = getRole();
-      globalTracks = offlineTracks.filter(track => isVisibleToRole(track, role));
-      console.log('📦 Loaded', globalTracks.length, 'tracks from IndexedDB');
-      applySortAndRender();
-      
-      // Обновляем индикатор
-      updateOfflineIndicator();
-      return true;
-    }
-  } catch (e) {
-    console.warn('IndexedDB load failed:', e);
+  console.log('📦 Loading offline tracks...');
+  const offlineTracks = await getTracksFromDB();
+  
+  if (offlineTracks && offlineTracks.length > 0) {
+    const role = getRole();
+    globalTracks = offlineTracks.filter(track => isVisibleToRole(track, role));
+    console.log('✅ Loaded', globalTracks.length, 'tracks from IndexedDB');
+    
+    // [CRITICAL] Рендерим СРАЗУ, не ждем Firestore
+    applySortAndRender();
+    updateOfflineIndicator();
+    return true;
   }
+  
+  console.log('⚠️ No tracks in IndexedDB');
   return false;
+}
+
+// [NEW] Только для случая когда Firestore вообще не доступен
+async function loadOfflineTracksOnly() {
+  const hasTracks = await loadOfflineTracksFirst();
+  if (!hasTracks) {
+    document.getElementById('tracksList').innerHTML = `
+      <div class="empty-state">
+        <h2>📴 Офлайн-режим</h2>
+        <p>Нет кэшированных треков. Подключитесь к интернету для загрузки.</p>
+      </div>
+    `;
+  }
 }
 
 function applySortAndRender() {
