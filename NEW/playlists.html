@@ -439,21 +439,36 @@ window.initPlaylistsView = function() {
     }
 
     function createAddCard() {
-      const div = document.createElement('div');
-      div.className = 'playlist-card add-card';
-      div.innerHTML = `
-        <div class="playlist-cover-wrap">
-          <span class="add-icon">+</span>
-          <span class="add-label">New</span>
-        </div>
-        <div class="playlist-info">
-          <div class="playlist-name">Create playlist</div>
-          <div class="playlist-meta">Add your songs</div>
-        </div>
-      `;
-      div.addEventListener('click', () => openPlaylistModal(null, null));
-      return div;
+  const div = document.createElement('div');
+  div.className = 'playlist-card add-card';
+  div.innerHTML = `
+    <div class="playlist-cover-wrap">
+      <span class="add-icon">+</span>
+      <span class="add-label">New</span>
+    </div>
+    <div class="playlist-info">
+      <div class="playlist-name">Create playlist</div>
+      <div class="playlist-meta">Add your songs</div>
+    </div>
+  `;
+  
+  div.addEventListener('click', () => {
+    if (role === 'guest') {
+      // Гость → переход на главную с флагом открытия логина
+      if (window.parent && window.parent !== window) {
+        // Внутри iframe — шлём команду родителю
+        window.parent.postMessage('open-login', '*');
+      } else {
+        // Обычный переход
+        window.location.href = 'NIKO.html?openLogin=1';
+      }
+      return;
     }
+    openPlaylistModal(null, null);
+  });
+  
+  return div;
+}
 
     function getOwnerBadge(ownerRole) {
       if (isPartner && ownerRole === 'partner') return { text: 'My', cls: 'my' };
