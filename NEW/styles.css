@@ -1615,3 +1615,98 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
 @media (max-width: 880px) {
   #chat-swipe-zone { display: block; }
 }
+
+/* ===== MINI-PLAYER & TRACK BUTTON HOVER GLOWS ===== */
+.mini-actions .btn.icon,
+#mini-right .btn.icon,
+.track .actions .btn.icon,
+.track .play-row .btn.icon {
+  transition: all 0.2s ease;
+}
+
+/* Share — Pink glow */
+#mini-share:hover svg,
+.mini-actions .share-svg-btn:hover svg,
+.track .share-btn:hover svg {
+  stroke: #ff4da6;
+  filter: drop-shadow(0 0 6px rgba(255, 77, 166, 0.5));
+  transform: scale(1.1);
+}
+
+/* Download — Cyan glow */
+#mini-download:hover svg,
+.mini-actions .download-btn:hover svg,
+.track .play-row .download-btn:hover svg {
+  stroke: #00E5FF;
+  filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.5));
+  transform: scale(1.1);
+}
+
+/* Text — Orange glow */
+#mini-open-text:hover,
+.track .play-row .open-text-btn:hover {
+  color: #ff7a4d;
+  filter: drop-shadow(0 0 6px rgba(255, 122, 77, 0.5));
+  transform: scale(1.1);
+}
+
+/* Comments — Green glow */
+#mini-comment:hover,
+.track .play-row .comment-btn:hover {
+  color: #4dff8a;
+  filter: drop-shadow(0 0 6px rgba(77, 255, 138, 0.5));
+  transform: scale(1.1);
+}
+
+/* Like — Pink glow */
+#mini-like:hover {
+  color: #ff4da6;
+  filter: drop-shadow(0 0 6px rgba(255, 77, 166, 0.5));
+  transform: scale(1.1);
+}
+
+/* Dislike — Red glow */
+#mini-dislike:hover {
+  color: #ff4d4d;
+  filter: drop-shadow(0 0 6px rgba(255, 77, 77, 0.5));
+  transform: scale(1.1);
+}
+
+/* Visualizer — Cyan glow */
+#mini-visualizer:hover {
+  color: #00E5FF;
+  filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.5));
+  transform: scale(1.1);
+}
+
+/* Playlist "Add tracks" button — unify with other nav buttons */
+#open-add-to-playlist-top.nav-btn {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #eaeaf2;
+  box-shadow: none;
+}
+#open-add-to-playlist-top.nav-btn:hover {
+  background: rgba(255,255,255,0.09);
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,0.14);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  color: #fff;
+}
+
+/* Add to playlist — Gold glow */
+.track .play-row .add-to-playlist-btn:hover,
+.track .actions .add-to-playlist-btn:hover {
+  color: #ffd700;
+  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.5));
+  transform: scale(1.1);
+}
+
+/* Open text — Orange glow (unified for all pages) */
+.track .play-row .open-text-btn:hover,
+.track .actions .open-text-btn:hover,
+#mini-open-text:hover {
+  color: #ff7a4d;
+  filter: drop-shadow(0 0 6px rgba(255, 122, 77, 0.5));
+  transform: scale(1.1);
+}
