@@ -8,6 +8,7 @@ const AUDIO_CACHE = 'niko-audio-v3';
 const STATIC_ASSETS = [
   './',
   './NIKO.html',
+  './db.js',
   './styles.css',
   './player-core.js',
   './visualizers.js',
