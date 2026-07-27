@@ -1270,21 +1270,7 @@ function applySortAndRender() {
   updateNewTracksBadge();
   filterTracks();
 }
-// ВРЕМЕННО: принудительно обновить SW и очистить старые кэши
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(async regs => {
-    for (const reg of regs) {
-      await reg.unregister();
-    }
-    const keys = await caches.keys();
-    for (const key of keys) {
-      await caches.delete(key);
-    }
-    console.log('🧹 All caches cleared');
-    // Перезагружаем страницу чтобы новый SW установился
-    // location.reload();
-  });
-}
+
 async function uploadToWorker(file, folder, fileName) {
   const fd = new FormData();
   fd.append('file', file);
