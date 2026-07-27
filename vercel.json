@@ -1,5 +1,5 @@
 {
-  "rewrites": [
-    {"source": "/", "destination": "/NIKO.html" }
+  "redirects": [
+    {"source": "/", "destination": "/NIKO.html", "permanent": true }
   ]
 }
