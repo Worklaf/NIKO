@@ -340,6 +340,8 @@
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
+<base target="_blank">
 </head>
 <body>
   <div class="container">
@@ -438,11 +440,15 @@
     <h3 data-i18n="playlists">🎵 Плейлисты</h3>
     <div id="playlists-list" style="margin-bottom:16px"></div>
     <input id="pl-name" class="search-input" data-i18n-placeholder="playlistName" placeholder="" style="width:100%;margin-bottom:8px">
-    <select id="pl-visibility" class="search-select" style="width:100%;margin-bottom:12px">
+    <select id="pl-visibility" class="search-select" style="width:100%;margin-bottom:8px">
       <option value="public" data-i18n="public">🌍 Public</option>
       <option value="partner" data-i18n="partner">♥ Partner only</option>
       <option value="hidden" data-i18n="hidden">🔒 Hidden</option>
     </select>
+    <label style="display:flex;align-items:center;gap:10px;margin-bottom:14px;cursor:pointer;background:rgba(255,77,166,0.08);border:1px solid rgba(255,77,166,0.2);border-radius:10px;padding:10px 12px;transition:all .2s;">
+      <input type="checkbox" id="pl-hide-from-home" style="width:20px;height:20px;cursor:pointer;accent-color:#ff4da6;flex-shrink:0;">
+      <span data-i18n="hideFromHome" style="font-weight:600;color:#eaeaf2;font-size:13px;">👁️‍🗨️ Скрыть треки с главной страницы</span>
+    </label>
     <div style="display:flex;gap:8px;justify-content:flex-end">
       <button id="pl-cancel" class="btn" data-i18n="close">Закрыть</button>
       <button id="pl-save" class="btn active" data-i18n="createPlaylist">Создать</button>
@@ -506,7 +512,13 @@
     <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
   </svg>
 </button>
-      <a id="mini-download" class="btn icon" href="#" download aria-label="Download" title="Download">⬇️</a>
+      <a id="mini-download" class="btn icon download-btn" href="#" download aria-label="Download" title="Download">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+      </a>
     </div>
   </div>
 </div>
@@ -671,9 +683,10 @@
       <option value="hidden" data-i18n="hidden">🔒 Hidden</option>
     </select>
     <textarea id="t-lyrics" data-i18n-placeholder="lyrics" placeholder="Текст песни" style="width:100%;min-height:100px;padding:8px;border-radius:8px;background:#07060a;border:1px solid rgba(255,255,255,0.04);color:#eaeaf2;margin-bottom:12px"></textarea>
-    <label data-i18n="mp3Link" style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px">MP3 файл</label>
-    <input id="t-audio-file" type="file" accept="audio/*" style="width:100%;margin-bottom:12px">
-    <label data-i18n="coverUrl" style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px">Фото обложки</label>
+    <label data-i18n="mp3Link" style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px">MP3 файл (можно выбрать несколько)</label>
+    <input id="t-audio-file" type="file" accept="audio/*" multiple style="width:100%;margin-bottom:12px">
+    <div id="multi-upload-list" style="max-height:320px;overflow-y:auto;margin-bottom:12px;display:none;"></div>
+    <label data-i18n="coverUrl" style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px">Фото обложки (для одиночной загрузки)</label>
     <input id="t-cover-file" type="file" accept="image/*" style="width:100%;margin-bottom:12px">
     <div style="display:flex;gap:8px;justify-content:flex-end">
       <button id="add-cancel" class="btn" data-i18n="cancel">Отмена</button>
@@ -769,6 +782,136 @@ let currentEditingSrc = '';
 let currentEditingId = '';
 let currentReplacingTrackId = '';
 let pendingUserTrack = null;
+let pendingMultiTracks = [];
+
+function readAudioTags(file) {
+  return new Promise((resolve) => {
+    jsmediatags.read(file, {
+      onSuccess: (tag) => resolve({ success: true, tags: tag.tags }),
+      onError: () => resolve({ success: false, tags: null })
+    });
+  });
+}
+
+function escapeHtmlMulti(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderMultiUploadList() {
+  const container = document.getElementById('multi-upload-list');
+  if (!container) return;
+  if (!pendingMultiTracks.length) { container.style.display = 'none'; container.innerHTML = ''; return; }
+  container.style.display = 'block';
+  container.innerHTML = '';
+
+  pendingMultiTracks.forEach((t, i) => {
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex;gap:10px;align-items:center;padding:10px;background:rgba(255,255,255,0.03);border-radius:10px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.06);';
+    const coverSrc = t.coverBlob ? URL.createObjectURL(t.coverBlob) : 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
+    const statusIcon = t.status === 'ready' ? '⏳' : t.status === 'uploading' ? '📤' : t.status === 'done' ? '✅' : '❌';
+    const statusColor = t.status === 'ready' ? 'var(--muted)' : t.status === 'uploading' ? '#00d1ff' : t.status === 'done' ? '#4dff8a' : '#ff4d4d';
+
+    div.innerHTML = `
+      <img src="${coverSrc}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;flex-shrink:0;">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;">
+        <input class="search-input mt-title" data-idx="${i}" value="${escapeHtmlMulti(t.title)}" placeholder="Название" style="padding:4px 8px;font-size:12px;margin:0;">
+        <div style="display:flex;gap:6px;">
+          <input class="search-input mt-artist" data-idx="${i}" value="${escapeHtmlMulti(t.artist)}" placeholder="Артист" style="padding:4px 8px;font-size:12px;margin:0;flex:1;">
+          <input class="search-input mt-genre" data-idx="${i}" value="${escapeHtmlMulti(t.genre)}" placeholder="Жанр" style="padding:4px 8px;font-size:12px;margin:0;flex:1;">
+        </div>
+        <textarea class="search-input mt-lyrics" data-idx="${i}" placeholder="Текст песни" style="padding:4px 8px;font-size:12px;margin:0;min-height:40px;resize:vertical;background:#07060a;border:1px solid rgba(255,255,255,0.04);color:#eaeaf2;border-radius:6px;">${escapeHtmlMulti(t.lyrics)}</textarea>
+      </div>
+      <div style="font-size:11px;color:${statusColor};flex-shrink:0;width:50px;text-align:center;font-weight:700;">${statusIcon}</div>
+    `;
+
+    div.querySelector('.mt-title').addEventListener('input', (e) => { pendingMultiTracks[i].title = e.target.value; });
+    div.querySelector('.mt-artist').addEventListener('input', (e) => { pendingMultiTracks[i].artist = e.target.value; });
+    div.querySelector('.mt-genre').addEventListener('input', (e) => { pendingMultiTracks[i].genre = e.target.value; });
+    div.querySelector('.mt-lyrics').addEventListener('input', (e) => { pendingMultiTracks[i].lyrics = e.target.value; });
+
+    container.appendChild(div);
+  });
+}
+
+async function uploadAllTracks() {
+  const btn = document.getElementById('add-save');
+  const originalText = btn.textContent;
+  btn.textContent = '⏳ Uploading ' + pendingMultiTracks.length + '...';
+  btn.disabled = true;
+
+  let successCount = 0;
+  let failCount = 0;
+
+  for (let i = 0; i < pendingMultiTracks.length; i++) {
+    const t = pendingMultiTracks[i];
+    t.status = 'uploading';
+    renderMultiUploadList();
+
+    try {
+      const displayTitle = t.title || 'Untitled';
+      const safeBaseName = uniqueBaseName(sanitizeBaseName(displayTitle));
+      const baseName = safeBaseName || 'track_' + Date.now();
+      const audioExt = t.file.name.split('.').pop().replace(/[^a-zA-Z0-9]/g, '');
+
+      const audioUrl = await uploadToWorker(t.file, STORAGE_FOLDER_AUDIO, `${baseName}.${audioExt}`);
+
+      let coverUrl = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
+      let coverFileName = null;
+      if (t.coverBlob) {
+        const coverFile = new File([t.coverBlob], `${baseName}.jpg`, { type: t.coverBlob.type || 'image/jpeg' });
+        coverFileName = `${baseName}.jpg`;
+        coverUrl = await uploadToWorker(coverFile, STORAGE_FOLDER_COVERS, coverFileName);
+      }
+
+      const visibility = isAdmin
+        ? (document.getElementById('t-visibility').value || 'public')
+        : 'partner';
+
+      await db.collection('tracks').add({
+        title: displayTitle,
+        artist: t.artist || '',
+        genre: t.genre || '',
+        playlist: '',
+        lyrics: t.lyrics || '',
+        playlistId: document.getElementById('t-playlist-id').value || null,
+        visibility: visibility,
+        baseName,
+        audioFileName: `${baseName}.${audioExt}`,
+        coverFileName,
+        audio: audioUrl,
+        cover: coverUrl,
+        duration: '—',
+        likes: 0, dislikes: 0, plays: 0,
+        uploadedBy: getRole(),
+        uploadedByRole: getRole(),
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      t.status = 'done';
+      successCount++;
+    } catch (e) {
+      console.error('Upload error:', e);
+      t.status = 'error';
+      failCount++;
+    }
+
+    renderMultiUploadList();
+  }
+
+  btn.textContent = originalText;
+  btn.disabled = false;
+
+  if (failCount === 0) {
+    alert('✅ ' + successCount + ' track(s) uploaded!');
+    document.getElementById('add-track-modal').classList.remove('open');
+    pendingMultiTracks = [];
+    document.getElementById('t-audio-file').value = '';
+    document.getElementById('multi-upload-list').innerHTML = '';
+    document.getElementById('multi-upload-list').style.display = 'none';
+  } else {
+    alert('⚠️ ' + successCount + ' done, ' + failCount + ' failed. Check list.');
+  }
+}
 
 window.currentUserRole = '';
 let myTracksFilter = 'all';
@@ -1086,7 +1229,7 @@ function renderPlaylistsList() {
   const mine = globalPlaylists.filter(p => p.ownerRole === getRole());
   list.innerHTML = mine.map(p => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:rgba(255,255,255,0.05);border-radius:8px;margin-bottom:6px">
-      <span>${p.name} <small style="color:var(--muted)">(${p.visibility})</small></span>
+      <span>${p.name} <small style="color:var(--muted)">(${p.visibility})</small>${p.hideFromHome ? ' <span title="Скрыт с главной" style="opacity:.6">👁️‍🗨️</span>' : ''}</span>
       <button class="btn icon delete-playlist-btn" data-id="${p.id}">🗑️</button>
     </div>
   `).join('');
@@ -1116,6 +1259,13 @@ function subscribeTracks() {
       if (track.playlistId) {
         const pl = globalPlaylists.find(p => p.id === track.playlistId);
         if (pl && !isVisibleToRole(pl, role)) return false;
+      }
+      // Скрыть треки, у которых ВСЕ плейлисты помечены как hideFromHome
+      const trackPlaylistIds = track.playlistIds || [];
+      if (trackPlaylistIds.length > 0) {
+        const pls = globalPlaylists.filter(p => trackPlaylistIds.includes(p.id));
+        const allHidden = pls.length > 0 && pls.every(p => p.hideFromHome === true);
+        if (allHidden) return false;
       }
       return true;
     });
@@ -1195,7 +1345,7 @@ function loadGenresToFilter() {
   });
   
   let genres = Array.from(genreSet);
-  if (isGenreSorted) genres.sort((a, b) => a.localeCompare(b));
+  genres.sort((a, b) => a.localeCompare(b));
   
   const genreSelect = document.getElementById('siteGenre');
   const currentVal = genreSelect.value;
@@ -1397,7 +1547,13 @@ function renderDraftTracks(tracks) {
           <button class="btn icon add-to-playlist-btn" title="${t('addToPlaylist') || 'В плейлист'}">➕</button>
           ${isAdmin ? `<button class="btn icon change-visibility-btn" title="${t('songVisibility') || 'Видимость'}">👁️</button>` : ''}
           ${orderButtons}
-          <a class="btn icon download-track-btn" href="${track.audio || '#'}" download="${(track.title || 'track').replace(/"/g,'')}.mp3" title="${t('download') || 'Скачать'}">⬇️</a>
+          <a class="btn icon download-btn" href="${track.audio || '#'}" download="${(track.title || 'track').replace(/"/g,'')}.mp3" title="${t('download') || 'Скачать'}" aria-label="Download">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </a>
         </div>
       </div>
     `;
@@ -1886,6 +2042,14 @@ if (lyricsSearch) lyricsSearch.placeholder = t('searchLyricsPlaceholder') || 'Se
         console.error('❌ Firebase save failed:', e);
       }
     }
+      // Открыть логин, если пришли с флагом ?openLogin=1
+  if (new URLSearchParams(window.location.search).get('openLogin') === '1') {
+    document.getElementById('login-modal').classList.add('open');
+    // Убираем параметр из URL
+    if (window.history.replaceState) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }
   });
   // ===== ОВЕРЛЕЙ ЧАТА (без перехода на новую страницу) =====
 const chatOverlay = document.getElementById('chat-overlay');
@@ -2221,13 +2385,15 @@ await loadSavedLanguage();
   document.getElementById('pl-save')?.addEventListener('click', async () => {
     const name = document.getElementById('pl-name').value.trim();
     const visibility = document.getElementById('pl-visibility').value;
+    const hideFromHome = document.getElementById('pl-hide-from-home').checked;
     if (!name) return alert(t('playlistName') || 'Введите название');
     await db.collection('playlists').add({
-      name, visibility,
+      name, visibility, hideFromHome,
       ownerRole: getRole(),
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     document.getElementById('pl-name').value = '';
+    document.getElementById('pl-hide-from-home').checked = false;
   });
 
   document.getElementById('pl-cancel')?.addEventListener('click', () => {
@@ -2236,6 +2402,8 @@ await loadSavedLanguage();
 
   document.getElementById('managePlaylistsBtn')?.addEventListener('click', (e) => {
     e.preventDefault();
+    const hideRow = document.getElementById('pl-hide-from-home')?.closest('label');
+    if (hideRow) hideRow.style.display = (getRole() === 'admin') ? 'flex' : 'none';
     if (window.openPlaylistsOverlay) window.openPlaylistsOverlay();
     else window.location.href = 'playlists.html';
   });
@@ -2319,8 +2487,45 @@ await loadSavedLanguage();
     });
     document.getElementById('add-cancel').addEventListener('click', () => {
       document.getElementById('add-track-modal').classList.remove('open');
+      pendingMultiTracks = [];
+      document.getElementById('t-audio-file').value = '';
+      document.getElementById('multi-upload-list').innerHTML = '';
+      document.getElementById('multi-upload-list').style.display = 'none';
     });
+    document.getElementById('t-audio-file').addEventListener('change', async (e) => {
+      const files = Array.from(e.target.files);
+      if (!files.length) return;
+
+      const container = document.getElementById('multi-upload-list');
+      container.style.display = 'block';
+      container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">⏳ Reading metadata for ' + files.length + ' file(s)...</div>';
+
+      const results = await Promise.all(files.map(file => readAudioTags(file)));
+
+      pendingMultiTracks = results.map((result, i) => {
+        const tags = result.tags || {};
+        const file = files[i];
+        const title = tags.title || file.name.replace(/\.[^.]+$/, '');
+        const artist = tags.artist || '';
+        const genre = tags.genre || '';
+        let coverBlob = null;
+        if (tags.picture) {
+          const { data, format } = tags.picture;
+          coverBlob = new Blob([new Uint8Array(data)], { type: format });
+        }
+        return { file, title, artist, genre, lyrics: '', coverBlob, status: 'ready' };
+      });
+
+      renderMultiUploadList();
+    });
+
     document.getElementById('add-save').addEventListener('click', async () => {
+      // Если есть мультизагрузка — грузим все
+      if (pendingMultiTracks.length > 0) {
+        await uploadAllTracks();
+        return;
+      }
+
       const title = document.getElementById('t-title').value.trim();
       const artist = document.getElementById('t-artist').value.trim();
       const genre = document.getElementById('t-genre').value.trim();
@@ -3160,7 +3365,11 @@ window.onPlayerTrackChanged = function(trackId) {
   window.addEventListener('message', (e) => {
     const data = e.data;
     if (!data) return;
-
+  if (data === 'open-login') {
+    // Открываем модалку логина
+    document.getElementById('login-modal').classList.add('open');
+    return;
+  }
     if (data === 'close-playlists') {
       closeOverlays();
     }
