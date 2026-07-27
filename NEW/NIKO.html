@@ -733,14 +733,21 @@
     </div>
   </div>
 </div>
-<script src="db.js"></script> 
+<script src="db.js"></script>
+	<script src="offline-cache.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
   // ВРЕМЕННЫЙ ДЕБАГ — удали после проверки
   window.addEventListener('error', (e) => console.error('GLOBAL ERROR:', e.message, e.filename, e.lineno));
-  window.addEventListener('unhandledrejection', (e) => console.error('UNHANDLED:', e.reason));
+  window.addEventListener('unhandledrejection', (e) => console.reject('UNHANDLED:', e.reason));
+  
+  // Логируем каждый шаг загрузки
+  const originalLog = console.log;
+  console.log = function(...args) {
+    originalLog.apply(console, ['[NIKO]', ...args]);
+  };
 </script>
 <script>
   const firebaseConfig = {
@@ -1113,15 +1120,14 @@ function subscribePlaylists() {
 
 function subscribeTracks() {
   if (!db) {
-    console.warn('Firestore not initialized');
-    // [CRITICAL] Даже без Firebase пытаемся загрузить из IndexedDB
+    console.warn('Firestore not initialized — loading from IndexedDB only');
     loadOfflineTracksOnly();
     return;
   }
 
-  // [CRITICAL] Сначала показываем кэш, потом подписываемся на Firestore
+  // [CRITICAL] Сначала показываем кэш мгновенно
   loadOfflineTracksFirst().then(() => {
-    // Только после рендера кэша подписываемся на Firestore
+    // Потом подписываемся на Firestore (если онлайн)
     db.collection('tracks').orderBy('createdAt', 'desc').onSnapshot(snap => {
       const role = getRole();
       let tracks = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(track => {
@@ -1146,39 +1152,65 @@ function subscribeTracks() {
       applySortAndRender();
     }, err => { 
       console.warn('Firestore error (offline?):', err);
-      // IndexedDB уже загружен выше, ничего не делаем
+      // IndexedDB уже загружен выше
     });
   });
 }
 
-// [NEW] Загружает из IndexedDB и рендерит
+// [NEW] Загружает из IndexedDB и рендерит — с защитой от гонки
 async function loadOfflineTracksFirst() {
   console.log('📦 Loading offline tracks...');
+  
+  // [CRITICAL] Ждём готовности DOM
+  if (document.readyState === 'loading') {
+    await new Promise(resolve => {
+      document.addEventListener('DOMContentLoaded', resolve, { once: true });
+    });
+  }
+  
   const offlineTracks = await getTracksFromDB();
   
   if (offlineTracks && offlineTracks.length > 0) {
     const role = getRole();
     globalTracks = offlineTracks.filter(track => isVisibleToRole(track, role));
     console.log('✅ Loaded', globalTracks.length, 'tracks from IndexedDB');
-    applySortAndRender();
-    if (typeof updateOfflineIndicator === 'function') {
-      updateOfflineIndicator();
-    }
+    
+    // [CRITICAL] Рендерим через setTimeout чтобы не блокировать поток
+    setTimeout(() => {
+      applySortAndRender();
+      updateOfflineIndicator?.();
+    }, 0);
+    
     return true;
   }
+  
+  console.log('⚠️ No tracks in IndexedDB');
   return false;
 }
 
-// [NEW] Только для случая когда Firestore вообще не доступен
+// [NEW] Только IndexedDB, без Firestore
 async function loadOfflineTracksOnly() {
   const hasTracks = await loadOfflineTracksFirst();
+  
   if (!hasTracks) {
-    document.getElementById('tracksList').innerHTML = `
-      <div class="empty-state">
-        <h2>📴 Офлайн-режим</h2>
-        <p>Нет кэшированных треков. Подключитесь к интернету для загрузки.</p>
-      </div>
-    `;
+    // [CRITICAL] Показываем сообщение даже если DOM ещё не готов
+    const showEmpty = () => {
+      const list = document.getElementById('tracksList');
+      if (list) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <h2>📴 Офлайн-режим</h2>
+            <p>Нет кэшированных треков. Подключитесь к интернету для загрузки.</p>
+          </div>
+        `;
+      }
+    };
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', showEmpty, { once: true });
+    } else {
+      showEmpty();
+    }
   }
 }
 
@@ -1868,13 +1900,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadAccessHashes();
   await loadListenedFromFirebase();
   await loadPartnerListens();
+  
+  // [CRITICAL] Подписка на треки — сначала кэш, потом Firestore
+  subscribeTracks();
+  
+  subscribePlaylists();
+  initWavesurfer();
 
   const langBtn = document.getElementById('lang-' + (window.currentLang || 'en'));
   if (langBtn) langBtn.classList.add('active');
 
-  subscribeTracks();
-  subscribePlaylists();
-  initWavesurfer();
+  
   initEmojiSystem();
   updateShuffleButton();
   if (typeof applyTranslations === 'function') applyTranslations();
@@ -3045,7 +3081,7 @@ window.updateTrackPlayIcons = function() {
     <line x1="15" y1="12" x2="3" y2="12"/>
   </svg>
 </button>
-<script src="offline-cache.js"></script>
+
 <script src="player-core.js"></script>
 <script src="visualizers.js"></script>
 <script src="language.js"></script>
