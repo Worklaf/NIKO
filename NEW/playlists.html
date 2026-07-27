@@ -331,6 +331,7 @@
     .btn.danger:hover { background: rgba(255,0,0,0.2); }
   </style>
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
 <div id="spa-playlists-content">
@@ -380,6 +381,10 @@
           <option value="partner">♥ Admin + partner</option>
           <option value="admin">🔒 Only admin</option>
         </select>
+      </div>
+      <div class="panel-row" id="hideFromHomeRow" style="display:flex;align-items:center;gap:10px;background:rgba(255,77,166,0.08);border:1px solid rgba(255,77,166,0.2);border-radius:10px;padding:10px 12px;">
+        <input type="checkbox" id="playlistHideFromHome" style="width:20px;height:20px;cursor:pointer;accent-color:#ff4da6;flex-shrink:0;">
+        <label for="playlistHideFromHome" style="margin:0;cursor:pointer;color:#eaeaf2;font-weight:600;font-size:13px;">👁️‍🗨️ Hide tracks from home page</label>
       </div>
 
       <div class="panel-actions">
@@ -518,7 +523,7 @@ window.initPlaylistsView = function() {
           </div>
           <div class="playlist-info">
             <div class="playlist-name">${p.name}</div>
-            <div class="playlist-meta">${songCount} tracks <span class="dot"></span> ${visIcon}</div>
+            <div class="playlist-meta">${songCount} tracks <span class="dot"></span> ${visIcon}${p.hideFromHome ? ' <span style="opacity:.6;margin-left:4px;" title="Hidden from home">👁️‍🗨️</span>' : ''}</div>
           </div>
         `;
 
@@ -566,12 +571,16 @@ window.initPlaylistsView = function() {
       const deleteRow = document.getElementById('playlistDeleteRow');
 
       if (visRow) visRow.style.display = isAdmin ? 'block' : 'none';
+      const hideRow = document.getElementById('hideFromHomeRow');
+      if (hideRow) hideRow.style.display = isAdmin ? 'flex' : 'none';
 
+      const hideCheck = document.getElementById('playlistHideFromHome');
       if (data) {
         titleEl.textContent = 'Edit playlist';
         nameInput.value = data.name || '';
         descInput.value = data.description || '';
         visSelect.value = data.visibility || 'public';
+        if (hideCheck) hideCheck.checked = !!data.hideFromHome;
         coverPreview.src = data.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
         deleteRow.style.display = canManagePlaylist(data.ownerRole || '') ? 'flex' : 'none';
       } else {
@@ -579,6 +588,7 @@ window.initPlaylistsView = function() {
         nameInput.value = '';
         descInput.value = '';
         visSelect.value = 'public';
+        if (hideCheck) hideCheck.checked = false;
         coverPreview.src = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
         deleteRow.style.display = 'none';
       }
@@ -620,8 +630,9 @@ window.initPlaylistsView = function() {
       try { coverData = await uploadCoverIfNeeded(baseName); }
       catch (e) { console.error(e); alert('Cover upload error: ' + e.message); }
 
+      const hideFromHome = !!document.getElementById('playlistHideFromHome')?.checked;
       const payload = {
-        name, description, visibility,
+        name, description, visibility, hideFromHome,
         ownerRole: role,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       };
