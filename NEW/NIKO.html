@@ -737,7 +737,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
+<script>
+  // ВРЕМЕННЫЙ ДЕБАГ — удали после проверки
+  window.addEventListener('error', (e) => console.error('GLOBAL ERROR:', e.message, e.filename, e.lineno));
+  window.addEventListener('unhandledrejection', (e) => console.error('UNHANDLED:', e.reason));
+</script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyBzCiSmy714eAS_sDQffBHHhN3HkPniIKk",
