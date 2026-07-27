@@ -6,8 +6,24 @@
   <title>N1K∅ — Tracks</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="https://unpkg.com/modern-normalize/modern-normalize.css">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
+  
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  
+  <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json">
+  
+  <!-- Theme Color -->
   <meta name="theme-color" content="#ff4da6">
+  
+  <!-- Apple PWA Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="N1K∅">
+  
   <base target="_blank">
   <style>
     .track.ready-to-play {
@@ -1093,6 +1109,7 @@ function subscribePlaylists() {
 
 function subscribeTracks() {
   if (!db) return console.warn('Firestore not initialized');
+  
   db.collection('tracks').orderBy('createdAt', 'desc').onSnapshot(snap => {
     const role = getRole();
     let tracks = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(track => {
@@ -1103,9 +1120,53 @@ function subscribeTracks() {
       }
       return true;
     });
+    
     globalTracks = tracks;
+    
+    // [NEW] Сохраняем треки для offline
+    saveTracksToDB(tracks).catch(e => console.warn('DB save failed:', e));
+    
+    // [NEW] Также шлём в SW
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: 'SAVE_TRACKS',
+        tracks: tracks
+      });
+    }
+    
     applySortAndRender();
-  }, err => { console.warn('tracks snapshot error', err); });
+  }, async err => { 
+    console.warn('tracks snapshot error', err);
+    
+    // [NEW] Offline fallback: загружаем из IndexedDB
+    if (!navigator.onLine) {
+      console.log('📴 Offline mode — loading from IndexedDB');
+      try {
+        const offlineTracks = await getTracksFromDB();
+        if (offlineTracks && offlineTracks.length > 0) {
+          const role = getRole();
+          globalTracks = offlineTracks.filter(track => isVisibleToRole(track, role));
+          applySortAndRender();
+          
+          // Обновляем индикатор
+          const indicator = document.getElementById('offline-indicator');
+          if (indicator) {
+            indicator.textContent = '📴 Офлайн — показаны кэшированные треки (' + globalTracks.length + ')';
+            indicator.style.display = 'block';
+          }
+        } else {
+          document.getElementById('tracksList').innerHTML = `
+            <div class="empty-state">
+              <h2>📴 Офлайн-режим</h2>
+              <p>Нет кэшированных треков. Подключитесь к интернету для загрузки.</p>
+            </div>
+          `;
+        }
+      } catch (e) {
+        console.error('Offline load failed:', e);
+      }
+    }
+  });
 }
 
 function applySortAndRender() {
