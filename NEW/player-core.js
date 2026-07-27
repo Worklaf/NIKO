@@ -253,7 +253,9 @@ window.initWavesurfer = function () {
   });
 
   wavesurfer.on('audioprocess', () => window.updateTimeDisplay());
-  wavesurfer.on('finish', () => window.playNext());
+  wavesurfer.on('finish', () => {
+  try { window.playNext(); } catch (e) { console.error('finish handler error', e); }
+});
 
   document.getElementById('mini-play').onclick = () => wavesurfer.playPause();
 
@@ -300,6 +302,17 @@ window.loadAndPlayTrack = function(track) {
 
   window.currentTrackId = track.id || '';
   window.currentTrackSrc = track.audio || track.url || track.file || '';
+    // Снимаем NEW при любом запуске (ручном или автоматическом)
+  const trackEl = document.querySelector(`.track[data-id="${track.id}"]`);
+  if (trackEl) {
+    trackEl.classList.remove('new-track');
+  }
+  if (typeof saveListenToFirebase === 'function') {
+    saveListenToFirebase(track.id).catch(() => {});
+  }
+  if (typeof updateNewTracksBadge === 'function') {
+    updateNewTracksBadge();
+  }
   window.currentTrackIndex = window.globalTracks.findIndex(t => t && t.id === track.id);
 
   const titleText = track.artist ? `${track.artist} - ${track.title}` : (track.title || '');
@@ -448,153 +461,123 @@ window.playTrackById = function (id) {
 // NEXT / PREV
 // ===============================
 window.playNext = async function () {
-  const ctx = window.playerContext;
-  if (!ctx.tracks.length) { 
-    console.warn('playNext: no context'); 
-    return; 
-  }
+  if (window.isSwitchingTrack) return; // блокируем двойные вызовы
+  window.isSwitchingTrack = true;
 
-  let nextIdx;
-  if (window.isShuffleMode) {
-    if (ctx.tracks.length === 1) { nextIdx = 0; }
-    else {
-      let attempts = 0;
-      do { 
-        nextIdx = Math.floor(Math.random() * ctx.tracks.length); 
-        attempts++; 
+  try {
+    const ctx = window.playerContext;
+    if (!ctx.tracks.length) return;
+
+    let nextIdx;
+    if (window.isShuffleMode) {
+      if (ctx.tracks.length === 1) nextIdx = 0;
+      else {
+        let attempts = 0;
+        do {
+          nextIdx = Math.floor(Math.random() * ctx.tracks.length);
+          attempts++;
+        } while (nextIdx === ctx.currentIndex && attempts < 10);
       }
-      while (nextIdx === ctx.currentIndex && attempts < 10);
+    } else {
+      nextIdx = (ctx.currentIndex + 1) % ctx.tracks.length;
     }
-  } else {
-    nextIdx = (ctx.currentIndex + 1) % ctx.tracks.length;
-  }
 
-  // [FIX] Офлайн: проверяем доступность трека
-  if (!navigator.onLine && typeof isTrackCached === 'function') {
-    const trackAudio = ctx.tracks[nextIdx]?.audio;
-    const cached = await isTrackCached(trackAudio);
-    
-    if (!cached) {
-      console.log('⏭️ Skip uncached track (offline):', ctx.tracks[nextIdx]?.title);
-      
-      // [FIX] Ищем СЛЕДУЮЩИЙ кэшированный трек по кругу
-      let found = false;
-      let checkIdx = nextIdx;
-      const startIdx = nextIdx;
-      
-      do {
-        checkIdx = (checkIdx + 1) % ctx.tracks.length;
-        if (checkIdx === ctx.currentIndex) break;
-        
-        const checkAudio = ctx.tracks[checkIdx]?.audio;
-        if (!checkAudio) continue;
-        
-        const checkCached = await isTrackCached(checkAudio);
-        if (checkCached) { 
-          nextIdx = checkIdx; 
-          found = true; 
-          break; 
+    // Офлайн: ищем ближайший закэшированный трек, но НЕ убиваем процесс
+    let checked = 0;
+    const total = ctx.tracks.length;
+    while (checked < total) {
+      const track = ctx.tracks[nextIdx];
+      if (track && track.audio) {
+        try {
+          // Если офлайн — проверим кэш, иначе сразу грузим
+          if (!navigator.onLine && typeof isTrackCached === 'function') {
+            const cached = await isTrackCached(track.audio);
+            if (!cached) {
+              nextIdx = (nextIdx + 1) % ctx.tracks.length;
+              checked++;
+              continue; // пропускаем незакэшированный
+            }
+          }
+          // Загружаем и обновляем индекс ТУТ, а не раньше
+          ctx.currentIndex = nextIdx;
+          window.loadAndPlayTrack(track);
+          return;
+        } catch (e) {
+          console.warn('⏭️ playNext skip:', track.title, e.message);
+          nextIdx = (nextIdx + 1) % ctx.tracks.length;
+          checked++;
         }
-      } while (checkIdx !== startIdx);
-      
-      if (!found) {
-        console.warn('❌ No cached tracks available offline');
-        // [FIX] Вместо alert — просто останавливаемся
-        if (wavesurfer) wavesurfer.pause();
-        window.isPlaying = false;
-        window.updateTrackPlayIcons();
-        return;
+      } else {
+        nextIdx = (nextIdx + 1) % ctx.tracks.length;
+        checked++;
       }
     }
-  }
-
-  ctx.currentIndex = nextIdx;
-
-  if (typeof debouncedTrackSwitch === 'function') {
-    debouncedTrackSwitch(() => {
-      window.loadAndPlayTrack(ctx.tracks[nextIdx]);
-    });
-  } else {
-    window.loadAndPlayTrack(ctx.tracks[nextIdx]);
+    console.warn('❌ playNext: нет доступных треков');
+  } finally {
+    setTimeout(() => { window.isSwitchingTrack = false; }, 400);
   }
 };
 
 window.playPrev = async function () {
+  if (window.isSwitchingTrack) return;
+  window.isSwitchingTrack = true;
+
   try {
-    const currentTime = wavesurfer ? wavesurfer.getCurrentTime() : 0;
-    if (currentTime > 3) {
-      if (wavesurfer) wavesurfer.seekTo(0);
-      return;
-    }
-  } catch (e) { /* ignore */ }
-
-  const ctx = window.playerContext;
-  if (!ctx.tracks.length) { 
-    console.warn('playPrev: no context'); 
-    return; 
-  }
-
-  let prevIdx;
-  if (window.isShuffleMode) {
-    if (ctx.tracks.length === 1) { prevIdx = 0; }
-    else {
-      let attempts = 0;
-      do { 
-        prevIdx = Math.floor(Math.random() * ctx.tracks.length); 
-        attempts++; 
-      }
-      while (prevIdx === ctx.currentIndex && attempts < 10);
-    }
-  } else {
-    prevIdx = (ctx.currentIndex - 1 + ctx.tracks.length) % ctx.tracks.length;
-  }
-
-  // [FIX] Офлайн: проверяем доступность трека
-  if (!navigator.onLine && typeof isTrackCached === 'function') {
-    const trackAudio = ctx.tracks[prevIdx]?.audio;
-    const cached = await isTrackCached(trackAudio);
-    
-    if (!cached) {
-      console.log('⏭️ Skip uncached track (offline):', ctx.tracks[prevIdx]?.title);
-      
-      // [FIX] Ищем ПРЕДЫДУЩИЙ кэшированный трек по кругу
-      let found = false;
-      let checkIdx = prevIdx;
-      const startIdx = prevIdx;
-      
-      do {
-        checkIdx = (checkIdx - 1 + ctx.tracks.length) % ctx.tracks.length;
-        if (checkIdx === ctx.currentIndex) break;
-        
-        const checkAudio = ctx.tracks[checkIdx]?.audio;
-        if (!checkAudio) continue;
-        
-        const checkCached = await isTrackCached(checkAudio);
-        if (checkCached) { 
-          prevIdx = checkIdx; 
-          found = true; 
-          break; 
-        }
-      } while (checkIdx !== startIdx);
-      
-      if (!found) {
-        console.warn('❌ No cached tracks available offline');
-        if (wavesurfer) wavesurfer.pause();
-        window.isPlaying = false;
-        window.updateTrackPlayIcons();
+    // Если прошло >3 сек — начинаем трек сначала
+    try {
+      if (wavesurfer && wavesurfer.getCurrentTime() > 3) {
+        wavesurfer.seekTo(0);
         return;
       }
+    } catch (e) {}
+
+    const ctx = window.playerContext;
+    if (!ctx.tracks.length) return;
+
+    let prevIdx;
+    if (window.isShuffleMode) {
+      if (ctx.tracks.length === 1) prevIdx = 0;
+      else {
+        let attempts = 0;
+        do {
+          prevIdx = Math.floor(Math.random() * ctx.tracks.length);
+          attempts++;
+        } while (prevIdx === ctx.currentIndex && attempts < 10);
+      }
+    } else {
+      prevIdx = (ctx.currentIndex - 1 + ctx.tracks.length) % ctx.tracks.length;
     }
-  }
 
-  ctx.currentIndex = prevIdx;
-
-  if (typeof debouncedTrackSwitch === 'function') {
-    debouncedTrackSwitch(() => {
-      window.loadAndPlayTrack(ctx.tracks[prevIdx]);
-    });
-  } else {
-    window.loadAndPlayTrack(ctx.tracks[prevIdx]);
+    let checked = 0;
+    const total = ctx.tracks.length;
+    while (checked < total) {
+      const track = ctx.tracks[prevIdx];
+      if (track && track.audio) {
+        try {
+          if (!navigator.onLine && typeof isTrackCached === 'function') {
+            const cached = await isTrackCached(track.audio);
+            if (!cached) {
+              prevIdx = (prevIdx - 1 + ctx.tracks.length) % ctx.tracks.length;
+              checked++;
+              continue;
+            }
+          }
+          ctx.currentIndex = prevIdx;
+          window.loadAndPlayTrack(track);
+          return;
+        } catch (e) {
+          console.warn('⏭️ playPrev skip:', track.title, e.message);
+          prevIdx = (prevIdx - 1 + ctx.tracks.length) % ctx.tracks.length;
+          checked++;
+        }
+      } else {
+        prevIdx = (prevIdx - 1 + ctx.tracks.length) % ctx.tracks.length;
+        checked++;
+      }
+    }
+    console.warn('❌ playPrev: нет доступных треков');
+  } finally {
+    setTimeout(() => { window.isSwitchingTrack = false; }, 400);
   }
 };
 // ===============================
