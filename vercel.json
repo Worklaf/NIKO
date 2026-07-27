@@ -1,5 +1,5 @@
 {
   "rewrites": [
-    {"source": "/", "destination": "/Niko.html" }
+    {"source": "/", "destination": "/NIKO.html" }
   ]
 }
