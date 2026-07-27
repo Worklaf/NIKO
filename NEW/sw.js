@@ -1,13 +1,9 @@
-// ===============================
-// N1K∅ Service Worker — Offline Audio Cache
-// ===============================
-
 const CACHE_NAME = 'niko-music-v3';
 const AUDIO_CACHE = 'niko-audio-v3';
 
+// [FIX] Убран './' — в подпапке без index.html это кэширует 404
 const STATIC_ASSETS = [
-  
-  './NIKO.html',
+  './NIKO.html',           // ← Главная страница
   './db.js',
   './styles.css',
   './player-core.js',
@@ -22,6 +18,105 @@ const EXTERNAL_ASSETS = [
   'https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js',
   'https://unpkg.com/modern-normalize/modern-normalize.css'
 ];
+
+// ========== INSTALL ==========
+self.addEventListener('install', (e) => {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then(async cache => {
+      // Кэшируем статику
+      await cache.addAll(STATIC_ASSETS).catch(err => {
+        console.warn('SW: Some static assets failed:', err);
+      });
+      // Кэшируем внешние скрипты
+      for (const url of EXTERNAL_ASSETS) {
+        try {
+          const response = await fetch(url, { mode: 'no-cors' });
+          await cache.put(url, response);
+        } catch (e) {
+          console.warn('SW: External asset failed:', url);
+        }
+      }
+    })
+  );
+  self.skipWaiting();
+});
+
+// ========== ACTIVATE ==========
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then(keys => 
+      Promise.all(
+        keys.filter(k => k !== CACHE_NAME && k !== AUDIO_CACHE).map(k => caches.delete(k))
+      )
+    )
+  );
+  self.clients.claim();
+});
+
+// ========== FETCH ==========
+self.addEventListener('fetch', (e) => {
+  const url = new URL(e.request.url);
+
+  if (e.request.method !== 'GET') return;
+  if (!url.protocol.startsWith('http')) return;
+
+  // Firebase — Network First
+  if (url.hostname.includes('googleapis.com') || 
+      url.hostname.includes('firebase') ||
+      url.hostname.includes('gstatic.com') ||
+      url.hostname.includes('firebasestorage')) {
+    e.respondWith(
+      fetch(e.request).catch(async () => {
+        const cached = await caches.match(e.request);
+        if (cached) return cached;
+        return new Response('[]', { 
+          status: 200, 
+          headers: { 'Content-Type': 'application/json' } 
+        });
+      })
+    );
+    return;
+  }
+
+  // Worker (аудио/обложки)
+  if (url.hostname.includes('workers.dev')) {
+    e.respondWith(
+      fetch(e.request).catch(async () => {
+        if (e.request.destination === 'audio' || url.pathname.match(/\.(mp3|wav|ogg|m4a|aac|flac)$/i)) {
+          const cache = await caches.open(AUDIO_CACHE);
+          const cached = await cache.match(e.request);
+          if (cached) return cached;
+        }
+        return new Response('', { status: 503 });
+      })
+    );
+    return;
+  }
+
+  // Аудио
+  if (e.request.destination === 'audio' || url.pathname.match(/\.(mp3|wav|ogg|m4a|aac|flac)$/i)) {
+    e.respondWith(audioCacheStrategy(e.request));
+    return;
+  }
+
+  // Картинки
+  if (e.request.destination === 'image' || url.pathname.match(/\.(jpg|jpeg|png|webp|gif|svg)$/i)) {
+    e.respondWith(imageCacheStrategy(e.request));
+    return;
+  }
+
+  // Внешние ассеты
+  if (EXTERNAL_ASSETS.includes(e.request.url)) {
+    e.respondWith(cacheFirstStrategy(e.request, CACHE_NAME));
+    return;
+  }
+
+  // Всё остальное (HTML, CSS, JS)
+  e.respondWith(networkFirstStrategy(e.request));
+});
+
+// ========== СТРАТЕГИИ ==========
+
 async function audioCacheStrategy(request) {
   const cache = await caches.open(AUDIO_CACHE);
   const cached = await cache.match(request);
@@ -63,11 +158,10 @@ async function networkFirstStrategy(request) {
     const cached = await caches.match(request);
     if (cached) return cached;
     
-    // [FIX] Для навигации — отдаём главную страницу
+    // [FIX] Навигация: отдаём NIKO.html, не index.html
     if (request.mode === 'navigate') {
-      const cachedMain = await caches.match('./index.html') || 
-                        await caches.match('./') ||
-                        await caches.match('./NIKO.html');
+      const cachedMain = await caches.match('./NIKO.html') || 
+                        await caches.match('./');
       if (cachedMain) return cachedMain;
     }
     
@@ -95,26 +189,9 @@ async function fetchAndCache(request, cache) {
   } catch (e) {}
 }
 
+// ========== MESSAGE ==========
 self.addEventListener('message', (e) => {
   if (e.data === 'skipWaiting') self.skipWaiting();
-  
-  // [NEW] Сохраняем треки в IndexedDB
-  if (e.data.type === 'SAVE_TRACKS') {
-    saveTracksToIndexedDB(e.data.tracks).then(() => {
-      e.source.postMessage({ type: 'TRACKS_SAVED', count: e.data.tracks.length });
-    }).catch(err => {
-      console.warn('SAVE_TRACKS failed:', err);
-    });
-  }
-  
-  // [NEW] Получаем треки из IndexedDB
-  if (e.data.type === 'GET_OFFLINE_TRACKS') {
-    getTracksFromIndexedDB().then(tracks => {
-      e.source.postMessage({ type: 'OFFLINE_TRACKS', tracks });
-    }).catch(err => {
-      e.source.postMessage({ type: 'OFFLINE_TRACKS', tracks: [] });
-    });
-  }
   
   if (e.data.type === 'CACHE_AUDIO') {
     caches.open(AUDIO_CACHE).then(cache => {
