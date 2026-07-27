@@ -6,7 +6,7 @@
   "background_color": "#0a0a0f",
   "theme_color": "#ff4da6",
   "orientation": "portrait-primary",
-  "scope": ".",
+  "scope": "./",
   "description": "Your personal music space with playlists, visualizers, and chat",
   "categories": ["music", "entertainment"],
   "icons": [
