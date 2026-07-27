@@ -1934,6 +1934,14 @@ if (lyricsSearch) lyricsSearch.placeholder = t('searchLyricsPlaceholder') || 'Se
         console.error('❌ Firebase save failed:', e);
       }
     }
+	    // Открыть логин, если пришли с флагом ?openLogin=1
+  if (new URLSearchParams(window.location.search).get('openLogin') === '1') {
+    document.getElementById('login-modal').classList.add('open');
+    // Убираем параметр из URL
+    if (window.history.replaceState) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }
   });
   // ===== ОВЕРЛЕЙ ЧАТА (без перехода на новую страницу) =====
 const chatOverlay = document.getElementById('chat-overlay');
@@ -3208,7 +3216,11 @@ window.onPlayerTrackChanged = function(trackId) {
   window.addEventListener('message', (e) => {
     const data = e.data;
     if (!data) return;
-
+  if (data === 'open-login') {
+    // Открываем модалку логина
+    document.getElementById('login-modal').classList.add('open');
+    return;
+  }
     if (data === 'close-playlists') {
       closeOverlays();
     }
