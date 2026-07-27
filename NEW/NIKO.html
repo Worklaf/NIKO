@@ -340,6 +340,8 @@
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
+<base target="_blank">
 </head>
 <body>
   <div class="container">
@@ -438,11 +440,15 @@
     <h3 data-i18n="playlists">🎵 Плейлисты</h3>
     <div id="playlists-list" style="margin-bottom:16px"></div>
     <input id="pl-name" class="search-input" data-i18n-placeholder="playlistName" placeholder="" style="width:100%;margin-bottom:8px">
-    <select id="pl-visibility" class="search-select" style="width:100%;margin-bottom:12px">
+    <select id="pl-visibility" class="search-select" style="width:100%;margin-bottom:8px">
       <option value="public" data-i18n="public">🌍 Public</option>
       <option value="partner" data-i18n="partner">♥ Partner only</option>
       <option value="hidden" data-i18n="hidden">🔒 Hidden</option>
     </select>
+    <label style="display:flex;align-items:center;gap:10px;margin-bottom:14px;cursor:pointer;background:rgba(255,77,166,0.08);border:1px solid rgba(255,77,166,0.2);border-radius:10px;padding:10px 12px;transition:all .2s;">
+      <input type="checkbox" id="pl-hide-from-home" style="width:20px;height:20px;cursor:pointer;accent-color:#ff4da6;flex-shrink:0;">
+      <span data-i18n="hideFromHome" style="font-weight:600;color:#eaeaf2;font-size:13px;">👁️‍🗨️ Скрыть треки с главной страницы</span>
+    </label>
     <div style="display:flex;gap:8px;justify-content:flex-end">
       <button id="pl-cancel" class="btn" data-i18n="close">Закрыть</button>
       <button id="pl-save" class="btn active" data-i18n="createPlaylist">Создать</button>
@@ -506,7 +512,13 @@
     <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
   </svg>
 </button>
-      <a id="mini-download" class="btn icon" href="#" download aria-label="Download" title="Download">⬇️</a>
+      <a id="mini-download" class="btn icon download-btn" href="#" download aria-label="Download" title="Download">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+      </a>
     </div>
   </div>
 </div>
@@ -838,13 +850,10 @@ function filterTracks() {
 
     // === PAGINATION: сохраняем отфильтрованные ID ===
     if (window.homeState) {
-  // Сохраняем ВСЕ отфильтрованные ID (все страницы), а не только текущую
-  const allFilteredIds = Array.from(document.querySelectorAll('.track'))
-    .map(el => el.dataset.id); // берём все, даже скрытые пагинацией
-  window.homeState.filteredIds = allFilteredIds;
-  window.homeState.currentPage = 1;
-  renderHomePage();
-}
+      window.homeState.filteredIds = [...window.currentFilteredIds];
+      window.homeState.currentPage = 1;
+      renderHomePage();
+    }
 }
 document.getElementById('share-copy-link').addEventListener('click', async () => {
   // [FIX] Используем window.currentTrackId вместо currentTrackSrc
@@ -1089,7 +1098,7 @@ function renderPlaylistsList() {
   const mine = globalPlaylists.filter(p => p.ownerRole === getRole());
   list.innerHTML = mine.map(p => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:rgba(255,255,255,0.05);border-radius:8px;margin-bottom:6px">
-      <span>${p.name} <small style="color:var(--muted)">(${p.visibility})</small></span>
+      <span>${p.name} <small style="color:var(--muted)">(${p.visibility})</small>${p.hideFromHome ? ' <span title="Скрыт с главной" style="opacity:.6">👁️‍🗨️</span>' : ''}</span>
       <button class="btn icon delete-playlist-btn" data-id="${p.id}">🗑️</button>
     </div>
   `).join('');
@@ -1112,7 +1121,6 @@ function subscribePlaylists() {
 
 function subscribeTracks() {
   if (!db) return console.warn('Firestore not initialized');
-  
   db.collection('tracks').orderBy('createdAt', 'desc').onSnapshot(snap => {
     const role = getRole();
     let tracks = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(track => {
@@ -1121,55 +1129,18 @@ function subscribeTracks() {
         const pl = globalPlaylists.find(p => p.id === track.playlistId);
         if (pl && !isVisibleToRole(pl, role)) return false;
       }
+      // Скрыть треки, у которых ВСЕ плейлисты помечены как hideFromHome
+      const trackPlaylistIds = track.playlistIds || [];
+      if (trackPlaylistIds.length > 0) {
+        const pls = globalPlaylists.filter(p => trackPlaylistIds.includes(p.id));
+        const allHidden = pls.length > 0 && pls.every(p => p.hideFromHome === true);
+        if (allHidden) return false;
+      }
       return true;
     });
-    
     globalTracks = tracks;
-    
-    // [NEW] Сохраняем треки для offline
-    saveTracksToDB(tracks).catch(e => console.warn('DB save failed:', e));
-    
-    // [NEW] Также шлём в SW
-    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-      navigator.serviceWorker.controller.postMessage({
-        type: 'SAVE_TRACKS',
-        tracks: tracks
-      });
-    }
-    
     applySortAndRender();
-  }, async err => { 
-    console.warn('tracks snapshot error', err);
-    
-    // [NEW] Offline fallback: загружаем из IndexedDB
-    if (!navigator.onLine) {
-      console.log('📴 Offline mode — loading from IndexedDB');
-      try {
-        const offlineTracks = await getTracksFromDB();
-        if (offlineTracks && offlineTracks.length > 0) {
-          const role = getRole();
-          globalTracks = offlineTracks.filter(track => isVisibleToRole(track, role));
-          applySortAndRender();
-          
-          // Обновляем индикатор
-          const indicator = document.getElementById('offline-indicator');
-          if (indicator) {
-            indicator.textContent = '📴 Офлайн — показаны кэшированные треки (' + globalTracks.length + ')';
-            indicator.style.display = 'block';
-          }
-        } else {
-          document.getElementById('tracksList').innerHTML = `
-            <div class="empty-state">
-              <h2>📴 Офлайн-режим</h2>
-              <p>Нет кэшированных треков. Подключитесь к интернету для загрузки.</p>
-            </div>
-          `;
-        }
-      } catch (e) {
-        console.error('Offline load failed:', e);
-      }
-    }
-  });
+  }, err => { console.warn('tracks snapshot error', err); });
 }
 
 function applySortAndRender() {
@@ -1445,7 +1416,13 @@ function renderDraftTracks(tracks) {
           <button class="btn icon add-to-playlist-btn" title="${t('addToPlaylist') || 'В плейлист'}">➕</button>
           ${isAdmin ? `<button class="btn icon change-visibility-btn" title="${t('songVisibility') || 'Видимость'}">👁️</button>` : ''}
           ${orderButtons}
-          <a class="btn icon download-track-btn" href="${track.audio || '#'}" download="${(track.title || 'track').replace(/"/g,'')}.mp3" title="${t('download') || 'Скачать'}">⬇️</a>
+          <a class="btn icon download-btn" href="${track.audio || '#'}" download="${(track.title || 'track').replace(/"/g,'')}.mp3" title="${t('download') || 'Скачать'}" aria-label="Download">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </a>
         </div>
       </div>
     `;
@@ -1934,7 +1911,7 @@ if (lyricsSearch) lyricsSearch.placeholder = t('searchLyricsPlaceholder') || 'Se
         console.error('❌ Firebase save failed:', e);
       }
     }
-	    // Открыть логин, если пришли с флагом ?openLogin=1
+      // Открыть логин, если пришли с флагом ?openLogin=1
   if (new URLSearchParams(window.location.search).get('openLogin') === '1') {
     document.getElementById('login-modal').classList.add('open');
     // Убираем параметр из URL
@@ -2167,8 +2144,8 @@ await loadSavedLanguage();
         window.currentTrackId = tid;
         currentTrackId = tid;
         const ctxTracks = window.homeState.filteredIds
-  .map(id => window.globalTracks.find(t => t.id === id))
-  .filter(Boolean);
+          .map(id => window.globalTracks.find(t => t.id === id))
+          .filter(Boolean);
         playTrack(trackEl, {tracks: ctxTracks, source: 'home'});
         // === FIX: сохраняем прослушивание ===
         await saveListenToFirebase(tid);
@@ -2277,13 +2254,15 @@ await loadSavedLanguage();
   document.getElementById('pl-save')?.addEventListener('click', async () => {
     const name = document.getElementById('pl-name').value.trim();
     const visibility = document.getElementById('pl-visibility').value;
+    const hideFromHome = document.getElementById('pl-hide-from-home').checked;
     if (!name) return alert(t('playlistName') || 'Введите название');
     await db.collection('playlists').add({
-      name, visibility,
+      name, visibility, hideFromHome,
       ownerRole: getRole(),
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     document.getElementById('pl-name').value = '';
+    document.getElementById('pl-hide-from-home').checked = false;
   });
 
   document.getElementById('pl-cancel')?.addEventListener('click', () => {
@@ -2292,6 +2271,8 @@ await loadSavedLanguage();
 
   document.getElementById('managePlaylistsBtn')?.addEventListener('click', (e) => {
     e.preventDefault();
+    const hideRow = document.getElementById('pl-hide-from-home')?.closest('label');
+    if (hideRow) hideRow.style.display = (getRole() === 'admin') ? 'flex' : 'none';
     if (window.openPlaylistsOverlay) window.openPlaylistsOverlay();
     else window.location.href = 'playlists.html';
   });
