@@ -838,10 +838,13 @@ function filterTracks() {
 
     // === PAGINATION: сохраняем отфильтрованные ID ===
     if (window.homeState) {
-      window.homeState.filteredIds = [...window.currentFilteredIds];
-      window.homeState.currentPage = 1;
-      renderHomePage();
-    }
+  // Сохраняем ВСЕ отфильтрованные ID (все страницы), а не только текущую
+  const allFilteredIds = Array.from(document.querySelectorAll('.track'))
+    .map(el => el.dataset.id); // берём все, даже скрытые пагинацией
+  window.homeState.filteredIds = allFilteredIds;
+  window.homeState.currentPage = 1;
+  renderHomePage();
+}
 }
 document.getElementById('share-copy-link').addEventListener('click', async () => {
   // [FIX] Используем window.currentTrackId вместо currentTrackSrc
@@ -2156,8 +2159,8 @@ await loadSavedLanguage();
         window.currentTrackId = tid;
         currentTrackId = tid;
         const ctxTracks = window.homeState.filteredIds
-          .map(id => window.globalTracks.find(t => t.id === id))
-          .filter(Boolean);
+  .map(id => window.globalTracks.find(t => t.id === id))
+  .filter(Boolean);
         playTrack(trackEl, {tracks: ctxTracks, source: 'home'});
         // === FIX: сохраняем прослушивание ===
         await saveListenToFirebase(tid);
