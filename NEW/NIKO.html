@@ -1109,7 +1109,11 @@ function subscribePlaylists() {
 
 function subscribeTracks() {
   if (!db) return console.warn('Firestore not initialized');
-  
+
+  // [NEW] Сначала показываем кэшированные треки (мгновенно)
+  // Это ключевое исправление — пользователь видит треки сразу, даже offline
+  loadOfflineTracksFirst();
+
   db.collection('tracks').orderBy('createdAt', 'desc').onSnapshot(snap => {
     const role = getRole();
     let tracks = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(track => {
@@ -1123,10 +1127,10 @@ function subscribeTracks() {
     
     globalTracks = tracks;
     
-    // [NEW] Сохраняем треки для offline
+    // Сохраняем треки для offline
     saveTracksToDB(tracks).catch(e => console.warn('DB save failed:', e));
     
-    // [NEW] Также шлём в SW
+    // Шлём в SW
     if (navigator.serviceWorker && navigator.serviceWorker.controller) {
       navigator.serviceWorker.controller.postMessage({
         type: 'SAVE_TRACKS',
@@ -1138,35 +1142,32 @@ function subscribeTracks() {
   }, async err => { 
     console.warn('tracks snapshot error', err);
     
-    // [NEW] Offline fallback: загружаем из IndexedDB
+    // Offline fallback уже сработал выше, но на всякий случай:
     if (!navigator.onLine) {
-      console.log('📴 Offline mode — loading from IndexedDB');
-      try {
-        const offlineTracks = await getTracksFromDB();
-        if (offlineTracks && offlineTracks.length > 0) {
-          const role = getRole();
-          globalTracks = offlineTracks.filter(track => isVisibleToRole(track, role));
-          applySortAndRender();
-          
-          // Обновляем индикатор
-          const indicator = document.getElementById('offline-indicator');
-          if (indicator) {
-            indicator.textContent = '📴 Офлайн — показаны кэшированные треки (' + globalTracks.length + ')';
-            indicator.style.display = 'block';
-          }
-        } else {
-          document.getElementById('tracksList').innerHTML = `
-            <div class="empty-state">
-              <h2>📴 Офлайн-режим</h2>
-              <p>Нет кэшированных треков. Подключитесь к интернету для загрузки.</p>
-            </div>
-          `;
-        }
-      } catch (e) {
-        console.error('Offline load failed:', e);
-      }
+      console.log('📴 Firestore failed — offline mode active');
+      // Треки уже загружены из IndexedDB выше
     }
   });
+}
+
+// [NEW] Новая функция — загрузка из IndexedDB ПЕРЕД подпиской Firestore
+async function loadOfflineTracksFirst() {
+  try {
+    const offlineTracks = await getTracksFromDB();
+    if (offlineTracks && offlineTracks.length > 0) {
+      const role = getRole();
+      globalTracks = offlineTracks.filter(track => isVisibleToRole(track, role));
+      console.log('📦 Loaded', globalTracks.length, 'tracks from IndexedDB');
+      applySortAndRender();
+      
+      // Обновляем индикатор
+      updateOfflineIndicator();
+      return true;
+    }
+  } catch (e) {
+    console.warn('IndexedDB load failed:', e);
+  }
+  return false;
 }
 
 function applySortAndRender() {
@@ -3443,6 +3444,18 @@ function showUpdateToast() {
   toast.onclick = () => location.reload();
   document.body.appendChild(toast);
 }
+	// PWA Install prompt
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  console.log('PWA install available');
+});
+
+window.addEventListener('appinstalled', () => {
+  console.log('PWA installed');
+  deferredPrompt = null;
+});
 </script>
 </body>
 </html>
