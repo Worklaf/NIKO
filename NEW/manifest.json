@@ -1,7 +1,7 @@
 {
   "name": "N1K∅ Music",
   "short_name": "N1K∅",
-  "start_url": "NIKO.html",
+ "start_url": "./NIKO.html",
   "display": "standalone",
   "background_color": "#0a0a0f",
   "theme_color": "#ff4da6",
