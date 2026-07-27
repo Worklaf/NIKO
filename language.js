@@ -104,6 +104,10 @@ const translations = {
     filterPartnerOnly: "Partner only",
     filterAdmin: "Admin",
     multiSelect: "Multi-select",
+        uploadSuccess: "✅ Song uploaded!",
+    uploadError: "❌ Error: ",
+    uploading: "⏳ Uploading...",
+    uploadBtn: "Upload",
   },
   pl: {
     searchPlaceholder: "Szukaj: tytuł, artysta lub gatunek",
@@ -210,6 +214,10 @@ const translations = {
     filterPartnerOnly: "Tylko partner",
     filterAdmin: "Admin",
     multiSelect: "Wielokrotny wybór",
+    uploadSuccess: "✅ Piosenka dodana!",
+    uploadError: "❌ Błąd: ",
+    uploading: "⏳ Dodawanie...",
+    uploadBtn: "Dodaj",
   },
   ua: {
     searchPlaceholder: "Пошук: назва, виконавець або жанр",
@@ -316,6 +324,10 @@ const translations = {
     filterPartnerOnly: "Видно тільки партнеру",
     filterAdmin: "Адмін",
     multiSelect: "Мультивибір",
+    uploadSuccess: "✅ Пісню завантажено!",
+    uploadError: "❌ Помилка: ",
+    uploading: "⏳ Завантаження...",
+    uploadBtn: "Завантажити",
   },
   es: {
     searchPlaceholder: "Buscar: título, artista o género",
@@ -422,6 +434,10 @@ const translations = {
     filterPartnerOnly: "Solo pareja",
     filterAdmin: "Admin",
     multiSelect: "Selección múltiple",
+    uploadSuccess: "✅ ¡Canción subida!",
+    uploadError: "❌ Error: ",
+    uploading: "⏳ Subiendo...",
+    uploadBtn: "Subir",
   }
 };
 
