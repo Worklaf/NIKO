@@ -1752,7 +1752,7 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
     width: 30px;
     align-items: center;
     justify-content: center;
-    padding-bottom: 1%;
+    padding-bottom: -30%;
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 2px;
