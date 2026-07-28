@@ -2157,25 +2157,23 @@ document.addEventListener('click', async (e) => {
 
   const audioUrl = downloadBtn.dataset.audio;
   const title = downloadBtn.dataset.title || 'track';
-  if (!audioUrl || audioUrl === '#') {
+  if (!audioUrl) {
     alert('❌ Аудио не найдено');
     return;
   }
 
-  // Меняем иконку на спиннер
+  // Спиннер
   const originalHTML = downloadBtn.innerHTML;
-  downloadBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="20" style="animation:spin 1s linear infinite"/></svg>`;
+  downloadBtn.innerHTML = '⏳';
   downloadBtn.disabled = true;
 
   try {
-    // Загружаем файл через fetch (обход cross-origin)
     const response = await fetch(audioUrl, { mode: 'cors' });
     if (!response.ok) throw new Error('Network error');
 
     const blob = await response.blob();
     const blobUrl = URL.createObjectURL(blob);
 
-    // Создаём временную ссылку для скачивания
     const a = document.createElement('a');
     a.href = blobUrl;
     a.download = `${title}.mp3`;
@@ -2183,15 +2181,12 @@ document.addEventListener('click', async (e) => {
     a.click();
     document.body.removeChild(a);
 
-    // Чистим blob URL
     setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
 
   } catch (err) {
     console.error('Download error:', err);
-    // Fallback: открываем в новой вкладке
     window.open(audioUrl, '_blank');
   } finally {
-    // Возвращаем иконку
     downloadBtn.innerHTML = originalHTML;
     downloadBtn.disabled = false;
   }
