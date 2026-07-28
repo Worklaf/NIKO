@@ -1507,6 +1507,15 @@ function renderDraftTracks(tracks) {
       if (role === 'admin') {
           console.log(`[ADMIN TRACK] ${track.title} | raw uploadedBy=${track.uploadedBy} | raw uploadedByRole=${track.uploadedByRole} | final uploader=${trackUploader} | visibility=${track.visibility}`);
       }
+    // Форматируем дату
+    let uploadDate = '';
+    if (track.createdAt) {
+      try {
+        const d = track.createdAt.toDate ? track.createdAt.toDate() : new Date(track.createdAt);
+        uploadDate = d.toLocaleDateString('pl-PL', { day:'2-digit', month:'2-digit', year:'numeric' });
+      } catch(e) { uploadDate = ''; }
+    }
+
     div.innerHTML = `
       <img class="thumb" src="${track.cover}" alt="${track.title}">
       <div class="info">
@@ -1556,6 +1565,7 @@ function renderDraftTracks(tracks) {
         </a>
         </div>
       </div>
+      ${uploadDate ? `<div class="track-date" title="Uploaded: ${uploadDate}">${uploadDate}</div>` : ''}
     `;
 
     list.appendChild(div);
