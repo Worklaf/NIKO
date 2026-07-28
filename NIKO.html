@@ -1573,14 +1573,13 @@ function renderDraftTracks(tracks) {
           <button class="btn icon add-to-playlist-btn" title="${t('addToPlaylist') || 'В плейлист'}">➕</button>
           ${isAdmin ? `<button class="btn icon change-visibility-btn" title="${t('songVisibility') || 'Видимость'}">👁️</button>` : ''}
           ${orderButtons}
-          // Кнопка загрузки — через JS fetch + blob (обход cross-origin)
-`<button class="btn icon download-btn" data-audio="${track.audio || ''}" data-title="${(track.title || 'track').replace(/"/g,'')}" title="${t('download') || 'Скачать'}" aria-label="Download">
+          <button class="btn icon download-btn" data-audio="${track.audio || ''}" data-title="${(track.title || 'track').replace(/"/g,'')}" title="${t('download') || 'Скачать'}" aria-label="Download">
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
     <polyline points="7 10 12 15 17 10"/>
     <line x1="12" y1="15" x2="12" y2="3"/>
   </svg>
-</button>`
+</button>
         </div>
       </div>
       ${uploadDate ? `<div class="track-date" title="Uploaded: ${uploadDate}">${uploadDate}</div>` : ''}
