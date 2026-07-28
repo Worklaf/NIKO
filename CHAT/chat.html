@@ -1750,7 +1750,6 @@ const LETTERS = { admin: 'N', partner: 'P' };
 });
 
     document.getElementById('exit-btn').addEventListener('click', () => {
-    if (!confirm(t('exit_confirm'))) return;
     try {
       db.collection('presence').doc(myRole).set({
         online: false,
