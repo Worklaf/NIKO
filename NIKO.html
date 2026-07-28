@@ -3631,7 +3631,165 @@ function showUpdateToast() {
   toast.onclick = () => location.reload();
   document.body.appendChild(toast);
 }
+// ===============================
+// SHARE — Нативные приложения (без лишних fallbacks)
+// ===============================
 
+(function initShareFix() {
+  const shareSocials = document.getElementById('share-socials');
+  const copyLinkBtn = document.getElementById('share-copy-link');
+
+  function getShareTrack() {
+    const tid = window.currentTrackId;
+    if (tid) return window.globalTracks.find(t => t.id === tid);
+    const el = document.querySelector('.track:not([style*="none"])');
+    return el ? window.globalTracks.find(t => t.id === el.dataset.id) : null;
+  }
+
+  function getShareUrl(track) {
+    const base = window.location.origin + window.location.pathname;
+    return track?.id ? base + '?track=' + encodeURIComponent(track.id) : base;
+  }
+
+  // Загружаем картинку трека
+  async function getTrackImageFile(track) {
+    if (!track?.cover) return null;
+    try {
+      const res = await fetch(track.cover, { mode: 'cors' });
+      const blob = await res.blob();
+      const ext = track.cover.split('.').pop().split('?')[0] || 'jpg';
+      return new File([blob], `cover.${ext}`, { type: blob.type || 'image/jpeg' });
+    } catch (e) { return null; }
+  }
+
+  // === КНОПКИ СОЦСЕТЕЙ ===
+  if (shareSocials) {
+    shareSocials.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.social-btn');
+      if (!btn) return;
+
+      const platform = btn.dataset.platform;
+      const track = getShareTrack();
+      const url = getShareUrl(track);
+      const title = track?.artist ? `${track.artist} — ${track.title}` : (track?.title || 'N1K∅ Music');
+      const text = `${title}\n${url}`;
+
+      switch (platform) {
+        // === TWITTER/X — открывает приложение напрямую ===
+        case 'twitter':
+          window.location.href = `twitter://post?message=${encodeURIComponent(text)}`;
+          break;
+
+        // === FACEBOOK — Web Share API (единственный способ с текстом) ===
+        case 'facebook':
+          if (navigator.share) {
+            navigator.share({ title: title, text: text, url: url }).catch(() => {});
+          } else {
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+          }
+          break;
+
+        // === MESSENGER — Web Share API (единственный рабочий способ) ===
+        case 'messenger':
+          if (navigator.share) {
+            navigator.share({ title: title, text: text, url: url }).catch(() => {});
+          } else {
+            // Fallback: fb-messenger:// (может не работать)
+            window.location.href = `fb-messenger://share?link=${encodeURIComponent(url)}`;
+          }
+          break;
+
+        // === TELEGRAM — tg:// открывает приложение напрямую (НЕТ fallback) ===
+        case 'telegram':
+          window.location.href = `tg://msg_url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`;
+          break;
+
+        // === VIBER — viber:// открывает приложение напрямую (НЕТ fallback) ===
+        case 'viber':
+          window.location.href = `viber://forward?text=${encodeURIComponent(text)}`;
+          break;
+
+        // === WHATSAPP — wa.me universal link (НЕТ fallback, НЕТ лишних страниц) ===
+        case 'whatsapp':
+          window.location.href = `https://wa.me/?text=${encodeURIComponent(text)}`;
+          break;
+
+        // === TIKTOK — Web Share API с картинкой ===
+        case 'tiktok':
+          const imgTik = await getTrackImageFile(track);
+          if (navigator.share) {
+            const data = { title: title, text: text, url: url };
+            if (imgTik && navigator.canShare?.({ files: [imgTik] })) data.files = [imgTik];
+            navigator.share(data).catch(() => {});
+          } else {
+            navigator.clipboard.writeText(text).then(() => showCopyFeedback('✅ Скопировано для TikTok'));
+          }
+          break;
+
+        // === MORE — Web Share API с картинкой ===
+        case 'native':
+          const imgMore = await getTrackImageFile(track);
+          if (navigator.share) {
+            const data = { title: title, text: text, url: url };
+            if (imgMore && navigator.canShare?.({ files: [imgMore] })) data.files = [imgMore];
+            navigator.share(data).catch(() => {});
+          } else {
+            navigator.clipboard.writeText(text).then(() => showCopyFeedback('✅ Скопировано!'));
+          }
+          break;
+      }
+    });
+  }
+
+  // === COPY LINK — копируем + обновляем OG ===
+  if (copyLinkBtn) {
+    const newBtn = copyLinkBtn.cloneNode(true);
+    copyLinkBtn.parentNode.replaceChild(newBtn, copyLinkBtn);
+
+    newBtn.addEventListener('click', async () => {
+      const track = getShareTrack();
+      if (!track) { showCopyFeedback('❌ Выберите трек'); return; }
+
+      const url = getShareUrl(track);
+      const title = track.artist ? `${track.artist} — ${track.title}` : track.title;
+      const richText = `${title}\n${url}\n🎵 ${track.genre || 'Music'}`;
+
+      // Обновляем OG meta tags
+      const ogTags = {
+        'og:title': title,
+        'og:description': track.genre ? `🎵 ${track.genre}` : 'N1K∅ Music',
+        'og:image': track.cover || '',
+        'og:url': url
+      };
+      Object.entries(ogTags).forEach(([key, val]) => {
+        if (!val) return;
+        let meta = document.querySelector(`meta[property="${key}"]`);
+        if (!meta) {
+          meta = document.createElement('meta');
+          meta.setAttribute('property', key);
+          document.head.appendChild(meta);
+        }
+        meta.setAttribute('content', val);
+      });
+
+      try {
+        await navigator.clipboard.writeText(richText);
+        showCopyFeedback('✅ Скопировано с превью!');
+      } catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = richText;
+        ta.style.cssText = 'position:fixed;left:-9999px;';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showCopyFeedback('✅ Скопировано!');
+      }
+    });
+  }
+
+  console.log('✅ Share: native apps, no fallbacks');
+})();
 </script>
 
 </body>
