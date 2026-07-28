@@ -1716,56 +1716,50 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
   right: 0;
   top: 0;
   bottom: 0;
-  width: 30px;
+  width: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   writing-mode: vertical-rl;
   text-orientation: mixed;
   transform: rotate(180deg);
-  font-family: 'Montserrat', 'Poppins', sans-serif;
-  font-size: 14px;
-  font-weight: 800;
-  letter-spacing: 2.5px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: #111111;
-  background: linear-gradient(180deg,
-    rgba(255, 255, 255, 1) 10%,
-    rgba(60, 255, 86, 0.72) 40%,
-    rgba(32, 101, 192, 0.92) 100%
+  color: rgba(255, 255, 255, 0.75);
+  background: linear-gradient(180deg, 
+    rgba(255, 77, 166, 0.25) 0%, 
+    rgba(0, 209, 255, 0.15) 50%,
+    rgba(39, 182, 70, 0.1) 100%
   );
-  border-left: 1px solid rgba(255,255,255,0.08);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0 var(--radius) var(--radius) 0;
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   pointer-events: none;
   user-select: none;
+  text-shadow: 0 0 8px rgba(255, 77, 166, 0.4);
   transition: opacity 0.2s ease;
-  /* Центрирование текста */
-  text-align: center;
-  line-height: 1;
 }
 
 .track:hover .track-date {
-  opacity: 0.35;
+  opacity: 0.3;
 }
 
-/* ===== Мобильная адаптация ===== */
+/* Мобильная адаптация */
 @media (max-width: 880px) {
   .track-date {
-    width: 30px;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 2px;
-    /* Убран padding-bottom — теперь по центру как на ПК */
-    text-align: center;
+    width: 22px;
+    font-size: 8px;
+    letter-spacing: 1px;
   }
 }
 
 @media (max-width: 480px) {
   .track-date {
-    width: 28px;
-    font-size: 10px;
-    letter-spacing: 1.5px;
-    text-align: center;
+    width: 20px;
+    font-size: 7px;
+    letter-spacing: 0.5px;
   }
 }
