@@ -3632,7 +3632,7 @@ function showUpdateToast() {
   document.body.appendChild(toast);
 }
 // ===============================
-// SHARE — Отправка картинки трека напрямую
+// SHARE — Открытие НАТИВНЫХ приложений (Universal Links)
 // ===============================
 
 (function initShareFix() {
@@ -3651,18 +3651,28 @@ function showUpdateToast() {
     return track?.id ? base + '?track=' + encodeURIComponent(track.id) : base;
   }
 
-  // Загружаем картинку трека как File для отправки
+  // Универсальная функция открытия нативного приложения
+  function openApp(urlScheme, universalLink) {
+    // Пробуем URL scheme (для iOS/Android с установленным app)
+    window.location.href = urlScheme;
+    
+    // Fallback: если через 1.5 секунды мы всё ещё на странице — открываем universal link
+    setTimeout(() => {
+      if (!document.hidden) {
+        window.location.href = universalLink;
+      }
+    }, 1500);
+  }
+
+  // Загружаем картинку трека для Web Share
   async function getTrackImageFile(track) {
     if (!track?.cover) return null;
     try {
       const res = await fetch(track.cover, { mode: 'cors' });
       const blob = await res.blob();
       const ext = track.cover.split('.').pop().split('?')[0] || 'jpg';
-      return new File([blob], `track_cover.${ext}`, { type: blob.type || 'image/jpeg' });
-    } catch (e) {
-      console.warn('Failed to load track image:', e);
-      return null;
-    }
+      return new File([blob], `cover.${ext}`, { type: blob.type || 'image/jpeg' });
+    } catch (e) { return null; }
   }
 
   // === КНОПКИ СОЦСЕТЕЙ ===
@@ -3674,120 +3684,109 @@ function showUpdateToast() {
       const platform = btn.dataset.platform;
       const track = getShareTrack();
       const url = getShareUrl(track);
-      const text = track 
-        ? `${track.artist ? track.artist + ' — ' : ''}${track.title}\n${url}`
-        : url;
+      const title = track?.artist ? `${track.artist} — ${track.title}` : (track?.title || 'N1K∅ Music');
+      const text = `${title}\n${url}`;
 
-      // 1. Прямые ссылки (открываются в браузере/app)
-      const directLinks = {
-        twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(track?.title || '')}`,
-        facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
-        telegram: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(track?.artist ? track.artist + ' — ' + track.title : track?.title || '')}`,
-        whatsapp: `https://wa.me/?text=${encodeURIComponent(text)}`
-      };
+      switch (platform) {
+        // === TWITTER/X — открывает приложение напрямую ===
+        case 'twitter':
+          openApp(
+            `twitter://post?message=${encodeURIComponent(text)}`,
+            `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`
+          );
+          break;
 
-      if (directLinks[platform]) {
-        window.open(directLinks[platform], '_blank');
-        return;
-      }
+        // === FACEBOOK — открывает приложение напрямую ===
+        case 'facebook':
+          openApp(
+            `fb://facewebmodal/f?href=${encodeURIComponent(url)}`,
+            `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`
+          );
+          break;
 
-      // 2. Messenger — пробуем нативную схему, потом Web Share
-      if (platform === 'messenger') {
-        // Пробуем открыть установленный Messenger (iOS/Android)
-        const messengerUrl = `fb-messenger://share?link=${encodeURIComponent(url)}`;
-        window.location.href = messengerUrl;
+        // === MESSENGER — открывает приложение напрямую ===
+        case 'messenger':
+          openApp(
+            `fb-messenger://share?link=${encodeURIComponent(url)}`,
+            `https://m.me/?ref=${encodeURIComponent(url)}`
+          );
+          break;
 
-        // Fallback через 1.5 сек — если app не открылся
-        setTimeout(async () => {
-          if (document.hidden) return; // App открылся, выходим
+        // === TELEGRAM — открывает приложение напрямую ===
+        case 'telegram':
+          openApp(
+            `tg://msg_url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`,
+            `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`
+          );
+          break;
 
-          // Пробуем Web Share API с файлами (покажет Messenger в списке)
-          const imageFile = await getTrackImageFile(track);
-          const shareData = {
-            title: track?.title || 'N1K∅ Music',
-            text: text,
-            url: url
-          };
-          if (imageFile && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
-            shareData.files = [imageFile];
-          }
+        // === VIBER — открывает приложение напрямую ===
+        case 'viber':
+          openApp(
+            `viber://forward?text=${encodeURIComponent(text)}`,
+            `https://viber.me/?text=${encodeURIComponent(text)}`
+          );
+          break;
 
+        // === WHATSAPP — 100% открывает приложение (wa.me — universal link) ===
+        case 'whatsapp':
+          // wa.me — это universal link WhatsApp, ОС сама открывает приложение
+          window.location.href = `https://wa.me/?text=${encodeURIComponent(text)}`;
+          break;
+
+        // === TIKTOK — нет API для шаринга, копируем с картинкой ===
+        case 'tiktok':
+          const img = await getTrackImageFile(track);
           if (navigator.share) {
-            navigator.share(shareData).catch(() => {});
+            const data = { title: title, text: text, url: url };
+            if (img && navigator.canShare?.({ files: [img] })) data.files = [img];
+            navigator.share(data).catch(() => {});
           } else {
-            // Последний fallback — копируем ссылку
-            navigator.clipboard.writeText(text).then(() => {
-              showCopyFeedback('✅ Скопировано! Вставь в Messenger');
-            });
+            navigator.clipboard.writeText(text).then(() => showCopyFeedback('✅ Скопировано для TikTok'));
           }
-        }, 1500);
-        return;
-      }
+          break;
 
-      // 3. Viber, TikTok, More — Web Share API с картинкой трека
-      if (['viber', 'tiktok', 'native'].includes(platform)) {
-        const imageFile = await getTrackImageFile(track);
-        const shareData = {
-          title: track?.title || 'N1K∅ Music',
-          text: text,
-          url: url
-        };
-
-        // Если можем отправить с картинкой — отправляем
-        if (imageFile && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
-          shareData.files = [imageFile];
-        }
-
-        if (navigator.share) {
-          try {
-            await navigator.share(shareData);
-          } catch (err) {
-            // Пользователь отменил или ошибка
+        // === MORE — системный диалог (Web Share API) ===
+        case 'native':
+          const imgMore = await getTrackImageFile(track);
+          if (navigator.share) {
+            const data = { title: title, text: text, url: url };
+            if (imgMore && navigator.canShare?.({ files: [imgMore] })) data.files = [imgMore];
+            navigator.share(data).catch(() => {});
+          } else {
+            navigator.clipboard.writeText(text).then(() => showCopyFeedback('✅ Скопировано!'));
           }
-        } else {
-          // Fallback — копируем текст
-          navigator.clipboard.writeText(text).then(() => {
-            showCopyFeedback('✅ Скопировано!');
-          });
-        }
-        return;
+          break;
       }
     });
   }
 
-  // === COPY LINK — копируем с текстом + обновляем OG ===
+  // === COPY LINK — копируем + обновляем OG ===
   if (copyLinkBtn) {
     const newBtn = copyLinkBtn.cloneNode(true);
     copyLinkBtn.parentNode.replaceChild(newBtn, copyLinkBtn);
 
     newBtn.addEventListener('click', async () => {
       const track = getShareTrack();
-      if (!track) {
-        showCopyFeedback('❌ Выберите трек');
-        return;
-      }
+      if (!track) { showCopyFeedback('❌ Выберите трек'); return; }
 
       const url = getShareUrl(track);
       const title = track.artist ? `${track.artist} — ${track.title}` : track.title;
       const richText = `${title}\n${url}\n🎵 ${track.genre || 'Music'}`;
 
-      // Обновляем OG meta tags (для paste в мессенджеры которые читают OG)
+      // Обновляем OG meta tags для rich preview при вставке
       const ogTags = {
         'og:title': title,
         'og:description': track.genre ? `🎵 ${track.genre}` : 'N1K∅ Music',
         'og:image': track.cover || '',
-        'og:url': url,
-        'twitter:title': title,
-        'twitter:image': track.cover || ''
+        'og:url': url
       };
       Object.entries(ogTags).forEach(([key, val]) => {
         if (!val) return;
-        const isOg = key.startsWith('og:');
-        const sel = isOg ? `meta[property="${key}"]` : `meta[name="${key}"]`;
-        let meta = document.querySelector(sel);
+        let meta = document.querySelector(`meta[property="${key}"]`);
         if (!meta) {
           meta = document.createElement('meta');
-          isOg ? meta.setAttribute('property', key) : meta.setAttribute('name', key);
+          meta.setAttribute('property', key);
           document.head.appendChild(meta);
         }
         meta.setAttribute('content', val);
@@ -3809,7 +3808,7 @@ function showUpdateToast() {
     });
   }
 
-  console.log('✅ Share fix: track images + Messenger native');
+  console.log('✅ Share: native apps via universal links');
 })();
 </script>
 
