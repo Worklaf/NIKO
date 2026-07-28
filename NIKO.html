@@ -24,12 +24,14 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="N1K∅">
   <!-- Open Graph / Facebook -->
+<!-- Open Graph — базовые, обновляются динамически при шаринге -->
 <meta property="og:type" content="music.song">
 <meta property="og:site_name" content="N1K∅ Music">
 <meta property="og:title" content="N1K∅ — Music Tracks">
-<meta property="og:description" content="Discover amazing music tracks">
+<meta property="og:description" content="Discover amazing music">
 <meta property="og:image" content="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png">
 <meta property="og:url" content="">
+<meta name="twitter:card" content="summary_large_image">
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image">
@@ -3630,28 +3632,18 @@ function showUpdateToast() {
   document.body.appendChild(toast);
 }
 // ===============================
-// SHARE FIX — Нативные приложения через Web Share API + URL Schemes
+// SHARE — Упрощённый (Web Share API)
 // ===============================
 
 (function initShareFix() {
   const shareSocials = document.getElementById('share-socials');
-  if (!shareSocials) return;
+  const copyLinkBtn = document.getElementById('share-copy-link');
 
   function getShareTrack() {
-    let track = null;
-    if (window.currentTrackId) {
-      track = window.globalTracks.find(t => t.id === window.currentTrackId);
-    }
-    if (!track && currentTrackSrc) {
-      track = window.globalTracks.find(t => t.audio === currentTrackSrc);
-    }
-    if (!track) {
-      const firstVisible = document.querySelector('.track:not([style*="none"])');
-      if (firstVisible) {
-        track = window.globalTracks.find(t => t.id === firstVisible.dataset.id);
-      }
-    }
-    return track;
+    const tid = window.currentTrackId;
+    if (tid) return window.globalTracks.find(t => t.id === tid);
+    const el = document.querySelector('.track:not([style*="none"])');
+    return el ? window.globalTracks.find(t => t.id === el.dataset.id) : null;
   }
 
   function getShareUrl(track) {
@@ -3659,120 +3651,86 @@ function showUpdateToast() {
     return track?.id ? base + '?track=' + encodeURIComponent(track.id) : base;
   }
 
-  // Проверяем мобильное устройство
-  function isMobile() {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  // Обновляем OG meta tags при открытии share-модалки
+  function updateOgTags(track) {
+    if (!track) return;
+    const url = getShareUrl(track);
+    const title = track.artist ? `${track.artist} — ${track.title}` : track.title;
+    const image = track.cover || '';
+
+    const tags = {
+      'og:title': title,
+      'og:description': track.genre ? `🎵 ${track.genre}` : 'N1K∅ Music',
+      'og:image': image,
+      'og:url': url,
+      'og:type': 'music.song',
+      'twitter:card': 'summary_large_image',
+      'twitter:title': title,
+      'twitter:image': image
+    };
+
+    Object.entries(tags).forEach(([key, val]) => {
+      if (!val) return;
+      const isOg = key.startsWith('og:');
+      const selector = isOg ? `meta[property="${key}"]` : `meta[name="${key}"]`;
+      let meta = document.querySelector(selector);
+      if (!meta) {
+        meta = document.createElement('meta');
+        isOg ? meta.setAttribute('property', key) : meta.setAttribute('name', key);
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute('content', val);
+    });
   }
 
-  shareSocials.addEventListener('click', function(e) {
-    const btn = e.target.closest('.social-btn');
-    if (!btn) return;
-    
-    const platform = btn.dataset.platform;
-    const track = getShareTrack();
-    const url = getShareUrl(track);
-    const text = track ? `${track.artist ? track.artist + ' — ' : ''}${track.title}` : 'Check out this track!';
-    const fullText = text + '\n' + url;
+  // Кнопки соцсетей — Web Share API
+  if (shareSocials) {
+    shareSocials.addEventListener('click', (e) => {
+      const btn = e.target.closest('.social-btn');
+      if (!btn) return;
+      
+      const track = getShareTrack();
+      const url = getShareUrl(track);
+      const text = track ? `${track.artist ? track.artist + ' — ' : ''}${track.title}` : 'N1K∅ Music';
+      const platform = btn.dataset.platform;
 
-    switch(platform) {
-      case 'twitter':
-        window.open(
-          `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,
-          '_blank'
-        );
-        break;
-        
-      case 'facebook':
-        window.open(
-          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
-          '_blank'
-        );
-        break;
-        
-      case 'messenger':
-        // === FIX: Messenger через Web Share API (самый надёжный способ) ===
-        if (navigator.share && isMobile()) {
-          // На мобильном — системный шаринг, пользователь сам выберет Messenger
-          navigator.share({
-            title: text,
-            text: text,
-            url: url
-          }).catch(() => {});
-        } else {
-          // Fallback: m.me ссылка (откроет Messenger или web-версию)
-          // ИЛИ Facebook Send Dialog
-          const fbAppId = '223346886059'; // Твой Firebase App ID как fallback
-          const sendDialogUrl = `https://www.facebook.com/dialog/send?` +
-            `app_id=${fbAppId}` +
-            `&link=${encodeURIComponent(url)}` +
-            `&redirect_uri=${encodeURIComponent(window.location.href)}` +
-            `&display=popup`;
-          window.open(sendDialogUrl, '_blank', 'width=600,height=500');
-        }
-        break;
-        
-      case 'telegram':
-        window.open(
-          `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,
-          '_blank'
-        );
-        break;
-        
-      case 'viber':
-        if (isMobile()) {
-          window.location.href = `viber://forward?text=${encodeURIComponent(fullText)}`;
-        } else {
-          window.open(`https://viber.me/?text=${encodeURIComponent(fullText)}`, '_blank');
-        }
-        break;
-        
-      case 'tiktok':
-        // TikTok НЕ имеет API для шаринга внешних ссылок
-        // Копируем ссылку с текстом для ручной вставки
-        navigator.clipboard.writeText(fullText).then(() => {
-          showCopyFeedback('🔗 Скопировано! Вставь в TikTok');
-        }).catch(() => {
-          window.open(`https://www.tiktok.com/`, '_blank');
+      // Twitter, Facebook — прямые ссылки
+      const directLinks = {
+        twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,
+        facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+        telegram: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,
+        whatsapp: `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`
+      };
+
+      if (directLinks[platform]) {
+        window.open(directLinks[platform], '_blank');
+        return;
+      }
+
+      // Messenger, Viber, TikTok, More — Web Share API (открывает нативные приложения)
+      if (navigator.share) {
+        navigator.share({ title: text, text: text, url: url }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(text + '\n' + url).then(() => {
+          showCopyFeedback('✅ Скопировано!');
         });
-        break;
-        
-      case 'whatsapp':
-        // WhatsApp: wa.me работает ВЕЗДЕ (мобильный + десктоп)
-        window.open(
-          `https://wa.me/?text=${encodeURIComponent(fullText)}`,
-          '_blank'
-        );
-        break;
-        
-      case 'native':
-        // "More" — системный шаринг (работает и находит Messenger!)
-        if (navigator.share) {
-          navigator.share({
-            title: text,
-            text: text,
-            url: url
-          }).catch(() => {});
-        } else {
-          navigator.clipboard.writeText(fullText).then(() => {
-            showCopyFeedback('✅ Скопировано!');
-          });
-        }
-        break;
-    }
-  });
+      }
+    });
+  }
 
-  // === FIX: Copy Link с Rich Preview ===
-  const copyLinkBtn = document.getElementById('share-copy-link');
+  // Copy Link — обновляем OG + копируем rich текст
   if (copyLinkBtn) {
     const newBtn = copyLinkBtn.cloneNode(true);
     copyLinkBtn.parentNode.replaceChild(newBtn, copyLinkBtn);
-    
+
     newBtn.addEventListener('click', async () => {
       const track = getShareTrack();
       if (!track) {
-        showCopyFeedback('❌ ' + (t('noTrackSelected') || 'No track'));
+        showCopyFeedback('❌ Выберите трек');
         return;
       }
+      
+      updateOgTags(track); // Обновляем OG при копировании
       
       const url = getShareUrl(track);
       const title = track.artist ? `${track.artist} — ${track.title}` : track.title;
@@ -3780,7 +3738,7 @@ function showUpdateToast() {
       
       try {
         await navigator.clipboard.writeText(richText);
-        showCopyFeedback('✅ ' + (t('copied') || 'Copied with preview!'));
+        showCopyFeedback('✅ Скопировано с превью!');
       } catch(e) {
         const ta = document.createElement('textarea');
         ta.value = richText;
@@ -3794,7 +3752,17 @@ function showUpdateToast() {
     });
   }
 
-  console.log('✅ Share fix: native apps via Web Share API + URL schemes');
+  // Обновляем OG при открытии share-модалки
+  const shareModal = document.getElementById('share-modal');
+  if (shareModal) {
+    new MutationObserver(() => {
+      if (shareModal.classList.contains('open')) {
+        updateOgTags(getShareTrack());
+      }
+    }).observe(shareModal, { attributes: true });
+  }
+
+  console.log('✅ Share fix: simple + OG per track');
 })();
 </script>
 
