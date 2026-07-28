@@ -1710,3 +1710,60 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
   filter: drop-shadow(0 0 6px rgba(255, 122, 77, 0.5));
   transform: scale(1.1);
 }
+/* ===== TRACK UPLOAD DATE — vertical right edge ===== */
+.track-date {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-family: 'Montserrat', 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #111111;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 1) 10%,
+    rgba(60, 255, 86, 0.72) 40%,
+    rgba(32, 101, 192, 0.92) 100%
+  );
+  border-left: 1px solid rgba(255,255,255,0.08);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+  user-select: none;
+  transition: opacity 0.2s ease;
+}
+
+.track:hover .track-date {
+  opacity: 0.35;
+}
+
+/* ===== Мобильная адаптация — твой текущий стиль ===== */
+@media (max-width: 880px) {
+  .track-date {
+    width: 30px;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 20%;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  .track-date {
+    width: 28px;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    padding-bottom: 20%;
+  }
+}
