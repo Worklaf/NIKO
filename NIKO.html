@@ -3629,9 +3629,8 @@ function showUpdateToast() {
   toast.onclick = () => location.reload();
   document.body.appendChild(toast);
 }
-
-	// ===============================
-// SHARE FIX — Нативные приложения (URL Schemes)
+// ===============================
+// SHARE FIX — Нативные приложения через Web Share API + URL Schemes
 // ===============================
 
 (function initShareFix() {
@@ -3660,26 +3659,9 @@ function showUpdateToast() {
     return track?.id ? base + '?track=' + encodeURIComponent(track.id) : base;
   }
 
-  // === ОТКРЫТИЕ В НАТИВНОМ ПРИЛОЖЕНИИ ===
-  function openNativeApp(urlScheme, webFallback) {
-    // Создаём невидимый iframe для URL scheme (работает лучше на iOS)
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = urlScheme;
-    document.body.appendChild(iframe);
-    
-    // Удаляем iframe через секунду
-    setTimeout(() => {
-      document.body.removeChild(iframe);
-    }, 1000);
-    
-    // Fallback: если app не открылся — открываем web-версию
-    setTimeout(() => {
-      // Проверяем, не ушли ли мы с страницы (значит app открылся)
-      if (!document.hidden) {
-        window.location.href = webFallback;
-      }
-    }, 1500);
+  // Проверяем мобильное устройство
+  function isMobile() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   }
 
   shareSocials.addEventListener('click', function(e) {
@@ -3690,83 +3672,88 @@ function showUpdateToast() {
     const track = getShareTrack();
     const url = getShareUrl(track);
     const text = track ? `${track.artist ? track.artist + ' — ' : ''}${track.title}` : 'Check out this track!';
-    
+    const fullText = text + '\n' + url;
+
     switch(platform) {
       case 'twitter':
-        // iOS: twitter://post?message=...  Android: intent://...
-        openNativeApp(
-          `twitter://post?message=${encodeURIComponent(text + ' ' + url)}`,
-          `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`
+        window.open(
+          `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,
+          '_blank'
         );
         break;
         
       case 'facebook':
-        openNativeApp(
-          `fb://share/?link=${encodeURIComponent(url)}`,
-          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`
+        window.open(
+          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+          '_blank'
         );
         break;
         
       case 'messenger':
-        // Messenger deep link — ОТКРЫВАЕТ установленный Messenger
-        // Формат: fb-messenger://share?link=URL  или  https://m.me/?ref=URL
-        const messengerScheme = `fb-messenger://share?link=${encodeURIComponent(url)}`;
-        const messengerWeb = `https://m.me/?ref=${encodeURIComponent(url)}`;
-        
-        // Пробуем сначала fb-messenger:// (работает на iOS/Android если установлен)
-        window.location.href = messengerScheme;
-        
-        // Fallback через 2 секунды
-        setTimeout(() => {
-          if (!document.hidden) {
-            // Messenger не открылся — пробуем через Facebook Share Dialog
-            window.location.href = `https://www.facebook.com/dialog/send?link=${encodeURIComponent(url)}&app_id=223346886059&redirect_uri=${encodeURIComponent(window.location.href)}`;
-          }
-        }, 2000);
+        // === FIX: Messenger через Web Share API (самый надёжный способ) ===
+        if (navigator.share && isMobile()) {
+          // На мобильном — системный шаринг, пользователь сам выберет Messenger
+          navigator.share({
+            title: text,
+            text: text,
+            url: url
+          }).catch(() => {});
+        } else {
+          // Fallback: m.me ссылка (откроет Messenger или web-версию)
+          // ИЛИ Facebook Send Dialog
+          const fbAppId = '223346886059'; // Твой Firebase App ID как fallback
+          const sendDialogUrl = `https://www.facebook.com/dialog/send?` +
+            `app_id=${fbAppId}` +
+            `&link=${encodeURIComponent(url)}` +
+            `&redirect_uri=${encodeURIComponent(window.location.href)}` +
+            `&display=popup`;
+          window.open(sendDialogUrl, '_blank', 'width=600,height=500');
+        }
         break;
         
       case 'telegram':
-        openNativeApp(
-          `tg://msg_url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,
-          `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`
+        window.open(
+          `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`,
+          '_blank'
         );
         break;
         
       case 'viber':
-        openNativeApp(
-          `viber://forward?text=${encodeURIComponent(text + ' ' + url)}`,
-          `https://viber.me/?text=${encodeURIComponent(text + ' ' + url)}`
-        );
-        break;
-        
-      case 'tiktok':
-        // TikTok НЕ поддерживает шаринг ссылок — используем Web Share API
-        if (navigator.share) {
-          navigator.share({ title: text, text: text, url: url }).catch(() => {});
+        if (isMobile()) {
+          window.location.href = `viber://forward?text=${encodeURIComponent(fullText)}`;
         } else {
-          navigator.clipboard.writeText(url + '\n\n' + text).then(() => {
-            showCopyFeedback('🔗 Скопировано для TikTok');
-          });
+          window.open(`https://viber.me/?text=${encodeURIComponent(fullText)}`, '_blank');
         }
         break;
         
+      case 'tiktok':
+        // TikTok НЕ имеет API для шаринга внешних ссылок
+        // Копируем ссылку с текстом для ручной вставки
+        navigator.clipboard.writeText(fullText).then(() => {
+          showCopyFeedback('🔗 Скопировано! Вставь в TikTok');
+        }).catch(() => {
+          window.open(`https://www.tiktok.com/`, '_blank');
+        });
+        break;
+        
       case 'whatsapp':
-        // WhatsApp: wa.me для всех платформ (надежнее чем whatsapp://)
-        const waUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
-        // Пробуем нативную схему сначала
-        window.location.href = `whatsapp://send?text=${encodeURIComponent(text + ' ' + url)}`;
-        setTimeout(() => {
-          if (!document.hidden) {
-            window.location.href = waUrl;
-          }
-        }, 1500);
+        // WhatsApp: wa.me работает ВЕЗДЕ (мобильный + десктоп)
+        window.open(
+          `https://wa.me/?text=${encodeURIComponent(fullText)}`,
+          '_blank'
+        );
         break;
         
       case 'native':
+        // "More" — системный шаринг (работает и находит Messenger!)
         if (navigator.share) {
-          navigator.share({ title: text, text: text, url: url }).catch(() => {});
+          navigator.share({
+            title: text,
+            text: text,
+            url: url
+          }).catch(() => {});
         } else {
-          navigator.clipboard.writeText(url).then(() => {
+          navigator.clipboard.writeText(fullText).then(() => {
             showCopyFeedback('✅ Скопировано!');
           });
         }
@@ -3792,26 +3779,22 @@ function showUpdateToast() {
       const richText = `${title}\n${url}\n🎵 ${track.genre || 'Music'}`;
       
       try {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(richText);
-          showCopyFeedback('✅ ' + (t('copied') || 'Copied with preview!'));
-        } else {
-          const ta = document.createElement('textarea');
-          ta.value = richText;
-          ta.style.cssText = 'position:fixed;left:-9999px;';
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand('copy');
-          document.body.removeChild(ta);
-          showCopyFeedback('✅ Скопировано!');
-        }
+        await navigator.clipboard.writeText(richText);
+        showCopyFeedback('✅ ' + (t('copied') || 'Copied with preview!'));
       } catch(e) {
-        showCopyFeedback('❌ Ошибка копирования');
+        const ta = document.createElement('textarea');
+        ta.value = richText;
+        ta.style.cssText = 'position:fixed;left:-9999px;';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showCopyFeedback('✅ Скопировано!');
       }
     });
   }
 
-  console.log('✅ Share fix: native apps support');
+  console.log('✅ Share fix: native apps via Web Share API + URL schemes');
 })();
 </script>
 
