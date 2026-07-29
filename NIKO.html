@@ -1263,29 +1263,54 @@ function subscribePlaylists() {
   db.collection('playlists').orderBy('createdAt', 'asc').onSnapshot(snap => {
     globalPlaylists = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderPlaylistsList();
-    renderDraftTracks(globalTracks);
+    
+    // === FIX: Перезапускаем фильтрацию треков с новыми плейлистами ===
+    // Это нужно чтобы hideFromHome сработал после загрузки плейлистов
+    if (globalTracks.length > 0) {
+      applySortAndRender();
+    }
   });
 }
-
 function subscribeTracks() {
   if (!db) return console.warn('Firestore not initialized');
+  
   db.collection('tracks').orderBy('createdAt', 'desc').onSnapshot(snap => {
     const role = getRole();
     let tracks = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(track => {
+      // 1. Проверка visibility трека
       if (!isVisibleToRole(track, role)) return false;
+      
+      // 2. Проверка visibility плейлиста (старое поле playlistId)
       if (track.playlistId) {
         const pl = globalPlaylists.find(p => p.id === track.playlistId);
         if (pl && !isVisibleToRole(pl, role)) return false;
       }
-      // Скрыть треки, у которых ВСЕ плейлисты помечены как hideFromHome
-      const trackPlaylistIds = track.playlistIds || [];
+      
+      // 3. === FIX: Собираем ВСЕ playlist IDs трека ===
+      const allPlaylistIds = new Set();
+      
+      // Старое поле (строка)
+      if (track.playlistId) allPlaylistIds.add(track.playlistId);
+      
+      // Новое поле (массив)
+      if (track.playlistIds && Array.isArray(track.playlistIds)) {
+        track.playlistIds.forEach(id => allPlaylistIds.add(id));
+      }
+      
+      const trackPlaylistIds = Array.from(allPlaylistIds);
+      
+      // 4. === FIX: Скрыть треки, у которых ВСЕ плейлисты помечены как hideFromHome ===
       if (trackPlaylistIds.length > 0) {
         const pls = globalPlaylists.filter(p => trackPlaylistIds.includes(p.id));
-        const allHidden = pls.length > 0 && pls.every(p => p.hideFromHome === true);
-        if (allHidden) return false;
+        // Если у трека есть плейлисты И все они скрыты с главной → скрыть трек
+        if (pls.length > 0 && pls.every(p => p.hideFromHome === true)) {
+          return false;
+        }
       }
+      
       return true;
     });
+    
     globalTracks = tracks;
     applySortAndRender();
   }, err => { console.warn('tracks snapshot error', err); });
