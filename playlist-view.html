@@ -1496,9 +1496,22 @@ div.innerHTML =
 
       const searchEl = document.getElementById(searchId);
       if (searchEl) searchEl.value = '';
-      const selectAllEl = document.getElementById(selectAllId);
-      if (selectAllEl) selectAllEl.checked = false;
-    };
+      const searchEl = document.getElementById(searchId);
+if (searchEl) {
+    searchEl.value = '';
+    
+    // Удаляем старый обработчик, если есть (чтобы не дублировать)
+    searchEl.removeEventListener('input', handleAddSearch);
+    
+    // Добавляем новый обработчик
+    searchEl.addEventListener('input', handleAddSearch);
+}
+
+// Функция обработки поиска (должна быть доступна в scope)
+function handleAddSearch(e) {
+    const filterText = e.target.value;
+    window.renderAddList(filterText);
+}
 
     window.renderAddList = function(filter) {
       const listEl = document.getElementById(listId);
