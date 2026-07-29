@@ -1491,21 +1491,19 @@ div.innerHTML =
         alert('Failed to load tracks'); return;
       }
 
-      renderAddList('');
+            renderAddList('');
       if (modalEl) modalEl.style.display = 'flex';
 
+      // === ИСПРАВЛЕННЫЙ ПОИСК ===
       const searchEl = document.getElementById(searchId);
-      if (searchEl) searchEl.value = '';
-      const searchEl = document.getElementById(searchId);
-if (searchEl) {
-    searchEl.value = '';
-    
-    // Удаляем старый обработчик, если есть (чтобы не дублировать)
-    searchEl.removeEventListener('input', handleAddSearch);
-    
-    // Добавляем новый обработчик
-    searchEl.addEventListener('input', handleAddSearch);
-}
+      if (searchEl) {
+          searchEl.value = '';
+          
+          // Удаляем старый обработчик перед добавлением нового
+          const newSearchHandler = (e) => window.renderAddList(e.target.value);
+          searchEl.removeEventListener('input', newSearchHandler);
+          searchEl.addEventListener('input', newSearchHandler);
+      }
 
 // Функция обработки поиска (должна быть доступна в scope)
 function handleAddSearch(e) {
