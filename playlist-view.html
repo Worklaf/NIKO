@@ -1430,7 +1430,7 @@ div.innerHTML =
       return fromWindow || fromData || fromVar || fromUrl || null;
     }
 
-    window.openAddToPlaylistModal = async function(targetPlaylistId) {
+        window.openAddToPlaylistModal = async function(targetPlaylistId) {
       const urlParamId = new URLSearchParams(location.search).get('id');
       const resolved = targetPlaylistId || (typeof playlistId !== 'undefined' && playlistId) || urlParamId || null;
       window.currentPlaylistForAdd = resolved;
@@ -1491,25 +1491,27 @@ div.innerHTML =
         alert('Failed to load tracks'); return;
       }
 
-            renderAddList('');
+      renderAddList('');
       if (modalEl) modalEl.style.display = 'flex';
 
-      // === ИСПРАВЛЕННЫЙ ПОИСК ===
+      // === ПОИСК: один раз объявляем, один раз вешаем обработчик ===
       const searchEl = document.getElementById(searchId);
       if (searchEl) {
           searchEl.value = '';
           
-          // Удаляем старый обработчик перед добавлением нового
-          const newSearchHandler = (e) => window.renderAddList(e.target.value);
-          searchEl.removeEventListener('input', newSearchHandler);
-          searchEl.addEventListener('input', newSearchHandler);
+          // Очищаем старые обработчики (чтобы не дублировались)
+          const oldHandler = searchEl._searchHandler;
+          if (oldHandler) searchEl.removeEventListener('input', oldHandler);
+          
+          // Создаём новый обработчик и сохраняем ссылку
+          const newHandler = (e) => window.renderAddList(e.target.value);
+          searchEl._searchHandler = newHandler;
+          searchEl.addEventListener('input', newHandler);
       }
 
-// Функция обработки поиска (должна быть доступна в scope)
-function handleAddSearch(e) {
-    const filterText = e.target.value;
-    window.renderAddList(filterText);
-}
+      const selectAllEl = document.getElementById(selectAllId);
+      if (selectAllEl) selectAllEl.checked = false;
+    };
 
     window.renderAddList = function(filter) {
       const listEl = document.getElementById(listId);
