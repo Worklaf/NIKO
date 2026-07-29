@@ -989,8 +989,16 @@ function filterTracks() {
             matchesNew = !listened.includes(trackId);
         }
 
-        trackEl.style.display = (matchesSearch && matchesGenre && matchesLyrics && matchesMyTracks && matchesNew) ? 'flex' : 'none';
+        // === НОВАЯ ПРОВЕРКА: скрыт ли трек с главной ===
+        let matchesHideFromHome = true;
+        const track = globalTracks.find(t => t.id === trackId);
+        if (track && isTrackHiddenFromHome(track)) {
+            matchesHideFromHome = false;
+        }
+
+        trackEl.style.display = (matchesSearch && matchesGenre && matchesLyrics && matchesMyTracks && matchesNew && matchesHideFromHome) ? 'flex' : 'none';
     });
+    
     // Обновляем глобальный список отфильтрованных ID
     window.currentFilteredIds = Array.from(document.querySelectorAll('.track'))
     .filter(el => el.style.display !== 'none')
@@ -1263,59 +1271,47 @@ function subscribePlaylists() {
   db.collection('playlists').orderBy('createdAt', 'asc').onSnapshot(snap => {
     globalPlaylists = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderPlaylistsList();
-    
-    // === FIX: Перезапускаем фильтрацию треков с новыми плейлистами ===
-    // Это нужно чтобы hideFromHome сработал после загрузки плейлистов
-    if (globalTracks.length > 0) {
-      applySortAndRender();
-    }
+    renderDraftTracks(globalTracks);
   });
 }
+
 function subscribeTracks() {
   if (!db) return console.warn('Firestore not initialized');
   
-  db.collection('tracks').orderBy('createdAt', 'desc').onSnapshot(snap => {
-    const role = getRole();
-    let tracks = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(track => {
-      // 1. Проверка visibility трека
+  // Отдельная функция для фильтрации треков
+  function applyHomeFilters(tracks, role) {
+    return tracks.filter(track => {
+      // Базовая проверка видимости
       if (!isVisibleToRole(track, role)) return false;
       
-      // 2. Проверка visibility плейлиста (старое поле playlistId)
+      // Проверка playlistId (для обратной совместимости)
       if (track.playlistId) {
         const pl = globalPlaylists.find(p => p.id === track.playlistId);
         if (pl && !isVisibleToRole(pl, role)) return false;
-      }
-      
-      // 3. === FIX: Собираем ВСЕ playlist IDs трека ===
-      const allPlaylistIds = new Set();
-      
-      // Старое поле (строка)
-      if (track.playlistId) allPlaylistIds.add(track.playlistId);
-      
-      // Новое поле (массив)
-      if (track.playlistIds && Array.isArray(track.playlistIds)) {
-        track.playlistIds.forEach(id => allPlaylistIds.add(id));
-      }
-      
-      const trackPlaylistIds = Array.from(allPlaylistIds);
-      
-      // 4. === FIX: Скрыть треки, у которых ВСЕ плейлисты помечены как hideFromHome ===
-      if (trackPlaylistIds.length > 0) {
-        const pls = globalPlaylists.filter(p => trackPlaylistIds.includes(p.id));
-        // Если у трека есть плейлисты И все они скрыты с главной → скрыть трек
-        if (pls.length > 0 && pls.every(p => p.hideFromHome === true)) {
-          return false;
-        }
-      }
-      
+      }      
       return true;
     });
+  }
+  
+  db.collection('tracks').orderBy('createdAt', 'desc').onSnapshot(snap => {
+    const role = getRole();
+    let allTracks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    
+    // Фильтруем для главной страницы
+    let tracks = applyHomeFilters(allTracks, role);
     
     globalTracks = tracks;
     applySortAndRender();
   }, err => { console.warn('tracks snapshot error', err); });
 }
-
+// Проверяет, скрыт ли трек с главной страницы (в любом из его плейлистов стоит hideFromHome)
+function isTrackHiddenFromHome(track) {
+  const trackPlaylistIds = track.playlistIds || [];
+  if (trackPlaylistIds.length === 0) return false;
+  
+  const pls = globalPlaylists.filter(p => trackPlaylistIds.includes(p.id));
+  return pls.some(p => p.hideFromHome === true);
+}
 function applySortAndRender() {
   let tracks = [...globalTracks];
   if (currentSortMode === 'plays-desc') tracks.sort((a, b) => (b.plays || 0) - (a.plays || 0));
@@ -2021,9 +2017,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const langBtn = document.getElementById('lang-' + (window.currentLang || 'en'));
   if (langBtn) langBtn.classList.add('active');
-
-  subscribeTracks();
+	
   subscribePlaylists();
+  subscribeTracks();
   initWavesurfer();
   initEmojiSystem();
   updateShuffleButton();
