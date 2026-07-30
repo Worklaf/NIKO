@@ -2129,19 +2129,30 @@ let chatOpen = false;
 function openChatOverlay(fromSwipe = false) {
   const role = getRole();
   if (role === 'guest') return;
-  // Не открываем, если сейчас открыт текст песни (side-panel)
+  
+  // Не открываем, если сейчас открыт текст песни
   if (document.getElementById('side-panel').classList.contains('open')) return;
 
   const chatFrame = document.getElementById('chat-frame');
   const chatOverlay = document.getElementById('chat-overlay');
+  const miniPlayer = document.getElementById('mini-player');
 
-  // Передаём флаг в URL: если открыто свайпом — чат получит ?swipe=1
+  // Проверяем, виден ли плеер
+  const isPlayerVisible = miniPlayer && 
+    window.getComputedStyle(miniPlayer).display !== 'none' && 
+    miniPlayer.style.display !== 'none';
+
+  // Добавляем/убираем класс для отступа
+  if (isPlayerVisible) {
+    chatOverlay.classList.add('has-player');
+  } else {
+    chatOverlay.classList.remove('has-player');
+  }
+
   chatFrame.src = fromSwipe ? 'CHAT/chat.html?swipe=1' : 'CHAT/chat.html';
-
   chatOverlay.style.display = 'block';
-  chatOverlay.offsetHeight; // reflow
+  chatOverlay.offsetHeight;
   chatOverlay.classList.add('open');
-  chatOpen = true;
 }
 
 function closeChatOverlay() {
@@ -3089,43 +3100,76 @@ window.updateTrackPlayIcons = function() {
 // ========================================
 (function initAutoLogout() {
   const INACTIVITY_TIMEOUT = 2 * 60 * 1000; // 2 минуты
-  let lastActivity = Date.now();
+  const LAST_ACTIVITY_KEY = 'lastActivityTimestamp';
   let checkInterval = null;
 
   function isMusicPlaying() {
     return window.isPlaying === true && window.wavesurfer != null;
   }
 
-  function resetActivity() {
-    // Не сбрасываем таймер если музыка играет — считаем это активностью
-    lastActivity = Date.now();
+  function updateLastActivity() {
+    localStorage.setItem(LAST_ACTIVITY_KEY, Date.now().toString());
+  }
+
+  function getLastActivity() {
+    const raw = localStorage.getItem(LAST_ACTIVITY_KEY);
+    return raw ? parseInt(raw, 10) : Date.now();
+  }
+
+  function performLogout() {
+    console.log('🔒 Auto-logout: inactive timeout exceeded');
+    localStorage.removeItem('siteRole');
+    localStorage.removeItem(LAST_ACTIVITY_KEY);
+    location.reload();
   }
 
   function checkInactivity() {
     const role = getRole();
-    if (role === 'guest') return; // Только для admin/partner
+    if (role === 'guest') return;
 
     const now = Date.now();
+    const lastActivity = getLastActivity();
     const idleTime = now - lastActivity;
 
-    // Если музыка играет — считаем пользователя активным
+    // Если музыка играет — считаем активным
     if (isMusicPlaying()) {
-      lastActivity = now;
+      updateLastActivity();
       return;
     }
 
     if (idleTime >= INACTIVITY_TIMEOUT) {
-      console.log('⏱️ Auto-logout: inactive for', Math.round(idleTime / 1000), 'seconds');
       clearInterval(checkInterval);
-      // Удаляем роль и перезагружаем
-      logoutRole();
+      performLogout();
     }
+  }
+
+  // === ПРОВЕРКА ПРИ ЗАГРУЗКЕ СТРАНИЦЫ (ключевой фикс!) ===
+  function checkOnPageLoad() {
+    const role = getRole();
+    if (role === 'guest') return;
+
+    const now = Date.now();
+    const lastActivity = getLastActivity();
+    const idleTime = now - lastActivity;
+
+    // Если с момента последней активности прошло больше 2 минут — выходим
+    if (idleTime >= INACTIVITY_TIMEOUT) {
+      console.log('🔒 Auto-logout on load: was inactive for', Math.round(idleTime/1000), 's');
+      performLogout();
+      return true; // Выполнен выход
+    }
+    return false; // Выход не нужен
+  }
+
+  // === Запускаем проверку СРАЗУ при загрузке ===
+  if (checkOnPageLoad()) {
+    return; // Если уже вышли — дальше не инициализируем
   }
 
   function startAutoLogout() {
     if (checkInterval) clearInterval(checkInterval);
-    lastActivity = Date.now();
-    checkInterval = setInterval(checkInactivity, 1000); // проверка каждую секунду
+    updateLastActivity(); // Сбрасываем таймер при старте
+    checkInterval = setInterval(checkInactivity, 5000); // проверка каждые 5 сек
   }
 
   function stopAutoLogout() {
@@ -3135,31 +3179,37 @@ window.updateTrackPlayIcons = function() {
     }
   }
 
-  // События активности (с дебаунсом 100мс чтобы не грузить CPU)
+  // События активности
   let debounceTimer;
-  const activityEvents = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
+  const activityEvents = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click', 'wheel'];
   
   activityEvents.forEach(event => {
     document.addEventListener(event, () => {
       clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(resetActivity, 100);
+      debounceTimer = setTimeout(updateLastActivity, 50);
     }, { passive: true });
   });
 
-  // При смене видимости вкладки — проверяем
+  // При смене видимости вкладки
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
-      // Вернулись на вкладку — проверим не истёк ли таймер
-      checkInactivity();
+      // Вернулись на вкладку — проверяем не истёк ли таймер
+      if (checkOnPageLoad()) return;
     }
+    updateLastActivity();
   });
 
-  // Запускаем только если пользователь залогинен
+  // При закрытии/перезагрузке — записываем время
+  window.addEventListener('beforeunload', () => {
+    updateLastActivity();
+  });
+
+  // Запускаем таймер
   if (getRole() !== 'guest') {
     startAutoLogout();
   }
 
-  // Слушаем изменение роли (после логина/логаута)
+  // Слушаем изменение роли
   window.addEventListener('storage', (e) => {
     if (e.key === 'siteRole') {
       if (e.newValue && e.newValue !== 'guest') {
