@@ -1970,40 +1970,140 @@ function formatLyrics(lyrics) {
   const lines = lyrics.split('\n');
   let html = '<div class="lyrics-formatted">';
 
-  // Улучшенные паттерны для распознавания тегов
-  const tagPatterns = [
-    // [Verse 1], [Chorus], [Pre-Chorus] — стандартные скобки
-    { regex: /^\s*\[\s*(verse|zwrotka|куплет|strofa|verso|estrofa)\s*(\d*)\s*(?:[-—]\s*.+?)?\s*\]\s*$/i, type: 'verse', label: (m) => 'Verse ' + (m[2] || '1') },
-    { regex: /^\s*\[\s*(chorus|refren|припев|estribillo|refrão)\s*(\d*)?\s*(?:[-—]\s*.+?)?\s*\]\s*$/i, type: 'chorus', label: (m) => 'Chorus ' + (m[2] || '') },
-    { regex: /^\s*\[\s*(pre[-\s]?chorus|pre[-\s]?refren|предприпев)\s*(\d*)?\s*(?:[-—]\s*.+?)?\s*\]\s*$/i, type: 'pre-chorus', label: (m) => 'Pre-Chorus ' + (m[2] || '') },
-    { regex: /^\s*\[\s*(bridge|мост|puente|ponte)\s*(\d*)?\s*(?:[-—]\s*.+?)?\s*\]\s*$/i, type: 'bridge', label: (m) => 'Bridge ' + (m[2] || '') },
-    { regex: /^\s*\[\s*(intro|интро|вступление|introducción|introdução)\s*(?:[-—]\s*.+?)?\s*\]\s*$/i, type: 'intro', label: () => 'Intro' },
-    { regex: /^\s*\[\s*(outro|аутро|завершение|final|coda)\s*(?:[-—]\s*.+?)?\s*\]\s*$/i, type: 'outro', label: () => 'Outro' },
-    { regex: /^\s*\[\s*(drop|дроп|caída|queda)\s*(\d*)?\s*(?:[-—]\s*.+?)?\s*\]\s*$/i, type: 'drop', label: (m) => 'Drop ' + (m[2] || '') },
-    { regex: /^\s*\[\s*(hook|хук|gancho)\s*(\d*)?\s*(?:[-—]\s*.+?)?\s*\]\s*$/i, type: 'hook', label: (m) => 'Hook ' + (m[2] || '') },
-    { regex: /^\s*\[\s*(build|билд|нарастание|build[-\s]?up)\s*(\d*)?\s*(?:[-—]\s*.+?)?\s*\]\s*$/i, type: 'build', label: (m) => 'Build ' + (m[2] || '') },
+  // === ОПРЕДЕЛЕНИЕ ТИПА ТЕГА ===
+  function getTagType(text) {
+    const lower = text.toLowerCase();
 
-    // ## Tag ## — markdown-заголовки
-    { regex: /^\s*##\s*(.+?)\s*##\s*$/i, type: 'generic', label: (m) => m[1].trim() },
+    // Verse / Zwrotka / Куплет
+    if (/\b(verse|zwrotka|куплет|strofa|verso|estrofa)\b/.test(lower)) return 'verse';
 
-    // 🎶 Chorus, 🎸 Instrumental Break — эмодзи + тег
-    { regex: /^\s*([🎶🎸🎤🎵🎼🎹🥁🎷🎺🎸🪕🎻🎲🎯🎳🎮🎰🧩🚀🛸🌟⭐💫✨⚡🔥💥🌈☀️🌙☄️🪐🌍🌎🌏🌕🌖🌗🌘🌑🌒🌓🌔☁️⛅⛈️🌤️🌥️🌦️🌧️🌨️🌩️🌪️🌫️🌬️🌀🌈❄️☃️⛄☄️🔥💧🌊🎃🎄🎆🎇🧨✨🎈🎉🎊🎋🎍🎎🎏🎐🎑🧧🎀🎁🎗️🎟️🎫🏆🏅🥇🥈🥉⚽⚾🥎🏀🏐🏈🏉🎾🥏🎳🏏🏑🏒🥍🏓🏸🥊🥋🥅⛳⛸️🎣🤿🎽🎿🛷💃🕺])\s*(verse|chorus|bridge|pre[-\s]?chorus|intro|outro|drop|hook|build|zwrotka|refren|instrumental|break|solo|interlude|fade|epilogue)\s*(\d*)?\s*(?:[-—]\s*.+?)?\s*$/i, type: 'generic', label: (m) => m[2].charAt(0).toUpperCase() + m[2].slice(1) + (m[3] ? ' ' + m[3] : '') },
+    // Chorus / Refren / Припев
+    if (/\b(chorus|refren|припев|estribillo|refrão|refrain)\b/.test(lower)) return 'chorus';
 
-    // **Bold Tag** — markdown bold
-    { regex: /^\s*\*\*(.+?)\*\*\s*$/i, type: 'generic', label: (m) => m[1].trim() },
+    // Pre-Chorus
+    if (/\b(pre[-\s]?chorus|pre[-\s]?refren|предприпев)\b/.test(lower)) return 'pre-chorus';
 
-    // [Anything] — любые скобки (последняя проверка)
-    { regex: /^\s*\[\s*(.+?)\s*\]\s*$/i, type: 'generic', label: (m) => m[1].trim() },
+    // Bridge
+    if (/\b(bridge|мост|puente|ponte)\b/.test(lower)) return 'bridge';
 
-    // Intro: описание (двоеточие вместо скобок)
-    { regex: /^\s*(intro|outro|break|fade|instrumental|solo|interlude)\s*:\s*(.+?)\s*$/i, type: 'generic', label: (m) => m[1].charAt(0).toUpperCase() + m[1].slice(1) + ': ' + m[2].trim() },
+    // Intro
+    if (/\b(intro|интро|вступление|introducción|introdução)\b/.test(lower)) return 'intro';
 
-    // Zwrotka 1: (польский формат с двоеточием)
-    { regex: /^\s*(zwrotka|refren|zwrotka|strofa)\s*(\d*)\s*:\s*$/i, type: 'verse', label: (m) => 'Zwrotka ' + (m[2] || '1') },
+    // Outro
+    if (/\b(outro|аутро|завершение|final|coda|epilogue)\b/.test(lower)) return 'outro';
 
-    // Verse 1 - Male (дефис/тире вместо скобок)
-    { regex: /^\s*(verse|chorus|bridge|pre[-\s]?chorus|intro|outro|drop|hook|build|zwrotka|refren)\s*(\d*)?\s*[-—]\s*(.+?)\s*$/i, type: 'generic', label: (m) => m[1].charAt(0).toUpperCase() + m[1].slice(1) + (m[2] ? ' ' + m[2] : '') + ' — ' + m[3].trim() },
-  ];
+    // Drop
+    if (/\b(drop|дроп|caída|queda)\b/.test(lower)) return 'drop';
+
+    // Hook
+    if (/\b(hook|хук|gancho)\b/.test(lower)) return 'hook';
+
+    // Build
+    if (/\b(build|билд|нарастание|build[-\s]?up)\b/.test(lower)) return 'build';
+
+    // Instrumental / Solo / Break / Interlude / Fade
+    if (/\b(instrumental|solo|break|interlude|fade)\b/.test(lower)) return 'generic';
+
+    return 'generic';
+  }
+
+  // === ПРОВЕРКА, ЯВЛЯЕТСЯ ЛИ СТРОКА ТЕГОМ ===
+  function isTagLine(line) {
+    const trimmed = line.trim();
+    if (!trimmed) return false;
+
+    // ## Tag (markdown-заголовок)
+    if (/^##\s+/.test(trimmed)) return true;
+
+    // 🎶 Tag (эмодзи + тег)
+    if (/^[🎶🎸🎤🎵🎼🎹🥁🎷🎺🪕🎻💫✨⚡🔥🌟⭐🎮🎯🎲🚀🛸🌈☀️🌙🪐🌍🌎🌏🌕🌖🌗🌘🌑🌒🌓🌔☁️⛅⛈️🌤️🌥️🌦️🌧️🌨️🌩️🌪️🌫️🌬️🌀❄️☃️⛄☄️💧🌊🎃🎄🎆🎇🧨🎈🎉🎊🎋🎍🎎🎏🎐🎑🧧🎀🎁🏆🏅🥇🥈🥉⚽⚾🥎🏀🏐🏈🏉🎾🥏🎳🏏🏑🏒🥍🏓🏸🥊🥋🥅⛳⛸️🎣🤿🎽🎿🛷💃🕺]\s*/.test(trimmed)) return true;
+
+    // [Tag] (скобки)
+    if (/^\[.+\]$/.test(trimmed)) return true;
+
+    // Tag: описание (двоеточие)
+    if (/^(intro|outro|break|fade|instrumental|solo|interlude|zwrotka|refren|verse|chorus|bridge|pre[-\s]?chorus|drop|hook|build|strofa)\s*\d*\s*:/i.test(trimmed)) return true;
+
+    // Tag - описание (дефис/тире)
+    if (/^(verse|chorus|bridge|pre[-\s]?chorus|intro|outro|drop|hook|build|zwrotka|refren|final)\s*\d*\s*[-—]\s*.+/i.test(trimmed)) return true;
+
+    // **Tag** (markdown bold)
+    if (/^\*\*.+\*\*$/.test(trimmed)) return true;
+
+    return false;
+  }
+
+  // === ИЗВЛЕЧЕНИЕ ЧИСТОГО ТЕКСТА ТЕГА ===
+  function extractTagText(line) {
+    let text = line.trim();
+
+    // Убираем ##
+    text = text.replace(/^##\s*/, '').replace(/\s*##\s*$/, '');
+
+    // Убираем эмодзи
+    text = text.replace(/^[🎶🎸🎤🎵🎼🎹🥁🎷🎺🪕🎻💫✨⚡🔥🌟⭐🎮🎯🎲🚀🛸🌈☀️🌙🪐🌍🌎🌏🌕🌖🌗🌘🌑🌒🌓🌔☁️⛅⛈️🌤️🌥️🌦️🌧️🌨️🌩️🌪️🌫️🌬️🌀❄️☃️⛄☄️💧🌊🎃🎄🎆🎇🧨🎈🎉🎊🎋🎍🎎🎏🎐🎑🧧🎀🎁🏆🏅🥇🥈🥉⚽⚾🥎🏀🏐🏈🏉🎾🥏🎳🏏🏑🏒🥍🏓🏸🥊🥋🥅⛳⛸️🎣🤿🎽🎿🛷💃🕺]\s*/, '');
+
+    // Убираем скобки
+    text = text.replace(/^\[/, '').replace(/\]$/, '');
+
+    // Убираем markdown bold
+    text = text.replace(/^\*\*/, '').replace(/\*\*$/, '');
+
+    return text.trim();
+  }
+
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      html += '<br>';
+      return;
+    }
+
+    // Разделитель "--" или "——" или "=="
+    if (/^[-—=]{2,}$/.test(trimmed)) {
+      html += '<div style="border-top:1px solid rgba(255,255,255,0.1);margin:8px 0;"></div>';
+      return;
+    }
+
+    // Проверяем, является ли строка тегом
+    if (isTagLine(trimmed)) {
+      const tagText = extractTagText(trimmed);
+      const tagType = getTagType(tagText);
+      html += '<span class="lyrics-tag ' + tagType + '">' + tagText + '</span>';
+      return;
+    }
+
+    // Обычная строка текста
+    let cleanLine = trimmed
+      .replace(/^\s*[-–—]\s*/, '')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+    html += '<span class="lyrics-line">' + cleanLine + '</span>';
+  });
+
+  html += '</div>';
+  return html;
+}
+
+function detectTagType(text) {
+    const lower = text.toLowerCase();
+
+    // Порядок важен — более специфичные проверяем первыми
+    if (/final\s*chorus/.test(lower)) return { type: 'chorus', label: text.trim() };
+    if (/pre[-\s]?chorus|предприпев|pre[-\s]?refren/.test(lower)) return { type: 'pre-chorus', label: text.trim() };
+    if (/chorus|refren|припев|estribillo|refrão/.test(lower)) return { type: 'chorus', label: text.trim() };
+    if (/verse|zwrotka|куплет|strofa|verso|estrofa/.test(lower)) return { type: 'verse', label: text.trim() };
+    if (/bridge|мост|puente|ponte/.test(lower)) return { type: 'bridge', label: text.trim() };
+    if (/intro|интро|вступление|introducción|introdução/.test(lower)) return { type: 'intro', label: text.trim() };
+    if (/outro|аутро|завершение|final|coda|epilogue/.test(lower)) return { type: 'outro', label: text.trim() };
+    if (/drop|дроп|caída|queda/.test(lower)) return { type: 'drop', label: text.trim() };
+    if (/hook|хук|gancho/.test(lower)) return { type: 'hook', label: text.trim() };
+    if (/build|билд|нарастание|build[-\s]?up/.test(lower)) return { type: 'build', label: text.trim() };
+    if (/break|solo|interlude|instrumental|fade/.test(lower)) return { type: 'generic', label: text.trim() };
+
+    return null;
+  }
 
   lines.forEach(line => {
     const trimmed = line.trim();
@@ -2019,13 +2119,72 @@ function formatLyrics(lyrics) {
     }
 
     let isTag = false;
-    for (const pattern of tagPatterns) {
-      const match = trimmed.match(pattern.regex);
-      if (match) {
-        const label = pattern.label(match);
-        html += '<span class="lyrics-tag ' + pattern.type + '">' + label + '</span>';
+
+    // 1. ## Tag (markdown-заголовок) — ВСЯ строка после ## является тегом
+    const mdMatch = trimmed.match(/^##\s*(.+)$/);
+    if (mdMatch) {
+      const content = mdMatch[1].trim();
+      const detected = detectTagType(content);
+      if (detected) {
+        html += '<span class="lyrics-tag ' + detected.type + '">' + detected.label + '</span>';
         isTag = true;
-        break;
+      }
+    }
+
+    // 2. 🎶 Tag (эмодзи + тег)
+    if (!isTag) {
+      const emojiMatch = trimmed.match(/^([🎶🎸🎤🎵🎼🎹🥁🎷🎺🪕🎻🎲🎯🎳🎮🎰🧩🚀🛸🌟⭐💫✨⚡🔥💥🌈☀️🌙☄️🪐🌍🌎🌏🌕🌖🌗🌘🌑🌒🌓🌔☁️⛅⛈️🌤️🌥️🌦️🌧️🌨️🌩️🌪️🌫️🌬️🌀🌈❄️☃️⛄☄️🔥💧🌊🎃🎄🎆🎇🧨✨🎈🎉🎊🎋🎍🎎🎏🎐🎑🧧🎀🎁🎗️🎟️🎫🏆🏅🥇🥈🥉⚽⚾🥎🏀🏐🏈🏉🎾🥏🎳🏏🏑🏒🥍🏓🏸🥊🥋🥅⛳⛸️🎣🤿🎽🎿🛷💃🕺])\s*(.+)$/);
+      if (emojiMatch) {
+        const content = emojiMatch[2].trim();
+        const detected = detectTagType(content);
+        if (detected) {
+          html += '<span class="lyrics-tag ' + detected.type + '">' + detected.label + '</span>';
+          isTag = true;
+        }
+      }
+    }
+
+    // 3. [Tag] — стандартные скобки
+    if (!isTag) {
+      const bracketMatch = trimmed.match(/^\[\s*(.+?)\s*\]$/);
+      if (bracketMatch) {
+        const content = bracketMatch[1].trim();
+        const detected = detectTagType(content);
+        if (detected) {
+          html += '<span class="lyrics-tag ' + detected.type + '">' + detected.label + '</span>';
+          isTag = true;
+        }
+      }
+    }
+
+    // 4. **Tag** — markdown bold
+    if (!isTag) {
+      const boldMatch = trimmed.match(/^\*\*(.+?)\*\*$/);
+      if (boldMatch) {
+        const content = boldMatch[1].trim();
+        const detected = detectTagType(content);
+        if (detected) {
+          html += '<span class="lyrics-tag ' + detected.type + '">' + detected.label + '</span>';
+          isTag = true;
+        }
+      }
+    }
+
+    // 5. Tag: описание (двоеточие)
+    if (!isTag) {
+      const colonMatch = trimmed.match(/^(intro|outro|break|fade|instrumental|solo|interlude)\s*:\s*(.+)$/i);
+      if (colonMatch) {
+        html += '<span class="lyrics-tag generic">' + trimmed + '</span>';
+        isTag = true;
+      }
+    }
+
+    // 6. Zwrotka 1: (польский)
+    if (!isTag) {
+      const plMatch = trimmed.match(/^(zwrotka|refren)\s*(\d*)\s*:\s*$/i);
+      if (plMatch) {
+        html += '<span class="lyrics-tag verse">' + plMatch[1].charAt(0).toUpperCase() + plMatch[1].slice(1) + (plMatch[2] ? ' ' + plMatch[2] : '') + '</span>';
+        isTag = true;
       }
     }
 
