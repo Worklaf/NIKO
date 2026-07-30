@@ -2137,21 +2137,26 @@ function openChatOverlay(fromSwipe = false) {
   const chatOverlay = document.getElementById('chat-overlay');
   const miniPlayer = document.getElementById('mini-player');
 
-  // Проверяем, виден ли плеер
-  const isPlayerVisible = miniPlayer && 
-    window.getComputedStyle(miniPlayer).display !== 'none' && 
-    miniPlayer.style.display !== 'none';
+  // === ДИНАМИЧЕСКИЙ ОТСТУП от плеера (как у side-panel) ===
+  let bottomOffset = 0; // базовый отступ без плеера
 
-  // Добавляем/убираем класс для отступа
-  if (isPlayerVisible) {
-    chatOverlay.classList.add('has-player');
-  } else {
-    chatOverlay.classList.remove('has-player');
+  if (miniPlayer) {
+    const style = window.getComputedStyle(miniPlayer);
+    const isVisible = style.display !== 'none' && miniPlayer.offsetHeight > 0;
+
+    if (isVisible) {
+      const playerHeight = miniPlayer.offsetHeight;        // реальная высота
+      const playerBottom = parseInt(style.bottom) || 0;    // отступ снизу
+      bottomOffset = playerHeight + playerBottom + 8;      // +8px минимальный запас
+    }
   }
+
+  chatOverlay.style.paddingBottom = bottomOffset + 'px';
+  // === ===
 
   chatFrame.src = fromSwipe ? 'CHAT/chat.html?swipe=1' : 'CHAT/chat.html';
   chatOverlay.style.display = 'block';
-  chatOverlay.offsetHeight;
+  chatOverlay.offsetHeight; // reflow
   chatOverlay.classList.add('open');
 }
 
