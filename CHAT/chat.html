@@ -1608,17 +1608,21 @@ console.log('currentLang will be:', localStorage.getItem('siteLang') || 'en');
   }
 
   function resetIdleTimer() {
-    if (isAutoLoggingOut) return;
-    localStorage.setItem('chat_last_activity', Date.now().toString());
-    if (idleTimer) clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => {
-      if (isVideoPlaying || isAudioPlaying || isRecording) {
-        resetIdleTimer();
-        return;
-      }
-      performAutoLogout();
-    }, IDLE_TIMEOUT_MS);
-  }
+  if (isAutoLoggingOut) return;
+  
+  // Сохраняем timestamp активности
+  localStorage.setItem('lastActivityTimestamp', Date.now().toString());
+  
+  localStorage.setItem('chat_last_activity', Date.now().toString());
+  if (idleTimer) clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => {
+    if (isVideoPlaying || isAudioPlaying || isRecording) {
+      resetIdleTimer();
+      return;
+    }
+    performAutoLogout();
+  }, IDLE_TIMEOUT_MS);
+}
 
   function performAutoLogout() {
     if (isAutoLoggingOut) return;
@@ -1691,8 +1695,8 @@ console.log('currentLang will be:', localStorage.getItem('siteLang') || 'en');
 
   // pagehide — закрытие вкладки/браузера
   window.addEventListener('pagehide', () => {
-  localStorage.setItem('chat_last_activity', Date.now().toString()); // ← ДОБАВЬ
-  localStorage.setItem('chat_page_hidden_at', Date.now().toString());
+  localStorage.setItem('lastActivityTimestamp', Date.now().toString());
+  localStorage.setItem('chat_last_activity', Date.now().toString());
   try {
     db.collection('presence').doc(myRole).set({
       online: false,
@@ -3501,14 +3505,15 @@ function ensureTwemoji() {
   });
 }
   async function initChat() {
- await ensureTwemoji();
-    const lastActivity = parseInt(localStorage.getItem('chat_last_activity') || '0');
-    if (lastActivity && (Date.now() - lastActivity) > IDLE_TIMEOUT_MS) {
-      performAutoLogout();
-      return;
-    }
+      await ensureTwemoji();// === ПРОВЕРКА АВТОВЫХОДА ПРИ ЗАГРУЗКЕ ===
+  const IDLE_TIMEOUT_MS = 2 * 60 * 1000;
+  const lastActivity = parseInt(localStorage.getItem('lastActivityTimestamp') || '0');
+  
+  if (lastActivity && (Date.now() - lastActivity) > IDLE_TIMEOUT_MS) {
+    performAutoLogout();
+    return;
+  }
     loadProfile();
-    
     document.getElementById('header-name').textContent = NAMES[otherRole];
     document.getElementById('header-avatar-letter').textContent = LETTERS[otherRole];
 if (typeof myRole !== 'undefined' && NAMES && NAMES[myRole]) {
