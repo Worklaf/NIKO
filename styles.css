@@ -1604,24 +1604,26 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
 #chat-overlay {
   position: fixed;
   inset: 0;
-  z-index: 20000;              /* выше модалок, плеера и side-panel */
+  z-index: 20000;
   background: var(--bg);
   transform: translateX(100%);
   transition: transform .35s cubic-bezier(.4,0,.2,1);
   display: none;
   will-change: transform;
+  /* padding-bottom убран — теперь задаётся динамически в JS */
 }
 #chat-overlay.open {
   display: block;
   transform: translateX(0);
 }
+
 #chat-overlay iframe {
   width: 100%;
   height: 100%;
   border: 0;
   background: var(--bg);
+  /* padding-bottom убран — теперь задаётся у самого оверлея */
 }
-
 /* Невидимая зона свайпа справа (только мобила) */
 #chat-swipe-zone {
   position: fixed;
@@ -1782,31 +1784,4 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
     font-size: 9px;
     letter-spacing: 1px;
   }
-}
-/* ===== CHAT OVERLAY — отступ от мини-плеера ===== */
-#chat-overlay {
-  /* ... existing styles ... */
-  /* ДОБАВИТЬ: */
-  padding-bottom: 0;
-  transition: transform .35s cubic-bezier(.4,0,.2,1), padding-bottom 0.3s ease;
-}
-
-#chat-overlay.has-player {
-  padding-bottom: 120px; /* высота плеера + запас */
-}
-
-@media (max-width: 880px) {
-  #chat-overlay.has-player {
-    padding-bottom: 140px; /* на мобиле плеер выше */
-  }
-}
-
-#chat-overlay iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
-  background: var(--bg);
-  /* ДОБАВИТЬ: */
-  padding-bottom: inherit;
-  box-sizing: border-box;
 }
