@@ -1672,10 +1672,23 @@ function openText(trackEl) {
   const lyrics = trackEl.dataset.lyrics || '';
   const title = trackEl.dataset.title || '';
   currentEditingId = trackEl.dataset.id;
+  
+  const sidePanel = document.getElementById('side-panel');
+  const miniPlayer = document.getElementById('mini-player');
+  
+  // === ДОБАВИТЬ: проверяем видимость плеера ===
+  const isPlayerVisible = miniPlayer && miniPlayer.style.display !== 'none';
+  if (isPlayerVisible) {
+    sidePanel.style.paddingBottom = '120px'; // или высота плеера + 20px
+  } else {
+    sidePanel.style.paddingBottom = '20px';
+  }
+  // === ===
+  
   document.getElementById('side-title').textContent = title;
   document.getElementById('side-content').textContent = lyrics || t('noTracks') || 'Нет текста';
   document.getElementById('side-content-editor').value = lyrics;
-  document.getElementById('side-panel').classList.add('open');
+  sidePanel.classList.add('open');
   document.getElementById('side-content').style.display = 'block';
   document.getElementById('side-content-editor').style.display = 'none';
   document.getElementById('edit-mode-actions').classList.remove('active');
