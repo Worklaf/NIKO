@@ -1052,141 +1052,15 @@ function normalizeGenre(genre) {
   if (!genre) return '';
   return genre
     .toLowerCase()
-    .replace(/[^a-z0-9\s\-]/g, '')  // убираем спецсимволы
-    .replace(/\s+/g, ' ')            // множественные пробелы → один
-    .replace(/\s*-\s*/g, '-')        // пробелы вокруг дефиса
+    .replace(/[^a-z0-9\s\-]/g, '')
+    .replace(/\s+/g, ' ')
+    .replace(/\s*-\s*/g, '-')
     .trim();
 }
 
 function getGenreDisplayName(rawGenre) {
   if (!rawGenre) return '';
-  const normalized = normalizeGenre(rawGenre);
-
-  // Словарь нормализации
-  const genreMap = {
-    'phonk': 'Phonk',
-    'drift phonk': 'Drift Phonk',
-    'aggressive phonk': 'Aggressive Phonk',
-    'aggressive phonk soul': 'Aggressive Phonk-Soul',
-    'phonk soul': 'Phonk-Soul',
-    'brazilian phonk': 'Brazilian Phonk',
-    'memphis phonk': 'Memphis Phonk',
-    'house': 'House',
-    'deep house': 'Deep House',
-    'tech house': 'Tech House',
-    'bass house': 'Bass House',
-    'future house': 'Future House',
-    'electro house': 'Electro House',
-    'progressive house': 'Progressive House',
-    'trap': 'Trap',
-    'edm trap': 'EDM Trap',
-    'hard trap': 'Hard Trap',
-    'dubstep': 'Dubstep',
-    'riddim': 'Riddim',
-    'brostep': 'Brostep',
-    'melodic dubstep': 'Melodic Dubstep',
-    'future bass': 'Future Bass',
-    'drum and bass': 'Drum & Bass',
-    'dnb': 'Drum & Bass',
-    'drum bass': 'Drum & Bass',
-    'liquid dnb': 'Liquid Drum & Bass',
-    'neurofunk': 'Neurofunk',
-    'techno': 'Techno',
-    'hard techno': 'Hard Techno',
-    'industrial techno': 'Industrial Techno',
-    'trance': 'Trance',
-    'psytrance': 'Psytrance',
-    'hardstyle': 'Hardstyle',
-    'rawstyle': 'Rawstyle',
-    'euphoric hardstyle': 'Euphoric Hardstyle',
-    'hardcore': 'Hardcore',
-    'uk hardcore': 'UK Hardcore',
-    'frenchcore': 'Frenchcore',
-    'speedcore': 'Speedcore',
-    'gabber': 'Gabber',
-    'industrial': 'Industrial',
-    'synthwave': 'Synthwave',
-    'retrowave': 'Retrowave',
-    'vaporwave': 'Vaporwave',
-    'lofi': 'Lo-Fi',
-    'lo fi': 'Lo-Fi',
-    'chill': 'Chill',
-    'chillout': 'Chillout',
-    'ambient': 'Ambient',
-    'downtempo': 'Downtempo',
-    'trip hop': 'Trip-Hop',
-    'hip hop': 'Hip-Hop',
-    'rap': 'Rap',
-    'pop': 'Pop',
-    'electropop': 'Electropop',
-    'synthpop': 'Synthpop',
-    'rock': 'Rock',
-    'metal': 'Metal',
-    'electronic': 'Electronic',
-    'edm': 'EDM',
-    'dance': 'Dance',
-    'pop dance': 'Pop Dance',
-    'hyperpop': 'Hyperpop',
-    'hypertechno': 'Hypertechno',
-    'eurodance': 'Eurodance',
-    'hands up': 'Hands Up',
-    'jumpstyle': 'Jumpstyle',
-    'tekno': 'Tekno',
-    'schranz': 'Schranz',
-    'minimal': 'Minimal',
-    'minimal techno': 'Minimal Techno',
-    'melodic techno': 'Melodic Techno',
-    'peak time techno': 'Peak Time Techno',
-    'acid': 'Acid',
-    'acid techno': 'Acid Techno',
-    'breakbeat': 'Breakbeat',
-    'big beat': 'Big Beat',
-    'jungle': 'Jungle',
-    'garage': 'Garage',
-    'uk garage': 'UK Garage',
-    'bassline': 'Bassline',
-    'grime': 'Grime',
-    'moombahton': 'Moombahton',
-    'tribal': 'Tribal',
-    'tribal house': 'Tribal House',
-    'afro house': 'Afro House',
-    'latin house': 'Latin House',
-    'reggaeton': 'Reggaeton',
-    'dembow': 'Dembow',
-    'baile funk': 'Baile Funk',
-    'funk': 'Funk',
-    'soul': 'Soul',
-    'rnb': 'R&B',
-    'r and b': 'R&B',
-    'jazz': 'Jazz',
-    'nu jazz': 'Nu Jazz',
-    'electro swing': 'Electro Swing',
-    'classical': 'Classical',
-    'orchestral': 'Orchestral',
-    'cinematic': 'Cinematic',
-    'epic': 'Epic',
-    'trailer': 'Trailer',
-    'gaming': 'Gaming',
-    '8bit': '8-Bit',
-    'chiptune': 'Chiptune',
-    'experimental': 'Experimental',
-    'idm': 'IDM',
-    'glitch': 'Glitch',
-    'noise': 'Noise',
-    'dark ambient': 'Dark Ambient',
-  };
-
-  // Ищем точное совпадение
-  if (genreMap[normalized]) return genreMap[normalized];
-
-  // Ищем частичное совпадение
-  for (const [key, value] of Object.entries(genreMap)) {
-    if (normalized.includes(key) || key.includes(normalized)) {
-      return value;
-    }
-  }
-
-  // Форматируем как Title Case
+  // Просто форматируем в Title Case, сохраняем оригинал
   return rawGenre
     .toLowerCase()
     .split(/[\s\-_]+/)
@@ -1659,28 +1533,52 @@ let isMultiGenreMode = false;
 let isGenreSorted = false;
 
 function loadGenresToFilter() {
-  const genreSet = new Set();
+  // Группируем по нормализованному ключу, но показываем оригинальные названия
+  const genreGroups = {}; // normalized -> { display: string, count: number, originals: [] }
+  
   globalTracks.forEach(track => {
-    if (track.genre) track.genre.split(',').map(g => g.trim()).filter(g => g).forEach(g => genreSet.add(g));
+    if (track.genre) {
+      track.genre.split(',').map(g => g.trim()).filter(g => g).forEach(g => {
+        const normalized = normalizeGenre(g);
+        if (!genreGroups[normalized]) {
+          genreGroups[normalized] = { display: g, count: 0, originals: [] };
+        }
+        const group = genreGroups[normalized];
+        group.count++;
+        if (!group.originals.includes(g)) group.originals.push(g);
+        // Берем самое короткое оригинальное название как display
+        if (g.length < group.display.length) {
+          group.display = g;
+        }
+      });
+    }
   });
   
-  let genres = Array.from(genreSet);
-  genres.sort((a, b) => a.localeCompare(b));
+  // Сортируем: сначала по популярности, потом алфавитно
+  let genres = Object.entries(genreGroups);
+  genres.sort((a, b) => {
+    if (b[1].count !== a[1].count) return b[1].count - a[1].count;
+    return a[1].display.localeCompare(b[1].display);
+  });
   
   const genreSelect = document.getElementById('siteGenre');
   const currentVal = genreSelect.value;
   while (genreSelect.options.length > 1) genreSelect.remove(1);
   
-  genres.forEach(genre => {
+  genres.forEach(([normalized, group]) => {
     const option = document.createElement('option');
-    option.value = genre.toLowerCase();
-    option.textContent = genre;
+    option.value = normalized;
+    // Показываем оригинальное название, но красиво отформатированное
+    option.textContent = getGenreDisplayName(group.display);
+    // Tooltip с вариантами написания
+    if (group.originals.length > 1) {
+      option.title = group.originals.join(', ');
+    }
     genreSelect.appendChild(option);
   });
   
   if (currentVal && !isMultiGenreMode) genreSelect.value = currentVal;
 }
-
 function renderSelectedGenres() {
   const container = document.getElementById('selected-genres');
   if (!container) return;
