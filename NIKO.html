@@ -1676,13 +1676,22 @@ function openText(trackEl) {
   const sidePanel = document.getElementById('side-panel');
   const miniPlayer = document.getElementById('mini-player');
   
-  // === ДОБАВИТЬ: проверяем видимость плеера ===
-  const isPlayerVisible = miniPlayer && miniPlayer.style.display !== 'none';
-  if (isPlayerVisible) {
-    sidePanel.style.paddingBottom = '120px'; // или высота плеера + 20px
-  } else {
-    sidePanel.style.paddingBottom = '20px';
+  // === ДИНАМИЧЕСКИЙ ОТСТУП ===
+  let bottomOffset = 20; // базовый отступ без плеера
+  
+  if (miniPlayer) {
+    const computedDisplay = window.getComputedStyle(miniPlayer).display;
+    const isVisible = computedDisplay !== 'none' && miniPlayer.style.display !== 'none';
+    
+    if (isVisible) {
+      // Получаем реальную высоту плеера + gap
+      const playerHeight = miniPlayer.offsetHeight || 96;
+      const playerBottom = parseInt(getComputedStyle(miniPlayer).bottom) || 0;
+      bottomOffset = playerHeight + playerBottom + 20; // +20px запас
+    }
   }
+  
+  sidePanel.style.paddingBottom = bottomOffset + 'px';
   // === ===
   
   document.getElementById('side-title').textContent = title;
