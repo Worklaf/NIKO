@@ -108,6 +108,7 @@ const translations = {
     uploadError: "❌ Error: ",
     uploading: "⏳ Uploading...",
     uploadBtn: "Upload",
+    likedTracks: "Liked",
   },
   pl: {
     searchPlaceholder: "Szukaj: tytuł, artysta lub gatunek",
@@ -218,6 +219,7 @@ const translations = {
     uploadError: "❌ Błąd: ",
     uploading: "⏳ Dodawanie...",
     uploadBtn: "Dodaj",
+    likedTracks: "Polubione",
   },
   ua: {
     searchPlaceholder: "Пошук: назва, виконавець або жанр",
@@ -328,6 +330,7 @@ const translations = {
     uploadError: "❌ Помилка: ",
     uploading: "⏳ Завантаження...",
     uploadBtn: "Завантажити",
+    likedTracks: "Улюблені",
   },
   es: {
     searchPlaceholder: "Buscar: título, artista o género",
@@ -438,6 +441,7 @@ const translations = {
     uploadError: "❌ Error: ",
     uploading: "⏳ Subiendo...",
     uploadBtn: "Subir",
+    likedTracks: "Favoritos",
   }
 };
 
