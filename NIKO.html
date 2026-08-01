@@ -1072,9 +1072,9 @@ function getGenreDisplayName(rawGenre) {
 
 function filterTracks() {
     if (!window.homeState) {
-      window.homeState = { filteredIds: [], currentPage: 1, perPage: 10 };
+        window.homeState = { filteredIds: [], currentPage: 1, perPage: 10 };
     }
-    // [FIX] Сохраняем текущую страницу перед фильтрацией
+
     const savedPage = window.homeState.currentPage;
     const searchInput = document.getElementById('siteSearch');
     const lyricsSearchInput = document.getElementById('lyricsSearch');
@@ -1085,23 +1085,37 @@ function filterTracks() {
     document.querySelectorAll('.track').forEach(trackEl => {
         const title = (trackEl.dataset.title || '').toLowerCase();
         const artist = (trackEl.dataset.artist || '').toLowerCase();
-        const genre = (trackEl.dataset.genre || '').toLowerCase();
+
+        // === НОВЫЙ БЛОК ЖАНРОВ ===
+        const rawGenre = trackEl.dataset.genre || '';
+        const genre = rawGenre.toLowerCase();
+        const trackGenres = rawGenre
+            .split(',')
+            .map(g => normalizeGenre(g.trim()))
+            .filter(g => g);
+
         const lyrics = (trackEl.dataset.lyrics || '').toLowerCase();
         const trackId = trackEl.dataset.id;
 
         const effectiveUploader = trackEl.dataset.uploadedBy || 'admin';
 
-        const matchesSearch = title.includes(query) || artist.includes(query) || genre.includes(query);
+        const matchesSearch =
+            title.includes(query) ||
+            artist.includes(query) ||
+            genre.includes(query);
+
         let matchesGenre = true;
+
         if (isMultiGenreMode) {
             if (selectedGenres.length > 0) {
-                const trackGenres = genre.split(',').map(g => g.trim()).filter(g => g).map(g => g.toLowerCase());
                 matchesGenre = selectedGenres.some(sg => trackGenres.includes(sg));
             }
         } else {
             const selectedGenre = (document.getElementById('siteGenre').value || '').toLowerCase();
-            matchesGenre = !selectedGenre || genre.includes(selectedGenre);
+            matchesGenre = !selectedGenre || trackGenres.includes(selectedGenre);
         }
+        // === КОНЕЦ НОВОГО БЛОКА ЖАНРОВ ===
+
         const matchesLyrics = !lyricsQuery || lyrics.includes(lyricsQuery);
 
         let matchesMyTracks = true;
@@ -1125,81 +1139,42 @@ function filterTracks() {
             matchesNew = !listened.includes(trackId);
         }
 
-        // [NEW] Фильтр liked треков
         let matchesLiked = true;
         if (showLikedOnly) {
             const userVote = localStorage.getItem('like:user:' + trackId);
             matchesLiked = userVote === 'like';
         }
 
-        // === НОВАЯ ПРОВЕРКА: скрыт ли трек с главной ===
         let matchesHideFromHome = true;
         const track = globalTracks.find(t => t.id === trackId);
         if (track && isTrackHiddenFromHome(track)) {
             matchesHideFromHome = false;
         }
 
-        trackEl.style.display = (matchesSearch && matchesGenre && matchesLyrics && matchesMyTracks && matchesNew && matchesLiked && matchesHideFromHome) ? 'flex' : 'none';
+        trackEl.style.display =
+            (matchesSearch &&
+             matchesGenre &&
+             matchesLyrics &&
+             matchesMyTracks &&
+             matchesNew &&
+             matchesLiked &&
+             matchesHideFromHome)
+            ? 'flex'
+            : 'none';
     });
-    
-    // Обновляем глобальный список отфильтрованных ID
-    window.currentFilteredIds = Array.from(document.querySelectorAll('.track'))
-    .filter(el => el.style.display !== 'none')
-    .map(el => el.dataset.id);
 
-    // === PAGINATION: сохраняем отфильтрованные ID ===
+    window.currentFilteredIds = Array.from(document.querySelectorAll('.track'))
+        .filter(el => el.style.display !== 'none')
+        .map(el => el.dataset.id);
+
     if (window.homeState) {
-      window.homeState.filteredIds = [...window.currentFilteredIds];
-      // [FIX] Восстанавливаем страницу, если она валидна, иначе 1
-      const maxPage = Math.ceil(window.homeState.filteredIds.length / window.homeState.perPage) || 1;
-      window.homeState.currentPage = Math.min(savedPage, maxPage);
-      renderHomePage();
+        window.homeState.filteredIds = [...window.currentFilteredIds];
+        const maxPage = Math.ceil(window.homeState.filteredIds.length / window.homeState.perPage) || 1;
+        window.homeState.currentPage = Math.min(savedPage, maxPage);
+        renderHomePage();
     }
 }
-document.getElementById('share-copy-link').addEventListener('click', async () => {
-  // [FIX] Используем window.currentTrackId вместо currentTrackSrc
-  let trackId = window.currentTrackId;
-  let track = null;
-  
-  if (trackId) {
-    track = window.globalTracks.find(t => t.id === trackId);
-  }
-  
-  // Если не играет ничего — берем первый видимый трек
-  if (!track) {
-    const firstVisible = document.querySelector('.track:not([style*="none"])');
-    if (firstVisible) {
-      trackId = firstVisible.dataset.id;
-      track = window.globalTracks.find(t => t.id === trackId);
-    }
-  }
-  
-  if (!trackId) {
-    showCopyFeedback('❌ ' + (t('noTrackSelected') || 'No track selected'));
-    return;
-  }
-  
-  const shareUrl = window.location.origin + window.location.pathname + '?track=' + encodeURIComponent(trackId);
-  
-  try {
-    await navigator.clipboard.writeText(shareUrl);
-    showCopyFeedback(' ' + (t('copied') || 'Copied!'));
-  } catch (err) {
-    const textArea = document.createElement('textarea');
-    textArea.value = shareUrl;
-    textArea.style.cssText = 'position:fixed;left:-9999px;top:0;';
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-    try {
-      document.execCommand('copy');
-      showCopyFeedback(' ' + (t('copied') || 'Copied!'));
-    } catch (e) {
-      showCopyFeedback('❌ ' + (t('copyFailed') || 'Failed to copy'));
-    }
-    document.body.removeChild(textArea);
-  }
-});
+
 
 // Вспомогательная функция для показа feedback
 function showCopyFeedback(text) {
@@ -1535,26 +1510,39 @@ let isMultiGenreMode = false;
 let isGenreSorted = false;
 
 function loadGenresToFilter() {
-  const genreSet = new Set();
+  const genreMap = new Map(); // normalized -> displayName
+
   globalTracks.forEach(track => {
-    if (track.genre) track.genre.split(',').map(g => g.trim()).filter(g => g).forEach(g => genreSet.add(g));
+    if (track.genre) {
+      track.genre.split(',').map(g => g.trim()).filter(g => g).forEach(g => {
+        const normalized = normalizeGenre(g);
+        const display = getGenreDisplayName(g);
+        if (normalized && !genreMap.has(normalized)) {
+          genreMap.set(normalized, display);
+        }
+      });
+    }
   });
-  
-  let genres = Array.from(genreSet);
-  genres.sort((a, b) => a.localeCompare(b));
-  
+
+  // Сортируем по отображаемому имени
+  const sortedGenres = Array.from(genreMap.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+
   const genreSelect = document.getElementById('siteGenre');
   const currentVal = genreSelect.value;
   while (genreSelect.options.length > 1) genreSelect.remove(1);
-  
-  genres.forEach(genre => {
+
+  sortedGenres.forEach(([normalized, display]) => {
     const option = document.createElement('option');
-    option.value = genre.toLowerCase();
-    option.textContent = genre;
+    option.value = normalized;
+    option.textContent = display;
     genreSelect.appendChild(option);
   });
-  
-  if (currentVal && !isMultiGenreMode) genreSelect.value = currentVal;
+
+  if (currentVal && genreMap.has(currentVal) && !isMultiGenreMode) {
+    genreSelect.value = currentVal;
+  } else if (!isMultiGenreMode) {
+    genreSelect.value = '';
+  }
 }
 
 function renderSelectedGenres() {
@@ -1562,7 +1550,7 @@ function renderSelectedGenres() {
   if (!container) return;
   if (selectedGenres.length === 0) { container.innerHTML = ''; return; }
   container.innerHTML = selectedGenres.map(g => `
-    <span class="genre-tag">${g} <span class="remove-genre" data-genre="${g}">×</span></span>
+    <span class="genre-tag">${getGenreDisplayName(g)} <span class="remove-genre" data-genre="${g}">×</span></span>
   `).join('');
   container.querySelectorAll('.remove-genre').forEach(btn => {
     btn.addEventListener('click', () => {
