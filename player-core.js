@@ -302,6 +302,11 @@ window.loadAndPlayTrack = function(track) {
 
   window.currentTrackId = track.id || '';
   window.currentTrackSrc = track.audio || track.url || track.file || '';
+    // [FIX] Синхронизируем индекс в контексте, иначе next/prev всегда сбрасываются на 0
+  const ctxIdx = window.playerContext.tracks.findIndex(t => t && t.id === track.id);
+  if (ctxIdx !== -1) {
+    window.playerContext.currentIndex = ctxIdx;
+  }
     // Снимаем NEW при любом запуске (ручном или автоматическом)
   const trackEl = document.querySelector(`.track[data-id="${track.id}"]`);
   if (trackEl) {
@@ -357,8 +362,28 @@ window.loadAndPlayTrack = function(track) {
     window.isLoadingTrack = false;
   }
 
-  if (track.id) {
-    try { window.bumpCounter(track.id, 'plays', 1); } catch (e) { console.warn('bumpCounter failed', e); }
+      if (track.id) {
+    try {
+      window.bumpCounter(track.id, 'plays', 1);
+      
+      // [FIX] Оптимистично обновляем DOM на ВСЕХ страницах сразу
+      const newPlays = (track.plays || 0) + 1;
+      track.plays = newPlays;
+      document.querySelectorAll(`.track[data-id="${track.id}"] .play-count .num`).forEach(el => {
+        el.textContent = newPlays;
+      });
+      
+      // Сообщаем iframe'ам (playlist-view)
+      document.querySelectorAll('iframe').forEach(function(iframe) {
+        try {
+          iframe.contentWindow.postMessage({
+            type: 'plays-update',
+            trackId: track.id,
+            delta: 1
+          }, '*');
+        } catch(e) {}
+      });
+    } catch (e) { console.warn('bumpCounter failed', e); }
   }
 
   window.updateMiniPlayerButtons();
@@ -644,45 +669,6 @@ document.getElementById('share-modal')?.addEventListener('click', (e) => {
     document.getElementById('share-socials').classList.remove('open');
   }
 });
-
-// ===============================
-// MINI PLAYER COVER CLICK — SCROLL TO TRACK
-// ===============================
-document.getElementById('mini-thumb')?.addEventListener('click', () => {
-  if (!window.currentTrackId) return;
-
-  // Находим страницу трека
-  if (window.homeState && window.homeState.filteredIds && window.homeState.perPage) {
-    const idx = window.homeState.filteredIds.indexOf(window.currentTrackId);
-    if (idx !== -1) {
-      const page = Math.floor(idx / window.homeState.perPage) + 1;
-      if (page !== window.homeState.currentPage && typeof window.changeHomePage === 'function') {
-        window.changeHomePage(page);
-      }
-    }
-  }
-
-  // Скроллим к треку
-  setTimeout(() => {
-    const trackEl = document.querySelector(`.track[data-id="${window.currentTrackId}"]`);
-    if (trackEl) {
-      trackEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // Подсвечиваем трек
-      trackEl.style.animation = 'pulseReady 1s ease 2';
-      setTimeout(() => {
-        trackEl.style.animation = '';
-      }, 2000);
-    }
-  }, 300);
-});
-
-// Добавляем cursor:pointer для обложки в мини-плеере
-(function addMiniThumbCursor() {
-  const style = document.createElement('style');
-  style.textContent = '#mini-thumb { cursor: pointer; transition: transform 0.2s ease; } #mini-thumb:hover { transform: scale(1.05); }';
-  document.head.appendChild(style);
-})();
-
 // ===============================
 // SHARE: правильный трек + тост-уведомление
 // ===============================
@@ -692,7 +678,7 @@ function showShareToast(message) {
   // Удаляем старый тост
   const oldToast = document.getElementById('share-toast');
   if (oldToast) oldToast.remove();
-
+  
   const toast = document.createElement('div');
   toast.id = 'share-toast';
   toast.style.cssText = `
@@ -712,7 +698,7 @@ function showShareToast(message) {
   `;
   toast.textContent = message;
   document.body.appendChild(toast);
-
+  
   setTimeout(() => {
     toast.style.animation = 'toastOut 0.3s ease';
     setTimeout(() => toast.remove(), 300);
@@ -741,7 +727,7 @@ function getTrackFromShareButton(btn) {
   // Ищем ближайший .track к кнопке
   const trackEl = btn.closest('.track');
   if (!trackEl) return null;
-
+  
   const trackId = trackEl.dataset.id;
   return window.globalTracks.find(t => t.id === trackId);
 }
@@ -752,11 +738,11 @@ document.getElementById('share-copy-link')?.addEventListener('click', async func
   // Модалка одна на страницу, но currentTrackId должен быть установлен
   let trackId = window.currentTrackId;
   let track = null;
-
+  
   if (trackId) {
     track = window.globalTracks.find(t => t.id === trackId);
   }
-
+  
   // Если currentTrackId пустой — берем первый видимый трек
   if (!track) {
     const firstVisible = document.querySelector('.track:not([style*="none"])');
@@ -765,14 +751,14 @@ document.getElementById('share-copy-link')?.addEventListener('click', async func
       track = window.globalTracks.find(t => t.id === trackId);
     }
   }
-
+  
   if (!trackId || !track) {
     showShareToast('❌ No track selected');
     return;
   }
-
+  
   const shareUrl = window.location.origin + window.location.pathname + '?track=' + encodeURIComponent(trackId);
-
+  
   try {
     await navigator.clipboard.writeText(shareUrl);
     showShareToast('✅ ' + (typeof t === 'function' ? t('copied') : 'Copied!'));
@@ -797,11 +783,11 @@ document.getElementById('share-copy-link')?.addEventListener('click', async func
 document.querySelectorAll('.social-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const platform = btn.dataset.platform;
-
+    
     // [FIX] Тот же надежный способ получения трека
     let trackId = window.currentTrackId;
     let track = null;
-
+    
     if (trackId) {
       track = window.globalTracks.find(t => t.id === trackId);
     }
@@ -812,17 +798,17 @@ document.querySelectorAll('.social-btn').forEach(btn => {
         track = window.globalTracks.find(t => t.id === trackId);
       }
     }
-
+    
     if (!track) {
       showShareToast('❌ No track selected');
       return;
     }
-
+    
     const trackTitle = track.title || 'Check out this track';
     const shareUrl = window.location.origin + window.location.pathname + '?track=' + encodeURIComponent(trackId);
-
+    
     let socialUrl = '';
-
+    
     switch(platform) {
       case 'twitter':
         socialUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent('🎵 ' + trackTitle)}&url=${encodeURIComponent(shareUrl)}`;
@@ -857,11 +843,11 @@ document.querySelectorAll('.social-btn').forEach(btn => {
           return;
         }
     }
-
+    
     if (socialUrl) {
       window.open(socialUrl, '_blank', 'width=600,height=400');
     }
-
+    
     document.getElementById('share-modal')?.classList.remove('open');
   });
 });
@@ -916,11 +902,11 @@ window.broadcastPlayerState = function() {
 window.broadcastCounters = function(trackId) {
   var track = (window.globalTracks || []).find(function(t) { return t && t.id === trackId; });
   var userVote = localStorage.getItem('like:user:' + trackId);
-
+  
   // Обновляем локальные значения на основе того, что мы знаем
   var likes = track ? (track.likes || 0) : 0;
   var dislikes = track ? (track.dislikes || 0) : 0;
-
+  
   document.querySelectorAll('iframe').forEach(function(iframe) {
     try {
       iframe.contentWindow.postMessage({
@@ -956,18 +942,18 @@ window.addEventListener('storage', function(e) {
 (function initDeepLinking() {
   const params = new URLSearchParams(window.location.search);
   const trackId = params.get('track');
-
+  
   if (!trackId) return;
-
+  
   console.log('🔗 Deep link detected:', trackId);
-
+  
   // Ждем загрузки треков из Firebase
   let attempts = 0;
   const maxAttempts = 50;
-
+  
   const tryPlay = setInterval(() => {
     attempts++;
-
+    
     if (!window.globalTracks || window.globalTracks.length === 0) {
       if (attempts >= maxAttempts) {
         clearInterval(tryPlay);
@@ -975,18 +961,18 @@ window.addEventListener('storage', function(e) {
       }
       return;
     }
-
+    
     clearInterval(tryPlay);
-
+    
     // [FIX] Ищем трек ПО ID, а не по индексу!
     const track = window.globalTracks.find(t => t.id === trackId);
     if (!track) {
       console.warn('❌ Deep link: track not found:', trackId);
       return;
     }
-
+    
     console.log('✅ Deep link: track found:', track.title);
-
+    
     // Проверяем пагинацию — может трек на другой странице
     if (window.homeState && window.homeState.filteredIds) {
       const idx = window.homeState.filteredIds.indexOf(trackId);
@@ -999,43 +985,43 @@ window.addEventListener('storage', function(e) {
         }
       }
     }
-
+    
     proceedWithTrack(track);
-
+    
     // Убираем ?track= из URL
     if (window.history.replaceState) {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
-
+    
   }, 200);
-
+  
   function proceedWithTrack(track) {
     // Находим DOM-элемент
     const trackEl = document.querySelector(`.track[data-id="${track.id}"]`);
-
+    
     if (trackEl) {
       trackEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-
+    
     // [FIX] НЕ запускаем автоматически — ждем клика пользователя!
     // Вместо этого: загружаем трек в wavesurfer, но НЕ играем
-
+    
     window.currentTrackId = track.id;
     window.currentTrackSrc = track.audio || '';
-
+    
     // Устанавливаем контекст плеера
     const visibleTracks = Array.from(document.querySelectorAll('.track:not([style*="none"])'))
       .map(el => window.globalTracks.find(t => t.id === el.dataset.id))
       .filter(Boolean);
-
+    
     window.setPlayerContext(visibleTracks.length ? visibleTracks : [track], 'home');
-
+    
     // Находим индекс в контексте
     const ctxIdx = window.playerContext.tracks.findIndex(t => t.id === track.id);
     if (ctxIdx !== -1) {
       window.playerContext.currentIndex = ctxIdx;
     }
-
+    
     // [FIX] Загружаем в wavesurfer, но НЕ вызываем play()
     // Показываем "Ready to play" UI
     if (window.wavesurfer && track.audio) {
@@ -1046,29 +1032,29 @@ window.addEventListener('storage', function(e) {
         console.warn('Deep link: wavesurfer load failed', e);
       }
     }
-
+    
     // Обновляем мини-плеер
     const titleText = track.artist ? `${track.artist} - ${track.title}` : (track.title || '');
     document.getElementById('mini-title').textContent = titleText;
     document.getElementById('mini-thumb').src = track.cover || '';
     document.getElementById('mini-player').style.display = 'flex';
-
+    
     // Обновляем UI иконок
     if (typeof window.updateTrackPlayIcons === 'function') {
       window.updateTrackPlayIcons();
     }
-
+    
     // Помечаем трек как "готов к воспроизведению" — подсвечиваем
     if (trackEl) {
       trackEl.classList.add('ready-to-play');
       setTimeout(() => trackEl.classList.remove('ready-to-play'), 2000);
     }
-
+    
     // Сохраняем прослушивание (без фактического воспроизведения — или уберите эту строку)
     // if (typeof window.saveListenToFirebase === 'function') {
     //   window.saveListenToFirebase(track.id);
     // }
-
+    
     console.log('▶️ Deep link: track loaded, waiting for user click to play');
   }
 })();
