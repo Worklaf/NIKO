@@ -2847,6 +2847,7 @@ function formatLyrics(lyrics) {
   }
 })();
 
+
 // ===== SHARE MODAL LOGIC =====
 (function() {
   const modal = document.getElementById('share-modal');
@@ -2870,10 +2871,7 @@ function formatLyrics(lyrics) {
   });
 
   document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
+    btn.addEventListener('click', () => {
       const platform = btn.dataset.platform;
       const track = (window.globalTracks || []).find(t => t.id === window.currentTrackId) ||
                     (window.currentPlaylistTracks || []).find(t => t.id === window.currentTrackId);
@@ -2889,18 +2887,8 @@ function formatLyrics(lyrics) {
         tiktok: `https://www.tiktok.com/`,
         native: () => { if (navigator.share) navigator.share({title: track?.title || 'Track', url: shareUrl}); else alert('Web Share not supported'); }
       };
-
-      if (platform === 'native') { 
-        urls.native(); 
-      } else if (urls[platform]) { 
-        const url = urls[platform];
-        // Если это нативная схема приложения (не http/https) — открываем напрямую, без новой вкладки
-        if (/^[a-z][a-z0-9+.-]*:\/\//i.test(url) && !url.startsWith('http')) {
-          window.location.href = url;
-        } else {
-          window.open(url, '_blank');
-        }
-      }
+      if (platform === 'native') { urls.native(); }
+      else if (urls[platform]) { window.open(urls[platform], '_blank'); }
     });
   });
 
