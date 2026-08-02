@@ -2846,8 +2846,6 @@ function formatLyrics(lyrics) {
     }
   }
 })();
-
-
 // ===== SHARE MODAL LOGIC =====
 (function() {
   const modal = document.getElementById('share-modal');
@@ -2870,25 +2868,57 @@ function formatLyrics(lyrics) {
     } catch (e) { console.error(e); }
   });
 
+  // Определяем мобильное устройство
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
   document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
       const platform = btn.dataset.platform;
       const track = (window.globalTracks || []).find(t => t.id === window.currentTrackId) ||
                     (window.currentPlaylistTracks || []).find(t => t.id === window.currentTrackId);
       const shareUrl = window.location.origin + '/NIKO.html?track=' + encodeURIComponent(track?.id || '');
       const text = encodeURIComponent('Check out: ' + (track?.title || 'Track'));
+
       const urls = {
-        twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${text}`,
-        facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
-        telegram: `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${text}`,
-        whatsapp: `https://wa.me/?text=${text}%20${encodeURIComponent(shareUrl)}`,
-        viber: `viber://forward?text=${text}%20${encodeURIComponent(shareUrl)}`,
-        messenger: `fb-messenger://share/?link=${encodeURIComponent(shareUrl)}`,
-        tiktok: `https://www.tiktok.com/`,
-        native: () => { if (navigator.share) navigator.share({title: track?.title || 'Track', url: shareUrl}); else alert('Web Share not supported'); }
+        twitter:   `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${text}`,
+        facebook:  `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+        // Для мобильных — нативные схемы (открывают приложение напрямую)
+        telegram:  isMobile
+                     ? `tg://msg_url?url=${encodeURIComponent(shareUrl)}&text=${text}`
+                     : `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${text}`,
+        whatsapp:  isMobile
+                     ? `whatsapp://send?text=${text}%20${encodeURIComponent(shareUrl)}`
+                     : `https://wa.me/?text=${text}%20${encodeURIComponent(shareUrl)}`,
+        viber:     isMobile
+                     ? `viber://forward?text=${text}%20${encodeURIComponent(shareUrl)}`
+                     : `viber://forward?text=${text}%20${encodeURIComponent(shareUrl)}`,
+        messenger: isMobile
+                     ? `fb-messenger://share/?link=${encodeURIComponent(shareUrl)}`
+                     : `https://www.facebook.com/dialog/send?link=${encodeURIComponent(shareUrl)}&redirect_uri=${encodeURIComponent(window.location.href)}`,
+        tiktok:    `https://www.tiktok.com/`,
+        native:    () => {
+                     if (navigator.share) navigator.share({title: track?.title || 'Track', url: shareUrl});
+                     else alert('Web Share not supported');
+                   }
       };
-      if (platform === 'native') { urls.native(); }
-      else if (urls[platform]) { window.open(urls[platform], '_blank'); }
+
+      if (platform === 'native') {
+        urls.native();
+      } else if (urls[platform]) {
+        const url = urls[platform];
+        const isNativeScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(url) && !url.startsWith('http://') && !url.startsWith('https://');
+
+        // На мобильных нативные схемы открываем через location.href — 
+        // так приложение открывается сразу, без промежуточной вкладки
+        if (isMobile && isNativeScheme) {
+          window.location.href = url;
+        } else {
+          window.open(url, '_blank', 'noopener,noreferrer');
+        }
+      }
     });
   });
 
