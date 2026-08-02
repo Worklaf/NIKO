@@ -1295,7 +1295,7 @@ let currentReplacingTrackId = '';
     let allTracksFull = [];
     let visibleTracks = [];
     let showLikedOnly = false;
-
+    let currentPlaylist = null;
 // ===== PAGINATION (like home page) =====
 const playlistState = {
   filteredIds: [],
@@ -1409,7 +1409,7 @@ window.onPlayerTrackChanged = function(trackId) {
     return;
   }
   const playlist = playlistDoc.data();
-
+  currentPlaylist = playlist;
   // === РОЛЬ — объявляем ОДИН РАЗ в начале функции ===
   const role = localStorage.getItem('siteRole') || 'guest';
 
@@ -1670,10 +1670,10 @@ function formatLyrics(lyrics) {
         const dislikesNum = t.dislikes || 0;
         const playsNum = t.plays || 0;
 
-       let addRemoveBtnHtml = '';
+       
 if (typeof playlistId !== 'undefined' && playlistId && inThisPlaylist) {
   const role = localStorage.getItem('siteRole') || 'guest';
-  const isOwnerPartner = playlist.ownerRole === 'partner';
+  const isOwnerPartner = currentPlaylist && currentPlaylist.ownerRole === 'partner';
   const canRemove = role === 'admin' || (role === 'partner' && isOwnerPartner);
   if (canRemove) {
     addRemoveBtnHtml = '<button class="btn icon remove-from-playlist-btn" data-id="' + escapeHtml(t.id) + '" title="Remove from playlist">−</button>';
