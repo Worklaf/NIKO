@@ -1409,6 +1409,7 @@ window.onPlayerTrackChanged = function(trackId) {
     return;
   }
   const playlist = playlistDoc.data();
+     window.currentPlaylist = playlist;
   currentPlaylist = playlist;
   // === РОЛЬ — объявляем ОДИН РАЗ в начале функции ===
   const role = localStorage.getItem('siteRole') || 'guest';
@@ -1416,7 +1417,7 @@ window.onPlayerTrackChanged = function(trackId) {
   // === Кнопка Add tracks: только admin (всегда) или partner (только свой плейлист) ===
   const addBtn = document.getElementById('open-add-to-playlist-top');
   if (addBtn) {
-    const isOwnerPartner = playlist.ownerRole === 'partner';
+    const isOwnerPartner = (window.currentPlaylist || {}).ownerRole === 'partner';
     const canAddTracks = role === 'admin' || (role === 'partner' && isOwnerPartner);
     addBtn.style.display = canAddTracks ? 'inline-flex' : 'none';
   }
@@ -1673,7 +1674,7 @@ function formatLyrics(lyrics) {
        
 if (typeof playlistId !== 'undefined' && playlistId && inThisPlaylist) {
   const role = localStorage.getItem('siteRole') || 'guest';
-  const isOwnerPartner = currentPlaylist && currentPlaylist.ownerRole === 'partner';
+  const isOwnerPartner = (window.currentPlaylist || {}).ownerRole === 'partner';  // ← исправлено
   const canRemove = role === 'admin' || (role === 'partner' && isOwnerPartner);
   if (canRemove) {
     addRemoveBtnHtml = '<button class="btn icon remove-from-playlist-btn" data-id="' + escapeHtml(t.id) + '" title="Remove from playlist">−</button>';
