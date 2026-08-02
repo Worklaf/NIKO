@@ -1670,12 +1670,15 @@ function formatLyrics(lyrics) {
         const dislikesNum = t.dislikes || 0;
         const playsNum = t.plays || 0;
 
-        let addRemoveBtnHtml = '';
-        if (typeof playlistId !== 'undefined' && playlistId) {
-          if (inThisPlaylist) {
-            addRemoveBtnHtml = '<button class="btn icon remove-from-playlist-btn" data-id="' + escapeHtml(t.id) + '" title="Remove from playlist">−</button>';
-          }
-        }
+       let addRemoveBtnHtml = '';
+if (typeof playlistId !== 'undefined' && playlistId && inThisPlaylist) {
+  const role = localStorage.getItem('siteRole') || 'guest';
+  const isOwnerPartner = playlist.ownerRole === 'partner';
+  const canRemove = role === 'admin' || (role === 'partner' && isOwnerPartner);
+  if (canRemove) {
+    addRemoveBtnHtml = '<button class="btn icon remove-from-playlist-btn" data-id="' + escapeHtml(t.id) + '" title="Remove from playlist">−</button>';
+  }
+}
 
         const isPlaying = t.id === currentTrackId && window.isPlaying;
 
