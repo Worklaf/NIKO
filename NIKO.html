@@ -461,21 +461,7 @@
   color: var(--muted);
   opacity: 0.7;
 }
-	  .track-date-editable {
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border-left: 2px solid rgba(255, 77, 166, 0.3);
-}
-.track-date-editable:hover {
-  background: rgba(255, 77, 166, 0.15);
-  border-left-color: #ff4da6;
-  color: #ff4da6;
-}
-.track-date-editable::after {
-  content: ' ✎';
-  font-size: 10px;
-  opacity: 0.6;
-}
+	 
   </style>
 <base target="_blank">
 <base target="_blank">
@@ -2695,7 +2681,73 @@ await loadSavedLanguage();
 
     const isPlayBtn = e.target.closest('.play-btn');
     const isOtherInteractive = e.target.closest('button:not(.play-btn), a, .likes-count, .dislikes-count, .play-count, .playlist-badge, .order-btn');
+  // === ADMIN: Клик по дате загрузки — смена createdAt ===
+    // === ADMIN: Клик по дате загрузки — смена createdAt ===
+if (e.target.closest('.track-date-editable')) {
+  e.preventDefault();
+  e.stopPropagation();
+  const dateEl = e.target.closest('.track-date-editable');
+  const trackId = dateEl.dataset.id;
+  const track = globalTracks.find(t => t.id === trackId);
+  if (!track) {
+    console.warn('Track not found for date edit:', trackId);
+    return;
+  }
 
+  // Получаем текущую дату в формате YYYY-MM-DD
+  let currentDateStr = '';
+  if (track.createdAt) {
+    try {
+      let d;
+      if (track.createdAt.toDate) {
+        d = track.createdAt.toDate();
+      } else if (typeof track.createdAt === 'string') {
+        d = new Date(track.createdAt);
+      } else if (typeof track.createdAt === 'number') {
+        d = new Date(track.createdAt);
+      }
+      if (d && !isNaN(d.getTime())) {
+        currentDateStr = d.toISOString().split('T')[0];
+      }
+    } catch(e) { currentDateStr = ''; }
+  }
+
+  const newDateStr = prompt(
+    `Change upload date for "${track.title}"\n\nFormat: YYYY-MM-DD\nCurrent: ${currentDateStr || 'not set'}`,
+    currentDateStr
+  );
+  
+  if (!newDateStr) return;
+
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(newDateStr)) {
+    alert('Invalid format! Use YYYY-MM-DD');
+    return;
+  }
+
+  const newDate = new Date(newDateStr + 'T12:00:00');
+  if (isNaN(newDate.getTime())) {
+    alert('Invalid date!');
+    return;
+  }
+
+  try {
+    await db.collection('tracks').doc(trackId).update({
+      createdAt: firebase.firestore.Timestamp.fromDate(newDate)
+    });
+    
+    // Обновляем локально
+    const g = globalTracks.find(t => t.id === trackId);
+    if (g) g.createdAt = firebase.firestore.Timestamp.fromDate(newDate);
+    
+    applySortAndRender();
+    alert(`✅ Date updated to ${newDateStr}`);
+  } catch (err) {
+    console.error('Date update error:', err);
+    alert('❌ Failed: ' + err.message);
+  }
+  return;
+}
     if (isPlayBtn || (!isOtherInteractive && trackEl)) {
       e.preventDefault();
       const tid = trackEl.dataset.id;
@@ -2784,59 +2836,7 @@ await loadSavedLanguage();
       document.getElementById('r-cover-file').value = '';
       document.getElementById('replace-track-modal').classList.add('open');
     }
-	      // === ADMIN: Клик по дате загрузки — смена createdAt ===
-    if (e.target.closest('.track-date-editable')) {
-      e.preventDefault();
-      e.stopPropagation();
-      const dateEl = e.target.closest('.track-date-editable');
-      const trackId = dateEl.dataset.id;
-      const track = globalTracks.find(t => t.id === trackId);
-      if (!track) return;
-
-      // Получаем текущую дату в формате YYYY-MM-DD
-      let currentDateStr = '';
-      if (track.createdAt) {
-        try {
-          const d = track.createdAt.toDate ? track.createdAt.toDate() : new Date(track.createdAt);
-          currentDateStr = d.toISOString().split('T')[0];
-        } catch(e) { currentDateStr = ''; }
-      }
-
-      const newDateStr = prompt(
-        `Change upload date for "${track.title}"\n\nFormat: YYYY-MM-DD\nCurrent: ${currentDateStr || 'not set'}`,
-        currentDateStr
-      );
-      
-      if (!newDateStr) return;
-
-      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-      if (!dateRegex.test(newDateStr)) {
-        alert('Invalid format! Use YYYY-MM-DD');
-        return;
-      }
-
-      const newDate = new Date(newDateStr + 'T12:00:00');
-      if (isNaN(newDate.getTime())) {
-        alert('Invalid date!');
-        return;
-      }
-
-      try {
-        await db.collection('tracks').doc(trackId).update({
-          createdAt: firebase.firestore.Timestamp.fromDate(newDate)
-        });
-        
-        const g = globalTracks.find(t => t.id === trackId);
-        if (g) g.createdAt = firebase.firestore.Timestamp.fromDate(newDate);
-        
-        applySortAndRender();
-        alert(`✅ Date updated to ${newDateStr}`);
-      } catch (err) {
-        console.error('Date update error:', err);
-        alert('❌ Failed: ' + err.message);
-      }
-      return;
-    }
+	    
   });
 
   document.getElementById('mini-open-text')?.addEventListener('click', () => {
