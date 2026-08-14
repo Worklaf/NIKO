@@ -1466,20 +1466,24 @@ window.onPlayerTrackChanged = function(trackId) {
   renderTracksPage();
 }
     function loadGenres(tracks) {
-      const genres = [...new Set((tracks || []).map(t => t.genre).filter(Boolean))];
-      const select = document.getElementById('genreFilter');
-      if (!select) return;
-      select.innerHTML = '<option value="">All genres</option>';
-      genres.forEach(g => {
-        const opt = document.createElement('option');
-        opt.value = g;
-        opt.textContent = g;
-        select.appendChild(opt);
-      });
-      select.onchange = applyFilters;
-      const lyricsSearchInput = document.getElementById('lyricsSearch');
-if (lyricsSearchInput) lyricsSearchInput.oninput = applyFilters;
-    }
+  const genres = [...new Set((tracks || []).map(t => t.genre).filter(Boolean))];
+  const select = document.getElementById('genreFilter');
+  if (!select) return;
+  select.innerHTML = '<option value="">All genres</option>';
+  genres.forEach(g => {
+    const opt = document.createElement('option');
+    opt.value = g;
+    opt.textContent = g;
+    select.appendChild(opt);
+  });
+  select.onchange = applyFilters;
+  
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) searchInput.oninput = applyFilters;
+  
+  const lyricsSearchInput = document.getElementById('lyricsSearch');
+  if (lyricsSearchInput) lyricsSearchInput.oninput = applyFilters;
+}
 
     function applyFilters() {
   const search = (document.getElementById('searchInput')?.value || '').toLowerCase();
@@ -1488,7 +1492,8 @@ if (lyricsSearchInput) lyricsSearchInput.oninput = applyFilters;
   
   visibleTracks = allTracksFull.filter(t => {
     const matchesGenre = !genre || t.genre === genre;
-    const matchesSearch = !search || (t.title || '').toLowerCase().includes(search);
+    const matchesSearch = !search || 
+  ((t.title || '') + ' ' + (t.artist || '')).toLowerCase().includes(search);
     const matchesLyrics = !lyricsQuery || ((t.lyrics || '').toLowerCase().includes(lyricsQuery));
     
     let matchesLiked = true;
