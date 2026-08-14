@@ -1452,11 +1452,21 @@ window.onPlayerTrackChanged = function(trackId) {
     };
   }
 
-  const snap = await db.collection('tracks')
+    const snap = await db.collection('tracks')
     .where('playlistIds', 'array-contains', playlistId)
     .get();
 
-  allTracksFull = snap.docs.map((d, i) => ({ __fullIndex: i, id: d.id, ...d.data() }));
+  allTracksFull = snap.docs
+    .map((d, i) => ({ __fullIndex: i, id: d.id, ...d.data() }))
+    .sort((a, b) => {
+      const getTime = (item) => {
+        if (!item.createdAt) return 0;
+        try {
+          return item.createdAt.toDate ? item.createdAt.toDate().getTime() : new Date(item.createdAt).getTime();
+        } catch (e) { return 0; }
+      };
+      return getTime(b) - getTime(a); // новые сверху
+    });
   window.currentPlaylistTracks = allTracksFull;
   window.globalTracks = allTracksFull;
 
