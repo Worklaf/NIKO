@@ -97,12 +97,13 @@ const translations = {
     logout: "Logout",
     newTracksShort: "NEW",
     uploadShort: "Upload",
-    filterAllSongs: "All songs",
-    filterMySongs: "My songs",
-    filterPartner: "Partner",
-    filterHidden: "Hidden from all",
-    filterPartnerOnly: "Partner only",
-    filterAdmin: "Admin",
+    filterAllSongs: "🎧 All songs",
+    filterMySongs: "👤 My songs",
+    filterPartner: "💑 Partner",
+    filterHidden: "🔒 Hidden from all",
+    filterPartnerOnly: "♥ Partner only",
+    filterAdmin: "👑 Admin",
+    filterPartnerOnlyMe: "🔒 Only for me",
     multiSelect: "Multi-select",
         uploadSuccess: "✅ Song uploaded!",
     uploadError: "❌ Error: ",
@@ -208,12 +209,13 @@ const translations = {
     logout: "Wyloguj",
     newTracksShort: "NOWE",
     uploadShort: "Dodaj",
-    filterAllSongs: "Wszystkie",
-    filterMySongs: "Moje",
-    filterPartner: "Partner",
-    filterHidden: "Ukryte",
-    filterPartnerOnly: "Tylko partner",
-    filterAdmin: "Admin",
+    filterAllSongs: "🎧 Wszystkie",
+    filterMySongs: "👤 Moje",
+    filterPartner: "💑 Partner",
+    filterHidden: "🔒 Ukryte",
+    filterPartnerOnly: "♥ Tylko partner",
+    filterAdmin: "👑 Admin",
+    filterPartnerOnlyMe: "🔒 Tylko dla mnie",
     multiSelect: "Wielokrotny wybór",
     uploadSuccess: "✅ Piosenka dodana!",
     uploadError: "❌ Błąd: ",
@@ -319,12 +321,13 @@ const translations = {
     logout: "Вийти",
     newTracksShort: "НОВІ",
     uploadShort: "Додати",
-    filterAllSongs: "Всі пісні",
-    filterMySongs: "Мої пісні",
-    filterPartner: "Партнер",
-    filterHidden: "Приховані від всіх",
-    filterPartnerOnly: "Видно тільки партнеру",
-    filterAdmin: "Адмін",
+    filterAllSongs: "🎧 Всі пісні",
+    filterMySongs: "👤 Мої пісні",
+    filterPartner: "💑 Партнер",
+    filterHidden: "🔒 Приховані від всіх",
+    filterPartnerOnly: "♥ Видно тільки партнеру",
+    filterAdmin: "👑 Адмін",
+    filterPartnerOnlyMe: "🔒 Тільки для мене",
     multiSelect: "Мультивибір",
     uploadSuccess: "✅ Пісню завантажено!",
     uploadError: "❌ Помилка: ",
@@ -430,12 +433,13 @@ const translations = {
     logout: "Cerrar sesión",
     newTracksShort: "NUEVO",
     uploadShort: "Subir",
-    filterAllSongs: "Todas",
-    filterMySongs: "Mis pistas",
-    filterPartner: "Pareja",
-    filterHidden: "Ocultas",
-    filterPartnerOnly: "Solo pareja",
-    filterAdmin: "Admin",
+    filterAllSongs: "🎧 Todas",
+    filterMySongs: "👤 Mis pistas",
+    filterPartner: "💑 Pareja",
+    filterHidden: "🔒 Ocultas",
+    filterPartnerOnly: "♥ Solo pareja",
+    filterAdmin: "👑 Admin",
+    filterPartnerOnlyMe: "🔒 Solo para mí",
     multiSelect: "Selección múltiple",
     uploadSuccess: "✅ ¡Canción subida!",
     uploadError: "❌ Error: ",
@@ -445,7 +449,7 @@ const translations = {
   }
 };
 
-let currentLang = localStorage.getItem('language') || 'en';
+let currentLang = localStorage.getItem('siteLanguage') || 'en';
 
 function t(key) {
   return translations[currentLang]?.[key] || translations.en[key] || key;
@@ -502,15 +506,6 @@ function applyTranslations() {
   document.querySelectorAll('[data-i18n]').forEach(node => {
     const key = node.dataset.i18n;
     if (key) node.textContent = t(key);
-  });
-
-  // options with data-i18n
-  document.querySelectorAll('option[data-i18n]').forEach(opt => {
-    const key = opt.dataset.i18n;
-    if (key && translations[currentLang]?.[key]) {
-      const prefix = opt.textContent.match(/^[^\w\s]*/)?.[0] || '';
-      opt.textContent = prefix + t(key);
-    }
   });
 
   // special cases
