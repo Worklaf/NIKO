@@ -1452,21 +1452,11 @@ window.onPlayerTrackChanged = function(trackId) {
     };
   }
 
-    const snap = await db.collection('tracks')
+  const snap = await db.collection('tracks')
     .where('playlistIds', 'array-contains', playlistId)
     .get();
 
-  allTracksFull = snap.docs
-    .map((d, i) => ({ __fullIndex: i, id: d.id, ...d.data() }))
-    .sort((a, b) => {
-      const getTime = (item) => {
-        if (!item.createdAt) return 0;
-        try {
-          return item.createdAt.toDate ? item.createdAt.toDate().getTime() : new Date(item.createdAt).getTime();
-        } catch (e) { return 0; }
-      };
-      return getTime(b) - getTime(a); // новые сверху
-    });
+  allTracksFull = snap.docs.map((d, i) => ({ __fullIndex: i, id: d.id, ...d.data() }));
   window.currentPlaylistTracks = allTracksFull;
   window.globalTracks = allTracksFull;
 
@@ -1476,24 +1466,20 @@ window.onPlayerTrackChanged = function(trackId) {
   renderTracksPage();
 }
     function loadGenres(tracks) {
-  const genres = [...new Set((tracks || []).map(t => t.genre).filter(Boolean))];
-  const select = document.getElementById('genreFilter');
-  if (!select) return;
-  select.innerHTML = '<option value="">All genres</option>';
-  genres.forEach(g => {
-    const opt = document.createElement('option');
-    opt.value = g;
-    opt.textContent = g;
-    select.appendChild(opt);
-  });
-  select.onchange = applyFilters;
-  
-  const searchInput = document.getElementById('searchInput');
-  if (searchInput) searchInput.oninput = applyFilters;
-  
-  const lyricsSearchInput = document.getElementById('lyricsSearch');
-  if (lyricsSearchInput) lyricsSearchInput.oninput = applyFilters;
-}
+      const genres = [...new Set((tracks || []).map(t => t.genre).filter(Boolean))];
+      const select = document.getElementById('genreFilter');
+      if (!select) return;
+      select.innerHTML = '<option value="">All genres</option>';
+      genres.forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g;
+        opt.textContent = g;
+        select.appendChild(opt);
+      });
+      select.onchange = applyFilters;
+      const lyricsSearchInput = document.getElementById('lyricsSearch');
+if (lyricsSearchInput) lyricsSearchInput.oninput = applyFilters;
+    }
 
     function applyFilters() {
   const search = (document.getElementById('searchInput')?.value || '').toLowerCase();
@@ -1502,8 +1488,7 @@ window.onPlayerTrackChanged = function(trackId) {
   
   visibleTracks = allTracksFull.filter(t => {
     const matchesGenre = !genre || t.genre === genre;
-    const matchesSearch = !search || 
-  ((t.title || '') + ' ' + (t.artist || '')).toLowerCase().includes(search);
+    const matchesSearch = !search || (t.title || '').toLowerCase().includes(search);
     const matchesLyrics = !lyricsQuery || ((t.lyrics || '').toLowerCase().includes(lyricsQuery));
     
     let matchesLiked = true;
