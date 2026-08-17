@@ -537,6 +537,7 @@
               <button id="genre-multi-btn" class="btn icon" data-i18n-title="multiSelect" title="Multi-select">☐</button>
               <select id="filterMyTracksSelect"class="search-select filter-select-mobile" style="display:none">
               <option value="all">🎧 Все</option>
+              <option value="partner-only" data-i18n="filterPartnerOnlyMe">🔒 Только мне</option>
             </select>
             </div>
             
@@ -586,7 +587,7 @@
 </div>
 
 <div id="login-modal" class="modal">
-  <div class="panel" style="max-width:320px;text-align:center;background:linear-gradient(135deg,rgba(10,10,15,0.95),rgba(5,5,8,0.95));border:1px solid rgba(0,229,255,0.2);box-shadow:0 0 30px rgba(0,229,255,0.1)">
+  <div class="panel" style="max-width:380px;text-align:center;background:linear-gradient(135deg,rgba(10,10,15,0.95),rgba(5,5,8,0.95));border:1px solid rgba(0,229,255,0.2);box-shadow:0 0 30px rgba(0,229,255,0.1)">
     <h3 style="color:#00E5FF;text-shadow:0 0 10px rgba(0,229,255,0.5);margin-bottom:16px">ENTER CODE</h3>
     <div id="pin-display" style="font-size:28px;font-weight:700;letter-spacing:8px;color:#00E5FF;text-shadow:0 0 15px rgba(0,229,255,0.8);margin:16px 0;min-height:40px;font-family:monospace">••••</div>
     <div class="pin-pad" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:20px 0">
@@ -604,6 +605,48 @@
       <button class="pin-btn confirm-btn" data-action="confirm">✓</button>
     </div>
     <button id="login-cancel" class="btn" style="margin-top:12px;background:transparent;border:1px solid rgba(255,255,255,0.1)">Cancel</button>
+    
+    <div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1)">
+      <p style="color:#bfc3d6;font-size:13px;margin-bottom:16px">Or login with:</p>
+      <button id="google-login-btn" class="btn" style="width:100%;margin-bottom:10px;background:#4285f4;color:white;border:none;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;border-radius:10px">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#fff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#fff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#fff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#fff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Google
+      </button>
+      <button id="email-login-btn" class="btn" style="width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2)">📧 Email / Password</button>
+    </div>
+  </div>
+</div>
+
+<div id="email-auth-modal" class="modal" style="display:none">
+  <div class="panel" style="max-width:380px;background:linear-gradient(135deg,rgba(10,10,15,0.95),rgba(5,5,8,0.95));border:1px solid rgba(0,229,255,0.2);box-shadow:0 0 30px rgba(0,229,255,0.1)">
+    <h3 style="color:#00E5FF;text-shadow:0 0 10px rgba(0,229,255,0.5);margin-bottom:20px;text-align:center" id="email-auth-title">Login</h3>
+    
+    <div id="email-login-form">
+      <input type="email" id="auth-email" placeholder="Email" style="width:100%;padding:12px;margin-bottom:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;box-sizing:border-box">
+      <input type="password" id="auth-password" placeholder="Password" style="width:100%;padding:12px;margin-bottom:16px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;box-sizing:border-box">
+      
+      <button id="auth-submit-btn" class="btn active" style="width:100%;padding:12px;margin-bottom:12px">Login</button>
+      <button id="auth-forgot-btn" class="btn" style="width:100%;background:transparent;border:1px solid rgba(255,255,255,0.1);margin-bottom:12px">Forgot Password?</button>
+      <button id="auth-toggle-register" class="btn" style="width:100%;background:transparent;border:1px solid rgba(255,255,255,0.1)">Create Account</button>
+    </div>
+    
+    <div id="email-register-form" style="display:none">
+      <input type="email" id="reg-email" placeholder="Email" style="width:100%;padding:12px;margin-bottom:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;box-sizing:border-box">
+      <input type="password" id="reg-password" placeholder="Password (min 6 chars)" style="width:100%;padding:12px;margin-bottom:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;box-sizing:border-box">
+      <input type="password" id="reg-password-confirm" placeholder="Confirm Password" style="width:100%;padding:12px;margin-bottom:16px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;box-sizing:border-box">
+      
+      <button id="reg-submit-btn" class="btn active" style="width:100%;padding:12px;margin-bottom:12px">Create Account</button>
+      <button id="reg-toggle-login" class="btn" style="width:100%;background:transparent;border:1px solid rgba(255,255,255,0.1)">Back to Login</button>
+    </div>
+    
+    <div id="email-forgot-form" style="display:none">
+      <input type="email" id="forgot-email" placeholder="Enter your email" style="width:100%;padding:12px;margin-bottom:16px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;box-sizing:border-box">
+      
+      <button id="forgot-submit-btn" class="btn active" style="width:100%;padding:12px;margin-bottom:12px">Send Reset Email</button>
+      <button id="forgot-toggle-login" class="btn" style="width:100%;background:transparent;border:1px solid rgba(255,255,255,0.1)">Back to Login</button>
+    </div>
+    
+    <button id="email-auth-cancel" class="btn" style="width:100%;margin-top:16px;background:transparent;border:1px solid rgba(255,255,255,0.1)">Cancel</button>
   </div>
 </div>
 
@@ -879,6 +922,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
 <script>
   const firebaseConfig = {
@@ -1131,6 +1175,9 @@ function filterTracks() {
         } else if (myTracksFilter === 'visibility-hidden') {
             matchesMyTracks = trackVisibility === 'hidden';
         } else if (myTracksFilter === 'visibility-partner') {
+            matchesMyTracks = trackVisibility === 'partner';
+        } else if (myTracksFilter === 'partner-only') {
+            // Show tracks with visibility=partner (available to partner and admin)
             matchesMyTracks = trackVisibility === 'partner';
         }
 
@@ -1397,6 +1444,68 @@ function subscribePlaylists() {
   });
 }
 
+// ==================== TRACK CACHING SYSTEM ====================
+const TRACKS_CACHE_KEY = 'tracks_cache';
+const TRACKS_CACHE_VERSION_KEY = 'tracks_cache_version';
+const TRACKS_CACHE_VERSION = 1;
+let tracksCache = null;
+let isCacheValid = false;
+
+// Save tracks to localStorage cache
+function saveTracksToCache(tracks) {
+  try {
+    const cacheData = {
+      version: TRACKS_CACHE_VERSION,
+      timestamp: Date.now(),
+      tracks: tracks
+    };
+    localStorage.setItem(TRACKS_CACHE_KEY, JSON.stringify(cacheData));
+    localStorage.setItem(TRACKS_CACHE_VERSION_KEY, TRACKS_CACHE_VERSION.toString());
+    console.log('✅ Tracks saved to cache');
+  } catch (e) {
+    console.error('Failed to save tracks to cache:', e);
+  }
+}
+
+// Load tracks from localStorage cache
+function loadTracksFromCache() {
+  try {
+    const cacheStr = localStorage.getItem(TRACKS_CACHE_KEY);
+    const versionStr = localStorage.getItem(TRACKS_CACHE_VERSION_KEY);
+    
+    if (!cacheStr || !versionStr) return null;
+    
+    const cacheData = JSON.parse(cacheStr);
+    const version = parseInt(versionStr, 10);
+    
+    // Check version compatibility
+    if (cacheData.version !== TRACKS_CACHE_VERSION || version !== TRACKS_CACHE_VERSION) {
+      console.log('⚠️ Cache version mismatch, ignoring cache');
+      return null;
+    }
+    
+    // Check if cache is too old (24 hours)
+    const cacheAge = Date.now() - cacheData.timestamp;
+    if (cacheAge > 24 * 60 * 60 * 1000) {
+      console.log('⚠️ Cache too old, ignoring');
+      return null;
+    }
+    
+    console.log('✅ Loaded tracks from cache (age:', Math.round(cacheAge / 60000), 'minutes)');
+    return cacheData.tracks;
+  } catch (e) {
+    console.error('Failed to load tracks from cache:', e);
+    return null;
+  }
+}
+
+// Clear tracks cache
+function clearTracksCache() {
+  localStorage.removeItem(TRACKS_CACHE_KEY);
+  localStorage.removeItem(TRACKS_CACHE_VERSION_KEY);
+  console.log('🗑️ Tracks cache cleared');
+}
+
 function subscribeTracks() {
   if (!db) return console.warn('Firestore not initialized');
   
@@ -1415,16 +1524,38 @@ function subscribeTracks() {
     });
   }
   
+  // Try to load from cache first
+  const cachedTracks = loadTracksFromCache();
+  const role = getRole();
+  
+  if (cachedTracks) {
+    // Use cached tracks initially
+    let tracks = applyHomeFilters(cachedTracks, role);
+    globalTracks = tracks;
+    applySortAndRender();
+    isCacheValid = true;
+  }
+  
+  // Always subscribe to real-time updates
   db.collection('tracks').orderBy('createdAt', 'desc').onSnapshot(snap => {
-    const role = getRole();
     let allTracks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    
+    // Save to cache
+    saveTracksToCache(allTracks);
     
     // Фильтруем для главной страницы
     let tracks = applyHomeFilters(allTracks, role);
     
     globalTracks = tracks;
     applySortAndRender();
-  }, err => { console.warn('tracks snapshot error', err); });
+    isCacheValid = true;
+  }, err => { 
+    console.warn('tracks snapshot error', err);
+    // If snapshot fails and we have cache, keep using cache
+    if (!isCacheValid && cachedTracks) {
+      console.log('⚠️ Using cached tracks due to snapshot error');
+    }
+  });
 }
 // Проверяет, скрыт ли трек с главной страницы (в любом из его плейлистов стоит hideFromHome)
 function isTrackHiddenFromHome(track) {
@@ -1445,11 +1576,12 @@ function applySortAndRender() {
   else if (currentSortMode === 'likes-asc') tracks.sort((a, b) => (a.likes || 0) - (b.likes || 0));
   else if (currentSortMode === 'title-asc') tracks.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
   else if (currentSortMode === 'title-desc') tracks.sort((a, b) => (b.title || '').localeCompare(a.title || ''));
+  
   renderDraftTracks(tracks);
   updateNewTracksBadge();
   filterTracks();
 
-  // [FIX] Восстанавливаем страницу после сортировки
+  // [FIX] 
   if (window.homeState && savedPage > 1) {
     const maxPage = Math.ceil(window.homeState.filteredIds.length / window.homeState.perPage) || 1;
     if (savedPage <= maxPage) {
@@ -1497,12 +1629,44 @@ async function loadCommentsFromServer(trackId) {
 }
 
 async function saveCommentToServer(trackId, comment) {
-  try { await db.collection('tracks').doc(trackId).collection('comments').add(comment); return true; }
+  try { 
+    await db.collection('tracks').doc(trackId).collection('comments').add(comment);
+    // Increment comment count in track document
+    await db.collection('tracks').doc(trackId).update({
+      commentCount: firebase.firestore.FieldValue.increment(1)
+    });
+    // Update the displayed count immediately
+    const trackEl = document.querySelector(`.track[data-id="${trackId}"]`);
+    if (trackEl) {
+      const countEl = trackEl.querySelector('.comment-count');
+      if (countEl) {
+        const currentCount = parseInt(countEl.textContent) || 0;
+        countEl.textContent = currentCount + 1;
+      }
+    }
+    return true; 
+  }
   catch (e) { console.error(e); return false; }
 }
 
 async function deleteCommentFromServer(trackId, commentId) {
-  try { await db.collection('tracks').doc(trackId).collection('comments').doc(commentId).delete(); return true; }
+  try { 
+    await db.collection('tracks').doc(trackId).collection('comments').doc(commentId).delete();
+    // Decrement comment count in track document
+    await db.collection('tracks').doc(trackId).update({
+      commentCount: firebase.firestore.FieldValue.increment(-1)
+    });
+    // Update the displayed count immediately
+    const trackEl = document.querySelector(`.track[data-id="${trackId}"]`);
+    if (trackEl) {
+      const countEl = trackEl.querySelector('.comment-count');
+      if (countEl) {
+        const currentCount = parseInt(countEl.textContent) || 0;
+        countEl.textContent = Math.max(0, currentCount - 1);
+      }
+    }
+    return true; 
+  }
   catch (e) { console.error(e); return false; }
 }
 
@@ -1734,7 +1898,9 @@ function renderDraftTracks(tracks) {
         <div class="play-row">
           <button class="btn icon play-btn ${isPlaying ? 'playing' : ''}" type="button" aria-label="Play">${playIcon}</button>
           <button class="btn icon open-text-btn" aria-label="Open full text">${t('text') || 'Текст'}</button>
-          <button class="btn icon comment-btn" aria-label="Comments" title="${t('comments') || 'Комментарии'}">💬</button>
+          <button class="btn icon comment-btn" aria-label="Comments" title="${t('comments') || 'Комментарии'}">
+            💬 <span class="comment-count">${track.commentCount || 0}</span>
+          </button>
           <button class="btn icon share-btn" aria-label="Share" title="${t('share') || 'Поделиться'}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle">
               <circle cx="18" cy="5" r="3"/>
@@ -2952,7 +3118,24 @@ if (e.target.closest('.track-date-editable')) {
     const originalText = sendBtn.textContent;
     sendBtn.textContent = '⏳...';
     sendBtn.disabled = true;
-    const comment = { text: text, author: 'User', timestamp: Date.now() };
+    
+    // Determine author name based on role
+    const role = getRole();
+    let author = 'Anonymous';
+    
+    if (role === 'user') {
+      // Firebase authenticated user - use their display name
+      author = localStorage.getItem('userDisplayName') || 'User';
+    } else if (role === 'guest') {
+      author = 'Anonymous';
+    } else if (role === 'partner') {
+      // Partner comments show as Anonymous
+      author = 'Anonymous';
+    } else if (role === 'admin') {
+      author = 'Admin';
+    }
+    
+    const comment = { text: text, author: author, timestamp: Date.now() };
     const success = await saveCommentToServer(currentTrackId, comment);
     if (success) {
       input.value = '';
@@ -3268,6 +3451,7 @@ if (translated) {
         opts.push({ val: 'visibility-partner', key: 'filterPartnerOnly', icon: '♥', def: 'Partner only' });
       } else if (r === 'partner') {
         opts.push({ val: 'admin', key: 'filterAdmin', icon: '👑', def: 'Admin' });
+        opts.push({ val: 'partner-only', key: 'filterPartnerOnlyMe', icon: '🔒', def: 'Only for me' });
       }
       opts.forEach(o => {
         const opt = document.createElement('option');
@@ -3276,6 +3460,7 @@ if (translated) {
         opt.textContent = `${o.icon} ${t(o.key) || o.def}`;
         filterSelect.appendChild(opt);
       });
+      applyTranslations();
       filterSelect.value = 'all';
       myTracksFilter = 'all';
     } else {
@@ -3339,8 +3524,20 @@ document.addEventListener('DOMContentLoaded', function() {
   const loginBtn = document.getElementById('loginBtn');
   refreshLoginBtn();
 
-  loginBtn.addEventListener('click', () => {
-    if (getRole() !== 'guest') { logoutRole(); return; }
+  loginBtn.addEventListener('click', async () => {
+    const role = getRole();
+    if (role !== 'guest') {
+      // Check if user is logged in via Firebase Auth
+      if (localStorage.getItem('firebaseUid')) {
+        try {
+          await firebase.auth().signOut();
+        } catch (e) {
+          console.error('Firebase sign out error:', e);
+        }
+      }
+      logoutRole();
+      return;
+    }
     document.getElementById('login-modal').classList.add('open');
   });
 
@@ -3348,6 +3545,192 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('login-modal').classList.remove('open');
     enteredPin = '';
     updatePinDisplay();
+  });
+
+  // Firebase Auth - Google Login
+  document.getElementById('google-login-btn')?.addEventListener('click', async () => {
+    try {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      const result = await firebase.auth().signInWithPopup(provider);
+      const user = result.user;
+      
+      // Store user data in Firestore
+      await db.collection('users').doc(user.uid).set({
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      
+      // Set role as 'user' (not admin/partner)
+      localStorage.setItem('siteRole', 'user');
+      localStorage.setItem('firebaseUid', user.uid);
+      localStorage.setItem('userEmail', user.email);
+      localStorage.setItem('userDisplayName', user.displayName || 'User');
+      
+      document.getElementById('login-modal').classList.remove('open');
+      location.reload();
+    } catch (error) {
+      console.error('Google login error:', error);
+      alert('Login failed: ' + error.message);
+    }
+  });
+
+  // Email Auth Modal Handlers
+  document.getElementById('email-login-btn')?.addEventListener('click', () => {
+    document.getElementById('login-modal').classList.remove('open');
+    document.getElementById('email-auth-modal').style.display = 'block';
+    document.getElementById('email-auth-modal').classList.add('open');
+    showEmailForm('login');
+  });
+
+  document.getElementById('email-auth-cancel')?.addEventListener('click', () => {
+    document.getElementById('email-auth-modal').classList.remove('open');
+    document.getElementById('email-auth-modal').style.display = 'none';
+  });
+
+  // Toggle between login/register/forgot forms
+  document.getElementById('auth-toggle-register')?.addEventListener('click', () => showEmailForm('register'));
+  document.getElementById('reg-toggle-login')?.addEventListener('click', () => showEmailForm('login'));
+  document.getElementById('auth-forgot-btn')?.addEventListener('click', () => showEmailForm('forgot'));
+  document.getElementById('forgot-toggle-login')?.addEventListener('click', () => showEmailForm('login'));
+
+  // Email Login
+  document.getElementById('auth-submit-btn')?.addEventListener('click', async () => {
+    const email = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-password').value;
+    
+    if (!email || !password) {
+      alert('Please enter email and password');
+      return;
+    }
+    
+    try {
+      await firebase.auth().signInWithEmailAndPassword(email, password);
+      // Auth state listener will handle the rest
+    } catch (error) {
+      alert('Login failed: ' + error.message);
+    }
+  });
+
+  // Email Register
+  document.getElementById('reg-submit-btn')?.addEventListener('click', async () => {
+    const email = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const confirmPassword = document.getElementById('reg-password-confirm').value;
+    
+    if (!email || !password || !confirmPassword) {
+      alert('Please fill all fields');
+      return;
+    }
+    
+    if (password.length < 6) {
+      alert('Password must be at least 6 characters');
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+    
+    try {
+      const result = await firebase.auth().createUserWithEmailAndPassword(email, password);
+      const user = result.user;
+      
+      // Store user data in Firestore
+      await db.collection('users').doc(user.uid).set({
+        email: user.email,
+        displayName: email.split('@')[0],
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      
+      alert('Account created successfully!');
+      showEmailForm('login');
+    } catch (error) {
+      alert('Registration failed: ' + error.message);
+    }
+  });
+
+  // Forgot Password
+  document.getElementById('forgot-submit-btn')?.addEventListener('click', async () => {
+    const email = document.getElementById('forgot-email').value.trim();
+    
+    if (!email) {
+      alert('Please enter your email');
+      return;
+    }
+    
+    try {
+      await firebase.auth().sendPasswordResetEmail(email);
+      alert('Password reset email sent! Check your inbox.');
+      showEmailForm('login');
+    } catch (error) {
+      alert('Failed to send reset email: ' + error.message);
+    }
+  });
+
+  function showEmailForm(formType) {
+    document.getElementById('email-login-form').style.display = 'none';
+    document.getElementById('email-register-form').style.display = 'none';
+    document.getElementById('email-forgot-form').style.display = 'none';
+    
+    const titleEl = document.getElementById('email-auth-title');
+    
+    if (formType === 'login') {
+      document.getElementById('email-login-form').style.display = 'block';
+      titleEl.textContent = 'Login';
+    } else if (formType === 'register') {
+      document.getElementById('email-register-form').style.display = 'block';
+      titleEl.textContent = 'Create Account';
+    } else if (formType === 'forgot') {
+      document.getElementById('email-forgot-form').style.display = 'block';
+      titleEl.textContent = 'Reset Password';
+    }
+  }
+
+  // Firebase Auth State Listener
+  firebase.auth().onAuthStateChanged(async (user) => {
+    if (user) {
+      // User is signed in via Firebase Auth
+      localStorage.setItem('siteRole', 'user');
+      localStorage.setItem('firebaseUid', user.uid);
+      localStorage.setItem('userEmail', user.email);
+      localStorage.setItem('userDisplayName', user.displayName || user.email.split('@')[0]);
+      
+      // Sync user data from Firestore
+      try {
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          localStorage.setItem('userDisplayName', userData.displayName || user.displayName || 'User');
+          
+          // Sync likes/dislikes from Firebase to localStorage
+          if (userData.likes) {
+            Object.keys(userData.likes).forEach(trackId => {
+              const status = userData.likes[trackId];
+              if (status === 'like' || status === 'dislike') {
+                localStorage.setItem('like:user:' + trackId, status);
+              }
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load user data:', e);
+      }
+      
+      refreshLoginBtn();
+    } else {
+      // User is signed out - check if they were using Firebase Auth
+      if (localStorage.getItem('firebaseUid')) {
+        // Clear Firebase user data
+        localStorage.removeItem('firebaseUid');
+        localStorage.removeItem('userEmail');
+        localStorage.removeItem('userDisplayName');
+        localStorage.setItem('siteRole', 'guest');
+        refreshLoginBtn();
+      }
+    }
   });
 
   let enteredPin = '';
@@ -3490,7 +3873,8 @@ window.updateTrackPlayIcons = function() {
 
   function checkInactivity() {
     const role = getRole();
-    if (role === 'guest') return;
+    // Auto-logout only for admin and partner roles, not for Firebase Auth users
+    if (role !== 'admin' && role !== 'partner') return;
 
     const now = Date.now();
     const lastActivity = getLastActivity();
@@ -3511,7 +3895,8 @@ window.updateTrackPlayIcons = function() {
   // === ПРОВЕРКА ПРИ ЗАГРУЗКЕ СТРАНИЦЫ (ключевой фикс!) ===
   function checkOnPageLoad() {
     const role = getRole();
-    if (role === 'guest') return;
+    // Auto-logout only for admin and partner roles, not for Firebase Auth users
+    if (role !== 'admin' && role !== 'partner') return;
 
     const now = Date.now();
     const lastActivity = getLastActivity();
