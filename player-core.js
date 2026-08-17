@@ -69,16 +69,31 @@ window.toggleLike = async function (trackId) {
 
   let likesDelta = 0;
   let dislikesDelta = 0;
+  let newStatus = null;
 
   if (cur === 'like') {
     localStorage.removeItem(userKey);
     likesDelta = -1;
+    newStatus = null;
   } else {
     if (cur === 'dislike') {
       dislikesDelta = -1;
     }
     localStorage.setItem(userKey, 'like');
     likesDelta = 1;
+    newStatus = 'like';
+  }
+
+  // Sync with Firebase for authenticated users
+  const firebaseUid = localStorage.getItem('firebaseUid');
+  if (firebaseUid) {
+    try {
+      await db.collection('users').doc(firebaseUid).set({
+        [`likes.${trackId}`]: newStatus
+      }, { merge: true });
+    } catch (e) {
+      console.error('Failed to sync like to Firebase:', e);
+    }
   }
 
   // Обновляем UI сразу (оптимистично)
@@ -106,16 +121,31 @@ window.toggleDislike = async function (trackId) {
 
   let likesDelta = 0;
   let dislikesDelta = 0;
+  let newStatus = null;
 
   if (cur === 'dislike') {
     localStorage.removeItem(userKey);
     dislikesDelta = -1;
+    newStatus = null;
   } else {
     if (cur === 'like') {
       likesDelta = -1;
     }
     localStorage.setItem(userKey, 'dislike');
     dislikesDelta = 1;
+    newStatus = 'dislike';
+  }
+
+  // Sync with Firebase for authenticated users
+  const firebaseUid = localStorage.getItem('firebaseUid');
+  if (firebaseUid) {
+    try {
+      await db.collection('users').doc(firebaseUid).set({
+        [`likes.${trackId}`]: newStatus
+      }, { merge: true });
+    } catch (e) {
+      console.error('Failed to sync dislike to Firebase:', e);
+    }
   }
 
     if (typeof window.updateLikeUI === 'function') {
