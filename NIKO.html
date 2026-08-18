@@ -482,13 +482,18 @@
       <div class="lang-dropdown">
               <button id="lang-toggle" class="btn lang-toggle-btn">
           <img id="current-lang-flag" src="https://flagcdn.com/w20/us.png" alt="" style="width:18px;height:13px;border-radius:2px;object-fit:cover;display:inline-block;vertical-align:middle;"> 
+
           <span id="current-lang-code">EN</span>
         </button>
         <div id="lang-menu" class="lang-menu">
           <button class="lang-option" data-lang="en"><img src="https://flagcdn.com/w20/us.png" alt="" class="flag-img"> English</button>
+
           <button class="lang-option" data-lang="pl"><img src="https://flagcdn.com/w20/pl.png" alt="" class="flag-img"> Polski</button>
+
           <button class="lang-option" data-lang="ua"><img src="https://flagcdn.com/w20/ua.png" alt="" class="flag-img"> Українська</button>
+
           <button class="lang-option" data-lang="es"><img src="https://flagcdn.com/w20/es.png" alt="" class="flag-img"> Español</button>
+
         </div>
       </div>
       <div class="login-wrap">
@@ -932,26 +937,71 @@
   
   // Firebase initialization with error handling for offline mode
   try {
-    const firebaseConfig = {
-      apiKey: "AIzaSyBzCiSmy714eAS_sDQffBHHhN3HkPniIKk",
-      authDomain: "niko-music-1d585.firebaseapp.com",
-      projectId: "niko-music-1d585",
-      storageBucket: "niko-music-1d585.firebasestorage.app",
-      messagingSenderId: "223346886059",
-      appId: "1:223346886059:web:e6e76ad23663de701b7eee",
-      measurementId: "G-L9ZY3FYN1R"
-    };
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.firestore();
-    console.log('✅ Firebase initialized');
+    if (typeof firebase !== 'undefined') {
+      const firebaseConfig = {
+        apiKey: "AIzaSyBzCiSmy714eAS_sDQffBHHhN3HkPniIKk",
+        authDomain: "niko-music-1d585.firebaseapp.com",
+        projectId: "niko-music-1d585",
+        storageBucket: "niko-music-1d585.firebasestorage.app",
+        messagingSenderId: "223346886059",
+        appId: "1:223346886059:web:e6e76ad23663de701b7eee",
+        measurementId: "G-L9ZY3FYN1R"
+      };
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+      console.log('✅ Firebase initialized');
+    } else {
+      console.warn('⚠️ Firebase not loaded (likely CDN issue)');
+    }
   } catch (e) {
-    console.warn('⚠️ Firebase initialization failed (likely offline):', e.message);
+    console.warn('⚠️ Firebase initialization failed:', e.message);
     // db remains null, will use offline cache
   }
 </script>
 
-<script src="https://unpkg.com/wavesurfer.js@7"></script>
+<script src="https://cdn.jsdelivr.net/npm/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
 <script src="offline-cache.js"></script>
+
+<script>
+// ===============================
+// PWA: Service Worker Registration
+// ===============================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => {
+        console.log('✅ SW registered:', reg.scope);
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              const toast = document.createElement('div');
+              toast.style.cssText = `
+                position: fixed;
+                bottom: 100px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(90deg, #4dff8a, #00E5FF);
+                color: #0a0a0f;
+                padding: 14px 28px;
+                border-radius: 50px;
+                font-size: 14px;
+                font-weight: 700;
+                z-index: 99999;
+                box-shadow: 0 4px 24px rgba(77,255,138,0.4);
+                cursor: pointer;
+              `;
+              toast.innerHTML = '🔄 Доступно обновление — нажмите для перезагрузки';
+              toast.onclick = () => location.reload();
+              document.body.appendChild(toast);
+            }
+          });
+        });
+      })
+      .catch(err => console.log('❌ SW failed:', err));
+  });
+}
+</script>
 
 <script>
 let accessHashes = null;
@@ -1283,6 +1333,12 @@ function setListenedTracks(arr) {
   const indicator = document.getElementById('chat-unread-indicator');
   if (!indicator) return;
 
+  // Skip if db not initialized (offline mode)
+  if (!db) {
+    console.log('⚠️ Skipping chat unread indicator (db not initialized)');
+    return;
+  }
+
   // Подписываемся на последнее сообщение (limit(1) + desc)
   db.collection('chat_messages')
     .orderBy('createdAt', 'desc')
@@ -1397,6 +1453,10 @@ let isPartner = getRole() === 'partner';
 window.currentUserRole = getRole();
 
 async function loadUploadPermission() {
+  if (!db) {
+    console.warn('⚠️ Cannot load upload permission (db not initialized)');
+    return 'admin_only';
+  }
   const doc = await db.collection('config').doc('upload_permission').get();
   return doc.exists ? doc.data().value : 'admin_only';
 }
@@ -1405,10 +1465,12 @@ if (isAdmin) {
   const sel = document.getElementById('upload-permission-select');
   if (sel) {
     sel.style.display = 'inline-block';
-    loadUploadPermission().then(v => sel.value = v);
-    sel.addEventListener('change', async () => {
-      await db.collection('config').doc('upload_permission').set({ value: sel.value });
-    });
+    if (db) {
+      loadUploadPermission().then(v => sel.value = v);
+      sel.addEventListener('change', async () => {
+        await db.collection('config').doc('upload_permission').set({ value: sel.value });
+      });
+    }
   }
 }
 
@@ -4406,6 +4468,10 @@ window.onPlayerTrackChanged = function(trackId) {
       openPlaylistsOverlay();
     }
     else if (data.type === 'play-track') {
+      if (!db) {
+        console.warn('⚠️ Cannot play track from playlist (db not initialized)');
+        return;
+      }
       db.collection('tracks').where('playlistIds', 'array-contains', data.playlistId).get()
         .then(snap => {
           const ctxTracks = snap.docs.map(d => ({id: d.id, ...d.data()}));
