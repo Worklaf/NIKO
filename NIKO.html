@@ -479,6 +479,9 @@
   <span id="chat-unread-indicator" class="chat-unread-indicator" style="display:none;"></span>
 </a>
        <div class="header-right">
+      <button id="pwa-install-btn" class="btn pwa-install-btn" style="display:none; background: linear-gradient(90deg, #ff4da6, #ff7a4d); color: white; border: none; padding: 8px 16px; border-radius: 50px; font-weight: 700; font-size: 12px; box-shadow: 0 4px 12px rgba(255, 77, 166, 0.3); transition: all 0.3s ease;">
+        📱 Install App
+      </button>
       <div class="lang-dropdown">
               <button id="lang-toggle" class="btn lang-toggle-btn">
           <img id="current-lang-flag" src="https://flagcdn.com/w20/us.png" alt="" style="width:18px;height:13px;border-radius:2px;object-fit:cover;display:inline-block;vertical-align:middle;"> 
@@ -4927,6 +4930,59 @@ function getCurrentTrackForShare() {
   // Проверка при старте
   if (!navigator.onLine) updateOnlineStatus();
 })();
+
+// ===============================
+// PWA INSTALL PROMPT
+// ===============================
+
+let deferredPrompt;
+const installBtn = document.getElementById('pwa-install-btn');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  
+  // Show install button
+  if (installBtn) {
+    installBtn.style.display = 'flex';
+    
+    // Add hover effect
+    installBtn.addEventListener('mouseenter', () => {
+      installBtn.style.transform = 'translateY(-2px)';
+      installBtn.style.boxShadow = '0 6px 20px rgba(255, 77, 166, 0.5)';
+    });
+    
+    installBtn.addEventListener('mouseleave', () => {
+      installBtn.style.transform = 'translateY(0)';
+      installBtn.style.boxShadow = '0 4px 12px rgba(255, 77, 166, 0.3)';
+    });
+  }
+  
+  console.log('📱 PWA install prompt available');
+});
+
+installBtn?.addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    
+    if (outcome === 'accepted') {
+      console.log('✅ PWA installed');
+      installBtn.style.display = 'none';
+    } else {
+      console.log('❌ PWA install declined');
+    }
+  }
+});
+
+// Hide install button if already installed
+window.addEventListener('appinstalled', () => {
+  if (installBtn) {
+    installBtn.style.display = 'none';
+  }
+  console.log('✅ PWA already installed');
+});
 </script>
 
 </body>
