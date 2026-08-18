@@ -9,19 +9,6 @@ const DB_NAME = 'niko-offline-db';
 const DB_VERSION = 1;
 const TRACKS_STORE = 'tracks';
 
-// === 1. Регистрация Service Worker (если ещё не зарегистрирован) ===
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => {
-        console.log('✅ SW registered:', reg.scope);
-        // Принудительно обновляем SW при изменении
-        reg.update();
-      })
-      .catch(err => console.log('❌ SW failed:', err));
-  });
-}
-
 // === 2. INDEXEDDB: Открытие базы ===
 function openOfflineDB() {
   return new Promise((resolve, reject) => {
