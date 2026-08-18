@@ -3605,34 +3605,237 @@ if (translated) {
 }
 
 async function exportToJson() {
-  try {
-    const btn = document.getElementById('exportJsonBtn');
-    btn.textContent = '⏳ Exporting...';
-    btn.disabled = true;
-    const snapshot = await db.collection('tracks').get();
-    const tracks = [];
-    snapshot.forEach(doc => { tracks.push({ id: doc.id, ...doc.data() }); });
-    const jsonData = JSON.stringify(tracks, null, 2);
-    const blob = new Blob([jsonData], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `tracks_backup_${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    alert(`✅ ${tracks.length} tracks exported`);
-  } catch (error) {
-    alert('❌ Ошибка экспорта: ' + error.message);
-  } finally {
-    const btn = document.getElementById('exportJsonBtn');
-    btn.textContent = '📦 Export JSON';
-    btn.disabled = false;
-  }
+  // Show export modal with field selection
+  showExportModal();
+}
+
+function showExportModal() {
+  const modal = document.createElement('div');
+  modal.className = 'modal open';
+  modal.innerHTML = `
+    <div class="panel" style="max-width: 500px;">
+      <h3 style="margin-top: 0;">📦 Export Tracks</h3>
+      <p style="color: var(--muted); font-size: 13px;">Select fields to export. Unchecked fields will be excluded from the JSON file.</p>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0;">
+        <label><input type="checkbox" class="export-field" value="id" checked disabled> ID (always)</label>
+        <label><input type="checkbox" class="export-field" value="title" checked> Title</label>
+        <label><input type="checkbox" class="export-field" value="artist" checked> Artist</label>
+        <label><input type="checkbox" class="export-field" value="genre" checked> Genre</label>
+        <label><input type="checkbox" class="export-field" value="lyrics"> Lyrics</label>
+        <label><input type="checkbox" class="export-field" value="cover"> Cover</label>
+        <label><input type="checkbox" class="export-field" value="audio"> Audio</label>
+        <label><input type="checkbox" class="export-field" value="createdAt"> Created Date</label>
+        <label><input type="checkbox" class="export-field" value="updatedAt"> Updated Date</label>
+        <label><input type="checkbox" class="export-field" value="visibility"> Visibility</label>
+        <label><input type="checkbox" class="export-field" value="playlistIds"> Playlists</label>
+        <label><input type="checkbox" class="export-field" value="likes"> Likes</label>
+        <label><input type="checkbox" class="export-field" value="dislikes"> Dislikes</label>
+        <label><input type="checkbox" class="export-field" value="playCount"> Play Count</label>
+        <label><input type="checkbox" class="export-field" value="commentCount"> Comment Count</label>
+      </div>
+      
+      <div style="display: flex; gap: 8px; margin-top: 16px;">
+        <button id="export-confirm-btn" class="btn" style="flex: 1; background: linear-gradient(90deg, #4dff8a, #00E5FF); color: #0a0a0f;">✅ Export</button>
+        <button id="export-cancel-btn" class="btn" style="flex: 1;">Cancel</button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  document.getElementById('export-cancel-btn').onclick = () => {
+    document.body.removeChild(modal);
+  };
+  
+  document.getElementById('export-confirm-btn').onclick = async () => {
+    const selectedFields = Array.from(document.querySelectorAll('.export-field:checked')).map(cb => cb.value);
+    
+    document.getElementById('export-confirm-btn').textContent = '⏳ Exporting...';
+    document.getElementById('export-confirm-btn').disabled = true;
+    
+    try {
+      const snapshot = await db.collection('tracks').get();
+      const tracks = [];
+      snapshot.forEach(doc => { 
+        const data = doc.data();
+        const exportData = { id: doc.id };
+        
+        selectedFields.forEach(field => {
+          if (data[field] !== undefined) {
+            // Convert Firestore Timestamp to readable date string
+            if (field === 'createdAt' || field === 'updatedAt') {
+              if (typeof data[field].toDate === 'function') {
+                exportData[field] = data[field].toDate().toISOString();
+              } else {
+                exportData[field] = data[field];
+              }
+            } else {
+              exportData[field] = data[field];
+            }
+          }
+        });
+        
+        tracks.push(exportData);
+      });
+      
+      const jsonData = JSON.stringify(tracks, null, 2);
+      const blob = new Blob([jsonData], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tracks_backup_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      alert(`✅ ${tracks.length} tracks exported with ${selectedFields.length} fields`);
+      document.body.removeChild(modal);
+    } catch (error) {
+      alert('❌ Ошибка экспорта: ' + error.message);
+      document.getElementById('export-confirm-btn').textContent = '✅ Export';
+      document.getElementById('export-confirm-btn').disabled = false;
+    }
+  };
 }
 
 document.getElementById('exportJsonBtn')?.addEventListener('click', exportToJson);
+
+// === Import from JSON with selective field updates ===
+async function importFromJson() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    try {
+      const text = await file.text();
+      const tracks = JSON.parse(text);
+      
+      if (!Array.isArray(tracks)) {
+        alert('❌ Invalid JSON format: expected array of tracks');
+        return;
+      }
+      
+      // Show import modal with field selection
+      showImportModal(tracks);
+    } catch (error) {
+      alert('❌ Error reading JSON: ' + error.message);
+    }
+  };
+  input.click();
+}
+
+function showImportModal(tracks) {
+  const modal = document.createElement('div');
+  modal.className = 'modal open';
+  modal.innerHTML = `
+    <div class="panel" style="max-width: 500px;">
+      <h3 style="margin-top: 0;">📥 Import ${tracks.length} tracks</h3>
+      <p style="color: var(--muted); font-size: 13px;">Select fields to update. Unchecked fields will keep current Firebase values.</p>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0;">
+        <label><input type="checkbox" class="import-field" value="title" checked> Title</label>
+        <label><input type="checkbox" class="import-field" value="artist" checked> Artist</label>
+        <label><input type="checkbox" class="import-field" value="genre" checked> Genre</label>
+        <label><input type="checkbox" class="import-field" value="lyrics" checked> Lyrics</label>
+        <label><input type="checkbox" class="import-field" value="cover" checked> Cover</label>
+        <label><input type="checkbox" class="import-field" value="audio" checked> Audio</label>
+        <label><input type="checkbox" class="import-field" value="createdAt"> Created Date</label>
+        <label><input type="checkbox" class="import-field" value="visibility"> Visibility</label>
+        <label><input type="checkbox" class="import-field" value="playlistIds"> Playlists</label>
+        <label><input type="checkbox" class="import-field" value="commentCount"> Comment Count</label>
+      </div>
+      
+      <div style="display: flex; gap: 8px; margin-top: 16px;">
+        <button id="import-confirm-btn" class="btn" style="flex: 1; background: linear-gradient(90deg, #4dff8a, #00E5FF); color: #0a0a0f;">✅ Import</button>
+        <button id="import-cancel-btn" class="btn" style="flex: 1;">Cancel</button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  document.getElementById('import-cancel-btn').onclick = () => {
+    document.body.removeChild(modal);
+  };
+  
+  document.getElementById('import-confirm-btn').onclick = async () => {
+    const selectedFields = Array.from(document.querySelectorAll('.import-field:checked')).map(cb => cb.value);
+    
+    if (selectedFields.length === 0) {
+      alert('⚠️ Please select at least one field to update');
+      return;
+    }
+    
+    document.getElementById('import-confirm-btn').textContent = '⏳ Importing...';
+    document.getElementById('import-confirm-btn').disabled = true;
+    
+    try {
+      let updatedCount = 0;
+      let skippedCount = 0;
+      
+      for (const track of tracks) {
+        if (!track.id) {
+          skippedCount++;
+          continue;
+        }
+        
+        const updateData = {};
+        selectedFields.forEach(field => {
+          if (track[field] !== undefined) {
+            // Convert ISO date strings back to Firestore Timestamp
+            if (field === 'createdAt' || field === 'updatedAt') {
+              if (typeof track[field] === 'string') {
+                updateData[field] = firebase.firestore.Timestamp.fromDate(new Date(track[field]));
+              } else {
+                updateData[field] = track[field];
+              }
+            } else {
+              updateData[field] = track[field];
+            }
+          }
+        });
+        
+        if (Object.keys(updateData).length > 0) {
+          await db.collection('tracks').doc(track.id).update(updateData);
+          updatedCount++;
+        } else {
+          skippedCount++;
+        }
+      }
+      
+      alert(`✅ Import complete: ${updatedCount} tracks updated, ${skippedCount} skipped`);
+      document.body.removeChild(modal);
+      
+      // Refresh tracks
+      if (typeof subscribeTracks === 'function') {
+        subscribeTracks();
+      }
+    } catch (error) {
+      alert('❌ Import error: ' + error.message);
+      document.getElementById('import-confirm-btn').textContent = '✅ Import';
+      document.getElementById('import-confirm-btn').disabled = false;
+    }
+  };
+}
+
+// Add import button if admin
+if (isAdmin) {
+  const exportBtn = document.getElementById('exportJsonBtn');
+  if (exportBtn) {
+    const importBtn = document.createElement('button');
+    importBtn.id = 'importJsonBtn';
+    importBtn.className = 'btn';
+    importBtn.textContent = '📥 Import JSON';
+    importBtn.style.marginLeft = '8px';
+    importBtn.onclick = importFromJson;
+    exportBtn.parentNode.insertBefore(importBtn, exportBtn.nextSibling);
+  }
+}
 
 // === FIX: обработчики логина ===
 document.addEventListener('DOMContentLoaded', function() {
@@ -3689,12 +3892,13 @@ document.addEventListener('DOMContentLoaded', function() {
       const result = await firebase.auth().signInWithPopup(provider);
       const user = result.user;
       
-      // Store user data in Firestore
+      // Store user data in Firestore with last login tracking
       await db.collection('users').doc(user.uid).set({
         email: user.email,
         displayName: user.displayName,
         photoURL: user.photoURL,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
       
       // Set role as 'user' (not admin/partner)
@@ -3741,7 +3945,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     try {
-      await firebase.auth().signInWithEmailAndPassword(email, password);
+      const result = await firebase.auth().signInWithEmailAndPassword(email, password);
+      const user = result.user;
+      
+      // Update last login timestamp
+      await db.collection('users').doc(user.uid).set({
+        lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      
       // Auth state listener will handle the rest
     } catch (error) {
       alert('Login failed: ' + error.message);
@@ -3773,11 +3984,12 @@ document.addEventListener('DOMContentLoaded', function() {
       const result = await firebase.auth().createUserWithEmailAndPassword(email, password);
       const user = result.user;
       
-      // Store user data in Firestore
+      // Store user data in Firestore with last login tracking
       await db.collection('users').doc(user.uid).set({
         email: user.email,
         displayName: email.split('@')[0],
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
       
       alert('Account created successfully!');
@@ -3904,6 +4116,18 @@ document.addEventListener('DOMContentLoaded', function() {
           enteredPin = '';
           updatePinDisplay();
           document.getElementById('login-modal').classList.remove('open');
+          
+          // Update last login timestamp in profiles collection for partners
+          if (role === 'partner' && db) {
+            try {
+              await db.collection('profiles').doc('partner').set({
+                lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
+              }, { merge: true });
+            } catch (e) {
+              console.error('Failed to update partner last login:', e);
+            }
+          }
+          
           location.reload();
         } else {
           flashError();
