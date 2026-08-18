@@ -4902,9 +4902,22 @@ function getCurrentTrackForShare() {
       console.log('🌐 Back online - reloading page');
       location.reload(); // Reload to get fresh data from Firestore
     } else {
-      indicator.textContent = '📴 Офлайн-режим — доступны кэшированные треки';
+      // Multilingual offline message
+      const lang = localStorage.getItem('siteLanguage') || 'en';
+      const messages = {
+        en: '📴 Offline mode - cached tracks available',
+        pl: '📴 Tryb offline - dostępne utwory z pamięci podręcznej',
+        ua: '📴 Офлайн-режим — доступні кешовані треки',
+        es: '📴 Modo sin conexión - pistas en caché disponibles'
+      };
+      indicator.textContent = messages[lang] || messages.en;
       indicator.style.display = 'block';
       console.log('📴 Gone offline - using cached tracks');
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        indicator.style.display = 'none';
+      }, 5000);
     }
   }
   
