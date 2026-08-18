@@ -473,7 +473,6 @@
 </head>
 <body>
   <div class="container">
-  <div id="offline-indicator" style="display:none;position:fixed;top:0;left:0;right:0;background:#ff4d4d;color:white;text-align:center;padding:8px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 2px 8px rgba(0,0,0,0.3);">📴 Offline — Cached tracks only</div>
   <header>
     <a id="site-logo" class="site-logo" href="#">
   <span class="logo-text">N1K∅</span>
@@ -1509,8 +1508,6 @@ function clearTracksCache() {
 }
 
 async function subscribeTracks() {
-  if (!db) return console.warn('Firestore not initialized');
-  
   // Отдельная функция для фильтрации треков
   function applyHomeFilters(tracks, role) {
     return tracks.filter(track => {
@@ -1534,8 +1531,13 @@ async function subscribeTracks() {
     console.log('📴 Offline mode: Loading tracks from IndexedDB');
     
     try {
+      console.log('📂 Loading from IndexedDB...');
       const dbTracks = await getTracksFromDB();
+      console.log('📂 Got', dbTracks.length, 'tracks from IndexedDB');
+      
+      console.log('🔍 Filtering by cached audio...');
       const offlineTracks = await getOfflineAvailableTracks(dbTracks);
+      console.log('🔍 Found', offlineTracks.length, 'tracks with cached audio');
       
       if (offlineTracks.length > 0) {
         let tracks = applyHomeFilters(offlineTracks, role);
@@ -1545,17 +1547,33 @@ async function subscribeTracks() {
       } else {
         console.warn('⚠️ No cached tracks available offline');
         document.getElementById('tracks-list').innerHTML = 
-          '<div style="text-align:center;padding:40px;color:var(--muted)">📴 No cached tracks available. Connect to internet to download tracks.</div>';
+          '<div style="text-align:center;padding:40px;color:var(--muted)">📴 No cached tracks available. Connect to internet to download tracks first.</div>';
       }
     } catch (e) {
       console.error('❌ Failed to load offline tracks:', e);
+      document.getElementById('tracks-list').innerHTML = 
+        '<div style="text-align:center;padding:40px;color:var(--muted)">❌ Error loading cached tracks: ' + e.message + '</div>';
     }
     
     // Don't try Firestore when offline
     return;
   }
   
-  // ONLINE MODE: Try localStorage cache first, then Firestore
+  // ONLINE MODE: Check if Firestore is initialized
+  if (!db) {
+    console.warn('Firestore not initialized, waiting for auth...');
+    // Try localStorage cache as fallback
+    const cachedTracks = loadTracksFromCache();
+    if (cachedTracks) {
+      let tracks = applyHomeFilters(cachedTracks, role);
+      globalTracks = tracks;
+      applySortAndRender();
+      isCacheValid = true;
+    }
+    return;
+  }
+  
+  // Try localStorage cache first
   const cachedTracks = loadTracksFromCache();
   
   if (cachedTracks) {
@@ -1573,7 +1591,9 @@ async function subscribeTracks() {
     // Save to both caches
     saveTracksToCache(allTracks);
     if (typeof saveTracksToDB === 'function') {
-      saveTracksToDB(allTracks);
+      console.log('💾 Saving', allTracks.length, 'tracks to IndexedDB...');
+      await saveTracksToDB(allTracks);
+      console.log('✅ Saved to IndexedDB');
     }
     
     // Фильтруем для главной страницы
@@ -2465,32 +2485,6 @@ document.getElementById('u-cancel').addEventListener('click', () => {
 
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('🚀 Init');
-
-  // Offline/Online status handling
-  function updateOfflineIndicator() {
-    const indicator = document.getElementById('offline-indicator');
-    if (!indicator) return;
-
-    if (!navigator.onLine) {
-      indicator.style.display = 'block';
-    } else {
-      indicator.style.display = 'none';
-    }
-  }
-
-  window.addEventListener('online', () => {
-    console.log('🌐 Back online - reloading tracks');
-    updateOfflineIndicator();
-    location.reload(); // Reload to get fresh data from Firestore
-  });
-
-  window.addEventListener('offline', () => {
-    console.log('📴 Gone offline - using cached tracks');
-    updateOfflineIndicator();
-  });
-
-  // Initial check
-  updateOfflineIndicator();
 
   // [FIX] Клик на обложку в мини-плеере — скролл к треку
   document.getElementById('mini-thumb')?.addEventListener('click', () => {
@@ -4477,12 +4471,12 @@ function getCurrentTrackForShare() {
   function updateOnlineStatus() {
     if (navigator.onLine) {
       indicator.style.display = 'none';
+      console.log('🌐 Back online - reloading page');
+      location.reload(); // Reload to get fresh data from Firestore
     } else {
       indicator.textContent = '📴 Офлайн-режим — доступны кэшированные треки';
       indicator.style.display = 'block';
-      setTimeout(() => {
-        indicator.style.display = 'none';
-      }, 4000);
+      console.log('📴 Gone offline - using cached tracks');
     }
   }
   
