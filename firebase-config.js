@@ -15,6 +15,7 @@ if (typeof firebase !== 'undefined') {
   
   // Initialize App Check (disabled for localhost due to Storage Access API issues)
   try {
+    self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
     const appCheck = firebase.appCheck();
     
     // Check if running on localhost
