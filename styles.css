@@ -531,6 +531,18 @@ h1{margin:0;font-size:24px;color:#fff}
     height:26px;
     font-size:10px;
   }
+  
+  .btn.icon.comment-btn {
+    width: auto;
+    min-width: 26px;
+  }
+  
+  .comment-count {
+    font-size: 10px;
+    min-width: 14px;
+    display: inline-block;
+    text-align: center;
+  }
   .lang-bar .btn.icon{
     width:auto;
     height:auto;
