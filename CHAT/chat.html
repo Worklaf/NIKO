@@ -1527,21 +1527,12 @@ border-radius:4px;overflow:hidden;cursor:pointer"></div>
 <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@14.1.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
+<script src="../firebase-config.js"></script>
 <script src="https://unpkg.com/wavesurfer.js"></script>
 <script src="language_chat.js"></script>
 <script src="emoji_categories.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyBzCiSmy714eAS_sDQffBHHhN3HkPniIKk",
-    authDomain: "niko-music-1d585.firebaseapp.com",
-    projectId: "niko-music-1d585",
-    storageBucket: "niko-music-1d585.firebasestorage.app",
-    messagingSenderId: "223346886059",
-    appId: "1:223346886059:web:e6e76ad23663de701b7eee",
-    measurementId: "G-L9ZY3FYN1R"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+
   // === ДИАГНОСТИКА ЯЗЫКА ===
 console.log('=== LANGUAGE DEBUG ===');
 console.log('localStorage siteLang:', localStorage.getItem('siteLang'));
