@@ -2,6 +2,12 @@
 // N1K∅ OFFLINE CACHE MANAGER v3
 // ===============================
 
+// Prevent double loading
+if (typeof window.NIKO_OFFLINE_CACHE_LOADED !== 'undefined') {
+  console.warn('⚠️ offline-cache.js already loaded');
+} else {
+  window.NIKO_OFFLINE_CACHE_LOADED = true;
+
 // === 0. КОНСТАНТЫ ===
 const AUDIO_CACHE_NAME = 'niko-audio-v3';      // ДОЛЖНО совпадать с sw.js!
 const STATIC_CACHE_NAME = 'niko-music-v3';     // ДОЛЖНО совпадать с sw.js!
@@ -269,3 +275,5 @@ window.debouncedTrackSwitch = debouncedTrackSwitch;
 window.preloadTrack = preloadTrack;
 
 console.log('📦 offline-cache.js v3 loaded');
+
+} // End of NIKO_OFFLINE_CACHE_LOADED check
