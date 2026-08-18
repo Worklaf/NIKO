@@ -925,20 +925,29 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyBzCiSmy714eAS_sDQffBHHhN3HkPniIKk",
-    authDomain: "niko-music-1d585.firebaseapp.com",
-    projectId: "niko-music-1d585",
-    storageBucket: "niko-music-1d585.firebasestorage.app",
-    messagingSenderId: "223346886059",
-    appId: "1:223346886059:web:e6e76ad23663de701b7eee",
-    measurementId: "G-L9ZY3FYN1R"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+  let db = null;
   const WORKER_URL = "https://r2-upload-proxy.nikolfar91.workers.dev";
   const STORAGE_FOLDER_AUDIO = "NIKO_music/audio";
   const STORAGE_FOLDER_COVERS = "NIKO_music/covers";
+  
+  // Firebase initialization with error handling for offline mode
+  try {
+    const firebaseConfig = {
+      apiKey: "AIzaSyBzCiSmy714eAS_sDQffBHHhN3HkPniIKk",
+      authDomain: "niko-music-1d585.firebaseapp.com",
+      projectId: "niko-music-1d585",
+      storageBucket: "niko-music-1d585.firebasestorage.app",
+      messagingSenderId: "223346886059",
+      appId: "1:223346886059:web:e6e76ad23663de701b7eee",
+      measurementId: "G-L9ZY3FYN1R"
+    };
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    console.log('✅ Firebase initialized');
+  } catch (e) {
+    console.warn('⚠️ Firebase initialization failed (likely offline):', e.message);
+    // db remains null, will use offline cache
+  }
 </script>
 
 <script src="https://unpkg.com/wavesurfer.js@7"></script>
@@ -2514,14 +2523,25 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }, 300);
   });
-  await loadAccessHashes();
-  await loadListenedFromFirebase();
-  await loadPartnerListens();
+  // Load Firebase-dependent data only if online and Firebase initialized
+  if (db && navigator.onLine) {
+    try {
+      await loadAccessHashes();
+      await loadListenedFromFirebase();
+      await loadPartnerListens();
+    } catch (e) {
+      console.warn('⚠️ Firebase data loading failed:', e);
+    }
+  } else {
+    console.log('📴 Skipping Firebase data loading (offline or not initialized)');
+  }
 
   const langBtn = document.getElementById('lang-' + (window.currentLang || 'en'));
   if (langBtn) langBtn.classList.add('active');
 	
-  subscribePlaylists();
+  if (db) {
+    subscribePlaylists();
+  }
   subscribeTracks();
   initWavesurfer();
   initEmojiSystem();
@@ -4486,51 +4506,6 @@ function getCurrentTrackForShare() {
   // Проверка при старте
   if (!navigator.onLine) updateOnlineStatus();
 })();
-// ===============================
-// PWA: Service Worker Registration
-// ===============================
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    // [FIX] ./sw.js вместо /sw.js — работает и в подпапке GitHub Pages
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => {
-        console.log('✅ SW registered:', reg.scope);
-        
-        // Обновления
-        reg.addEventListener('updatefound', () => {
-          const newWorker = reg.installing;
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              showUpdateToast();
-            }
-          });
-        });
-      })
-      .catch(err => console.log('❌ SW failed:', err));
-  });
-}
-
-function showUpdateToast() {
-  const toast = document.createElement('div');
-  toast.style.cssText = `
-    position: fixed;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(90deg, #4dff8a, #00E5FF);
-    color: #0a0a0f;
-    padding: 14px 28px;
-    border-radius: 50px;
-    font-size: 14px;
-    font-weight: 700;
-    z-index: 99999;
-    box-shadow: 0 4px 24px rgba(77,255,138,0.4);
-    cursor: pointer;
-  `;
-  toast.innerHTML = '🔄 Доступно обновление — нажмите для перезагрузки';
-  toast.onclick = () => location.reload();
-  document.body.appendChild(toast);
-}
 </script>
 
 </body>
