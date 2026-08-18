@@ -473,6 +473,7 @@
 </head>
 <body>
   <div class="container">
+  <div id="offline-indicator" style="display:none;position:fixed;top:0;left:0;right:0;background:#ff4d4d;color:white;text-align:center;padding:8px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 2px 8px rgba(0,0,0,0.3);">📴 Offline — Cached tracks only</div>
   <header>
     <a id="site-logo" class="site-logo" href="#">
   <span class="logo-text">N1K∅</span>
@@ -942,6 +943,7 @@
 </script>
 
 <script src="https://unpkg.com/wavesurfer.js@7"></script>
+<script src="offline-cache.js"></script>
 
 <script>
 let accessHashes = null;
@@ -1506,7 +1508,7 @@ function clearTracksCache() {
   console.log('🗑️ Tracks cache cleared');
 }
 
-function subscribeTracks() {
+async function subscribeTracks() {
   if (!db) return console.warn('Firestore not initialized');
   
   // Отдельная функция для фильтрации треков
@@ -1524,9 +1526,37 @@ function subscribeTracks() {
     });
   }
   
-  // Try to load from cache first
-  const cachedTracks = loadTracksFromCache();
   const role = getRole();
+  const isOnline = navigator.onLine;
+  
+  if (!isOnline) {
+    // OFFLINE MODE: Load from IndexedDB and filter by cached audio
+    console.log('📴 Offline mode: Loading tracks from IndexedDB');
+    
+    try {
+      const dbTracks = await getTracksFromDB();
+      const offlineTracks = await getOfflineAvailableTracks(dbTracks);
+      
+      if (offlineTracks.length > 0) {
+        let tracks = applyHomeFilters(offlineTracks, role);
+        globalTracks = tracks;
+        applySortAndRender();
+        console.log('✅ Loaded', offlineTracks.length, 'offline tracks');
+      } else {
+        console.warn('⚠️ No cached tracks available offline');
+        document.getElementById('tracks-list').innerHTML = 
+          '<div style="text-align:center;padding:40px;color:var(--muted)">📴 No cached tracks available. Connect to internet to download tracks.</div>';
+      }
+    } catch (e) {
+      console.error('❌ Failed to load offline tracks:', e);
+    }
+    
+    // Don't try Firestore when offline
+    return;
+  }
+  
+  // ONLINE MODE: Try localStorage cache first, then Firestore
+  const cachedTracks = loadTracksFromCache();
   
   if (cachedTracks) {
     // Use cached tracks initially
@@ -1536,12 +1566,15 @@ function subscribeTracks() {
     isCacheValid = true;
   }
   
-  // Always subscribe to real-time updates
-  db.collection('tracks').orderBy('createdAt', 'desc').onSnapshot(snap => {
+  // Subscribe to real-time updates
+  db.collection('tracks').orderBy('createdAt', 'desc').onSnapshot(async (snap) => {
     let allTracks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     
-    // Save to cache
+    // Save to both caches
     saveTracksToCache(allTracks);
+    if (typeof saveTracksToDB === 'function') {
+      saveTracksToDB(allTracks);
+    }
     
     // Фильтруем для главной страницы
     let tracks = applyHomeFilters(allTracks, role);
@@ -2432,6 +2465,32 @@ document.getElementById('u-cancel').addEventListener('click', () => {
 
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('🚀 Init');
+
+  // Offline/Online status handling
+  function updateOfflineIndicator() {
+    const indicator = document.getElementById('offline-indicator');
+    if (!indicator) return;
+
+    if (!navigator.onLine) {
+      indicator.style.display = 'block';
+    } else {
+      indicator.style.display = 'none';
+    }
+  }
+
+  window.addEventListener('online', () => {
+    console.log('🌐 Back online - reloading tracks');
+    updateOfflineIndicator();
+    location.reload(); // Reload to get fresh data from Firestore
+  });
+
+  window.addEventListener('offline', () => {
+    console.log('📴 Gone offline - using cached tracks');
+    updateOfflineIndicator();
+  });
+
+  // Initial check
+  updateOfflineIndicator();
 
   // [FIX] Клик на обложку в мини-плеере — скролл к треку
   document.getElementById('mini-thumb')?.addEventListener('click', () => {
