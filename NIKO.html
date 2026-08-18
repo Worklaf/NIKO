@@ -948,35 +948,13 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
+<script src="firebase-config.js"></script>
 
 <script>
-  let db = null;
   const WORKER_URL = "https://r2-upload-proxy.nikolfar91.workers.dev";
   const STORAGE_FOLDER_AUDIO = "NIKO_music/audio";
   const STORAGE_FOLDER_COVERS = "NIKO_music/covers";
-  
-  // Firebase initialization with error handling for offline mode
-  try {
-    if (typeof firebase !== 'undefined') {
-      const firebaseConfig = {
-        apiKey: "AIzaSyBzCiSmy714eAS_sDQffBHHhN3HkPniIKk",
-        authDomain: "niko-music-1d585.firebaseapp.com",
-        projectId: "niko-music-1d585",
-        storageBucket: "niko-music-1d585.firebasestorage.app",
-        messagingSenderId: "223346886059",
-        appId: "1:223346886059:web:e6e76ad23663de701b7eee",
-        measurementId: "G-L9ZY3FYN1R"
-      };
-      firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
-      console.log('✅ Firebase initialized');
-    } else {
-      console.warn('⚠️ Firebase not loaded (likely CDN issue)');
-    }
-  } catch (e) {
-    console.warn('⚠️ Firebase initialization failed:', e.message);
-    // db remains null, will use offline cache
-  }
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
