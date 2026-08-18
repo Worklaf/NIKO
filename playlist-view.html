@@ -1231,8 +1231,10 @@ body.bg-cover #likedTracksBtn.active {
 </div>
 
   <!-- ===== FIREBASE ===== -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
+  <script src="firebase-config.js"></script>
 
   <!-- ===== WAVESURFER & CORE ===== -->
   <script src="https://unpkg.com/wavesurfer.js" defer></script>
@@ -1244,17 +1246,6 @@ body.bg-cover #likedTracksBtn.active {
 
   <!-- ===== MAIN LOGIC ===== -->
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBzCiSmy714eAS_sDQffBHHhN3HkPniIKk",
-      authDomain: "niko-music-1d585.firebaseapp.com",
-      projectId: "niko-music-1d585",
-      storageBucket: "niko-music-1d585.firebasestorage.app",
-      messagingSenderId: "223346886059",
-      appId: "1:223346886059:web:e6e76ad23663de701b7eee",
-      measurementId: "G-L9ZY3FYN1R"
-    };
-    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-    const db = firebase.firestore();
 const WORKER_URL = "https://r2-upload-proxy.nikolfar91.workers.dev";
 const STORAGE_FOLDER_AUDIO = "NIKO_music/audio";
 const STORAGE_FOLDER_COVERS = "NIKO_music/covers";
@@ -1452,11 +1443,21 @@ window.onPlayerTrackChanged = function(trackId) {
     };
   }
 
-  const snap = await db.collection('tracks')
+    const snap = await db.collection('tracks')
     .where('playlistIds', 'array-contains', playlistId)
     .get();
 
-  allTracksFull = snap.docs.map((d, i) => ({ __fullIndex: i, id: d.id, ...d.data() }));
+  allTracksFull = snap.docs
+    .map((d, i) => ({ __fullIndex: i, id: d.id, ...d.data() }))
+    .sort((a, b) => {
+      const getTime = (item) => {
+        if (!item.createdAt) return 0;
+        try {
+          return item.createdAt.toDate ? item.createdAt.toDate().getTime() : new Date(item.createdAt).getTime();
+        } catch (e) { return 0; }
+      };
+      return getTime(b) - getTime(a); // новые сверху
+    });
   window.currentPlaylistTracks = allTracksFull;
   window.globalTracks = allTracksFull;
 
@@ -1466,20 +1467,35 @@ window.onPlayerTrackChanged = function(trackId) {
   renderTracksPage();
 }
     function loadGenres(tracks) {
-      const genres = [...new Set((tracks || []).map(t => t.genre).filter(Boolean))];
-      const select = document.getElementById('genreFilter');
-      if (!select) return;
-      select.innerHTML = '<option value="">All genres</option>';
-      genres.forEach(g => {
-        const opt = document.createElement('option');
-        opt.value = g;
-        opt.textContent = g;
-        select.appendChild(opt);
-      });
-      select.onchange = applyFilters;
-      const lyricsSearchInput = document.getElementById('lyricsSearch');
-if (lyricsSearchInput) lyricsSearchInput.oninput = applyFilters;
-    }
+  // Split multi-genre tracks into individual genres
+  const allGenres = (tracks || []).map(t => t.genre).filter(Boolean);
+  const splitGenres = [];
+  allGenres.forEach(genreStr => {
+    // Split by comma and trim each genre
+    const genres = genreStr.split(',').map(g => g.trim()).filter(g => g);
+    splitGenres.push(...genres);
+  });
+  
+  // Get unique genres
+  const genres = [...new Set(splitGenres)];
+  
+  const select = document.getElementById('genreFilter');
+  if (!select) return;
+  select.innerHTML = '<option value="">All genres</option>';
+  genres.forEach(g => {
+    const opt = document.createElement('option');
+    opt.value = g;
+    opt.textContent = g;
+    select.appendChild(opt);
+  });
+  select.onchange = applyFilters;
+  
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) searchInput.oninput = applyFilters;
+  
+  const lyricsSearchInput = document.getElementById('lyricsSearch');
+  if (lyricsSearchInput) lyricsSearchInput.oninput = applyFilters;
+}
 
     function applyFilters() {
   const search = (document.getElementById('searchInput')?.value || '').toLowerCase();
@@ -1487,8 +1503,12 @@ if (lyricsSearchInput) lyricsSearchInput.oninput = applyFilters;
   const genre = document.getElementById('genreFilter')?.value || '';
   
   visibleTracks = allTracksFull.filter(t => {
-    const matchesGenre = !genre || t.genre === genre;
-    const matchesSearch = !search || (t.title || '').toLowerCase().includes(search);
+    // Split track genres and check if selected genre matches any of them
+    const trackGenres = (t.genre || '').split(',').map(g => g.trim()).filter(g => g);
+    const matchesGenre = !genre || trackGenres.includes(genre);
+    
+    const matchesSearch = !search || 
+  ((t.title || '') + ' ' + (t.artist || '')).toLowerCase().includes(search);
     const matchesLyrics = !lyricsQuery || ((t.lyrics || '').toLowerCase().includes(lyricsQuery));
     
     let matchesLiked = true;
