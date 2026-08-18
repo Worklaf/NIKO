@@ -552,6 +552,7 @@
         <button id="addTrackBtn" class="btn" style="display:none"><span data-i18n="uploadTrack">Загрузить трек</span></button>
         <button id="exportJsonBtn" class="btn" style="display:none"><span data-i18n="exportJson">Export JSON</span></button>
         <button id="resetPlaysBtn" class="btn" style="display:none;background:rgba(255,77,77,0.1);border-color:rgba(255,77,77,0.3)"><span data-i18n="resetPlays">Reset Plays</span></button>
+        <button id="bulkDateBtn" class="btn" style="display:none;background:rgba(77,255,138,0.1);border-color:rgba(77,255,138,0.3)">📅 Bulk Date</button>
         <select id="upload-permission-select" class="search-select" style="display:none">
             <option value="admin_only" data-i18n="uploadAdminOnly">Только админ</option>
             <option value="partner_only" data-i18n="uploadPartnerOnly">Админ и партнер</option>
@@ -920,6 +921,25 @@
     <div id="partner-listens-list" style="max-height:400px;overflow-y:auto;margin-top:12px"></div>
     <div style="display:flex;justify-content:flex-end;margin-top:12px">
       <button id="partner-listens-close" class="btn">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<div id="bulk-date-modal" class="modal">
+  <div class="panel" style="max-width:500px">
+    <h3>📅 Bulk Date Change</h3>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:16px">Select tracks and change their createdAt date to reorder them.</p>
+    
+    <div style="margin-bottom:16px">
+      <label style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px">New Date:</label>
+      <input id="bulk-date-input" type="datetime-local" style="width:100%;padding:8px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:#fff">
+    </div>
+    
+    <div id="bulk-tracks-list" style="max-height:300px;overflow-y:auto;margin-bottom:16px"></div>
+    
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button id="bulk-date-cancel" class="btn">Cancel</button>
+      <button id="bulk-date-save" class="btn active">Apply</button>
     </div>
   </div>
 </div>
@@ -1949,10 +1969,7 @@ function renderDraftTracks(tracks) {
       ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
       : '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3v18l15-9L5 3z"/></svg>';
 
-    const orderButtons = isAdmin ? `
-      <button class="btn icon order-btn move-up-btn" data-id="${track.id}" title="Вверх">↑</button>
-      <button class="btn icon order-btn move-down-btn" data-id="${track.id}" title="Вниз">↓</button>
-    ` : '';
+    const orderButtons = ''; // Removed up/down buttons - use bulk date change instead
 
        let partnerListenInfo = '';
     if (isAdmin && partnerListensData[track.id]) {
@@ -2627,6 +2644,8 @@ if (lyricsSearch) lyricsSearch.placeholder = t('searchLyricsPlaceholder') || 'Se
   if (isAdmin) {
     const editBtn = document.getElementById('edit-text');
     if (editBtn) editBtn.style.display = 'inline-block';
+    const bulkDateBtn = document.getElementById('bulkDateBtn');
+    if (bulkDateBtn) bulkDateBtn.style.display = 'inline-block';
   }
 
     // Language dropdown
@@ -3470,7 +3489,15 @@ function loadPlaysForReset() {
     container.innerHTML = '<p style="text-align:center;color:#bfc3d6;padding:20px">No tracks</p>';
     return;
   }
-  globalTracks.forEach((track) => {
+  
+  // Sort tracks by selected metric (descending)
+  const sortedTracks = [...globalTracks].sort((a, b) => {
+    const countA = (resetType === 'plays' ? (a.plays || 0) : resetType === 'likes' ? (a.likes || 0) : (a.dislikes || 0));
+    const countB = (resetType === 'plays' ? (b.plays || 0) : resetType === 'likes' ? (b.likes || 0) : (b.dislikes || 0));
+    return countB - countA; // Descending order
+  });
+  
+  sortedTracks.forEach((track) => {
     let count, icon, label;
     if (resetType === 'plays') { count = track.plays || 0; icon = '🎵'; label = 'plays'; }
     else if (resetType === 'likes') { count = track.likes || 0; icon = '❤️'; label = 'likes'; }
@@ -3526,6 +3553,112 @@ Continue?`
   alert(`✅ Done!
 
 ${selected.length} track(s) ${typeLabels[resetType].toLowerCase()} reset to 0`);
+}
+
+// === Bulk Date Change ===
+function openBulkDateModal() {
+  document.getElementById('bulk-date-modal').classList.add('open');
+  loadBulkTracksList();
+  
+  // Set default date to current time
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  document.getElementById('bulk-date-input').value = now.toISOString().slice(0, 16);
+}
+
+function loadBulkTracksList() {
+  const container = document.getElementById('bulk-tracks-list');
+  if (!container) return;
+  container.innerHTML = '';
+  
+  if (globalTracks.length === 0) {
+    container.innerHTML = '<p style="text-align:center;color:#bfc3d6;padding:20px">No tracks</p>';
+    return;
+  }
+  
+  // Sort by createdAt (descending)
+  const sortedTracks = [...globalTracks].sort((a, b) => {
+    const dateA = a.createdAt ? (typeof a.createdAt.toDate === 'function' ? a.createdAt.toDate() : new Date(a.createdAt)) : new Date(0);
+    const dateB = b.createdAt ? (typeof b.createdAt.toDate === 'function' ? b.createdAt.toDate() : new Date(b.createdAt)) : new Date(0);
+    return dateB - dateA;
+  });
+  
+  sortedTracks.forEach((track) => {
+    let dateStr = 'No date';
+    if (track.createdAt) {
+      const date = typeof track.createdAt.toDate === 'function' ? track.createdAt.toDate() : new Date(track.createdAt);
+      dateStr = date.toLocaleString();
+    }
+    
+    const div = document.createElement('div');
+    div.style.cssText = 'padding: 8px; margin-bottom: 6px; background: rgba(255,255,255,0.05); border-radius: 8px';
+    div.innerHTML = `
+      <label style="display: flex; align-items: center; gap: 10px; cursor: pointer">
+        <input type="checkbox" class="bulk-track-checkbox" data-id="${track.id}" style="width: 16px; height: 16px">
+        <img src="${track.cover}" style="width: 40px; height: 60px; object-fit: cover; border-radius: 4px" alt="">
+        <div style="flex: 1; min-width: 0">
+          <div style="font-weight: 600; color: #fff; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">${track.title}</div>
+          <div style="color: #bfc3d6; font-size: 12px">📅 ${dateStr}</div>
+        </div>
+      </label>
+    `;
+    container.appendChild(div);
+  });
+}
+
+async function applyBulkDateChange() {
+  const selected = Array.from(document.querySelectorAll('.bulk-track-checkbox:checked')).map(cb => cb.dataset.id);
+  const newDateStr = document.getElementById('bulk-date-input').value;
+  
+  if (selected.length === 0) {
+    alert('❌ Select at least one track!');
+    return;
+  }
+  
+  if (!newDateStr) {
+    alert('❌ Please select a date!');
+    return;
+  }
+  
+  const newDate = new Date(newDateStr);
+  const confirmed = window.confirm(
+    `⚠️ Change date for ${selected.length} track(s)?
+
+New date: ${newDate.toLocaleString()}
+
+This will change the createdAt timestamp and affect track ordering.
+
+Continue?`
+  );
+  
+  if (!confirmed) return;
+  
+  const btn = document.getElementById('bulk-date-save');
+  btn.textContent = '⏳ Applying...';
+  btn.disabled = true;
+  
+  try {
+    const timestamp = firebase.firestore.Timestamp.fromDate(newDate);
+    
+    for (const trackId of selected) {
+      await db.collection('tracks').doc(trackId).update({
+        createdAt: timestamp
+      });
+    }
+    
+    alert(`✅ Date updated for ${selected.length} track(s)!`);
+    document.getElementById('bulk-date-modal').classList.remove('open');
+    
+    // Refresh tracks
+    if (typeof subscribeTracks === 'function') {
+      subscribeTracks();
+    }
+  } catch (error) {
+    alert('❌ Error: ' + error.message);
+  } finally {
+    btn.textContent = 'Apply';
+    btn.disabled = false;
+  }
 }
 
 // === FIX: refreshLoginBtn с правильным отображением кнопок ===
@@ -3854,6 +3987,13 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('select-all-plays').checked = false;
       });
     });
+    
+    // Bulk date change handlers
+    document.getElementById('bulkDateBtn')?.addEventListener('click', openBulkDateModal);
+    document.getElementById('bulk-date-cancel')?.addEventListener('click', () => {
+      document.getElementById('bulk-date-modal').classList.remove('open');
+    });
+    document.getElementById('bulk-date-save')?.addEventListener('click', applyBulkDateChange);
   } else {
     const btn = document.getElementById('resetPlaysBtn');
     if (btn) btn.style.display = 'none';
