@@ -479,11 +479,11 @@
   <span id="chat-unread-indicator" class="chat-unread-indicator" style="display:none;"></span>
 </a>
        <div class="header-right">
-      <button id="pwa-install-btn" class="btn pwa-install-btn" style="display:none; background: linear-gradient(90deg, #ff4da6, #ff7a4d); color: white; border: none; padding: 8px 16px; border-radius: 50px; font-weight: 700; font-size: 12px; box-shadow: 0 4px 12px rgba(255, 77, 166, 0.3); transition: all 0.3s ease;">
-        📱 Install App
+      <button id="pwa-install-btn" class="btn pwa-install-btn" style="display:none; background: linear-gradient(90deg, #ff4da6, #ff7a4d); color: white; border: none; padding: 8px 12px; border-radius: 50px; font-weight: 700; font-size: 11px; box-shadow: 0 4px 12px rgba(255, 77, 166, 0.3); transition: all 0.3s ease; white-space: nowrap;">
+        📱 Install
       </button>
-      <button id="push-notif-btn" class="btn push-notif-btn" style="display:none; background: linear-gradient(90deg, #00d1ff, #27b646); color: white; border: none; padding: 8px 16px; border-radius: 50px; font-weight: 700; font-size: 12px; box-shadow: 0 4px 12px rgba(0, 209, 255, 0.3); transition: all 0.3s ease;">
-        🔔 Enable Notifications
+      <button id="push-notif-btn" class="btn push-notif-btn" style="display:none; background: linear-gradient(90deg, #00d1ff, #27b646); color: white; border: none; padding: 8px 12px; border-radius: 50px; font-weight: 700; font-size: 16px; box-shadow: 0 4px 12px rgba(0, 209, 255, 0.3); transition: all 0.3s ease; min-width: 40px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+        🔔
       </button>
       <div class="lang-dropdown">
               <button id="lang-toggle" class="btn lang-toggle-btn">
@@ -5176,17 +5176,37 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
     try {
       const registration = await navigator.serviceWorker.ready;
       
+      // Проверяем текущее состояние разрешения
+      const currentPermission = Notification.permission;
+      
+      if (currentPermission === 'denied') {
+        alert('❌ Уведомления заблокированы в браузере.\n\nЧтобы включить:\n1. Нажмите на иконку замка 🔒 в адресной строке\n2. Нажмите "Разрешения сайта"\n3. Найдите "Уведомления" и нажмите "Сбросить"\n4. Затем нажмите на кнопку уведомлений снова');
+        return false;
+      }
+      
+      if (currentPermission === 'granted') {
+        // Уже разрешено - сразу подписываемся
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array('BO7gzbXFlUvJzea4rQozVRifl2evB6j-zwdBh7rGMBxiT2-UArp-abTloC5iQZ4IPRFcB9bAn1cFbALudJ67EYs')
+        });
+        
+        console.log('✅ Push subscription created:', subscription);
+        await savePushSubscriptionToFirestore(subscription);
+        return true;
+      }
+      
       // Запрос разрешения
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') {
-        console.log('❌ Notification permission denied');
+        alert('❌ Разрешение на уведомления отклонено.\n\nЧтобы включить:\n1. Нажмите на иконку замка 🔒 в адресной строке\n2. Нажмите "Разрешения сайта"\n3. Найдите "Уведомления" и разрешите\n4. Затем нажмите на кнопку уведомлений снова');
         return false;
       }
 
       // Создание подписки
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array('BO7gzbXFlUvJzea4rQozVRifl2evB6j')
+        applicationServerKey: urlBase64ToUint8Array('BO7gzbXFlUvJzea4rQozVRifl2evB6j-zwdBh7rGMBxiT2-UArp-abTloC5iQZ4IPRFcB9bAn1cFbALudJ67EYs')
       });
 
       console.log('✅ Push subscription created:', subscription);
@@ -5197,6 +5217,7 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
       return true;
     } catch (error) {
       console.error('❌ Push subscription failed:', error);
+      alert('❌ Ошибка подписки: ' + error.message);
       return false;
     }
   };
@@ -5245,23 +5266,23 @@ if (pushNotifBtn) {
 
   // Обработчик клика
   pushNotifBtn.addEventListener('click', async () => {
-    pushNotifBtn.textContent = '⏳ Enabling...';
+    pushNotifBtn.textContent = '⏳';
     pushNotifBtn.disabled = true;
 
     const success = await window.subscribeToPushNotifications();
     
     if (success) {
-      pushNotifBtn.textContent = '✅ Notifications Enabled';
+      pushNotifBtn.textContent = '✅';
       pushNotifBtn.style.background = 'linear-gradient(90deg, #27b646, #1add82)';
       setTimeout(() => {
         pushNotifBtn.style.display = 'none';
       }, 2000);
     } else {
-      pushNotifBtn.textContent = '❌ Failed';
+      pushNotifBtn.textContent = '❌';
       pushNotifBtn.disabled = false;
       setTimeout(() => {
-        pushNotifBtn.textContent = '🔔 Enable Notifications';
-      }, 2000);
+        pushNotifBtn.textContent = '🔔';
+      }, 3000);
     }
   });
 }
