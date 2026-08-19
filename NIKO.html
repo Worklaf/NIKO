@@ -482,6 +482,9 @@
       <button id="pwa-install-btn" class="btn pwa-install-btn" style="display:none; background: linear-gradient(90deg, #ff4da6, #ff7a4d); color: white; border: none; padding: 8px 16px; border-radius: 50px; font-weight: 700; font-size: 12px; box-shadow: 0 4px 12px rgba(255, 77, 166, 0.3); transition: all 0.3s ease;">
         📱 Install App
       </button>
+      <button id="push-notif-btn" class="btn push-notif-btn" style="display:none; background: linear-gradient(90deg, #00d1ff, #27b646); color: white; border: none; padding: 8px 16px; border-radius: 50px; font-weight: 700; font-size: 12px; box-shadow: 0 4px 12px rgba(0, 209, 255, 0.3); transition: all 0.3s ease;">
+        🔔 Enable Notifications
+      </button>
       <div class="lang-dropdown">
               <button id="lang-toggle" class="btn lang-toggle-btn">
           <img id="current-lang-flag" src="https://flagcdn.com/w20/us.png" alt="" style="width:18px;height:13px;border-radius:2px;object-fit:cover;display:inline-block;vertical-align:middle;"> 
@@ -1657,8 +1660,10 @@ async function subscribeTracks() {
   }
   
   // Subscribe to real-time updates
-  db.collection('tracks').orderBy('createdAt', 'desc').onSnapshot(async (snap) => {
-    let allTracks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  db.collection('tracks')
+    .orderBy('createdAt', 'desc')
+    .onSnapshot(async (snap) => {
+      let allTracks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     
     // Save to both caches
     saveTracksToCache(allTracks);
@@ -1996,7 +2001,7 @@ function renderDraftTracks(tracks) {
       : (uploadDate ? `<div class="track-date" title="Uploaded: ${uploadDate}">${uploadDate}</div>` : '');
 
     div.innerHTML = `
-      <img class="thumb" src="${track.cover}" alt="${track.title}">
+      <img class="thumb lazy" data-src="${track.cover}" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 200'%3E%3Crect fill='%230b0b10' width='120' height='200'/%3E%3C/svg%3E" alt="${track.title}">
       <div class="info">
         <div class="title">${track.artist ? `${track.artist} - ${track.title}` : track.title}</div>
         <div class="meta">${track.genre ? track.genre.split(',').map(g => g.trim()).filter(g => g).map(g => getGenreDisplayName(g)).join(', ') : ''} · ${track.duration || '—'}</div>
@@ -4983,6 +4988,256 @@ window.addEventListener('appinstalled', () => {
   }
   console.log('✅ PWA already installed');
 });
+
+// ===============================
+// LAZY LOADING IMAGES
+// ===============================
+
+if ('IntersectionObserver' in window) {
+  const lazyImageObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target;
+        const src = img.dataset.src;
+        
+        if (src) {
+          img.src = src;
+          img.classList.remove('lazy');
+          img.classList.add('loaded');
+          observer.unobserve(img);
+        }
+      }
+    });
+  }, {
+    rootMargin: '50px 0px',
+    threshold: 0.01
+  });
+
+  // Наблюдаем за всеми изображениями с классом lazy
+  document.addEventListener('DOMContentLoaded', () => {
+    const lazyImages = document.querySelectorAll('img.lazy');
+    lazyImages.forEach(img => lazyImageObserver.observe(img));
+  });
+
+  // Для динамически добавленных изображений
+  const observeNewImages = () => {
+    const lazyImages = document.querySelectorAll('img.lazy:not(.observed)');
+    lazyImages.forEach(img => {
+      img.classList.add('observed');
+      lazyImageObserver.observe(img);
+    });
+  };
+
+  // Вызываем после рендера треков
+  const originalRenderDraftTracks = window.renderDraftTracks;
+  if (originalRenderDraftTracks) {
+    window.renderDraftTracks = function(tracks) {
+      originalRenderDraftTracks(tracks);
+      setTimeout(observeNewImages, 100);
+    };
+  }
+}
+
+// ===============================
+// LOCALSTORAGE CACHING
+// ===============================
+
+const CACHE_VERSION = 'v2';
+const CACHE_KEY = `niko_tracks_cache_${CACHE_VERSION}`;
+
+function saveTracksToCache(tracks) {
+  try {
+    const cacheData = {
+      tracks: tracks,
+      timestamp: Date.now(),
+      version: CACHE_VERSION
+    };
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+    console.log('💾 Tracks cached in localStorage');
+  } catch (e) {
+    console.warn('⚠️ Failed to cache tracks:', e);
+  }
+}
+
+function loadTracksFromCache() {
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (!cached) return null;
+
+    const cacheData = JSON.parse(cached);
+    
+    // Проверяем только версию, без ограничения по времени
+    if (cacheData.version !== CACHE_VERSION) {
+      console.log('🔄 Cache version mismatch, ignoring');
+      return null;
+    }
+
+    const age = Date.now() - cacheData.timestamp;
+    console.log('✅ Loaded tracks from cache (age:', Math.round(age / 1000), 's)');
+    return cacheData.tracks;
+  } catch (e) {
+    console.warn('⚠️ Failed to load from cache:', e);
+    return null;
+  }
+}
+
+// Перехватываем загрузку треков для кэширования
+const originalSubscribeTracks = window.subscribeTracks;
+if (originalSubscribeTracks) {
+  window.subscribeTracks = function() {
+    // Сначала пробуем загрузить из кэша
+    const cachedTracks = loadTracksFromCache();
+    if (cachedTracks && cachedTracks.length > 0) {
+      window.globalTracks = cachedTracks;
+      window.renderDraftTracks(cachedTracks);
+      console.log('🚀 Using cached tracks for instant load');
+    }
+
+    // Затем загружаем из Firebase для актуальности
+    originalSubscribeTracks.apply(this, arguments);
+  };
+}
+
+// Сохраняем треки в кэш после загрузки из Firebase
+const originalOnSnapshot = db?.collection('tracks')?.onSnapshot;
+if (originalOnSnapshot) {
+  const originalHandler = arguments[1];
+  // Это будет работать через существующий код подписки
+}
+
+// Сохраняем в кэш при каждом обновлении треков
+document.addEventListener('DOMContentLoaded', () => {
+  // Наблюдаем за изменениями globalTracks
+  let lastTracksLength = 0;
+  setInterval(() => {
+    if (window.globalTracks && window.globalTracks.length !== lastTracksLength) {
+      lastTracksLength = window.globalTracks.length;
+      saveTracksToCache(window.globalTracks);
+    }
+  }, 2000);
+});
+
+// ===============================
+// PUSH NOTIFICATIONS
+// ===============================
+
+// Проверка поддержки Service Worker и Push API
+if ('serviceWorker' in navigator && 'PushManager' in window) {
+  console.log('📱 Push notifications supported');
+
+  // Регистрация Service Worker
+  navigator.serviceWorker.register('/sw.js')
+    .then(registration => {
+      console.log('✅ Service Worker registered:', registration);
+
+      // Проверка текущей подписки
+      registration.pushManager.getSubscription()
+        .then(subscription => {
+          if (subscription) {
+            console.log('📬 Already subscribed to push notifications');
+            return subscription;
+          }
+          return null;
+        });
+    })
+    .catch(error => {
+      console.error('❌ Service Worker registration failed:', error);
+    });
+
+  // Функция для запроса разрешения и подписки
+  window.subscribeToPushNotifications = async function() {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      
+      // Запрос разрешения
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        console.log('❌ Notification permission denied');
+        return false;
+      }
+
+      // Создание подписки
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array('YOUR_VAPID_PUBLIC_KEY_HERE')
+      });
+
+      console.log('✅ Push subscription created:', subscription);
+      
+      // Отправка подписки на сервер (для сохранения в Firebase)
+      // TODO: Добавить функцию для сохранения подписки в Firestore
+      
+      return true;
+    } catch (error) {
+      console.error('❌ Push subscription failed:', error);
+      return false;
+    }
+  };
+
+  // Вспомогательная функция для конвертации VAPID ключа
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    
+    return outputArray;
+  }
+} else {
+  console.log('⚠️ Push notifications not supported');
+}
+
+// Обработчик кнопки подписки на уведомления
+const pushNotifBtn = document.getElementById('push-notif-btn');
+if (pushNotifBtn) {
+  // Показываем кнопку если поддерживаются уведомления и еще нет подписки
+  if ('serviceWorker' in navigator && 'PushManager' in window) {
+    navigator.serviceWorker.ready.then(registration => {
+      registration.pushManager.getSubscription().then(subscription => {
+        if (!subscription) {
+          pushNotifBtn.style.display = 'flex';
+          
+          // Добавляем hover эффекты
+          pushNotifBtn.addEventListener('mouseenter', () => {
+            pushNotifBtn.style.transform = 'translateY(-2px)';
+            pushNotifBtn.style.boxShadow = '0 6px 20px rgba(0, 209, 255, 0.5)';
+          });
+          
+          pushNotifBtn.addEventListener('mouseleave', () => {
+            pushNotifBtn.style.transform = 'translateY(0)';
+            pushNotifBtn.style.boxShadow = '0 4px 12px rgba(0, 209, 255, 0.3)';
+          });
+        }
+      });
+    });
+  }
+
+  // Обработчик клика
+  pushNotifBtn.addEventListener('click', async () => {
+    pushNotifBtn.textContent = '⏳ Enabling...';
+    pushNotifBtn.disabled = true;
+
+    const success = await window.subscribeToPushNotifications();
+    
+    if (success) {
+      pushNotifBtn.textContent = '✅ Notifications Enabled';
+      pushNotifBtn.style.background = 'linear-gradient(90deg, #27b646, #1add82)';
+      setTimeout(() => {
+        pushNotifBtn.style.display = 'none';
+      }, 2000);
+    } else {
+      pushNotifBtn.textContent = '❌ Failed';
+      pushNotifBtn.disabled = false;
+      setTimeout(() => {
+        pushNotifBtn.textContent = '🔔 Enable Notifications';
+      }, 2000);
+    }
+  });
+}
 </script>
 
 </body>
