@@ -1,0 +1,9 @@
+{
+  "name": "niko-music",
+  "version": "1.0.0",
+  "description": "N1K∅ Music Player with Push Notifications",
+  "dependencies": {
+    "firebase-admin": "^11.0.0",
+    "web-push": "^3.6.0"
+  }
+}
