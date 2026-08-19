@@ -2539,7 +2539,9 @@ document.getElementById('u-audio-file').addEventListener('change', (e) => {
           cover: coverUrl
         };
         
-        await fetch('/api/send-push-notification', {
+        console.log('📤 Sending push notification for track:', trackRef.id, trackData);
+        
+        const response = await fetch('/api/send-push-notification', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -2547,7 +2549,9 @@ document.getElementById('u-audio-file').addEventListener('change', (e) => {
             track: trackData
           })
         });
-        console.log('✅ Push notification sent for new track:', trackRef.id);
+        
+        const result = await response.json();
+        console.log('✅ Push notification response:', result);
       } catch (pushError) {
         console.warn('⚠️ Failed to send push notification:', pushError);
       }
@@ -5233,7 +5237,8 @@ if ('serviceWorker' in navigator && 'PushManager' in window) {
       console.log('✅ Push subscription created:', subscription);
       
       // Сохранение подписки в Firestore
-      await savePushSubscriptionToFirestore(subscription);
+      const saved = await savePushSubscriptionToFirestore(subscription);
+      console.log('💾 Subscription saved to Firestore:', saved);
       
       return true;
     } catch (error) {
