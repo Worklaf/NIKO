@@ -5099,11 +5099,8 @@ if (originalSubscribeTracks) {
 }
 
 // Сохраняем треки в кэш после загрузки из Firebase
-const originalOnSnapshot = db?.collection('tracks')?.onSnapshot;
-if (originalOnSnapshot) {
-  const originalHandler = arguments[1];
-  // Это будет работать через существующий код подписки
-}
+// Примечание: onSnapshot уже обрабатывается в основном коде подписки
+// Кэширование происходит через saveTracksToCache при обновлении globalTracks
 
 // Сохраняем в кэш при каждом обновлении треков
 document.addEventListener('DOMContentLoaded', () => {
