@@ -52,4 +52,3 @@ if (typeof firebase !== 'undefined') {
 } else {
   console.error('❌ Firebase SDK not loaded! Check script tags in HTML.');
 }
->>>>>>> 00e2a6eeefb2f97354d53a8cdfc8c66e2f5f0135
