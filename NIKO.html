@@ -2512,7 +2512,7 @@ document.getElementById('u-audio-file').addEventListener('change', (e) => {
       const role = getRole();
       const visibility = role === 'admin' ? 'public' : 'partner';
 
-      await db.collection('tracks').add({
+      const trackRef = await db.collection('tracks').add({
         title: displayTitle,
         artist: artist,
         genre: genre || '',
@@ -2530,6 +2530,27 @@ document.getElementById('u-audio-file').addEventListener('change', (e) => {
         uploadedByRole: role,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
+
+      // Отправляем push уведомление о новом треке
+      try {
+        const trackData = {
+          title: displayTitle,
+          artist: artist,
+          cover: coverUrl
+        };
+        
+        await fetch('/api/send-push-notification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            trackId: trackRef.id,
+            track: trackData
+          })
+        });
+        console.log('✅ Push notification sent for new track:', trackRef.id);
+      } catch (pushError) {
+        console.warn('⚠️ Failed to send push notification:', pushError);
+      }
 
       document.getElementById('user-upload-modal').classList.remove('open');
       pendingUserTrack = null;
