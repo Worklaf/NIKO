@@ -2,15 +2,20 @@
 
 const webpush = require('web-push');
 
-// Firebase VAPID ключи (получены из Firebase Console)
+// VAPID ключи (получены из web-push generate-vapid-keys)
 const vapidKeys = {
   publicKey: 'BO7gzbXFlUvJzea4rQozVRifl2evB6j-zwdBh7rGMBxiT2-UArp-abTloC5iQZ4IPRFcB9bAn1cFbALudJ67EYs',
-  privateKey: null // Firebase управляет приватным ключом автоматически
+  privateKey: process.env.VAPID_PRIVATE_KEY || 'your-private-key-here'
 };
 
+if (!vapidKeys.privateKey || vapidKeys.privateKey === 'your-private-key-here') {
+  console.error('VAPID_PRIVATE_KEY environment variable not set');
+}
+
 webpush.setVapidDetails(
-  'mailto:your-email@example.com',
-  vapidKeys.publicKey
+  'mailto:admin@niko-vert.vercel.app',
+  vapidKeys.publicKey,
+  vapidKeys.privateKey
 );
 
 // Firebase Admin SDK инициализация (для доступа к Firestore)
