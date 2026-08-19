@@ -275,3 +275,5 @@ window.debouncedTrackSwitch = debouncedTrackSwitch;
 window.preloadTrack = preloadTrack;
 
 console.log('📦 offline-cache.js v3 loaded');
+
+} // End of NIKO_OFFLINE_CACHE_LOADED check
