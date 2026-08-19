@@ -1,0 +1,5 @@
+{
+  "redirects": [
+    {"source": "/", "destination": "/NIKO.html", "permanent": true }
+  ]
+}

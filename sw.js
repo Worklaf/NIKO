@@ -269,6 +269,7 @@ self.addEventListener('message', (e) => {
     });
   }
 });
+<<<<<<< HEAD
 
 // ===============================
 // PUSH NOTIFICATIONS
@@ -341,3 +342,5 @@ self.addEventListener('notificationclick', (e) => {
     })
   );
 });
+=======
+>>>>>>> 00e2a6eeefb2f97354d53a8cdfc8c66e2f5f0135

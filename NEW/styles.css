@@ -184,25 +184,7 @@ h1{margin:0;font-size:24px;color:#fff}
 .control-btn.active{color:var(--accent);background:rgba(255,77,166,0.1)}
 .time-display{color:var(--muted);font-size:13px;white-space:nowrap;margin-top:4px}
 
-.side-panel{
-  position:fixed;
-  right:0;
-  top:0;
-  height:100%;
-  width:360px;
-  background:#0b0b10;
-  color:#eaeaf2;
-  padding:18px;
-  /* === ОТСТУП СНИЗУ ПОД ПЛЕЕР === */
-  padding-bottom:120px;
-  box-sizing:border-box;
-  /* === === */
-  box-shadow:-20px 0 40px rgba(0,0,0,.6);
-  transform:translateX(100%);
-  transition:transform .28s ease;
-  z-index:10001;
-  overflow:auto
-}
+.side-panel{position:fixed;right:0;top:0;height:100%;width:360px;background:#0b0b10;color:#eaeaf2;padding:18px;box-shadow:-20px 0 40px rgba(0,0,0,.6);transform:translateX(100%);transition:transform .28s ease;z-index:10001;overflow:auto}
 .side-panel.open{transform:translateX(0)}
 .side-panel h3{margin-top:0}
 
@@ -531,18 +513,6 @@ h1{margin:0;font-size:24px;color:#fff}
     height:26px;
     font-size:10px;
   }
-  
-  .btn.icon.comment-btn {
-    width: auto;
-    min-width: 26px;
-  }
-  
-  .comment-count {
-    font-size: 10px;
-    min-width: 14px;
-    display: inline-block;
-    text-align: center;
-  }
   .lang-bar .btn.icon{
     width:auto;
     height:auto;
@@ -640,11 +610,9 @@ h1{margin:0;font-size:24px;color:#fff}
   }
   
   .side-panel{
-  width:100%;
-  padding:12px;
-  padding-bottom:120px; /* отступ под плеер */
-  box-sizing:border-box;
-}
+    width:100%;
+    padding:12px;
+  }
   
   .emoji-popup-grid{
     grid-template-columns:repeat(6,1fr);
@@ -1616,26 +1584,24 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
 #chat-overlay {
   position: fixed;
   inset: 0;
-  z-index: 20000;
+  z-index: 20000;              /* выше модалок, плеера и side-panel */
   background: var(--bg);
   transform: translateX(100%);
   transition: transform .35s cubic-bezier(.4,0,.2,1);
   display: none;
   will-change: transform;
-  /* padding-bottom убран — теперь задаётся динамически в JS */
 }
 #chat-overlay.open {
   display: block;
   transform: translateX(0);
 }
-
 #chat-overlay iframe {
   width: 100%;
   height: 100%;
   border: 0;
   background: var(--bg);
-  /* padding-bottom убран — теперь задаётся у самого оверлея */
 }
+
 /* Невидимая зона свайпа справа (только мобила) */
 #chat-swipe-zone {
   position: fixed;
@@ -1744,85 +1710,3 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
   filter: drop-shadow(0 0 6px rgba(255, 122, 77, 0.5));
   transform: scale(1.1);
 }
-/* ===== TRACK UPLOAD DATE — vertical right edge ===== */
-.track-date {
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  transform: rotate(180deg);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 2.2px;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.89);
-  background: linear-gradient(180deg, 
-    rgba(255, 77, 166, 0.25) 0%, 
-    rgba(0, 209, 255, 0.15) 50%,
-    rgba(39, 182, 70, 0.1) 100%
-  );
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 0 var(--radius) var(--radius) 0;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  user-select: none;
-  text-shadow: 0 0 8px rgba(255, 77, 166, 0.4);
-  transition: opacity 0.2s ease;
-}
-
-/* Обычная дата — не кликабельна */
-.track-date:not(.track-date-editable) {
-  pointer-events: none;
-}
-
-/* Редактируемая дата — кликабельна */
-.track-date.track-date-editable {
-  pointer-events: auto;
-  cursor: pointer;
-}
-
-.track-date.track-date-editable:hover {
-  background: linear-gradient(180deg, 
-    rgba(255, 77, 166, 0.5) 0%, 
-    rgba(0, 209, 255, 0.35) 50%,
-    rgba(39, 182, 70, 0.25) 100%
-  );
-  color: #fff;
-  text-shadow: 0 0 12px rgba(255, 77, 166, 0.8);
-  box-shadow: inset 0 0 20px rgba(255, 77, 166, 0.2);
-}
-
-.track:hover .track-date:not(.track-date-editable) {
-  opacity: 0.3;
-}
-
-.track:hover .track-date {
-  opacity: 0.3;
-}
-
-/* Мобильная адаптация */
-@media (max-width: 880px) {
-  .track-date {
-    width: 22px;
-    font-size: 11px;
-    letter-spacing: 1.3px;
-  }
-}
-
-@media (max-width: 480px) {
-  .track-date {
-    width: 20px;
-    font-size: 9px;
-    letter-spacing: 1px;
-  }
-<<<<<<< HEAD
-}
-=======
-}
->>>>>>> 00e2a6eeefb2f97354d53a8cdfc8c66e2f5f0135

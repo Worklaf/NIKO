@@ -54,4 +54,8 @@ if (typeof firebase !== 'undefined') {
 }
 
 // Экспорт db (для модульной сборки, если используете ES-импорты)
+<<<<<<< HEAD
 // export { db };
+=======
+// export { db };
+>>>>>>> 00e2a6eeefb2f97354d53a8cdfc8c66e2f5f0135
