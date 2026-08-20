@@ -482,9 +482,12 @@
       <button id="pwa-install-btn" class="btn pwa-install-btn" style="display:none; background: linear-gradient(90deg, #ff4da6, #ff7a4d); color: white; border: none; padding: 8px 12px; border-radius: 50px; font-weight: 700; font-size: 11px; box-shadow: 0 4px 12px rgba(255, 77, 166, 0.3); transition: all 0.3s ease; white-space: nowrap;">
         📱 Install
       </button>
+      <!-- TODO: Push notifications временно скрыты - нужна настройка Vercel redeploy + Firestore rules -->
+      <!--
       <button id="push-notif-btn" class="btn push-notif-btn" style="display:none; background: linear-gradient(90deg, #00d1ff, #27b646); color: white; border: none; padding: 8px 12px; border-radius: 50px; font-weight: 700; font-size: 16px; box-shadow: 0 4px 12px rgba(0, 209, 255, 0.3); transition: all 0.3s ease; min-width: 40px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
         🔔
       </button>
+      -->
       <div class="lang-dropdown">
               <button id="lang-toggle" class="btn lang-toggle-btn">
           <img id="current-lang-flag" src="https://flagcdn.com/w20/us.png" alt="" style="width:18px;height:13px;border-radius:2px;object-fit:cover;display:inline-block;vertical-align:middle;"> 
@@ -2532,6 +2535,8 @@ document.getElementById('u-audio-file').addEventListener('change', (e) => {
       });
 
       // Отправляем push уведомление о новом треке
+      // TODO: Временно отключено - нужна настройка Vercel redeploy + Firestore rules
+      /*
       try {
         const trackData = {
           title: displayTitle,
@@ -2555,6 +2560,7 @@ document.getElementById('u-audio-file').addEventListener('change', (e) => {
       } catch (pushError) {
         console.warn('⚠️ Failed to send push notification:', pushError);
       }
+      */
 
       document.getElementById('user-upload-modal').classList.remove('open');
       pendingUserTrack = null;
@@ -5138,134 +5144,131 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, 2000);
 });
-
 // ===============================
-// PUSH NOTIFICATIONS
+// PUSH NOTIFICATIONS (ВРЕМЕННО ОТКЛЮЧЕНО)
+// TODO: Нужна настройка Vercel redeploy + Firestore rules
 // ===============================
-
-// Проверка поддержки Service Worker и Push API
+/*
+// Проверяем поддержку push уведомлений
 if ('serviceWorker' in navigator && 'PushManager' in window) {
   console.log('📱 Push notifications supported');
-
-  // Регистрация Service Worker
-  navigator.serviceWorker.register('/sw.js')
-    .then(registration => {
-      console.log('✅ Service Worker registered:', registration);
-
-      // Проверка текущей подписки
-      registration.pushManager.getSubscription()
-        .then(subscription => {
-          if (subscription) {
-            console.log('📬 Already subscribed to push notifications');
-            return subscription;
-          }
-          return null;
-        });
-    })
-    .catch(error => {
-      console.error('❌ Service Worker registration failed:', error);
+  
+  // Показываем кнопку уведомлений
+  const pushNotifBtn = document.getElementById('push-notif-btn');
+  if (pushNotifBtn) {
+    pushNotifBtn.style.display = 'flex';
+  }
+  
+  // Проверяем текущее состояние подписки
+  navigator.serviceWorker.ready.then(registration => {
+    registration.pushManager.getSubscription().then(subscription => {
+      if (subscription) {
+        console.log('📬 Already subscribed to push notifications');
+        pushNotifBtn.style.display = 'none';
+      }
     });
+  });
+} else {
+  console.log('⚠️ Push notifications not supported');
+}
 
-  // Функция для сохранения подписки в Firestore
-  async function savePushSubscriptionToFirestore(subscription) {
-    try {
-      const subscriptionJson = subscription.toJSON();
-      
-      // Создаем уникальный ID для подписки на основе endpoint (гарантированно уникален для каждого устройства)
-      const endpoint = subscriptionJson.endpoint;
-      const subscriptionId = btoa(endpoint).replace(/[+/=]/g, '').substring(0, 32);
-      
-      console.log('💾 Saving subscription with ID:', subscriptionId, 'endpoint:', endpoint);
-      
-      // Получаем ID пользователя если авторизован
-      const userId = localStorage.getItem('firebaseUid') || 'anonymous';
-      
-      // Сохраняем в Firestore
-      await db.collection('push_subscriptions').doc(subscriptionId).set({
-        userId: userId,
-        subscription: subscriptionJson,
-        endpoint: endpoint, // Сохраняем endpoint для отладки
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        userAgent: navigator.userAgent,
-        language: localStorage.getItem('siteLanguage') || 'en'
-      }, { merge: true });
-      
-      console.log('✅ Push subscription saved to Firestore:', subscriptionId);
-      return true;
-    } catch (error) {
-      console.error('❌ Failed to save push subscription:', error);
+// Функция для сохранения подписки в Firestore
+async function savePushSubscriptionToFirestore(subscription) {
+  try {
+    const subscriptionJson = subscription.toJSON();
+    
+    // Создаем уникальный ID для подписки на основе endpoint (гарантированно уникален для каждого устройства)
+    const endpoint = subscriptionJson.endpoint;
+    const subscriptionId = btoa(endpoint).replace(/[+/=]/g, '').substring(0, 32);
+    
+    console.log('💾 Saving subscription with ID:', subscriptionId, 'endpoint:', endpoint);
+    
+    // Получаем ID пользователя если авторизован
+    const userId = localStorage.getItem('firebaseUid') || 'anonymous';
+    
+    // Сохраняем в Firestore
+    await db.collection('push_subscriptions').doc(subscriptionId).set({
+      userId: userId,
+      subscription: subscriptionJson,
+      endpoint: endpoint, // Сохраняем endpoint для отладки
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      userAgent: navigator.userAgent,
+      language: localStorage.getItem('siteLanguage') || 'en'
+    }, { merge: true });
+    
+    console.log('✅ Push subscription saved to Firestore:', subscriptionId);
+    return true;
+  } catch (error) {
+    console.error('❌ Failed to save push subscription:', error);
+    return false;
+  }
+}
+
+// Функция для запроса разрешения и подписки
+window.subscribeToPushNotifications = async function() {
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    
+    // Проверяем текущее состояние разрешения
+    const currentPermission = Notification.permission;
+    
+    if (currentPermission === 'denied') {
+      alert('❌ Уведомления заблокированы в браузере.\n\nЧтобы включить:\n1. Нажмите на иконку замка 🔒 в адресной строке\n2. Нажмите "Разрешения сайта"\n3. Найдите "Уведомления" и нажмите "Сбросить"\n4. Затем нажмите на кнопку уведомлений снова');
       return false;
     }
-  }
-
-  // Функция для запроса разрешения и подписки
-  window.subscribeToPushNotifications = async function() {
-    try {
-      const registration = await navigator.serviceWorker.ready;
-      
-      // Проверяем текущее состояние разрешения
-      const currentPermission = Notification.permission;
-      
-      if (currentPermission === 'denied') {
-        alert('❌ Уведомления заблокированы в браузере.\n\nЧтобы включить:\n1. Нажмите на иконку замка 🔒 в адресной строке\n2. Нажмите "Разрешения сайта"\n3. Найдите "Уведомления" и нажмите "Сбросить"\n4. Затем нажмите на кнопку уведомлений снова');
-        return false;
-      }
-      
-      if (currentPermission === 'granted') {
-        // Уже разрешено - сразу подписываемся
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array('BO7gzbXFlUvJzea4rQozVRifl2evB6j-zwdBh7rGMBxiT2-UArp-abTloC5iQZ4IPRFcB9bAn1cFbALudJ67EYs')
-        });
-        
-        console.log('✅ Push subscription created:', subscription);
-        await savePushSubscriptionToFirestore(subscription);
-        return true;
-      }
-      
-      // Запрос разрешения
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        alert('❌ Разрешение на уведомления отклонено.\n\nЧтобы включить:\n1. Нажмите на иконку замка 🔒 в адресной строке\n2. Нажмите "Разрешения сайта"\n3. Найдите "Уведомления" и разрешите\n4. Затем нажмите на кнопку уведомлений снова');
-        return false;
-      }
-
-      // Создание подписки
+    
+    if (currentPermission === 'granted') {
+      // Уже разрешено - сразу подписываемся
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array('BO7gzbXFlUvJzea4rQozVRifl2evB6j-zwdBh7rGMBxiT2-UArp-abTloC5iQZ4IPRFcB9bAn1cFbALudJ67EYs')
       });
-
+      
       console.log('✅ Push subscription created:', subscription);
-      
-      // Сохранение подписки в Firestore
-      const saved = await savePushSubscriptionToFirestore(subscription);
-      console.log('💾 Subscription saved to Firestore:', saved);
-      
+      await savePushSubscriptionToFirestore(subscription);
       return true;
-    } catch (error) {
-      console.error('❌ Push subscription failed:', error);
-      alert('❌ Ошибка подписки: ' + error.message);
+    }
+    
+    // Запрос разрешения
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      alert('❌ Разрешение на уведомления отклонено.\n\nЧтобы включить:\n1. Нажмите на иконку замка 🔒 в адресной строке\n2. Нажмите "Разрешения сайта"\n3. Найдите "Уведомления" и разрешите\n4. Затем нажмите на кнопку уведомлений снова');
       return false;
     }
-  };
 
-  // Вспомогательная функция для конвертации VAPID ключа
-  function urlBase64ToUint8Array(base64String) {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
+    // Создание подписки
+    const subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array('BO7gzbXFlUvJzea4rQozVRifl2evB6j-zwdBh7rGMBxiT2-UArp-abTloC5iQZ4IPRFcB9bAn1cFbALudJ67EYs')
+    });
+
+    console.log('✅ Push subscription created:', subscription);
     
-    for (let i = 0; i < rawData.length; ++i) {
-      outputArray[i] = rawData.charCodeAt(i);
-    }
+    // Сохранение подписки в Firestore
+    const saved = await savePushSubscriptionToFirestore(subscription);
+    console.log('💾 Subscription saved to Firestore:', saved);
     
-    return outputArray;
+    return true;
+  } catch (error) {
+    console.error('❌ Push subscription failed:', error);
+    alert('❌ Ошибка подписки: ' + error.message);
+    return false;
   }
-} else {
-  console.log('⚠️ Push notifications not supported');
+};
+
+// Вспомогательная функция для конвертации VAPID ключа
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  
+  return outputArray;
 }
 
 // Обработчик кнопки подписки на уведомления
@@ -5315,6 +5318,7 @@ if (pushNotifBtn) {
     }
   });
 }
+*/
 </script>
 
 </body>
