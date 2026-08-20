@@ -59,21 +59,25 @@ export default async function handler(req, res) {
   try {
     const { trackId, track } = req.body;
 
+    console.log('📤 Push notification request received:', { trackId, track });
+
     if (!trackId || !track) {
+      console.error('❌ Missing trackId or track data');
       return res.status(400).json({ error: 'Missing trackId or track data' });
     }
 
-    console.log('Sending push notification for track:', track.title);
+    console.log('🔑 VAPID keys configured:', !!vapidKeys.privateKey);
+    console.log('🔥 Firebase initialized:', !!serviceAccount);
 
     // Получаем все активные подписки из Firestore
     const subscriptionsSnapshot = await db.collection('push_subscriptions').get();
 
     if (subscriptionsSnapshot.empty) {
-      console.log('No push subscriptions found');
+      console.log('⚠️ No push subscriptions found in Firestore');
       return res.status(200).json({ message: 'No subscriptions to notify' });
     }
 
-    console.log(`Found ${subscriptionsSnapshot.size} subscriptions`);
+    console.log(`✅ Found ${subscriptionsSnapshot.size} subscriptions`);
 
     const notifications = [];
     const failedSubscriptions = [];
@@ -100,10 +104,10 @@ export default async function handler(req, res) {
       notifications.push(
         webpush.sendNotification(subscription, JSON.stringify(notificationPayload))
           .then(() => {
-            console.log('✅ Push sent to:', doc.id);
+            console.log('✅ Push sent successfully to:', doc.id);
           })
           .catch(error => {
-            console.error('❌ Push failed for:', doc.id, error);
+            console.error('❌ Push failed for:', doc.id, error.message, error.statusCode);
 
             // Если подписка недействительна (410 Gone) - удаляем её
             if (error.statusCode === 410 || error.statusCode === 404) {
