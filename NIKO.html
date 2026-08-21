@@ -284,7 +284,7 @@
     background: var(--bg);
     display: none;
   }
-  #mini-player { z-index: 100001 !important; }
+  #mini-player { z-index: 9999 !important; }
 .share-svg-btn {
   display: inline-flex;
   align-items: center;
@@ -622,46 +622,52 @@
     <button id="login-cancel" class="btn" style="margin-top:12px;background:transparent;border:1px solid rgba(255,255,255,0.1)">Cancel</button>
     
     <div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1)">
-      <p style="color:#bfc3d6;font-size:13px;margin-bottom:16px">Or login with:</p>
-      <button id="google-login-btn" class="btn" style="width:100%;margin-bottom:10px;background:#4285f4;color:white;border:none;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;border-radius:10px">
-        <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#fff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#fff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#fff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#fff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-        Google
-      </button>
-      <button id="email-login-btn" class="btn" style="width:100%;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2)">📧 Email / Password</button>
+      <p style="color:#bfc3d6;font-size:13px;margin-bottom:12px">Or login with:</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button id="google-login-btn" class="btn" style="background:#4285f4;color:white;border:none;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:10px;font-weight:600;font-size:14px">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#fff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#fff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#fff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#fff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Google
+        </button>
+        <button id="email-login-btn" class="btn" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:10px;font-weight:600;font-size:14px">
+          📧 Email
+        </button>
+      </div>
     </div>
   </div>
 </div>
 
 <div id="email-auth-modal" class="modal" style="display:none">
-  <div class="panel" style="max-width:380px;background:linear-gradient(135deg,rgba(10,10,15,0.95),rgba(5,5,8,0.95));border:1px solid rgba(0,229,255,0.2);box-shadow:0 0 30px rgba(0,229,255,0.1)">
-    <h3 style="color:#00E5FF;text-shadow:0 0 10px rgba(0,229,255,0.5);margin-bottom:20px;text-align:center" id="email-auth-title">Login</h3>
+  <div class="panel" style="max-width:420px;background:linear-gradient(135deg,rgba(10,10,15,0.98),rgba(5,5,8,0.98));border:1px solid rgba(0,229,255,0.3);box-shadow:0 0 40px rgba(0,229,255,0.15),0 20px 60px rgba(0,0,0,0.8);border-radius:16px;padding:24px">
+    <h3 style="color:#00E5FF;text-shadow:0 0 15px rgba(0,229,255,0.6);margin-bottom:24px;text-align:center;font-size:24px;font-weight:700" id="email-auth-title">Login</h3>
     
     <div id="email-login-form">
-      <input type="email" id="auth-email" placeholder="Email" style="width:100%;padding:12px;margin-bottom:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;box-sizing:border-box">
-      <input type="password" id="auth-password" placeholder="Password" style="width:100%;padding:12px;margin-bottom:16px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;box-sizing:border-box">
+      <input type="email" id="auth-email" placeholder="Email" style="width:100%;padding:14px;margin-bottom:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;box-sizing:border-box;transition:border-color 0.3s,background 0.3s" onfocus="this.style.borderColor='rgba(0,229,255,0.5)';this.style.background='rgba(255,255,255,0.12)'" onblur="this.style.borderColor='rgba(255,255,255,0.15)';this.style.background='rgba(255,255,255,0.08)'">
+      <input type="password" id="auth-password" placeholder="Password" style="width:100%;padding:14px;margin-bottom:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;box-sizing:border-box;transition:border-color 0.3s,background 0.3s" onfocus="this.style.borderColor='rgba(0,229,255,0.5)';this.style.background='rgba(255,255,255,0.12)'" onblur="this.style.borderColor='rgba(255,255,255,0.15)';this.style.background='rgba(255,255,255,0.08)'">
       
-      <button id="auth-submit-btn" class="btn active" style="width:100%;padding:12px;margin-bottom:12px">Login</button>
-      <button id="auth-forgot-btn" class="btn" style="width:100%;background:transparent;border:1px solid rgba(255,255,255,0.1);margin-bottom:12px">Forgot Password?</button>
-      <button id="auth-toggle-register" class="btn" style="width:100%;background:transparent;border:1px solid rgba(255,255,255,0.1)">Create Account</button>
+      <div style="display:flex;gap:12px;margin-bottom:12px">
+        <button id="auth-submit-btn" class="btn active" style="flex:2;padding:14px;border-radius:12px;font-weight:600;font-size:15px">Login</button>
+        <button id="auth-toggle-register" class="btn" style="flex:1;padding:14px;border-radius:12px;background:linear-gradient(135deg,rgba(0,229,255,0.2),rgba(0,229,255,0.1));border:1px solid rgba(0,229,255,0.4);font-weight:600;font-size:15px;color:#00E5FF">Create</button>
+      </div>
+      <button id="auth-forgot-btn" class="btn" style="width:100%;background:transparent;border:1px solid rgba(255,255,255,0.1);padding:12px;border-radius:12px;font-size:14px">Forgot Password?</button>
     </div>
     
     <div id="email-register-form" style="display:none">
-      <input type="email" id="reg-email" placeholder="Email" style="width:100%;padding:12px;margin-bottom:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;box-sizing:border-box">
-      <input type="password" id="reg-password" placeholder="Password (min 6 chars)" style="width:100%;padding:12px;margin-bottom:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;box-sizing:border-box">
-      <input type="password" id="reg-password-confirm" placeholder="Confirm Password" style="width:100%;padding:12px;margin-bottom:16px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;box-sizing:border-box">
+      <input type="email" id="reg-email" placeholder="Email" style="width:100%;padding:14px;margin-bottom:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;box-sizing:border-box;transition:border-color 0.3s,background 0.3s" onfocus="this.style.borderColor='rgba(0,229,255,0.5)';this.style.background='rgba(255,255,255,0.12)'" onblur="this.style.borderColor='rgba(255,255,255,0.15)';this.style.background='rgba(255,255,255,0.08)'">
+      <input type="password" id="reg-password" placeholder="Password (min 6 chars)" style="width:100%;padding:14px;margin-bottom:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;box-sizing:border-box;transition:border-color 0.3s,background 0.3s" onfocus="this.style.borderColor='rgba(0,229,255,0.5)';this.style.background='rgba(255,255,255,0.12)'" onblur="this.style.borderColor='rgba(255,255,255,0.15)';this.style.background='rgba(255,255,255,0.08)'">
+      <input type="password" id="reg-password-confirm" placeholder="Confirm Password" style="width:100%;padding:14px;margin-bottom:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;box-sizing:border-box;transition:border-color 0.3s,background 0.3s" onfocus="this.style.borderColor='rgba(0,229,255,0.5)';this.style.background='rgba(255,255,255,0.12)'" onblur="this.style.borderColor='rgba(255,255,255,0.15)';this.style.background='rgba(255,255,255,0.08)'">
       
-      <button id="reg-submit-btn" class="btn active" style="width:100%;padding:12px;margin-bottom:12px">Create Account</button>
-      <button id="reg-toggle-login" class="btn" style="width:100%;background:transparent;border:1px solid rgba(255,255,255,0.1)">Back to Login</button>
+      <button id="reg-submit-btn" class="btn active" style="width:100%;padding:14px;margin-bottom:12px;border-radius:12px;font-weight:600;font-size:15px">Create Account</button>
+      <button id="reg-toggle-login" class="btn" style="width:100%;background:transparent;border:1px solid rgba(255,255,255,0.1);padding:12px;border-radius:12px;font-size:14px">Back to Login</button>
     </div>
     
     <div id="email-forgot-form" style="display:none">
-      <input type="email" id="forgot-email" placeholder="Enter your email" style="width:100%;padding:12px;margin-bottom:16px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;box-sizing:border-box">
+      <input type="email" id="forgot-email" placeholder="Enter your email" style="width:100%;padding:14px;margin-bottom:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;box-sizing:border-box;transition:border-color 0.3s,background 0.3s" onfocus="this.style.borderColor='rgba(0,229,255,0.5)';this.style.background='rgba(255,255,255,0.12)'" onblur="this.style.borderColor='rgba(255,255,255,0.15)';this.style.background='rgba(255,255,255,0.08)'">
       
-      <button id="forgot-submit-btn" class="btn active" style="width:100%;padding:12px;margin-bottom:12px">Send Reset Email</button>
-      <button id="forgot-toggle-login" class="btn" style="width:100%;background:transparent;border:1px solid rgba(255,255,255,0.1)">Back to Login</button>
+      <button id="forgot-submit-btn" class="btn active" style="width:100%;padding:14px;margin-bottom:12px;border-radius:12px;font-weight:600;font-size:15px">Send Reset Email</button>
+      <button id="forgot-toggle-login" class="btn" style="width:100%;background:transparent;border:1px solid rgba(255,255,255,0.1);padding:12px;border-radius:12px;font-size:14px">Back to Login</button>
     </div>
     
-    <button id="email-auth-cancel" class="btn" style="width:100%;margin-top:16px;background:transparent;border:1px solid rgba(255,255,255,0.1)">Cancel</button>
+    <button id="email-auth-cancel" class="btn" style="width:100%;margin-top:16px;background:transparent;border:1px solid rgba(255,255,255,0.1);padding:12px;border-radius:12px;font-size:14px">Cancel</button>
   </div>
 </div>
 
@@ -699,7 +705,7 @@
     <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
   </svg>
 </button>
-      <a id="mini-download" class="btn icon download-btn" href="#" download aria-label="Download" title="Download">
+      <a id="mini-download" class="btn icon download-btn" href="#" download aria-label="Download" title="Download" style="display:none;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
           <polyline points="7 10 12 15 17 10"/>
@@ -1616,7 +1622,7 @@ async function subscribeTracks() {
       console.log('🔍 Filtering by cached audio...');
       const offlineTracks = await getOfflineAvailableTracks(dbTracks);
       console.log('🔍 Found', offlineTracks.length, 'tracks with cached audio');
-      
+
       if (offlineTracks.length > 0) {
         let tracks = applyHomeFilters(offlineTracks, role);
         globalTracks = tracks;
@@ -2819,6 +2825,21 @@ document.addEventListener('click', async (e) => {
   if (!downloadBtn) return;
   e.preventDefault();
 
+  const role = getRole();
+  if (role === 'guest') {
+    // Показываем модальное окно вместо alert
+    const modal = document.getElementById('download-restriction-modal');
+    if (modal) {
+      // Обновляем тексты на текущем языке
+      document.getElementById('download-restricted-title').textContent = t('downloadRestricted');
+      document.getElementById('download-restricted-text').textContent = t('downloadRestrictedText');
+      document.getElementById('download-restricted-login-text').textContent = t('login');
+      document.getElementById('download-restricted-close-text').textContent = t('close');
+      modal.classList.add('open');
+    }
+    return;
+  }
+
   const audioUrl = downloadBtn.dataset.audio;
   const title = downloadBtn.dataset.title || 'track';
   if (!audioUrl) {
@@ -3985,7 +4006,7 @@ if (isAdmin) {
     importBtn.onclick = importFromJson;
     exportBtn.parentNode.insertBefore(importBtn, exportBtn.nextSibling);
   }
-}
+} 
 
 // === FIX: обработчики логина ===
 document.addEventListener('DOMContentLoaded', function() {
@@ -4042,6 +4063,16 @@ document.addEventListener('DOMContentLoaded', function() {
     updatePinDisplay();
   });
 
+  // Download Restriction Modal Handlers
+  document.getElementById('download-restriction-login-btn')?.addEventListener('click', () => {
+    document.getElementById('download-restriction-modal').classList.remove('open');
+    document.getElementById('login-modal').classList.add('open');
+  });
+
+  document.getElementById('download-restriction-close-btn')?.addEventListener('click', () => {
+    document.getElementById('download-restriction-modal').classList.remove('open');
+  });
+
   // Firebase Auth - Google Login
   document.getElementById('google-login-btn')?.addEventListener('click', async () => {
     try {
@@ -4075,9 +4106,12 @@ document.addEventListener('DOMContentLoaded', function() {
   // Email Auth Modal Handlers
   document.getElementById('email-login-btn')?.addEventListener('click', () => {
     document.getElementById('login-modal').classList.remove('open');
-    document.getElementById('email-auth-modal').style.display = 'block';
-    document.getElementById('email-auth-modal').classList.add('open');
+    const emailModal = document.getElementById('email-auth-modal');
+    emailModal.style.display = 'flex';
+    emailModal.classList.add('open');
     showEmailForm('login');
+    // Update modal text with translations
+    updateEmailAuthModalTranslations();
   });
 
   document.getElementById('email-auth-cancel')?.addEventListener('click', () => {
@@ -4173,25 +4207,6 @@ document.addEventListener('DOMContentLoaded', function() {
       alert('Failed to send reset email: ' + error.message);
     }
   });
-
-  function showEmailForm(formType) {
-    document.getElementById('email-login-form').style.display = 'none';
-    document.getElementById('email-register-form').style.display = 'none';
-    document.getElementById('email-forgot-form').style.display = 'none';
-    
-    const titleEl = document.getElementById('email-auth-title');
-    
-    if (formType === 'login') {
-      document.getElementById('email-login-form').style.display = 'block';
-      titleEl.textContent = 'Login';
-    } else if (formType === 'register') {
-      document.getElementById('email-register-form').style.display = 'block';
-      titleEl.textContent = 'Create Account';
-    } else if (formType === 'forgot') {
-      document.getElementById('email-forgot-form').style.display = 'block';
-      titleEl.textContent = 'Reset Password';
-    }
-  }
 
   // Firebase Auth State Listener
   firebase.auth().onAuthStateChanged(async (user) => {
@@ -4329,14 +4344,38 @@ document.addEventListener('DOMContentLoaded', function() {
   setTimeout(updateVisibility, 100);
 }
 
-// Запускаем после загрузки
-document.addEventListener('DOMContentLoaded', () => {
-  // ... ваш существующий код ...
+function showEmailForm(formType) {
+  document.getElementById('email-login-form').style.display = formType === 'login' ? 'block' : 'none';
+  document.getElementById('email-register-form').style.display = formType === 'register' ? 'block' : 'none';
+  document.getElementById('email-forgot-form').style.display = formType === 'forgot' ? 'block' : 'none';
+  
+  const title = document.getElementById('email-auth-title');
+  if (formType === 'login') title.textContent = t('login');
+  else if (formType === 'register') title.textContent = t('createAccount');
+  else if (formType === 'forgot') title.textContent = t('forgotPassword');
+  
+  updateEmailAuthModalTranslations();
+}
 
-  // Запускаем кнопку ПОСЛЕ всего
-  setTimeout(initFloatingLogout, 500);
-});
-});
+function updateEmailAuthModalTranslations() {
+  // Update placeholders
+  document.getElementById('auth-email').placeholder = t('email');
+  document.getElementById('auth-password').placeholder = t('password');
+  document.getElementById('reg-email').placeholder = t('email');
+  document.getElementById('reg-password').placeholder = t('passwordMin');
+  document.getElementById('reg-password-confirm').placeholder = t('confirmPassword');
+  document.getElementById('forgot-email').placeholder = t('email');
+  
+  // Update buttons
+  document.getElementById('auth-submit-btn').textContent = t('login');
+  document.getElementById('auth-toggle-register').textContent = t('create');
+  document.getElementById('auth-forgot-btn').textContent = t('forgotPassword');
+  document.getElementById('reg-submit-btn').textContent = t('createAccount');
+  document.getElementById('reg-toggle-login').textContent = t('backToLogin');
+  document.getElementById('forgot-submit-btn').textContent = t('sendResetEmail');
+  document.getElementById('forgot-toggle-login').textContent = t('backToLogin');
+  document.getElementById('email-auth-cancel').textContent = t('cancel');
+}
 
 /* Обновление UI иконок play/pause */
 window.updateTrackPlayIcons = function() {
@@ -4486,7 +4525,7 @@ window.updateTrackPlayIcons = function() {
     }
   });
 })();
-
+}); 
 </script>
 
 <div id="visualizer-fullscreen" style="
@@ -4540,22 +4579,22 @@ window.updateTrackPlayIcons = function() {
     bottom: 20px;
     left: 0;
     right: 0;
-    display: flex;
-    justify-content: center;
-    gap: 8px;
+    text-align: center;
     z-index: 51;
-  " id="visualizer-dots">
-  </div>
+    font-size: 14px;
+    color: rgba(255,255,255,0.6);
+  " id="viz-hint">Tap to close</div>
   <div style="
     flex: 1;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 0 20px 20px;
+    width: 100%;
+    height: 100%;
   ">
-    <canvas id="audio-visualizer" style="
-      max-width: 100%;
+    <canvas id="circular-spectrum" style="
+      width: 100%;
+      height: 100%;
       max-height: 70vh;
       border-radius: 12px;
     "></canvas>
@@ -4614,6 +4653,20 @@ window.updateTrackPlayIcons = function() {
     </div>
   </div>
 </div>
+
+<div id="download-restriction-modal" class="modal">
+  <div class="panel" style="max-width:380px;text-align:center;background:linear-gradient(135deg,rgba(10,10,15,0.95),rgba(5,5,8,0.95));border:1px solid rgba(255,77,166,0.2);box-shadow:0 0 30px rgba(255,77,166,0.1)">
+    <div style="font-size:48px;margin-bottom:16px">🔒</div>
+    <h3 id="download-restricted-title" style="color:#ff4da6;text-shadow:0 0 10px rgba(255,77,166,0.5);margin-bottom:16px">Загрузка ограничена</h3>
+    <p id="download-restricted-text" style="color:#bfc3d6;font-size:14px;line-height:1.6;margin-bottom:20px">Загрузка треков доступна только зарегистрированным пользователям</p>
+    <button id="download-restriction-login-btn" class="btn active" style="background:linear-gradient(90deg,#00d1ff,#27b646);border:none;padding:12px 24px;border-radius:50px;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.3s ease">
+      <span id="download-restricted-login-text">Войти</span>
+    </button>
+    <button id="download-restriction-close-btn" class="btn" style="margin-top:12px;background:transparent;border:1px solid rgba(255,255,255,0.1);padding:10px 20px;border-radius:50px;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.3s ease">
+      <span id="download-restricted-close-text">Закрыть</span>
+    </button>
+  </div>
+</div>
 <!-- Плавающая кнопка выхода -->
 <button id="floating-logout-btn" title="Выйти">
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -4668,9 +4721,9 @@ window.updateTrackPlayIcons = function() {
   console.log('✅ Плавающая кнопка (верх-справа, при скролле) инициализирована');
 })();
 
+</script>
 
-
-
+<script>
 
 
 // ===============================
@@ -5078,8 +5131,14 @@ const CACHE_KEY = `niko_tracks_cache_${CACHE_VERSION}`;
 
 function saveTracksToCache(tracks) {
   try {
+    // Сохраняем треки с createdAt для корректного отображения даты в офлайн режиме
+    const tracksWithDates = tracks.map(track => ({
+        ...track,
+      _cachedCreatedAt: track.createdAt ? (typeof track.createdAt.toDate === 'function' ? track.createdAt.toDate().toISOString() : new Date(track.createdAt).toISOString()) : null
+    }));
+    
     const cacheData = {
-      tracks: tracks,
+      tracks: tracksWithDates,
       timestamp: Date.now(),
       version: CACHE_VERSION
     };
