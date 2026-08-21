@@ -268,9 +268,9 @@ h1{margin:0;font-size:24px;color:#fff}
   resize: vertical;
 }
 
-.modal{display:none;position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;z-index:10002}
+.modal{display:none;position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,0.6);align-items:flex-start;justify-content:center;z-index:100010;padding-top:80px;overflow-y:auto}
 .modal.open{display:flex}
-.panel{width:min(720px,95%);background:#0b0b10;border-radius:12px;padding:16px;color:#eaeaf2;box-shadow:0 20px 60px rgba(0,0,0,.7);max-height:80vh;overflow:auto}
+.panel{width:min(720px,95%);background:#0b0b10;border-radius:12px;padding:16px;color:#eaeaf2;box-shadow:0 20px 60px rgba(0,0,0,.7);max-height:70vh;overflow:auto;margin-bottom:100px}
 
 .emoji-popup-modal {
   display: none;
