@@ -1752,11 +1752,11 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
 
 @media (max-width: 480px) {
   .track-date {
-    width: 20px;
+    width: 40px;
     font-size: 9px;
     letter-spacing: 1px;
   }
-  
+  }
 /* Pin Pad */
 .pin-pad {
   display: grid;
@@ -2333,20 +2333,6 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
   top: 2px;
   box-shadow: 0 2px 0 #1a0a0a, 0 4px 15px rgba(255, 77, 77, 0.2) !important;
 }
-/* --- Login Button — Logged In (logout style) --- */
-.login-niko-btn.logged-in {
-  background: #0b0b14 !important;
-  color: #ff6b6b !important;
-  border: 2px solid #2a1515 !important;
-  box-shadow: 0 4px 0 #1a0a0a, 0 6px 20px rgba(0,0,0,0.4) !important;
-}
-
-.login-niko-btn.logged-in:hover {
-  border-color: #ff4d4d !important;
-  box-shadow: 0 6px 0 #1a0a0a, 0 0 25px rgba(255, 77, 77, 0.25) !important;
-  color: #ff8080 !important;
-}
-
 /* --- Search Inputs --- */
 .search-input,
 .search-select,
@@ -2495,44 +2481,6 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
   box-shadow: 0 4px 0 #07070a, 0 0 20px rgba(0, 209, 255, 0.25);
 }
 
-/* --- Selected Genre Tags --- */
-.selected-genres {
-  gap: 6px;
-  margin-top: 8px;
-}
-
-.genre-tag {
-  background: #0f0f1a !important;
-  border: 2px solid #1a1a2e !important;
-  color: #ff4da6 !important;
-  border-radius: 20px !important;
-  padding: 4px 14px !important;
-  font-size: 11px;
-  font-weight: 800;
-  box-shadow: 0 2px 0 #0a0a10;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: all 0.2s ease;
-}
-
-.genre-tag:hover {
-  border-color: #ff4da6 !important;
-  box-shadow: 0 2px 0 #0a0a10, 0 0 15px rgba(255, 77, 166, 0.2);
-}
-
-.genre-tag .remove-genre {
-  color: #ff2d6e;
-  font-size: 14px;
-  line-height: 1;
-  margin-left: 6px;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.genre-tag .remove-genre:hover {
-  transform: scale(1.3);
-}
-
 /* --- Admin Buttons --- */
 #addTrackBtn,
 #exportJsonBtn,
@@ -2620,4 +2568,161 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
     font-size: 11px !important;
     padding: 7px 28px 7px 12px !important;
   }
+}/* ========================================
+   GENRE TAGS — gradient + readable text
+   ======================================== */
+
+.genre-tag {
+  background: linear-gradient(90deg, var(--accent), var(--accent2)) !important;
+  color: #07060a !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(255, 77, 166, 0.25) !important;
+  text-transform: none !important;
+  letter-spacing: 0.2px !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  padding: 4px 12px !important;
+  border-radius: 20px !important;
+}
+
+.genre-tag .remove-genre {
+  color: #07060a !important;
+  font-weight: 800 !important;
+  opacity: 0.6;
+  margin-left: 6px;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.genre-tag .remove-genre:hover {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+/* ========================================
+   CUSTOM GENRE DROPDOWN (multi-select)
+   ======================================== */
+
+.filter-genre-col {
+  position: relative;
+  z-index: 500;
+}
+
+.custom-genre-dropdown {
+  position: relative;
+  width: 100%;
+  display: none; /* hidden until JS opens it */
+}
+
+.custom-genre-trigger {
+  background: #0b0b14;
+  border: 2px solid #151520;
+  border-radius: 14px;
+  color: #fff;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #07070a, 0 6px 20px rgba(0,0,0,0.3);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.custom-genre-trigger:hover {
+  border-color: rgba(255,77,166,0.3);
+}
+
+.custom-genre-dropdown.open .custom-genre-trigger {
+  border-color: #ff4da6;
+}
+
+.custom-genre-options {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  max-height: 260px;
+  overflow-y: auto;
+  z-index: 10000;
+  background: #0b0b14;
+  border: 2px solid #1a1a2e;
+  border-radius: 14px;
+  padding: 6px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+  display: none;
+}
+
+.custom-genre-dropdown.open .custom-genre-options {
+  display: block;
+}
+
+.custom-genre-option {
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #eaeaf2;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.custom-genre-option:hover {
+  background: rgba(255,77,166,0.1);
+  color: #ff4da6;
+}
+
+.custom-genre-option.selected {
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  color: #07060a;
+  font-weight: 700;
+}
+
+/* Scrollbar */
+.custom-genre-options::-webkit-scrollbar { width: 6px; }
+.custom-genre-options::-webkit-scrollbar-track { background: transparent; }
+.custom-genre-options::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+}
+
+/* ========================================
+   MOBILE STYLES
+   ======================================== */
+
+@media (max-width: 880px) {
+  .selected-genres {
+    gap: 6px !important;
+    margin-top: 8px !important;
+  }
+
+  .genre-tag {
+    font-size: 11px !important;
+    padding: 3px 10px !important;
+  }
+
+  .custom-genre-trigger {
+    font-size: 15px;
+    padding: 8px 14px;
+  }
+
+  .custom-genre-options {
+    max-height: 240px;
+  }
+
+  .custom-genre-option {
+    font-size: 14px;
+    padding: 12px 14px;
+  }
+}
+@media (min-width: 881px) {
+  .custom-genre-options {
+    right: auto;                 /* снимаем привязку к ширине колонки */
+    width: min(860px, calc(100vw - 60px));
+    max-height: 460px;
+    display: none;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 2px 6px;
+  }
+  .custom-genre-dropdown.open .custom-genre-options { display: grid; }
+  .custom-genre-option { padding: 8px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 }
