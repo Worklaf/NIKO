@@ -360,6 +360,7 @@ const translations = {
     likedTracks: "Улюблені",
     downloadRestricted: "Завантаження обмежено",
     downloadRestrictedText: "Завантаження треків доступне тільки для зареєстрованих користувачів",
+    login: "Увійти",
     createAccount: "Створити акаунт",
     create: "Створити",
     email: "Email",
