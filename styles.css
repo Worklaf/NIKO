@@ -1752,9 +1752,9 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
 
 @media (max-width: 480px) {
   .track-date {
-    width: 40px;
-    font-size: 9px;
-    letter-spacing: 1px;
+    width: 20px;
+    font-size: 11px;
+    letter-spacing: 2px;
   }
   }
 /* Pin Pad */
