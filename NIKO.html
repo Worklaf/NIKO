@@ -73,35 +73,7 @@
       flex-shrink: 0;
       flex-wrap: nowrap;
     }
-    .sort-controls select {
-      padding: 6px 10px;
-      border-radius: 50px;
-      background: linear-gradient(90deg, #ff4da6, #ff7a4d);
-      border: none;
-      color: #fff;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(255, 77, 166, 0.3);
-      white-space: nowrap;
-      min-width: 0;
-    }
-    .sort-controls select option {
-      background: #0b0b10;
-      color: #eaeaf2;
-    }
-        .sort-controls select {
-      padding: 6px 10px;
-      border-radius: 6px;
-      background: #0b0b10;
-      border: 1px solid rgba(255,255,255,0.1);
-      color: #eaeaf2;
-      font-size: 13px;
-    }
-    .sort-controls select option {
-      background: #0b0b10;
-      color: #eaeaf2;
-    }
+    
     .new-tracks-btn { position: relative; }
     .new-tracks-btn .badge {
       position: absolute;
@@ -657,7 +629,12 @@
       </div>
       <div class="login-wrap">
         <button id="loginBtn" class="btn login-niko-btn">
-  <span class="login-icon">🔐</span>
+  <span class="login-icon" id="login-icon-emoji">🔐</span>
+  <svg id="login-icon-logged" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px;display:none">
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+    <polyline points="16 17 21 12 16 7"/>
+    <line x1="21" y1="12" x2="9" y2="12"/>
+  </svg>
   <span id="login-text" data-i18n="login">Войти</span>
 </button>
       </div>
@@ -3952,29 +3929,34 @@ Continue?`
 // === FIX: refreshLoginBtn с правильным отображением кнопок ===
 function refreshLoginBtn() {
   const r = getRole();
-  const logo = document.getElementById('site-logo');
-  if (logo) {
-    if (r === 'admin' || r === 'partner') logo.classList.add('clickable');
-    else logo.classList.remove('clickable');
-  }
-
   const loginBtn = document.getElementById('loginBtn');
   const loginText = document.getElementById('login-text');
-  const loginIcon = loginBtn?.querySelector('.login-icon');
+  const loginIconEmoji = document.getElementById('login-icon-emoji');
+  const loginIconLogged = document.getElementById('login-icon-logged');
 
-  // Обновляем иконку
-  if (loginIcon) {
-    loginIcon.textContent = (r === 'guest') ? '🔐' : '🚪';
+  if (loginBtn) {
+    if (r === 'guest') {
+      loginBtn.classList.remove('logged-in');
+      if (loginIconEmoji) loginIconEmoji.style.display = 'inline';
+      if (loginIconLogged) loginIconLogged.style.display = 'none';
+    } else {
+      loginBtn.classList.add('logged-in');
+      if (loginIconEmoji) loginIconEmoji.style.display = 'none';
+      if (loginIconLogged) loginIconLogged.style.display = 'inline';
+    }
   }
 
-  // Обновляем текст через data-i18n для мгновенного перевода
   if (loginText) {
     const key = (r === 'guest') ? 'login' : 'logout';
     loginText.dataset.i18n = key;
     const translated = t(key);
-if (translated) {
-  loginText.textContent = translated;
-}
+    if (translated) loginText.textContent = translated;
+  }
+
+  const logo = document.getElementById('site-logo');
+  if (logo) {
+    if (r === 'admin' || r === 'partner') logo.classList.add('clickable');
+    else logo.classList.remove('clickable');
   }
 
   const addTrackBtn = document.getElementById('addTrackBtn');
@@ -3982,6 +3964,7 @@ if (translated) {
   const resetPlaysBtn = document.getElementById('resetPlaysBtn');
   const managePlaylistsBtn = document.getElementById('managePlaylistsBtn');
   const newTracksBtn = document.getElementById('newTracksBtn');
+  const likedTracksBtn = document.getElementById('likedTracksBtn');
   const userUploadBtn = document.getElementById('userUploadBtn');
 
   if (addTrackBtn) addTrackBtn.style.display = (r === 'admin') ? 'inline-flex' : 'none';
