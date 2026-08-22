@@ -671,6 +671,10 @@
             <select id="siteGenre" class="search-select" aria-label="Genre">
               <option value="">All genres</option>
             </select>
+            <div id="custom-genre-dropdown" class="custom-genre-dropdown" style="display:none;">
+    <div class="custom-genre-trigger" id="custom-genre-trigger">Wszystkie gatunki</div>
+    <div class="custom-genre-options" id="custom-genre-options"></div>
+  </div>
             <div id="selected-genres" class="selected-genres"></div>
           </div>
                    <div class="filter-col filter-owner-col">
@@ -1988,7 +1992,7 @@ let isMultiGenreMode = false;
 let isGenreSorted = false;
 
 function loadGenresToFilter() {
-  const genreMap = new Map(); // normalized -> displayName
+  const genreMap = new Map();
 
   globalTracks.forEach(track => {
     if (track.genre) {
@@ -2002,9 +2006,9 @@ function loadGenresToFilter() {
     }
   });
 
-  // Сортируем по отображаемому имени
   const sortedGenres = Array.from(genreMap.entries()).sort((a, b) => a[1].localeCompare(b[1]));
 
+  /* --- Обычный select (одиночный выбор) --- */
   const genreSelect = document.getElementById('siteGenre');
   const currentVal = genreSelect.value;
   while (genreSelect.options.length > 1) genreSelect.remove(1);
@@ -2021,21 +2025,64 @@ function loadGenresToFilter() {
   } else if (!isMultiGenreMode) {
     genreSelect.value = '';
   }
+
+  /* --- Кастомный dropdown (мультивыбор) --- */
+  const customOptions = document.getElementById('custom-genre-options');
+  if (customOptions) {
+    customOptions.innerHTML = '';
+    sortedGenres.forEach(([normalized, display]) => {
+      const div = document.createElement('div');
+      div.className = 'custom-genre-option';
+      div.dataset.value = normalized;
+      div.textContent = display;
+      if (selectedGenres.includes(normalized)) div.classList.add('selected');
+
+      div.addEventListener('click', (e) => {
+        e.stopPropagation(); // <-- ключевое: не даём закрыть список
+        const idx = selectedGenres.indexOf(normalized);
+        if (idx === -1) {
+          selectedGenres.push(normalized);
+        } else {
+          selectedGenres.splice(idx, 1); // повторный клик — убрать
+        }
+        renderSelectedGenres();
+        filterTracks();
+        // Обновляем подсветку внутри открытого списка
+        document.querySelectorAll('.custom-genre-option').forEach(opt => {
+          opt.classList.toggle('selected', selectedGenres.includes(opt.dataset.value));
+        });
+      });
+
+      customOptions.appendChild(div);
+    });
+  }
 }
 
 function renderSelectedGenres() {
   const container = document.getElementById('selected-genres');
   if (!container) return;
-  if (selectedGenres.length === 0) { container.innerHTML = ''; return; }
+
+  if (selectedGenres.length === 0) {
+    container.innerHTML = '';
+    document.querySelectorAll('.custom-genre-option').forEach(opt => opt.classList.remove('selected'));
+    return;
+  }
+
   container.innerHTML = selectedGenres.map(g => `
     <span class="genre-tag">${getGenreDisplayName(g)} <span class="remove-genre" data-genre="${g}">×</span></span>
   `).join('');
+
   container.querySelectorAll('.remove-genre').forEach(btn => {
     btn.addEventListener('click', () => {
       selectedGenres = selectedGenres.filter(x => x !== btn.dataset.genre);
       renderSelectedGenres();
       filterTracks();
     });
+  });
+
+  // Синхронизируем подсветку в открытом кастомном списке
+  document.querySelectorAll('.custom-genre-option').forEach(opt => {
+    opt.classList.toggle('selected', selectedGenres.includes(opt.dataset.value));
   });
 }
 
@@ -3199,17 +3246,34 @@ await loadSavedLanguage();
   });
 
   document.getElementById('genre-multi-btn')?.addEventListener('click', () => {
-    isMultiGenreMode = !isMultiGenreMode;
-    const btn = document.getElementById('genre-multi-btn');
-    btn.classList.toggle('active', isMultiGenreMode);
-    btn.textContent = isMultiGenreMode ? '☑' : '☐';
-    if (!isMultiGenreMode) {
-      selectedGenres = [];
-      document.getElementById('siteGenre').value = '';
-      renderSelectedGenres();
+  isMultiGenreMode = !isMultiGenreMode;
+  const btn = document.getElementById('genre-multi-btn');
+  const genreSelect = document.getElementById('siteGenre');
+  const customDropdown = document.getElementById('custom-genre-dropdown');
+
+  btn.classList.toggle('active', isMultiGenreMode);
+  btn.textContent = isMultiGenreMode ? '☑' : '☐';
+
+  if (isMultiGenreMode) {
+    // Включаем мультивыбор: прячем <select>, показываем кастомный (ЗАКРЫТЫЙ)
+    if (genreSelect) genreSelect.style.display = 'none';
+    if (customDropdown) {
+      customDropdown.style.display = 'block';
+      // НЕ открываем автоматически! Пользователь сам кликнет по "Wszystkie gatunki"
     }
-    filterTracks();
-  });
+    if (genreSelect) genreSelect.value = '';
+  } else {
+    // Выключаем мультивыбор: возвращаем <select>, прячем кастомный
+    if (genreSelect) genreSelect.style.display = '';
+    if (customDropdown) {
+      customDropdown.style.display = 'none';
+      customDropdown.classList.remove('open');
+    }
+    selectedGenres = [];        // ← добавить
+    renderSelectedGenres();     // ← добавить: чистит теги и снимает подсветку
+  }
+  filterTracks();
+});
 
   document.getElementById('siteGenre')?.addEventListener('change', (e) => {
     if (isMultiGenreMode) {
@@ -4258,7 +4322,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('select-all-plays').checked = false;
       });
     });
-    
+   
     // Bulk date change handlers
     document.getElementById('bulkDateBtn')?.addEventListener('click', openBulkDateModal);
     document.getElementById('bulk-date-cancel')?.addEventListener('click', () => {
@@ -4322,7 +4386,21 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     };
   }
+ // Открытие/закрытие кастомного dropdown по клику на заголовок
+document.getElementById('custom-genre-trigger')?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('custom-genre-dropdown')?.classList.toggle('open');
+});
 
+// Закрытие при клике вне списка (но НЕ при клике на жанр внутри — см. stopPropagation выше)
+document.addEventListener('click', (e) => {
+  const customDropdown = document.getElementById('custom-genre-dropdown');
+  if (customDropdown && customDropdown.classList.contains('open')) {
+    if (!e.target.closest('#custom-genre-dropdown') && !e.target.closest('#genre-multi-btn')) {
+      customDropdown.classList.remove('open');
+    }
+  }
+});
   // Download Restriction Modal Handlers
   document.getElementById('download-restriction-login-btn')?.addEventListener('click', () => {
     document.getElementById('download-restriction-modal').classList.remove('open');
