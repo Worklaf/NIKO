@@ -1962,10 +1962,87 @@ async function deleteCommentFromServer(trackId, commentId) {
 let selectedGenres = [];
 let isMultiGenreMode = false;
 let isGenreSorted = false;
+let _lastGenreBuildKey = '';
+let expandedParents = new Set();
+function buildGenreParent(value, display, totalCount, childrenCount) {
+  const div = document.createElement('div');
+  div.className = 'custom-genre-option genre-parent';
+  div.dataset.value = value;
+  div.dataset.search = display.toLowerCase();
 
+  const label = document.createElement('span');
+  label.className = 'genre-label';
+  label.textContent = display;
+
+  const right = document.createElement('div');
+  right.className = 'genre-parent-right';
+
+  const countSpan = document.createElement('span');
+  countSpan.className = 'genre-count';
+  countSpan.textContent = totalCount;
+  right.appendChild(countSpan);
+
+  // Стрелка тоггла (отдельная, не мешает выбору)
+  if (childrenCount > 0) {
+    const arrow = document.createElement('span');
+    const isExpanded = expandedParents.has(value);
+    arrow.className = 'genre-arrow' + (isExpanded ? ' expanded' : '');
+    arrow.innerHTML = isExpanded ? '&#9662;' : '&#9656;'; // ▼ / ▶
+
+    arrow.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const container = div.nextElementSibling;
+      if (!container || !container.classList.contains('genre-children')) return;
+
+      if (expandedParents.has(value)) {
+        expandedParents.delete(value);
+        container.classList.remove('open');
+        arrow.classList.remove('expanded');
+        arrow.innerHTML = '&#9656;';
+      } else {
+        expandedParents.add(value);
+        container.classList.add('open');
+        arrow.classList.add('expanded');
+        arrow.innerHTML = '&#9662;';
+      }
+    });
+    right.appendChild(arrow);
+  }
+
+  div.appendChild(label);
+  div.appendChild(right);
+
+  // Клик по самому родителю (не по стрелке) — выбирает жанр
+  div.addEventListener('click', (e) => {
+    if (e.target.closest('.genre-arrow')) return;
+    e.stopPropagation();
+
+    if (isMultiGenreMode) {
+      const idx = selectedGenres.indexOf(value);
+      if (idx === -1) selectedGenres.push(value);
+      else selectedGenres.splice(idx, 1);
+      renderSelectedGenres();
+    } else {
+      const sel = document.getElementById('siteGenre');
+      if (sel) sel.value = value;
+      document.getElementById('custom-genre-dropdown')?.classList.remove('open');
+    }
+    highlightGenreOptions();
+    updateGenreTriggerText();
+    filterTracks();
+  });
+
+  return div;
+}
 function loadGenresToFilter() {
-  const count = new Map();          // key -> число треков
+  // === ГАРД: не перестраивать, если набор треков тот же ===
+  const key = globalTracks.length + '|' + globalTracks.map(t => t.id).join(',');
+  if (key === _lastGenreBuildKey) return;
+  _lastGenreBuildKey = key;
+
+  const count = new Map();
   const parentKeys = new Set();
+
 
   globalTracks.forEach(track => {
     const seen = new Set();
@@ -2021,19 +2098,42 @@ function loadGenresToFilter() {
     genreSelect.value = '';
   }
 
-  /* --- красивый список --- */
+   /* --- красивый список --- */
   const box = document.getElementById('custom-genre-options');
   if (box) {
     box.innerHTML = '';
     box.appendChild(buildGenreOption('', getAllGenresLabel(), globalTracks.length, true));
 
-    rows.forEach(r => {
-      const opt = buildGenreOption(r.key, r.label, count.get(r.key) || 0, false);
-      opt.classList.add(r.level === 'parent' ? 'genre-parent' : 'genre-sub');
-      // поиск ищет и по названию родителя: "phonk" находит все его подстили
-      opt.dataset.search = (r.label + ' ' + (r.parent || '')).toLowerCase();
-      box.appendChild(opt);
-    });
+    Array.from(parentKeys)
+      .sort((a, b) => getGenreDisplayName(a).localeCompare(getGenreDisplayName(b)))
+      .forEach(pKey => {
+        const subGenres = Array.from(GENRE_CHILDREN.get(pKey) || [])
+          .filter(k => k !== pKey && count.has(k))
+          .sort((a, b) => getGenreDisplayName(a).localeCompare(getGenreDisplayName(b)));
+
+        const parentCount = count.get(pKey) || 0;
+        const totalCount = subGenres.reduce((sum, k) => sum + (count.get(k) || 0), parentCount);
+
+        // Родитель
+        const parentEl = buildGenreParent(pKey, getGenreDisplayName(pKey), totalCount, subGenres.length);
+        box.appendChild(parentEl);
+
+        // Контейнер поджанров
+        if (subGenres.length > 0) {
+          const childrenBox = document.createElement('div');
+          childrenBox.className = 'genre-children';
+          childrenBox.dataset.parent = pKey;
+          if (expandedParents.has(pKey)) childrenBox.classList.add('open');
+
+          subGenres.forEach(cKey => {
+            const opt = buildGenreOption(cKey, getGenreDisplayName(cKey), count.get(cKey) || 0, false);
+            opt.classList.add('genre-sub');
+            opt.dataset.search = (getGenreDisplayName(cKey) + ' ' + getGenreDisplayName(pKey)).toLowerCase();
+            childrenBox.appendChild(opt);
+          });
+          box.appendChild(childrenBox);
+        }
+      });
 
     const empty = document.createElement('div');
     empty.className = 'genre-search-empty';
@@ -2046,6 +2146,74 @@ function loadGenresToFilter() {
   if (typeof applyGenreSearch === 'function') applyGenreSearch();
   highlightGenreOptions();
   updateGenreTriggerText();
+}
+function applyGenreSearch() {
+  const input = document.querySelector('.genre-search');
+  const query = input ? input.value.trim().toLowerCase() : '';
+  const options = document.querySelectorAll('.custom-genre-option');
+  const empty = document.getElementById('genre-search-empty');
+  let visibleCount = 0;
+
+  options.forEach(opt => {
+    const searchText = opt.dataset.search || opt.textContent.toLowerCase();
+    const match = !query || searchText.includes(query);
+    opt.style.display = match ? 'flex' : 'none';
+    if (match) visibleCount++;
+
+    // 🔑 Авто-раскрытие ТОЛЬКО при активном поиске (введён текст)
+    if (query && match && opt.classList.contains('genre-sub')) {
+      const container = opt.closest('.genre-children');
+      if (container) {
+        container.classList.add('open');
+        const parentOpt = container.previousElementSibling;
+        if (parentOpt && parentOpt.classList.contains('genre-parent')) {
+          parentOpt.style.display = 'flex';
+          const arrow = parentOpt.querySelector('.genre-arrow');
+          if (arrow) {
+            arrow.classList.add('expanded');
+            arrow.innerHTML = '&#9662;';
+            expandedParents.add(parentOpt.dataset.value);
+          }
+        }
+      }
+    }
+  });
+
+  // 🔑 При пустом поиске восстанавливаем только ручное состояние expandedParents
+  if (!query) {
+    document.querySelectorAll('.genre-children').forEach(container => {
+      const parentKey = container.dataset.parent;
+      const parentOpt = container.previousElementSibling;
+
+      if (expandedParents.has(parentKey)) {
+        // Пользователь сам раскрывал — оставляем открытым
+        container.classList.add('open');
+        if (parentOpt) {
+          parentOpt.style.display = 'flex';
+          const arrow = parentOpt.querySelector('.genre-arrow');
+          if (arrow) {
+            arrow.classList.add('expanded');
+            arrow.innerHTML = '&#9662;';
+          }
+        }
+      } else {
+        // По умолчанию скрыто (мобила) или раскрыто (ПК — управляется CSS)
+        container.classList.remove('open');
+        if (parentOpt) {
+          const arrow = parentOpt.querySelector('.genre-arrow');
+          if (arrow) {
+            arrow.classList.remove('expanded');
+            arrow.innerHTML = '&#9656;';
+          }
+        }
+      }
+    });
+  }
+
+  if (empty) {
+    empty.style.display = visibleCount === 0 ? 'block' : 'none';
+    empty.textContent = query ? 'No genres found' : '';
+  }
 }
 function getAllGenresLabel() {
   const first = document.getElementById('siteGenre')?.options[0];
