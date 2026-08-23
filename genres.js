@@ -134,9 +134,26 @@ function parseTrackGenres(rawGenreString) {
 
     if (!parents.length) { GENRE_DROPPED.add(tag); return; }
 
-    const label = titleCaseGenre(clean);
-    const key = normalizeGenre(label);
-    GENRE_LABELS.set(key, label);
+    // Если строка длинная — оставляем только название жанра
+let label;
+if (parents.length === 1) {
+  // один жанр → используем его красивое название
+  label = GENRE_LABELS.get(parents[0]) || titleCaseGenre(clean);
+} else {
+  // несколько жанров → создаём отдельные подстили
+  // например: Dark Romantic + Ritual Trap
+  parents.forEach(p => {
+    const pLabel = GENRE_LABELS.get(p);
+    const pKey = normalizeGenre(pLabel);
+    subs.push({ key: pKey, label: pLabel, parents: [p] });
+    keys.add(pKey);
+  });
+  return; // не добавляем длинный label
+}
+
+const key = normalizeGenre(label);
+GENRE_LABELS.set(key, label);
+
 
     const known = GENRE_PARENTS.get(key) || [];
     parents.forEach(p => { if (known.indexOf(p) === -1) known.push(p); });
