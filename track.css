@@ -1,0 +1,486 @@
+/* =========================================================================
+   track.css — страница отдельного трека (в стиле главной)
+   ========================================================================= */
+
+/* [hidden] должен побеждать наши display-правила */
+[hidden] { display: none !important; }
+
+.tp-container { max-width: 1100px; }
+
+.tp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.tp-back {
+  cursor: pointer;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #eaeaf2;
+  text-decoration: none;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.tp-back:hover { border-color: var(--accent); color: #fff; }
+
+.tp-state { padding: 40px 0; color: var(--muted); text-align: center; }
+
+/* ===================== верхний блок ===================== */
+.tp-hero {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  align-items: start;
+  gap: 24px;
+  padding: 18px;
+  background: linear-gradient(180deg, rgba(255,77,166,0.07), rgba(0,209,255,0.04));
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 18px;
+}
+
+.tp-cover-wrap { position: relative; }
+
+.tp-cover {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  background: #0b0b10;
+  border-radius: 14px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.55);
+}
+
+.tp-play {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  width: 62px;
+  height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), #ff7a4d);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 10px 26px rgba(255,77,166,0.45);
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.tp-play:hover { transform: scale(1.06); }
+
+/* иконка: пауза видна только во время проигрывания */
+.tp-play .ic-pause { display: none; }
+.tp-play.playing .ic-play { display: none; }
+.tp-play.playing .ic-pause { display: block; }
+.tp-play.playing { background: linear-gradient(135deg, var(--accent2), #4dffb0); box-shadow: 0 10px 26px rgba(0,209,255,0.4); }
+
+.tp-info { min-width: 0; display: flex; flex-direction: column; }
+
+.tp-title {
+  margin: 0 0 4px;
+  font-size: 27px;
+  line-height: 1.2;
+  color: #fff;
+  overflow-wrap: anywhere;
+}
+
+.tp-artist { margin-bottom: 12px; font-size: 14px; font-weight: 600; color: var(--accent); }
+
+/* ---------- жанры-чипы ---------- */
+.tp-genres { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+
+.tp-genre {
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #eaeaf2;
+  text-decoration: none;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 999px;
+  transition: all 0.15s ease;
+}
+
+.tp-genre { cursor: pointer; font-family: inherit; }
+.tp-genre:hover { color: #fff; border-color: var(--accent); background: rgba(255,77,166,0.16); }
+.tp-genre-empty { color: var(--muted); }
+
+/* ---------- копирование ---------- */
+.tp-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  color: var(--muted);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tp-copy:hover { color: #fff; border-color: var(--accent); background: rgba(255,77,166,0.14); }
+.tp-copy.copied { color: #4dff8a; border-color: #4dff8a; background: rgba(77,255,138,0.14); }
+.tp-copy.copied svg { display: none; }
+.tp-copy.copied::after { content: '\2713'; font-size: 14px; font-weight: 800; }
+
+/* ---------- полный промпт ---------- */
+.tp-prompt-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.tp-prompt-toggle {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+  border: 1px dashed rgba(255,255,255,0.18);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.tp-prompt-toggle:hover { color: #fff; border-color: var(--accent); }
+.tp-prompt-toggle .tp-plus { font-size: 14px; font-weight: 800; color: var(--accent); }
+
+.tp-prompt {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  max-height: 260px;
+  overflow-y: auto;
+  font-family: inherit;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: #c8ccd8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+}
+
+/* ---------- плеер ---------- */
+.tp-player { margin: 4px 0 12px; }
+
+.tp-bar {
+  height: 8px;
+  background: rgba(255,255,255,0.09);
+  border-radius: 999px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.tp-bar-fill {
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 999px;
+}
+
+.tp-times {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ---------- кнопки-действия ---------- */
+.tp-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+
+.tp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #eaeaf2;
+  text-decoration: none;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tp-chip:hover { border-color: var(--accent); color: #fff; }
+.tp-chip.active { background: rgba(255,77,166,0.18); border-color: var(--accent); color: #fff; }
+.tp-chip-static { cursor: default; }
+.tp-chip-static:hover { border-color: rgba(255,255,255,0.10); }
+.tp-admin { border-style: dashed; }
+
+.tp-date { margin-top: 10px; font-size: 11px; color: var(--muted); }
+
+/* ===================== вкладки (только телефон) ===================== */
+.tp-tabs { display: none; gap: 8px; margin: 16px 0 10px; }
+
+.tp-tab {
+  flex: 1;
+  padding: 11px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.tp-tab.active { color: #fff; background: rgba(255,77,166,0.16); border-color: var(--accent); }
+
+/* ===================== текст и комментарии ===================== */
+.tp-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.tp-panel {
+  padding: 16px 18px;
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  min-width: 0;
+}
+
+.tp-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.tp-h2 { margin: 0; font-size: 15px; color: #fff; }
+
+.tp-lyrics {
+  margin: 0;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #dfe2ee;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.tp-comments { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+
+.tp-comment {
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+}
+
+.tp-comment-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+  font-size: 11px;
+}
+
+.tp-comment-author { font-weight: 700; color: var(--accent); }
+.tp-comment-date { color: #7d8296; }
+
+.tp-comment-del {
+  margin-left: auto;
+  padding: 0 5px;
+  color: #ff6b6b;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.tp-comment-text { font-size: 13.5px; line-height: 1.55; color: #eaeaf2; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.tp-comment-form { display: flex; gap: 8px; align-items: flex-end; }
+
+.tp-comment-form textarea {
+  flex: 1;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 13px;
+  color: #eaeaf2;
+  background: #07060a;
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 10px;
+  resize: vertical;
+  outline: none;
+}
+
+.tp-comment-form textarea:focus { border-color: var(--accent); }
+
+.tp-send {
+  padding: 10px 16px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), #ff7a4d);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.tp-muted { font-size: 12.5px; color: var(--muted); }
+
+/* ===================== модалка ===================== */
+.tp-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0,0,0,0.72);
+}
+
+.tp-modal[hidden] { display: none; }
+
+.tp-modal-box {
+  width: min(520px, 100%);
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  background: #0b0b14;
+  border: 2px solid #1a1a2e;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.tp-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.tp-modal-close { font-size: 16px; color: var(--muted); background: transparent; border: none; cursor: pointer; }
+.tp-modal-body { padding: 14px 16px; overflow-y: auto; }
+
+.tp-pl-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding: 11px 13px;
+  font-size: 13px;
+  color: #eaeaf2;
+  text-align: left;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.tp-pl-row.on { background: rgba(255,77,166,0.16); border-color: var(--accent); }
+.tp-pl-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tp-pl-name small { color: var(--muted); font-weight: 400; }
+
+.tp-pl-btn {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  font-size: 16px;
+  font-weight: 900;
+  color: #07060a;
+  background: #4dff8a;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.tp-pl-row.on .tp-pl-btn { background: var(--accent); color: #fff; }
+.tp-pl-lock { flex: 0 0 auto; opacity: 0.45; font-size: 13px; }
+
+/* ховеры соцсетей — как на главной */
+.social-btn { transition: all 0.25s ease; }
+.social-btn:hover { background: rgba(255,255,255,0.08) !important; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+.social-btn:hover .soc-icon-wrap { transform: scale(1.12); }
+.social-btn[data-platform="twitter"]:hover .soc-icon-wrap { background: rgba(29,161,242,0.2); box-shadow: 0 0 16px rgba(29,161,242,0.35); }
+.social-btn[data-platform="facebook"]:hover .soc-icon-wrap { background: rgba(24,119,242,0.2); box-shadow: 0 0 16px rgba(24,119,242,0.35); }
+.social-btn[data-platform="messenger"]:hover .soc-icon-wrap { background: rgba(0,132,255,0.2); box-shadow: 0 0 16px rgba(0,132,255,0.35); }
+.social-btn[data-platform="telegram"]:hover .soc-icon-wrap { background: rgba(34,158,217,0.2); box-shadow: 0 0 16px rgba(34,158,217,0.35); }
+.social-btn[data-platform="viber"]:hover .soc-icon-wrap { background: rgba(115,96,242,0.2); box-shadow: 0 0 16px rgba(115,96,242,0.35); }
+.social-btn[data-platform="tiktok"]:hover .soc-icon-wrap { background: rgba(255,255,255,0.12); box-shadow: 0 0 16px rgba(255,255,255,0.2); }
+.social-btn[data-platform="whatsapp"]:hover .soc-icon-wrap { background: rgba(37,211,102,0.2); box-shadow: 0 0 16px rgba(37,211,102,0.35); }
+.social-btn[data-platform="native"]:hover .soc-icon-wrap { background: rgba(255,77,166,0.2); box-shadow: 0 0 16px rgba(255,77,166,0.35); }
+.share-option { transition: all 0.2s ease; }
+.share-option:hover { background: rgba(255,255,255,0.06) !important; border-color: rgba(255,77,166,0.3) !important; }
+
+.tp-editor {
+  width: 100%;
+  padding: 12px;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #eaeaf2;
+  background: #07060a;
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 10px;
+  resize: vertical;
+  outline: none;
+}
+
+.tp-editor:focus { border-color: var(--accent); }
+
+.tp-save {
+  width: 100%;
+  margin-top: 10px;
+  padding: 11px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), #ff7a4d);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+/* ===================== планшет и телефон ===================== */
+@media (max-width: 880px) {
+  body { padding: 14px; }
+
+  .tp-hero {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 14px;
+  }
+
+  .tp-cover { aspect-ratio: 1 / 1; max-height: 320px; }
+  .tp-title { font-size: 22px; }
+  .tp-play { width: 54px; height: 54px; }
+
+  /* на телефоне текст и комментарии переключаются кнопками */
+  .tp-tabs { display: flex; }
+  .tp-panels { grid-template-columns: 1fr; margin-top: 0; }
+  .tp-panel.tp-hide-mobile { display: none; }
+}
+
+@media (min-width: 881px) {
+  /* на ПК видно всё сразу, вкладки не нужны */
+  .tp-panel.tp-hide-mobile { display: block; }
+}

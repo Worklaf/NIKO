@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>N1K∅ — Track</title>
+<link rel="preconnect" href="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="track.css">
+</head>
+<body>
+<div class="container tp-container">
+
+  <header class="tp-header">
+    <a class="site-logo" href="NIKO.html" target="_self">
+      <span class="logo-text">N1K∅</span>
+    </a>
+    <button class="btn tp-back" type="button" id="tp-back">← Wszystkie utwory</button>
+  </header>
+
+  <div id="tp-state" class="tp-state">Ładowanie…</div>
+
+  <article id="tp-main" class="tp" hidden>
+
+    <!-- ===== Верх: обложка + основное ===== -->
+    <section class="tp-hero">
+      <div class="tp-cover-wrap">
+        <img id="tp-cover" class="tp-cover" alt="">
+        <button id="tp-play" class="tp-play" type="button" aria-label="Play">
+          <svg class="ic-play" width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3v18l15-9L5 3z"/></svg>
+          <svg class="ic-pause" width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        </button>
+      </div>
+
+      <div class="tp-info">
+        <h1 id="tp-title" class="tp-title"></h1>
+        <div id="tp-artist" class="tp-artist"></div>
+
+        <div id="tp-genres" class="tp-genres"></div>
+
+        <div class="tp-prompt-row">
+          <button id="tp-prompt-toggle" class="tp-prompt-toggle" type="button">
+            <span class="tp-plus">+</span> <span class="tp-prompt-label">Pełny prompt</span>
+          </button>
+          <button id="tp-copy-prompt" class="tp-copy" type="button" title="Kopiuj prompt" aria-label="Kopiuj prompt">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+        <pre id="tp-prompt" class="tp-prompt" hidden></pre>
+
+        <!-- плеер -->
+        <div class="tp-player">
+          <div id="tp-bar" class="tp-bar"><div id="tp-bar-fill" class="tp-bar-fill"></div></div>
+          <div class="tp-times"><span id="tp-cur">0:00</span><span id="tp-dur">0:00</span></div>
+        </div>
+
+        <!-- действия -->
+        <div class="tp-actions">
+          <button id="tp-like" class="tp-chip" type="button">❤ <span id="tp-likes">0</span></button>
+          <button id="tp-dislike" class="tp-chip" type="button">👎 <span id="tp-dislikes">0</span></button>
+          <span class="tp-chip tp-chip-static">▶ <span id="tp-plays">0</span></span>
+          <button id="tp-playlist" class="tp-chip" type="button">➕ Playlista</button>
+          <button id="tp-download" class="tp-chip" type="button">⬇ Pobierz</button>
+          <button id="tp-share" class="tp-chip" type="button">🔗 Udostępnij</button>
+          <button id="tp-edit-genre" class="tp-chip tp-admin" type="button" hidden>✏ Styl</button>
+          <button id="tp-edit-lyrics" class="tp-chip tp-admin" type="button" hidden>✏ Tekst</button>
+        </div>
+
+        <div id="tp-date" class="tp-date"></div>
+      </div>
+    </section>
+
+    <!-- ===== Переключатель для телефона ===== -->
+    <div class="tp-tabs">
+      <button class="tp-tab active" data-tab="lyrics" type="button">Tekst</button>
+      <button class="tp-tab" data-tab="comments" type="button">💬 Komentarze <span id="tp-ccount">0</span></button>
+    </div>
+
+    <!-- ===== Текст и комментарии ===== -->
+    <div class="tp-panels">
+      <section class="tp-panel" id="tp-panel-lyrics">
+        <div class="tp-panel-head">
+          <h2 class="tp-h2">Tekst</h2>
+          <button id="tp-copy-lyrics" class="tp-copy" type="button" title="Kopiuj tekst" aria-label="Kopiuj tekst">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+        <pre id="tp-lyrics" class="tp-lyrics"></pre>
+      </section>
+
+      <section class="tp-panel tp-hide-mobile" id="tp-panel-comments">
+        <div class="tp-panel-head">
+          <h2 class="tp-h2">💬 Komentarze <span id="tp-ccount2">0</span></h2>
+        </div>
+        <div id="tp-comments" class="tp-comments"></div>
+        <form id="tp-comment-form" class="tp-comment-form">
+          <textarea id="tp-comment-text" rows="2" placeholder="..." maxlength="1000"></textarea>
+          <button class="tp-send" type="submit">→</button>
+        </form>
+      </section>
+    </div>
+  </article>
+</div>
+
+<!-- модалка плейлистов / редактора -->
+<div id="tp-modal" class="tp-modal" hidden>
+  <div class="tp-modal-box">
+    <div class="tp-modal-head">
+      <span id="tp-modal-title">Playlista</span>
+      <button id="tp-modal-close" class="tp-modal-close" type="button">✕</button>
+    </div>
+    <div id="tp-modal-body" class="tp-modal-body"></div>
+  </div>
+</div>
+
+<div id="share-modal" class="share-modal">
+  <div class="share-modal-content" style="max-width:360px;">
+    <div class="share-modal-header">
+      <h3 class="share-modal-title" style="font-size:15px; color:#eaeaf2;">Share Track</h3>
+      <button class="share-modal-close" id="share-modal-close" style="font-size:20px; color:#bfc3d6;">×</button>
+    </div>
+    
+    <div class="share-options" style="margin-bottom:16px;">
+      <div class="share-option" id="share-copy-link" style="display:flex; align-items:center; gap:12px; padding:12px; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid rgba(255,255,255,0.06); cursor:pointer; transition:all 0.2s;">
+        <div style="width:36px;height:36px;border-radius:10px;background:rgba(255,77,166,0.15);display:flex;align-items:center;justify-content:center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff4da6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+        </div>
+        <div>
+          <div style="color:#eaeaf2;font-size:13px;font-weight:600;">Copy Link</div>
+          <div style="color:#666;font-size:11px;">Copy to clipboard</div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="color:#bfc3d6;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Share to</div>
+    
+    <div class="share-modal-socials" id="share-socials" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+      
+      <!-- X (Twitter) -->
+      <div class="social-btn" data-platform="twitter" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">X</span>
+      </div>
+      
+      <!-- Facebook -->
+      <div class="social-btn" data-platform="facebook" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">Facebook</span>
+      </div>
+      
+      <!-- Messenger -->
+      <div class="social-btn" data-platform="messenger" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M12 0C5.373 0 0 4.975 0 11.111c0 3.497 1.744 6.616 4.472 8.652V24l4.086-2.242c1.09.301 2.246.464 3.442.464 6.627 0 12-4.975 12-11.111C24 4.975 18.627 0 12 0zm1.193 14.963l-3.056-3.26-5.963 3.26 6.559-6.963 3.13 3.26 5.889-3.26-6.559 6.963z"/></svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">Messenger</span>
+      </div>
+      
+      <!-- Telegram -->
+      <div class="social-btn" data-platform="telegram" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">Telegram</span>
+      </div>
+      
+      <!-- Viber -->
+      <div class="social-btn" data-platform="viber" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M12.026 0C5.376 0 .002 5.374.002 12.024c0 2.574.81 4.96 2.192 6.916L.936 23.999l5.342-1.256A11.95 11.95 0 0 0 12.026 24c6.65 0 12.024-5.374 12.024-12.024C24.05 5.374 18.676 0 12.026 0zm6.826 16.964c-.274.772-1.362 1.408-1.89 1.498-.51.086-1.01.194-3.364-.706-2.85-1.12-4.68-4.02-4.82-4.206-.14-.186-1.15-1.53-1.15-2.92 0-1.39.73-2.07.988-2.354.26-.286.548-.358.73-.358.18 0 .36 0 .518.008.166.006.39-.064.61.466.22.53.748 1.848.814 1.982.066.134.11.29.022.468-.088.178-.132.29-.262.446-.13.156-.272.348-.388.466-.13.134-.266.28-.114.552.152.27.676 1.116 1.45 1.806.996.888 1.838 1.164 2.1 1.292.262.128.416.106.57-.064.152-.168.656-.762.83-1.024.174-.262.348-.22.584-.132.238.088 1.51.712 1.77.84.26.13.434.194.498.302.064.11.048.636-.226 1.408zM10.96 6.796c2.694.154 4.89 2.236 5.17 4.916.03.29-.19.546-.48.576a.553.553 0 0 1-.576-.48 4.684 4.684 0 0 0-4.18-4.18.553.553 0 0 1-.48-.576c.03-.29.286-.51.576-.48l-.03.224zm-.954 2.384c1.616.092 2.934 1.342 3.102 2.95.03.29-.19.546-.48.576a.553.553 0 0 1-.576-.48 2.31 2.31 0 0 0-2.066-2.066.553.553 0 0 1-.48-.576c.03-.29.286-.51.576-.48l-.076.076zm-.954 2.384c.538.03.976.446 1.034.984a.553.553 0 0 1-.528.576.553.553 0 0 1-.576-.528 1.107 1.107 0 0 0-.984-1.034.553.553 0 0 1-.528-.576c.03-.29.286-.51.576-.48l.006.058z"/></svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">Viber</span>
+      </div>
+      
+      <!-- TikTok -->
+      <div class="social-btn" data-platform="tiktok" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">TikTok</span>
+      </div>
+      
+      <!-- WhatsApp -->
+      <div class="social-btn" data-platform="whatsapp" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">WhatsApp</span>
+      </div>
+      
+      <!-- More / Native -->
+      <div class="social-btn" data-platform="native" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;cursor:pointer;transition:all 0.25s;">
+        <div class="soc-icon-wrap" style="width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:all 0.3s;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+          </svg>
+        </div>
+        <span style="color:#bfc3d6;font-size:10px;font-weight:500;">More</span>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<audio id="tp-audio" preload="metadata"></audio>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="genres.js"></script>
+<script>
+/* ===================== страница трека ===================== */
+const QS = new URLSearchParams(location.search);
+/* embed = страница открыта внутри iframe на главной: звук играет в родителе */
+const IS_EMBED = QS.get('embed') === '1' || window.parent !== window;
+
+const TP = {
+  id: QS.get('id'),
+  track: null,
+  role: localStorage.getItem('siteRole') || 'guest'
+};
+const isAdmin = TP.role === 'admin';
+const isPartner = TP.role === 'partner';
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s == null ? '' : s)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+const fmt = (sec) => {
+  if (!isFinite(sec) || sec < 0) sec = 0;
+  const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
+  return m + ':' + String(s).padStart(2, '0');
+};
+function toParent(msg) { if (IS_EMBED) { try { parent.postMessage(msg, '*'); } catch (e) {} } }
+
+/* ---------- загрузка ---------- */
+(async function init() {
+  if (!TP.id) { $('#tp-state').textContent = 'Nie podano ID utworu.'; return; }
+  try {
+    const doc = await db.collection('tracks').doc(TP.id).get();
+    if (!doc.exists) { $('#tp-state').textContent = 'Utwór nie znaleziony.'; return; }
+    TP.track = Object.assign({ id: doc.id }, doc.data());
+    render();
+    $('#tp-state').hidden = true;
+    $('#tp-main').hidden = false;
+    loadComments();
+    toParent({ type: 'track-page-ready', trackId: TP.id });
+  } catch (e) {
+    console.error(e);
+    $('#tp-state').textContent = 'Błąd ładowania: ' + e.message;
+  }
+})();
+
+/* ---------- отрисовка ---------- */
+function render() {
+  const t = TP.track;
+  document.title = (t.artist ? t.artist + ' — ' : '') + (t.title || 'Track') + ' | N1K∅';
+
+  $('#tp-cover').src = t.cover || '';
+  $('#tp-cover').alt = t.title || '';
+  $('#tp-title').textContent = t.title || '';
+  $('#tp-artist').textContent = t.artist || '';
+
+  /* жанры: только нормализованные подстили */
+  const labels = getTrackGenreLabels(t.genre);
+  $('#tp-genres').innerHTML = labels.length
+    ? labels.map(g => '<button class="tp-genre" type="button" data-genre="' +
+        esc(normalizeGenre(g)) + '">' + esc(g) + '</button>').join('')
+    : '<span class="tp-genre tp-genre-empty">—</span>';
+
+  $('#tp-genres').querySelectorAll('.tp-genre[data-genre]').forEach(b => {
+    b.addEventListener('click', () => {
+      const g = b.dataset.genre;
+      if (IS_EMBED) toParent({ type: 'filter-genre', genre: g });
+      else location.href = 'NIKO.html?genre=' + encodeURIComponent(g);
+    });
+  });
+
+  /* полный промпт */
+  $('#tp-prompt').textContent = t.genre || '—';
+
+  /* локальный плеер нужен только в самостоятельном режиме */
+  if (!IS_EMBED) $('#tp-audio').src = t.audio || '';
+  if (t.duration) $('#tp-dur').textContent = t.duration;
+
+  /* счётчики */
+  $('#tp-likes').textContent = t.likes || 0;
+  $('#tp-dislikes').textContent = t.dislikes || 0;
+  $('#tp-plays').textContent = t.plays || 0;
+  $('#tp-ccount').textContent = t.commentCount || 0;
+  $('#tp-ccount2').textContent = t.commentCount || 0;
+
+  const vote = localStorage.getItem('like:user:' + t.id);
+  $('#tp-like').classList.toggle('active', vote === 'like');
+  $('#tp-dislike').classList.toggle('active', vote === 'dislike');
+
+  $('#tp-lyrics').textContent = t.lyrics && t.lyrics.trim() ? t.lyrics : '—';
+
+  if (t.createdAt) {
+    try {
+      const d = t.createdAt.toDate ? t.createdAt.toDate() : new Date(t.createdAt);
+      $('#tp-date').textContent = d.toLocaleDateString('pl-PL',
+        { day: '2-digit', month: '2-digit', year: 'numeric' });
+    } catch (e) {}
+  }
+
+  if (isAdmin) {
+    $('#tp-edit-genre').hidden = false;
+    $('#tp-edit-lyrics').hidden = false;
+  }
+}
+
+/* ---------- назад ---------- */
+$('#tp-back').addEventListener('click', () => {
+  if (IS_EMBED) toParent('close-track');
+  else location.href = 'NIKO.html';
+});
+
+/* ---------- полный промпт ---------- */
+$('#tp-prompt-toggle').addEventListener('click', () => {
+  const box = $('#tp-prompt');
+  const open = box.hidden;
+  box.hidden = !open;
+  $('#tp-prompt-toggle').classList.toggle('open', open);
+  $('#tp-prompt-toggle').querySelector('.tp-plus').textContent = open ? '−' : '+';
+});
+
+/* ---------- копирование ---------- */
+function copyToClipboard(text, btn) {
+  const done = () => {
+    btn.classList.add('copied');
+    setTimeout(() => btn.classList.remove('copied'), 1400);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => fallback());
+  } else fallback();
+
+  function fallback() {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;left:-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+}
+$('#tp-copy-lyrics').addEventListener('click', () =>
+  copyToClipboard(TP.track && TP.track.lyrics ? TP.track.lyrics : '', $('#tp-copy-lyrics')));
+$('#tp-copy-prompt').addEventListener('click', () =>
+  copyToClipboard(TP.track && TP.track.genre ? TP.track.genre : '', $('#tp-copy-prompt')));
+
+/* ================= плеер =================
+   embed: играет родительская страница (звук не прерывается при переходах)
+   standalone: играет локальный <audio> */
+const audio = $('#tp-audio');
+let playsCounted = false;
+
+function setPlayingUI(on) { $('#tp-play').classList.toggle('playing', !!on); }
+function setProgress(cur, dur) {
+  $('#tp-cur').textContent = fmt(cur);
+  if (dur) $('#tp-dur').textContent = fmt(dur);
+  $('#tp-bar-fill').style.width = (dur ? (cur / dur) * 100 : 0) + '%';
+}
+
+$('#tp-play').addEventListener('click', () => {
+  if (IS_EMBED) {
+    toParent({ type: 'toggle-track', trackId: TP.id });
+    return;
+  }
+  if (audio.paused) audio.play(); else audio.pause();
+});
+
+$('#tp-bar').addEventListener('click', (e) => {
+  const r = $('#tp-bar').getBoundingClientRect();
+  const ratio = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+  if (IS_EMBED) { toParent({ type: 'seek-track', trackId: TP.id, ratio: ratio }); return; }
+  if (audio.duration) audio.currentTime = ratio * audio.duration;
+});
+
+/* локальный плеер */
+audio.addEventListener('play', async () => {
+  setPlayingUI(true);
+  if (!playsCounted) {
+    playsCounted = true;
+    try {
+      await db.collection('tracks').doc(TP.id)
+        .update({ plays: firebase.firestore.FieldValue.increment(1) });
+      $('#tp-plays').textContent = (parseInt($('#tp-plays').textContent) || 0) + 1;
+    } catch (e) { console.warn(e); }
+  }
+});
+['pause', 'ended'].forEach(ev => audio.addEventListener(ev, () => setPlayingUI(false)));
+audio.addEventListener('loadedmetadata', () => setProgress(0, audio.duration));
+audio.addEventListener('timeupdate', () => setProgress(audio.currentTime, audio.duration));
+
+/* состояние родительского плеера */
+window.addEventListener('message', (e) => {
+  const d = e.data;
+  if (!d || d.type !== 'player-state') return;
+  if (d.trackId !== TP.id) { setPlayingUI(false); return; }
+  setPlayingUI(d.playing);
+  if (d.duration) setProgress(d.currentTime || 0, d.duration);
+});
+
+/* ---------- лайки ---------- */
+async function vote(kind) {
+  const key = 'like:user:' + TP.id;
+  const cur = localStorage.getItem(key);
+  const inc = (n) => firebase.firestore.FieldValue.increment(n);
+  const patch = {};
+
+  if (cur === kind) {
+    patch[kind + 's'] = inc(-1);
+    localStorage.removeItem(key);
+  } else {
+    patch[kind + 's'] = inc(1);
+    if (cur) patch[cur + 's'] = inc(-1);
+    localStorage.setItem(key, kind);
+  }
+
+  try {
+    await db.collection('tracks').doc(TP.id).update(patch);
+    const doc = await db.collection('tracks').doc(TP.id).get();
+    const d = doc.data() || {};
+    TP.track.likes = d.likes || 0;
+    TP.track.dislikes = d.dislikes || 0;
+    $('#tp-likes').textContent = TP.track.likes;
+    $('#tp-dislikes').textContent = TP.track.dislikes;
+    const v = localStorage.getItem(key);
+    $('#tp-like').classList.toggle('active', v === 'like');
+    $('#tp-dislike').classList.toggle('active', v === 'dislike');
+  } catch (e) { console.error(e); }
+}
+$('#tp-like').addEventListener('click', () => vote('like'));
+$('#tp-dislike').addEventListener('click', () => vote('dislike'));
+
+/* ---------- скачивание (как на главной: сразу файл) ---------- */
+$('#tp-download').addEventListener('click', async () => {
+  const url = TP.track.audio;
+  const title = (TP.track.title || 'track').replace(/"/g, '');
+  if (!url) return;
+
+  /* внутри iframe отдаём главной: там гостевая модалка и учёт скачиваний */
+  if (IS_EMBED) {
+    toParent({ type: 'download-track', audioUrl: url, title: title, trackId: TP.id });
+    return;
+  }
+  if (TP.role === 'guest') {
+  openDownloadRestrictionModal();
+  return;
+}
+const dlModal = $('#tp-download-modal');
+
+function openDownloadRestrictionModal() {
+  if (!dlModal) return;
+  dlModal.hidden = false;
+  dlModal.style.display = '';
+  document.body.classList.add('tp-modal-open');
+}
+
+function closeDownloadRestrictionModal() {
+  if (!dlModal) return;
+  dlModal.hidden = true;
+  dlModal.style.display = '';
+  document.body.classList.remove('tp-modal-open');
+}
+
+$('#tp-download-modal-close')?.addEventListener('click', closeDownloadRestrictionModal);
+$('#tp-download-close')?.addEventListener('click', closeDownloadRestrictionModal);
+dlModal?.addEventListener('click', (e) => { if (e.target === dlModal) closeDownloadRestrictionModal(); });
+
+$('#tp-download-login')?.addEventListener('click', () => {
+  closeDownloadRestrictionModal();
+  if (IS_EMBED) { toParent({ type: 'show-login-modal' }); return; }
+  location.href = 'NIKO.html?openLogin=1';
+});
+  const btn = $('#tp-download');
+  const old = btn.innerHTML;
+  btn.innerHTML = '⏳';
+  btn.disabled = true;
+  try {
+    const res = await fetch(url, { mode: 'cors' });
+    if (!res.ok) throw new Error('Network error');
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = title + '.mp3';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+  } catch (e) {
+    alert('Błąd pobierania: ' + e.message);
+  }
+  btn.innerHTML = old;
+  btn.disabled = false;
+});
+
+/* ---------- плейлисты (права как на главной) ---------- */
+$('#tp-playlist').addEventListener('click', async () => {
+  /* внутри iframe открываем родной выбор плейлистов главной страницы */
+  if (IS_EMBED) {
+    toParent({ type: 'open-playlist-picker', trackId: TP.id });
+    return;
+  }
+  openPlaylistPickerLocal();
+});
+
+function isVisibleToRole(item, role) {
+  if (item.visibility === 'hidden') return role === 'admin';
+  if (item.visibility === 'partner') return role === 'admin' || role === 'partner';
+  return true;
+}
+
+async function openPlaylistPickerLocal() {
+  openModal('Playlista', '<div class="tp-muted">…</div>');
+  try {
+    const snap = await db.collection('playlists').get();
+    const all = snap.docs.map(d => Object.assign({ id: d.id }, d.data()))
+      .filter(p => isVisibleToRole(p, TP.role));
+    const ids = TP.track.playlistIds || [];
+
+    $('#tp-modal-body').innerHTML = all.length
+      ? all.map(p => {
+          const inPl = ids.indexOf(p.id) > -1;
+          /* админ — везде; партнёр — только в свои; гость — нигде */
+          let can = false;
+          if (isAdmin) can = true;
+          else if (isPartner && p.ownerRole === 'partner') can = true;
+          const icon = p.visibility === 'public' ? '🌍' : p.visibility === 'partner' ? '♥' : '🔒';
+          return `
+  <div class="tp-pl-row${inPl ? ' on' : ''}">
+    <span class="tp-pl-name">
+      ${icon} 
+      ${TP.role === 'admin' ? (VIS_LABELS[p.visibility] || p.visibility) + ' · ' : ''}
+      ${esc(p.name)}
+      <small>· ${p.songCount || 0}</small>
+    </span>
+    ${
+      can
+        ? `<button class="tp-pl-btn" data-id="${p.id}" data-in="${inPl ? '1' : ''}">
+             ${inPl ? '−' : '+'}
+           </button>`
+        : '<span class="tp-pl-lock">🔒</span>'
+    }
+  </div>
+`;
+        }).join('')
+      : '<div class="tp-muted">Brak playlist</div>';
+
+    $('#tp-modal-body').querySelectorAll('.tp-pl-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const pid = btn.dataset.id;
+        const has = !!btn.dataset.in;
+        const FV = firebase.firestore.FieldValue;
+        btn.disabled = true;
+        try {
+          await db.collection('tracks').doc(TP.id).update({
+            playlistIds: has ? FV.arrayRemove(pid) : FV.arrayUnion(pid)
+          });
+          await db.collection('playlists').doc(pid).update({ songCount: FV.increment(has ? -1 : 1) });
+          TP.track.playlistIds = has
+            ? (TP.track.playlistIds || []).filter(x => x !== pid)
+            : (TP.track.playlistIds || []).concat([pid]);
+          openPlaylistPickerLocal();
+        } catch (e) { alert('Błąd: ' + e.message); btn.disabled = false; }
+      });
+    });
+  } catch (e) {
+    $('#tp-modal-body').innerHTML = '<div class="tp-muted">' + esc(e.message) + '</div>';
+  }
+}
+
+/* ---------- поделиться (модалка один в один с главной) ---------- */
+function trackShareUrl() {
+  const base = location.origin + location.pathname.replace(/[^/]*$/, '');
+  return base + 'track.html?id=' + encodeURIComponent(TP.id);
+}
+
+$('#tp-share').addEventListener('click', () => {
+  const modal = document.getElementById('share-modal');
+  if (modal) modal.classList.add('open');
+});
+document.getElementById('share-modal-close')?.addEventListener('click', () =>
+  document.getElementById('share-modal').classList.remove('open'));
+document.getElementById('share-modal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'share-modal') e.target.classList.remove('open');
+});
+
+document.getElementById('share-copy-link')?.addEventListener('click', () => {
+  copyToClipboard(trackShareUrl(), document.getElementById('share-copy-link'));
+  showCopyFeedback('Copied!');
+});
+
+function showCopyFeedback(text) {
+  const btn = document.getElementById('share-copy-link');
+  if (!btn) return;
+  const original = btn.innerHTML;
+  btn.innerHTML =
+    '<div style="width:36px;height:36px;border-radius:10px;background:rgba(77,255,138,0.15);display:flex;align-items:center;justify-content:center;">' +
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4dff8a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>' +
+    '<div><div style="color:#4dff8a;font-size:13px;font-weight:600;">' + esc(text) + '</div></div>';
+  setTimeout(() => { btn.innerHTML = original; }, 2000);
+}
+
+document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const url = trackShareUrl();
+    const title = (TP.track.artist ? TP.track.artist + ' — ' : '') + (TP.track.title || '');
+    const u = encodeURIComponent(url), tx = encodeURIComponent(title);
+    const p = btn.dataset.platform;
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    let link = '';
+
+    if (p === 'twitter')   link = 'https://twitter.com/intent/tweet?text=' + tx + '&url=' + u;
+    if (p === 'facebook')  link = 'https://www.facebook.com/sharer/sharer.php?u=' + u;
+    if (p === 'messenger') link = isMobile ? 'fb-messenger://share?link=' + u
+                                          : 'https://www.facebook.com/sharer/sharer.php?u=' + u;
+    if (p === 'telegram')  link = 'https://t.me/share/url?url=' + u + '&text=' + tx;
+    if (p === 'viber')     link = 'viber://forward?text=' + encodeURIComponent(title + ' ' + url);
+    if (p === 'whatsapp')  link = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(title + ' ' + url);
+
+    if (p === 'tiktok') {                     // TikTok не умеет share-ссылки — копируем
+      copyToClipboard(url, btn);
+      showCopyFeedback('Link copied — wklej w TikTok');
+      return;
+    }
+    if (p === 'native') {
+      if (navigator.share) { try { await navigator.share({ title: title, url: url }); } catch (e) {} }
+      else { copyToClipboard(url, btn); showCopyFeedback('Copied!'); }
+      return;
+    }
+    if (link) window.open(link, '_blank', 'noopener,width=600,height=600');
+  });
+});
+
+/* ---------- админ: правка стиля и текста ---------- */
+$('#tp-edit-genre').addEventListener('click', () => {
+  openEditor('Styl / prompt', TP.track.genre || '', async (val) => {
+    await db.collection('tracks').doc(TP.id).update({ genre: val });
+    TP.track.genre = val;
+    render();
+  });
+});
+$('#tp-edit-lyrics').addEventListener('click', () => {
+  openEditor('Tekst', TP.track.lyrics || '', async (val) => {
+    await db.collection('tracks').doc(TP.id).update({ lyrics: val });
+    TP.track.lyrics = val;
+    render();
+  });
+});
+
+function openEditor(title, value, onSave) {
+  openModal(title,
+    '<textarea id="tp-editor" class="tp-editor" rows="14"></textarea>' +
+    '<button id="tp-editor-save" class="tp-save">Zapisz</button>');
+  $('#tp-editor').value = value;
+  $('#tp-editor-save').addEventListener('click', async () => {
+    $('#tp-editor-save').disabled = true;
+    try { await onSave($('#tp-editor').value); closeModal(); }
+    catch (e) { alert('Błąd: ' + e.message); $('#tp-editor-save').disabled = false; }
+  });
+}
+
+/* ---------- комментарии ---------- */
+async function loadComments() {
+  const box = $('#tp-comments');
+  box.innerHTML = '<div class="tp-muted">…</div>';
+  try {
+    const snap = await db.collection('tracks').doc(TP.id)
+      .collection('comments').orderBy('timestamp', 'asc').get();
+    const list = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+    $('#tp-ccount').textContent = list.length;
+    $('#tp-ccount2').textContent = list.length;
+
+    box.innerHTML = list.length ? list.map(c => {
+      let date = '';
+      try {
+        const d = c.timestamp && c.timestamp.toDate ? c.timestamp.toDate() : new Date(c.timestamp);
+        date = d.toLocaleString('pl-PL');
+      } catch (e) {}
+      return '<div class="tp-comment" data-id="' + c.id + '">' +
+        '<div class="tp-comment-head"><span class="tp-comment-author">' + esc(c.author || 'Anonymous') +
+        '</span><span class="tp-comment-date">' + esc(date) + '</span>' +
+        (isAdmin ? '<button class="tp-comment-del" title="Usuń">✕</button>' : '') + '</div>' +
+        '<div class="tp-comment-text">' + esc(c.text) + '</div></div>';
+    }).join('') : '<div class="tp-muted">—</div>';
+
+    box.querySelectorAll('.tp-comment-del').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.closest('.tp-comment').dataset.id;
+        try {
+          await db.collection('tracks').doc(TP.id).collection('comments').doc(id).delete();
+          await db.collection('tracks').doc(TP.id)
+            .update({ commentCount: firebase.firestore.FieldValue.increment(-1) });
+          loadComments();
+        } catch (e) { console.error(e); }
+      });
+    });
+  } catch (e) {
+    box.innerHTML = '<div class="tp-muted">' + esc(e.message) + '</div>';
+  }
+}
+
+$('#tp-comment-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const text = $('#tp-comment-text').value.trim();
+  if (!text) return;
+  let author = 'Anonymous';
+  if (TP.role === 'admin') author = 'Admin';
+  else if (TP.role === 'partner') author = localStorage.getItem('userDisplayName') || 'User';
+  try {
+    await db.collection('tracks').doc(TP.id).collection('comments')
+      .add({ text: text, author: author, timestamp: Date.now() });
+    await db.collection('tracks').doc(TP.id)
+      .update({ commentCount: firebase.firestore.FieldValue.increment(1) });
+    $('#tp-comment-text').value = '';
+    loadComments();
+  } catch (e) { console.error(e); alert('Błąd: ' + e.message); }
+});
+
+/* ---------- вкладки (телефон) ---------- */
+document.querySelectorAll('.tp-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tp-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const lyrics = tab.dataset.tab === 'lyrics';
+    $('#tp-panel-lyrics').classList.toggle('tp-hide-mobile', !lyrics);
+    $('#tp-panel-comments').classList.toggle('tp-hide-mobile', lyrics);
+  });
+});
+
+/* ---------- модалка ---------- */
+function openModal(title, html) {
+  $('#tp-modal-title').textContent = title;
+  $('#tp-modal-body').innerHTML = html;
+  $('#tp-modal').hidden = false;
+}
+function closeModal() { $('#tp-modal').hidden = true; }
+$('#tp-modal-close').addEventListener('click', closeModal);
+$('#tp-modal').addEventListener('click', (e) => { if (e.target.id === 'tp-modal') closeModal(); });
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  closeModal();
+  closeDownloadRestrictionModal();
+  document.getElementById('share-modal')?.classList.remove('open');
+});
+</script>
+<div id="tp-download-modal" class="tp-modal" hidden>
+  <div class="tp-modal-box tp-auth-download-box" role="dialog" aria-modal="true">
+    <button id="tp-download-modal-close" class="tp-modal-close" type="button" aria-label="Zamknij">✕</button>
+    <div class="tp-auth-icon">🔒</div>
+    <h3 class="tp-auth-title">Pobieranie ograniczone</h3>
+    <p class="tp-auth-text">Pobieranie utworów dostępne tylko dla zarejestrowanych użytkowników</p>
+    <div class="tp-auth-actions">
+      <button id="tp-download-login" class="tp-auth-primary" type="button">Zaloguj się</button>
+      <button id="tp-download-close" class="tp-auth-secondary" type="button">Zamknij</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
