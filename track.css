@@ -1,3 +1,4 @@
+
 /* =========================================================================
    track.css — страница отдельного трека (в стиле главной)
    ========================================================================= */
@@ -459,7 +460,46 @@
   border-radius: 10px;
   cursor: pointer;
 }
+/* ---------- плейлисты трека ---------- */
+.tp-playlists {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 10px;
+}
 
+.tp-playlists .tp-pl-chip {
+  all: unset;
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px !important;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #eaeaf2 !important;
+  background: linear-gradient(135deg, rgba(255, 77, 166, 0.14), rgba(0, 209, 255, 0.08)) !important;
+  border: 1px solid rgba(255, 77, 166, 0.40) !important;
+  border-radius: 999px !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+.tp-playlists .tp-pl-chip:hover {
+  color: #fff !important;
+  background: linear-gradient(135deg, rgba(255, 77, 166, 0.28), rgba(0, 209, 255, 0.16)) !important;
+  border-color: rgba(255, 77, 166, 0.85) !important;
+  box-shadow: 0 0 20px rgba(255, 77, 166, 0.40), 0 4px 14px rgba(0, 0, 0, 0.35);
+  transform: translateY(-2px);
+}
+
+.tp-playlists .tp-pl-chip:active {
+  transform: translateY(0);
+}
 /* ===================== планшет и телефон ===================== */
 @media (max-width: 880px) {
   body { padding: 14px; }
