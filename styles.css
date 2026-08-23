@@ -3149,3 +3149,67 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
     grid-template-columns: 1fr;
   }
 }
+/* ---------- counts row (plays / likes / dislikes / comments) ---------- */
+.counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 8px 0 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.counts > div {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.counts .num { font-weight: 700; color: #eaeaf2; }
+.counts .likes-count.active,
+.counts .likes-count:hover { color: #ff4da6; }
+.counts .dislikes-count.active,
+.counts .dislikes-count:hover { color: #ff4d4d; }
+.counts .comments-count:hover { color: #00d1ff; }
+
+/* ---------- play-row: unified icon buttons ---------- */
+.play-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.play-row .btn.icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: #eaeaf2;
+  transition: all 0.2s ease;
+}
+
+.play-row .btn.icon svg {
+  display: block;
+  stroke: currentColor;
+}
+
+.play-row .btn.icon:hover {
+  border-color: var(--accent);
+  color: #fff;
+  background: rgba(255,77,166,0.12);
+}
+
+/* play button — green accent */
+.play-row .btn.icon.play-btn:hover {
+  border-color: rgba(77,255,138,0.5);
+  color: #4dff8a;
+}
