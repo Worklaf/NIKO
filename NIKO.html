@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>N1K∅ — Tracks</title>
-  <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="https://unpkg.com/modern-normalize/modern-normalize.css">
+<link rel="stylesheet" href="styles.css">
   
   <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
@@ -31,7 +31,6 @@
 <meta property="og:description" content="Discover amazing music">
 <meta property="og:image" content="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png">
 <meta property="og:url" content="">
-<meta name="twitter:card" content="summary_large_image">
 
 <!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image">
@@ -666,17 +665,15 @@
         </div>
 
         <div class="filter-row">
-          <div class="filter-col filter-genre-col">
-           
-            <select id="siteGenre" class="search-select" aria-label="Genre">
-              <option value="">All genres</option>
-            </select>
-            <div id="custom-genre-dropdown" class="custom-genre-dropdown" style="display:none;">
-    <div class="custom-genre-trigger" id="custom-genre-trigger">Wszystkie gatunki</div>
-    <div class="custom-genre-options" id="custom-genre-options"></div>
-  </div>
-            <div id="selected-genres" class="selected-genres"></div>
-          </div>
+       <div class="filter-col filter-genre-col">
+         <select id="siteGenre" class="search-select" aria-label="Genre" style="display:none">
+           <option value="">All genres</option>
+         </select>
+         <div id="custom-genre-dropdown" class="custom-genre-dropdown">
+           <div class="custom-genre-trigger" id="custom-genre-trigger">Wszystkie gatunki</div>
+           <div class="custom-genre-options" id="custom-genre-options"></div>
+         </div>
+       </div>
                    <div class="filter-col filter-owner-col">
             <div class="filter-header">
               <button id="genre-multi-btn" class="btn icon" data-i18n-title="multiSelect" title="Multi-select">☐</button>
@@ -687,7 +684,8 @@
             </div>
             
           </div>
-        </div>
+         </div>
+     <div id="selected-genres" class="selected-genres"></div>
 
         <button id="addTrackBtn" class="btn" style="display:none"><span data-i18n="uploadTrack">Загрузить трек</span></button>
         <button id="exportJsonBtn" class="btn" style="display:none"><span data-i18n="exportJson">Export JSON</span></button>
@@ -1143,6 +1141,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
 <script src="firebase-config.js"></script>
+ <script src="genres.js"></script>
+ <script src="genre-ui-fix.js"></script>
 
 <script>
   const WORKER_URL = "https://r2-upload-proxy.nikolfar91.workers.dev";
@@ -1341,30 +1341,6 @@ let myTracksFilter = 'all';
 let showNewOnly = false;
 let currentFilteredIds = [];
 
-
-// ===== GENRE NORMALIZATION =====
-function normalizeGenre(genre) {
-  if (!genre) return '';
-  return genre
-    .toLowerCase()
-    .replace(/[^a-z0-9\s\-]/g, '')  // убираем спецсимволы
-    .replace(/\s+/g, ' ')            // множественные пробелы → один
-    .replace(/\s*-\s*/g, '-')        // пробелы вокруг дефиса
-    .trim();
-}
-
-function getGenreDisplayName(rawGenre) {
-  if (!rawGenre) return '';
-
-  // [FIX] Просто форматируем оригинальное название в Title Case
-  // НЕ заменяем на другое слово — сохраняем оригинал (Dark aggressive phonk)
-  return rawGenre
-    .toLowerCase()
-    .split(/[\s\-_]+/)
-    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
-}
-
 function filterTracks() {
     if (!window.homeState) {
         window.homeState = { filteredIds: [], currentPage: 1, perPage: 10 };
@@ -1384,11 +1360,7 @@ function filterTracks() {
         // === НОВЫЙ БЛОК ЖАНРОВ ===
         const rawGenre = trackEl.dataset.genre || '';
         const genre = rawGenre.toLowerCase();
-        const trackGenres = rawGenre
-            .split(',')
-            .map(g => normalizeGenre(g.trim()))
-            .filter(g => g);
-
+       const trackGenres = canonicalGenres(rawGenre);
         const lyrics = (trackEl.dataset.lyrics || '').toLowerCase();
         const trackId = trackEl.dataset.id;
 
@@ -1991,70 +1963,159 @@ let isMultiGenreMode = false;
 let isGenreSorted = false;
 
 function loadGenresToFilter() {
-  const genreMap = new Map();
+  const count = new Map();          // key -> число треков
+  const parentKeys = new Set();
 
   globalTracks.forEach(track => {
-    if (track.genre) {
-      track.genre.split(',').map(g => g.trim()).filter(g => g).forEach(g => {
-        const normalized = normalizeGenre(g);
-        const display = getGenreDisplayName(g);
-        if (normalized && !genreMap.has(normalized)) {
-          genreMap.set(normalized, display);
-        }
-      });
-    }
+    const seen = new Set();
+    parseTrackGenres(track.genre).keys.forEach(k => {
+      if (seen.has(k)) return;
+      seen.add(k);
+      count.set(k, (count.get(k) || 0) + 1);
+    });
   });
 
-  const sortedGenres = Array.from(genreMap.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+  count.forEach((_, key) => { if (GENRE_CHILDREN.has(key)) parentKeys.add(key); });
 
-  /* --- Обычный select (одиночный выбор) --- */
+  /* порядок: родитель -> его подстили по алфавиту */
+  const rows = [];
+  Array.from(parentKeys)
+    .sort((a, b) => getGenreDisplayName(a).localeCompare(getGenreDisplayName(b)))
+    .forEach(pKey => {
+      rows.push({ key: pKey, label: getGenreDisplayName(pKey), level: 'parent' });
+      Array.from(GENRE_CHILDREN.get(pKey) || [])
+        .filter(k => k !== pKey && count.has(k))
+        .sort((a, b) => getGenreDisplayName(a).localeCompare(getGenreDisplayName(b)))
+        .forEach(cKey => {
+          rows.push({
+            key: cKey,
+            label: getGenreDisplayName(cKey),
+            level: 'sub',
+            parent: getGenreDisplayName(pKey)
+          });
+        });
+    });
+
+  if (GENRE_DROPPED.size) {
+    console.log('[genres] выброшено из промптов (' + GENRE_DROPPED.size + '):',
+                Array.from(GENRE_DROPPED).sort());
+  }
+
+  /* --- скрытый select: хранит выбранный жанр в одиночном режиме --- */
   const genreSelect = document.getElementById('siteGenre');
   const currentVal = genreSelect.value;
   while (genreSelect.options.length > 1) genreSelect.remove(1);
 
-  sortedGenres.forEach(([normalized, display]) => {
+  rows.forEach(r => {
     const option = document.createElement('option');
-    option.value = normalized;
-    option.textContent = display;
+    option.value = r.key;
+    option.textContent = (r.level === 'sub' ? '   • ' : '') + r.label +
+                         ' (' + (count.get(r.key) || 0) + ')';
     genreSelect.appendChild(option);
   });
 
-  if (currentVal && genreMap.has(currentVal) && !isMultiGenreMode) {
+  if (currentVal && count.has(currentVal) && !isMultiGenreMode) {
     genreSelect.value = currentVal;
   } else if (!isMultiGenreMode) {
     genreSelect.value = '';
   }
 
-  /* --- Кастомный dropdown (мультивыбор) --- */
-  const customOptions = document.getElementById('custom-genre-options');
-  if (customOptions) {
-    customOptions.innerHTML = '';
-    sortedGenres.forEach(([normalized, display]) => {
-      const div = document.createElement('div');
-      div.className = 'custom-genre-option';
-      div.dataset.value = normalized;
-      div.textContent = display;
-      if (selectedGenres.includes(normalized)) div.classList.add('selected');
+  /* --- красивый список --- */
+  const box = document.getElementById('custom-genre-options');
+  if (box) {
+    box.innerHTML = '';
+    box.appendChild(buildGenreOption('', getAllGenresLabel(), globalTracks.length, true));
 
-      div.addEventListener('click', (e) => {
-        e.stopPropagation(); // <-- ключевое: не даём закрыть список
-        const idx = selectedGenres.indexOf(normalized);
-        if (idx === -1) {
-          selectedGenres.push(normalized);
-        } else {
-          selectedGenres.splice(idx, 1); // повторный клик — убрать
-        }
-        renderSelectedGenres();
-        filterTracks();
-        // Обновляем подсветку внутри открытого списка
-        document.querySelectorAll('.custom-genre-option').forEach(opt => {
-          opt.classList.toggle('selected', selectedGenres.includes(opt.dataset.value));
-        });
-      });
-
-      customOptions.appendChild(div);
+    rows.forEach(r => {
+      const opt = buildGenreOption(r.key, r.label, count.get(r.key) || 0, false);
+      opt.classList.add(r.level === 'parent' ? 'genre-parent' : 'genre-sub');
+      // поиск ищет и по названию родителя: "phonk" находит все его подстили
+      opt.dataset.search = (r.label + ' ' + (r.parent || '')).toLowerCase();
+      box.appendChild(opt);
     });
+
+    const empty = document.createElement('div');
+    empty.className = 'genre-search-empty';
+    empty.id = 'genre-search-empty';
+    box.appendChild(empty);
   }
+
+  selectedGenres = selectedGenres.filter(g => count.has(g));
+
+  if (typeof applyGenreSearch === 'function') applyGenreSearch();
+  highlightGenreOptions();
+  updateGenreTriggerText();
+}
+function getAllGenresLabel() {
+  const first = document.getElementById('siteGenre')?.options[0];
+  return (first && first.textContent.trim()) || 'All genres';
+}
+function buildGenreOption(value, display, count, isAll) {
+  const div = document.createElement('div');
+  div.className = 'custom-genre-option' + (isAll ? ' all-genres' : '');
+  div.dataset.value = value;
+
+  const label = document.createElement('span');
+  label.className = 'genre-label';
+  label.textContent = display;
+
+  const cnt = document.createElement('span');
+  cnt.className = 'genre-count';
+  cnt.textContent = count;
+
+  div.append(label, cnt);
+
+  div.addEventListener('click', (e) => {
+    e.stopPropagation(); // не даём документу закрыть список
+
+    if (isMultiGenreMode) {
+      /* --- МУЛЬТИВЫБОР --- */
+      if (isAll) {
+        selectedGenres = [];                 // "Все жанры" = сбросить всё
+      } else {
+        const idx = selectedGenres.indexOf(value);
+        if (idx === -1) selectedGenres.push(value);
+        else selectedGenres.splice(idx, 1);  // повторный клик — убрать
+      }
+      renderSelectedGenres();
+      // список НЕ закрываем — можно отметить несколько жанров подряд
+    } else {
+      /* --- ОДИНОЧНЫЙ ВЫБОР --- */
+      const sel = document.getElementById('siteGenre');
+      if (sel) sel.value = value;            // '' = все жанры
+      document.getElementById('custom-genre-dropdown')?.classList.remove('open');
+    }
+
+    highlightGenreOptions();
+    updateGenreTriggerText();
+    filterTracks();
+  });
+
+  return div;
+}
+function highlightGenreOptions() {
+  const single = (document.getElementById('siteGenre')?.value) || '';
+  document.querySelectorAll('.custom-genre-option').forEach(opt => {
+    const v = opt.dataset.value;
+    const active = isMultiGenreMode
+      ? (v === '' ? selectedGenres.length === 0 : selectedGenres.includes(v))
+      : (v === single);
+    opt.classList.toggle('selected', active);
+  });
+}
+function updateGenreTriggerText() {
+  const trigger = document.getElementById('custom-genre-trigger');
+  if (!trigger) return;
+
+  if (isMultiGenreMode) {
+    trigger.textContent = selectedGenres.length
+      ? getAllGenresLabel() + ' · ' + selectedGenres.length
+      : getAllGenresLabel();
+    return;
+  }
+
+  const val = document.getElementById('siteGenre')?.value || '';
+  trigger.textContent = val ? getGenreDisplayName(val) : getAllGenresLabel();
 }
 
 function renderSelectedGenres() {
@@ -2063,7 +2124,8 @@ function renderSelectedGenres() {
 
   if (selectedGenres.length === 0) {
     container.innerHTML = '';
-    document.querySelectorAll('.custom-genre-option').forEach(opt => opt.classList.remove('selected'));
+    highlightGenreOptions();
+    updateGenreTriggerText();
     return;
   }
 
@@ -2079,10 +2141,8 @@ function renderSelectedGenres() {
     });
   });
 
-  // Синхронизируем подсветку в открытом кастомном списке
-  document.querySelectorAll('.custom-genre-option').forEach(opt => {
-    opt.classList.toggle('selected', selectedGenres.includes(opt.dataset.value));
-  });
+  highlightGenreOptions();
+  updateGenreTriggerText();
 }
 
 function updateNewTracksBadge() {
@@ -2232,8 +2292,8 @@ function renderDraftTracks(tracks) {
     div.innerHTML = `
       <img class="thumb lazy" data-src="${track.cover}" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 200'%3E%3Crect fill='%230b0b10' width='120' height='200'/%3E%3C/svg%3E" alt="${track.title}">
       <div class="info">
-        <div class="title">${track.artist ? `${track.artist} - ${track.title}` : track.title}</div>
-        <div class="meta">${track.genre ? track.genre.split(',').map(g => g.trim()).filter(g => g).map(g => getGenreDisplayName(g)).join(', ') : ''} · ${track.duration || '—'}</div>
+         <div class="title"><a class="track-title-link" href="track.html?id=${track.id}">${track.artist ? `${track.artist} - ${track.title}` : track.title}</a></div>
+        <div class="meta">${getTrackGenreLabels(track.genre).join(', ')} · ${track.duration || '—'}</div>
         ${partnerListenInfo}
         <div class="playlist-badges" style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px 0">
           ${track.playlistIds && track.playlistIds.length > 0
@@ -2509,7 +2569,12 @@ async function loadComments(trackId) {
     });
   }
 }
-
+/* человеческие названия типов плейлистов */
+const VIS_LABELS = {
+  public:  'Public',
+  partner: 'Premium',   // вместо «partner»
+  hidden:  'Prywatna'
+};
 async function openPlaylistPicker(trackId) {
   const role = getRole();
   const track = globalTracks.find(t => t.id === trackId);
@@ -2535,7 +2600,11 @@ async function openPlaylistPicker(trackId) {
       <img src="${p.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png'}" style="width:40px;height:40px;border-radius:6px;object-fit:cover">
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</div>
-        <div style="font-size:11px;color:#bfc3d6">${visIcon} ${p.visibility} · ${p.songCount || 0} tracks</div>
+                <div style="font-size:11px;color:#bfc3d6">${
+          role === 'admin'
+            ? visIcon + ' ' + (VIS_LABELS[p.visibility] || p.visibility) + ' · '
+            : ''
+        }${p.songCount || 0} tracks</div>
       </div>
       ${showPlus || showMinus ? `<button class="playlist-action-btn" style="background:${showMinus ? '#ff4da6' : '#4dff8a'};border:none;width:26px;height:26px;border-radius:6px;font-weight:900;cursor:pointer;">${showMinus ? '−' : '+'}</button>` : ''}
     `;
@@ -2570,14 +2639,25 @@ async function openPlaylistPicker(trackId) {
     createBtn.textContent = '+ Create new playlist';
     createBtn.style.cssText = 'width:100%;padding:10px;margin-top:10px;background:#4d8aff;border:none;border-radius:8px;color:white;font-weight:600;cursor:pointer;';
     createBtn.addEventListener('click', async () => {
-      const name = prompt('Enter playlist name');
-      if (!name) return;
-      const payload = { name, description: '', ownerRole: role, visibility: role === 'admin' ? 'public' : 'partner', songCount: 0, createdAt: firebase.firestore.FieldValue.serverTimestamp() };
-      const docRef = await db.collection('playlists').add(payload);
-      await loadGlobalPlaylists();
-      await db.collection('tracks').doc(trackId).update({ playlistIds: firebase.firestore.FieldValue.arrayUnion(docRef.id) });
-      openPlaylistPicker(trackId);
-    });
+  const data = await askNewPlaylist(role);
+  if (!data) return;
+
+  const payload = {
+    name: data.name,
+    description: '',
+    ownerRole: role,
+    visibility: role === 'admin' ? data.visibility : 'partner',
+    hideFromHome: data.hideFromHome,
+    songCount: 0,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+
+  const docRef = await db.collection('playlists').add(payload);
+  await loadGlobalPlaylists();
+  await db.collection('tracks').doc(trackId)
+    .update({ playlistIds: firebase.firestore.FieldValue.arrayUnion(docRef.id) });
+  openPlaylistPicker(trackId);
+});
     listEl.appendChild(createBtn);
   }
   modal.classList.add('open');
@@ -3057,18 +3137,9 @@ document.addEventListener('click', async (e) => {
 
   const role = getRole();
   if (role === 'guest') {
-    // Показываем модальное окно вместо alert
-    const modal = document.getElementById('download-restriction-modal');
-    if (modal) {
-      // Обновляем тексты на текущем языке
-      document.getElementById('download-restricted-title').textContent = t('downloadRestricted');
-      document.getElementById('download-restricted-text').textContent = t('downloadRestrictedText');
-      document.getElementById('download-restricted-login-text').textContent = t('login');
-      document.getElementById('download-restricted-close-text').textContent = t('close');
-      modal.classList.add('open');
-    }
-    return;
-  }
+  openDownloadRestriction();
+  return;
+}
 
   const audioUrl = downloadBtn.dataset.audio;
   const title = downloadBtn.dataset.title || 'track';
@@ -3229,6 +3300,7 @@ document.getElementById('site-logo')?.addEventListener('click', (e) => {
   switchLanguage(savedLang);
   updateLangDisplay(savedLang);
 }
+
 await loadSavedLanguage();
 
   const searchInput = document.getElementById('siteSearch');
@@ -3246,33 +3318,30 @@ await loadSavedLanguage();
 
   document.getElementById('genre-multi-btn')?.addEventListener('click', () => {
   isMultiGenreMode = !isMultiGenreMode;
+
   const btn = document.getElementById('genre-multi-btn');
   const genreSelect = document.getElementById('siteGenre');
-  const customDropdown = document.getElementById('custom-genre-dropdown');
 
   btn.classList.toggle('active', isMultiGenreMode);
   btn.textContent = isMultiGenreMode ? '☑' : '☐';
 
   if (isMultiGenreMode) {
-    // Включаем мультивыбор: прячем <select>, показываем кастомный (ЗАКРЫТЫЙ)
-    if (genreSelect) genreSelect.style.display = 'none';
-    if (customDropdown) {
-      customDropdown.style.display = 'block';
-      // НЕ открываем автоматически! Пользователь сам кликнет по "Wszystkie gatunki"
-    }
+    // переходим в мультивыбор: одиночный жанр сбрасываем
     if (genreSelect) genreSelect.value = '';
   } else {
-    // Выключаем мультивыбор: возвращаем <select>, прячем кастомный
-    if (genreSelect) genreSelect.style.display = '';
-    if (customDropdown) {
-      customDropdown.style.display = 'none';
-      customDropdown.classList.remove('open');
-    }
-    selectedGenres = [];        // ← добавить
-    renderSelectedGenres();     // ← добавить: чистит теги и снимает подсветку
+    // выключаем мультивыбор: сбрасываем все выбранные жанры
+    selectedGenres = [];
+    renderSelectedGenres();
   }
+
+  // список жанров больше не прячем и не подменяем — он один на оба режима
+  document.getElementById('custom-genre-dropdown')?.classList.remove('open');
+
+  highlightGenreOptions();
+  updateGenreTriggerText();
   filterTracks();
 });
+
 
   document.getElementById('siteGenre')?.addEventListener('change', (e) => {
     if (isMultiGenreMode) {
@@ -3800,7 +3869,37 @@ if (e.target.closest('.track-date-editable')) {
   // === FIX: обновление UI кнопок ===
   refreshLoginBtn();
 });
+/* ---------- модалка «Pobieranie ograniczone» ---------- */
+function openDownloadRestriction() {
+  const modal = document.getElementById('download-restriction-modal');
+  if (!modal) return;
 
+  const setText = (id, key) => {
+    const el = document.getElementById(id);
+    if (el && typeof t === 'function') el.textContent = t(key) || el.textContent;
+  };
+
+  setText('download-restricted-title', 'downloadRestricted');
+  setText('download-restricted-text', 'downloadRestrictedText');
+  setText('download-restricted-login-text', 'login');
+  setText('download-restricted-close-text', 'close');
+
+  modal.style.display = '';            // не оставляем inline-стиля
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDownloadRestriction() {
+  const modal = document.getElementById('download-restriction-modal');
+  if (!modal) return;
+
+  modal.classList.remove('open');
+  modal.style.display = '';            // ← ключевая строка, снимает inline display:flex
+  document.body.style.overflow = '';
+}
+
+window.openDownloadRestriction = openDownloadRestriction;
+window.closeDownloadRestriction = closeDownloadRestriction;
 // ========================================
 // 🔄 СБРОС СТАТИСТИКИ (ADMIN)
 // ========================================
@@ -4402,13 +4501,23 @@ document.addEventListener('click', (e) => {
 });
   // Download Restriction Modal Handlers
   document.getElementById('download-restriction-login-btn')?.addEventListener('click', () => {
-    document.getElementById('download-restriction-modal').classList.remove('open');
-    document.getElementById('login-modal').classList.add('open');
-  });
+  closeDownloadRestriction();
+  const login = document.getElementById('login-modal');
+  if (login) { login.style.display = ''; login.classList.add('open'); }
+});
 
-  document.getElementById('download-restriction-close-btn')?.addEventListener('click', () => {
-    document.getElementById('download-restriction-modal').classList.remove('open');
-  });
+document.getElementById('download-restriction-close-btn')?.addEventListener('click', closeDownloadRestriction);
+
+/* клик по фону */
+document.getElementById('download-restriction-modal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'download-restriction-modal') closeDownloadRestriction();
+});
+document.getElementById('download-restriction-close-x')?.addEventListener('click', closeDownloadRestriction);
+
+/* Escape */
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeDownloadRestriction();
+});
 
   // Firebase Auth - Google Login
   document.getElementById('google-login-btn')?.addEventListener('click', async () => {
@@ -5084,6 +5193,7 @@ window.updateTrackPlayIcons = function() {
     <button id="download-restriction-close-btn" class="btn" style="margin-top:12px;background:transparent;border:1px solid rgba(255,255,255,0.1);padding:10px 20px;border-radius:50px;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.3s ease">
       <span id="download-restricted-close-text">Закрыть</span>
     </button>
+    <button id="download-restriction-close-x" class="login-close-btn" aria-label="Close">✕</button>
   </div>
 </div>
 <!-- Плавающая кнопка выхода -->
@@ -5347,22 +5457,18 @@ window.onPlayerTrackChanged = function(trackId) {
       const modal = document.getElementById('login-modal');
       if (modal) modal.classList.add('open');
     }
+    else if (data.type === 'open-track') {
+      if (data.trackId && typeof window.openTrackOverlay === 'function') {
+        window.openTrackOverlay(data.trackId);
+      }
+    }
     else if (data.type === 'download-track') {
       // Handle download from iframe
       const role = getRole();
       if (role === 'guest') {
-        const modal = document.getElementById('download-restriction-modal');
-        if (modal) {
-          document.getElementById('download-restricted-title').textContent = t('downloadRestricted');
-          document.getElementById('download-restricted-text').textContent = t('downloadRestrictedText');
-          document.getElementById('download-restricted-login-text').textContent = t('login');
-          document.getElementById('download-restricted-close-text').textContent = t('close');
-          modal.classList.add('open');
-          modal.style.display = 'flex';
-          document.body.style.overflow = 'hidden';
-        }
-        return;
-      }
+  openDownloadRestriction();
+  return;
+}
       
       // Download the file
       const audioUrl = data.audioUrl;
@@ -5722,6 +5828,210 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, 2000);
 });
+/* ============ страница трека внутри iframe ============ */
+(function () {
+  let trackIframe = null;
+
+  function getFrame() {
+    if (!trackIframe) {
+      trackIframe = document.createElement('iframe');
+      trackIframe.id = 'iframe-track';
+      trackIframe.className = 'app-iframe';
+      trackIframe.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;' +
+        'border:none;z-index:100000;background:var(--bg);display:none;';
+      document.body.appendChild(trackIframe);
+    }
+    return trackIframe;
+  }
+
+  window.openTrackOverlay = function (id) {
+    const f = getFrame();
+    f.src = 'track.html?id=' + encodeURIComponent(id) + '&embed=1';
+    f.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeTrackOverlay = function () {
+    if (!trackIframe) return;
+    trackIframe.style.display = 'none';
+    trackIframe.src = '';
+    document.body.style.overflow = '';
+  };
+
+  /* клик по названию трека: открываем overlay, проигрывание НЕ трогаем.
+     capture = true — чтобы обработчик карточки не запустил трек */
+  document.addEventListener('click', function (e) {
+    const link = e.target.closest('.track-title-link');
+    if (!link) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const card = link.closest('.track');
+    const id = card && card.dataset.id;
+    if (id) window.openTrackOverlay(id);
+  }, true);
+
+  /* ---------- доступ к работающему плееру главной ---------- */
+  function player() {
+    if (window.wavesurfer && typeof window.wavesurfer.playPause === 'function') {
+      const w = window.wavesurfer;
+      return {
+        playing: () => { try { return !!w.isPlaying(); } catch (e) { return false; } },
+        cur: () => { try { return w.getCurrentTime() || 0; } catch (e) { return 0; } },
+        dur: () => { try { return w.getDuration() || 0; } catch (e) { return 0; } },
+        toggle: () => w.playPause(),
+        seek: (r) => { try { w.seekTo(r); } catch (e) {} }
+      };
+    }
+    const a = document.querySelector('audio');
+    if (a) {
+      return {
+        playing: () => !a.paused,
+        cur: () => a.currentTime || 0,
+        dur: () => a.duration || 0,
+        toggle: () => { if (a.paused) a.play(); else a.pause(); },
+        seek: (r) => { if (a.duration) a.currentTime = r * a.duration; }
+      };
+    }
+    return null;
+  }
+
+  /* ---------- сообщения со страницы трека ---------- */
+  window.addEventListener('message', function (e) {
+    const d = e.data;
+    if (!d) return;
+
+    if (d === 'close-track') { window.closeTrackOverlay(); return; }
+
+    /* плей/пауза: тот же трек — переключаем, другой — запускаем */
+    if (d.type === 'toggle-track') {
+      const p = player();
+      if (window.currentTrackId === d.trackId && p) { p.toggle(); return; }
+      const track = (window.globalTracks || []).find(t => t.id === d.trackId);
+      if (track && typeof window.loadAndPlayTrack === 'function') {
+        if (typeof window.setPlayerContext === 'function') {
+          window.setPlayerContext(window.globalTracks, 'home');
+        }
+        window.loadAndPlayTrack(track);
+      }
+      return;
+    }
+
+    if (d.type === 'seek-track') {
+      const p = player();
+      if (p && window.currentTrackId === d.trackId) p.seek(d.ratio);
+      return;
+    }
+
+    /* выбор плейлиста — родная модалка главной со всеми правами ролей */
+    if (d.type === 'open-playlist-picker') {
+      if (typeof openPlaylistPicker === 'function') openPlaylistPicker(d.trackId);
+      return;
+    }
+
+    /* клик по жанру на странице трека — фильтруем главную */
+    if (d.type === 'filter-genre') {
+      window.closeTrackOverlay();
+      const sel = document.getElementById('siteGenre');
+      if (sel) {
+        sel.value = d.genre;
+        sel.dispatchEvent(new Event('change'));
+      }
+      if (typeof selectedGenres !== 'undefined' && Array.isArray(selectedGenres)) {
+        selectedGenres.length = 0;
+        selectedGenres.push(d.genre);
+        if (typeof renderSelectedGenres === 'function') renderSelectedGenres();
+      }
+      if (typeof filterTracks === 'function') filterTracks();
+      return;
+    }
+  });
+
+  /* ---------- отдаём состояние плеера внутрь iframe ---------- */
+  setInterval(function () {
+    if (!trackIframe || trackIframe.style.display === 'none' || !trackIframe.contentWindow) return;
+    const p = player();
+    trackIframe.contentWindow.postMessage({
+      type: 'player-state',
+      trackId: window.currentTrackId || null,
+      playing: p ? p.playing() : false,
+      currentTime: p ? p.cur() : 0,
+      duration: p ? p.dur() : 0
+    }, '*');
+  }, 400);
+})();
+/* ---------- модалка создания плейлиста ---------- */
+function askNewPlaylist(role) {
+  return new Promise((resolve) => {
+    const modal = document.getElementById('new-playlist-modal');
+    if (!modal) { resolve(null); return; }
+
+    const nameEl = document.getElementById('np-name');
+    const visEl = document.getElementById('np-visibility');
+    const hideEl = document.getElementById('np-hide');
+    const errEl = document.getElementById('np-error');
+    const createBtn = document.getElementById('np-create');
+    const adminOnly = document.getElementById('np-admin-only');
+
+    const isAdminRole = role === 'admin';
+
+    /* сброс полей */
+    nameEl.value = '';
+    errEl.hidden = true;
+    hideEl.checked = false;
+    visEl.value = isAdminRole ? 'public' : 'partner';
+
+    /* партнёр видит только название */
+    if (adminOnly) {
+      adminOnly.hidden = !isAdminRole;
+      adminOnly.style.display = isAdminRole ? '' : 'none';
+    }
+
+    document.getElementById('np-subtitle').textContent = isAdminRole
+      ? 'Podaj nazwę i widoczność playlisty'
+      : 'Podaj nazwę playlisty';
+
+    /* открытие */
+    modal.style.display = '';
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => nameEl.focus(), 60);
+
+    function done(result) {
+      modal.classList.remove('open');
+      modal.style.display = '';
+      document.body.style.overflow = '';
+      modal.removeEventListener('click', onBackdrop);
+      document.removeEventListener('keydown', onKey);
+      resolve(result);
+    }
+
+    function submit() {
+      const name = nameEl.value.trim();
+      if (!name) {
+        errEl.textContent = 'Podaj nazwę playlisty';
+        errEl.hidden = false;
+        nameEl.focus();
+        return;
+      }
+
+      done(isAdminRole
+        ? { name, visibility: visEl.value, hideFromHome: hideEl.checked }
+        : { name, visibility: 'partner', hideFromHome: false });
+    }
+
+    function onBackdrop(e) { if (e.target === modal) done(null); }
+    function onKey(e) {
+      if (e.key === 'Escape') done(null);
+      if (e.key === 'Enter' && document.activeElement === nameEl) submit();
+    }
+
+    createBtn.onclick = submit;
+    document.getElementById('np-cancel').onclick = () => done(null);
+    document.getElementById('np-close').onclick = () => done(null);
+    modal.addEventListener('click', onBackdrop);
+    document.addEventListener('keydown', onKey);
+  });
+}
 // ===============================
 // PUSH NOTIFICATIONS (ВРЕМЕННО ОТКЛЮЧЕНО)
 // TODO: Нужна настройка Vercel redeploy + Firestore rules
@@ -5898,6 +6208,41 @@ if (pushNotifBtn) {
 }
 */
 </script>
+<div id="new-playlist-modal" class="modal" style="z-index:100030">
+  <div class="panel" style="max-width:420px">
+    <button id="np-close" class="login-close-btn" aria-label="Close">✕</button>
 
+        <h3 id="np-title" style="margin:0 0 4px;color:#ff4da6">🎵 Nowa playlista</h3>
+    <p id="np-subtitle" style="margin:0 0 18px;color:#bfc3d6;font-size:13px">Podaj nazwę playlisty</p>
+
+    <label class="np-field">
+      <span>Nazwa playlisty</span>
+      <input id="np-name" type="text" maxlength="80" placeholder="Np. Night Drive" autocomplete="off">
+    </label>
+
+    <div id="np-admin-only">
+      <label class="np-field">
+        <span>Widoczność</span>
+        <select id="np-visibility">
+          <option value="public">🌍 Publiczna</option>
+          <option value="partner">♥ Tylko partnerzy</option>
+          <option value="hidden">🔒 Ukryta</option>
+        </select>
+      </label>
+
+      <label class="np-check">
+        <input id="np-hide" type="checkbox">
+        <span>👁️‍🗨️ Ukryj utwory na stronie głównej</span>
+      </label>
+    </div>
+
+    <div id="np-error" class="np-error" hidden></div>
+
+    <div class="np-actions">
+      <button id="np-cancel" class="btn" type="button">Anuluj</button>
+      <button id="np-create" class="btn active" type="button">Utwórz</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
