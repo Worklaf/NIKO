@@ -2497,7 +2497,12 @@ function renderDraftTracks(tracks) {
           </button>
           ${isAdmin ? `<button class="btn icon replace-track-btn" title="${t('replaceTrackFiles') || 'Заменить'}">🔄</button>` : ''}
           ${canDelete ? `<button class="btn icon delete-track-btn" title="Удалить">🗑️</button>` : ''}
-          <button class="btn icon add-to-playlist-btn" title="${t('addToPlaylist') || 'В плейлист'}">➕</button>
+          <button class="btn icon add-to-playlist-btn playlist-btn" title="${t('addToPlaylist') || 'В плейлист'}" aria-label="${t('addToPlaylist') || 'В плейлист'}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
           ${isAdmin ? `<button class="btn icon change-visibility-btn" title="${t('songVisibility') || 'Видимость'}">👁️</button>` : ''}
           ${orderButtons}
           <button class="btn icon download-btn" data-id="${track.id || ''}" data-audio="${track.audio || ''}" data-title="${(track.title || 'track').replace(/"/g,'')}" title="${t('download') || 'Скачать'}" aria-label="Download">
