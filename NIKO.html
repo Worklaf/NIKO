@@ -255,7 +255,7 @@
     background: var(--bg);
     display: none;
   }
-  #mini-player { z-index: 100001 !important; }
+  #mini-player { z-index: 100004 !important; }
 .share-svg-btn {
   display: inline-flex;
   align-items: center;
@@ -2423,7 +2423,7 @@ function renderDraftTracks(tracks) {
       if (ts && ts.toDate) timeStr = ts.toDate().toLocaleString();
       else if (ts) timeStr = new Date(ts).toLocaleString();
       const count = plData.count || 1;
-      partnerListenInfo = `<div class="partner-listen-info">👤 Партнёр слушал: ${timeStr} (${count}x)</div>`;
+      partnerListenInfo = `<div class="partner-listen-info">👤 Слушал: ${timeStr} (${count}x)</div>`;
     }      let trackUploader = track.uploadedBy || track.uploadedByRole || '';
       if (trackUploader === 'guest') trackUploader = '';
       if (!trackUploader && track.visibility === 'partner') trackUploader = 'partner';
@@ -5553,7 +5553,6 @@ window.onPlayerTrackChanged = function(trackId) {
     }, 150);
   }
 };
-
 // ===============================
 // IFRAME OVERLAY MANAGER
 // ===============================
@@ -5561,6 +5560,7 @@ window.onPlayerTrackChanged = function(trackId) {
 (function() {
   let playlistsIframe = null;
   let playlistIframe = null;
+  let trackIframe = null;
 
   function createIframe(id) {
     const iframe = document.createElement('iframe');
@@ -5571,10 +5571,19 @@ window.onPlayerTrackChanged = function(trackId) {
     return iframe;
   }
 
+  // Поднимает активный iframe поверх всех остальных
+  function bringToFront(active) {
+    [playlistsIframe, playlistIframe, trackIframe].forEach(f => {
+      if (!f) return;
+      f.style.zIndex = (f === active) ? '100002' : '100000';
+    });
+  }
+
   window.openPlaylistsOverlay = function() {
     if (!playlistsIframe) playlistsIframe = createIframe('iframe-playlists');
     playlistsIframe.src = 'playlists.html?embed=1';
     playlistsIframe.style.display = 'block';
+    bringToFront(playlistsIframe);
     if (playlistIframe) playlistIframe.style.display = 'none';
   };
 
@@ -5582,6 +5591,7 @@ window.onPlayerTrackChanged = function(trackId) {
     if (!playlistIframe) playlistIframe = createIframe('iframe-playlist');
     playlistIframe.src = 'playlist-view.html?id=' + encodeURIComponent(id) + '&embed=1';
     playlistIframe.style.display = 'block';
+    bringToFront(playlistIframe);
     if (playlistsIframe) playlistsIframe.style.display = 'none';
   };
 
@@ -5590,9 +5600,63 @@ window.onPlayerTrackChanged = function(trackId) {
     if (playlistIframe) { playlistIframe.style.display = 'none'; playlistIframe.src = ''; }
   };
 
-  window.addEventListener('message', async (e) => {
+  window.openTrackOverlay = function(id) {
+    if (!trackIframe) trackIframe = createIframe('iframe-track');
+    trackIframe.src = 'track.html?id=' + encodeURIComponent(id) + '&embed=1';
+    trackIframe.style.display = 'block';
+    bringToFront(trackIframe);
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeTrackOverlay = function() {
+    if (!trackIframe) return;
+    trackIframe.style.display = 'none';
+    trackIframe.src = '';
+    document.body.style.overflow = '';
+  };
+
+  // клик по названию трека на главной — открываем overlay
+  document.addEventListener('click', function(e) {
+    const link = e.target.closest('.track-title-link');
+    if (!link) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const card = link.closest('.track');
+    const id = card && card.dataset.id;
+    if (id) window.openTrackOverlay(id);
+  }, true);
+
+  // доступ к работающему плееру главной
+  function player() {
+    if (window.wavesurfer && typeof window.wavesurfer.playPause === 'function') {
+      const w = window.wavesurfer;
+      return {
+        playing: () => { try { return !!w.isPlaying(); } catch (e) { return false; } },
+        cur: () => { try { return w.getCurrentTime() || 0; } catch (e) { return 0; } },
+        dur: () => { try { return w.getDuration() || 0; } catch (e) { return 0; } },
+        toggle: () => w.playPause(),
+        seek: (r) => { try { w.seekTo(r); } catch (e) {} }
+      };
+    }
+    const a = document.querySelector('audio');
+    if (a) {
+      return {
+        playing: () => !a.paused,
+        cur: () => a.currentTime || 0,
+        dur: () => a.duration || 0,
+        toggle: () => { if (a.paused) a.play(); else a.pause(); },
+        seek: (r) => { if (a.duration) a.currentTime = r * a.duration; }
+      };
+    }
+    return null;
+  }
+
+  // единый обработчик сообщений от всех iframe
+  window.addEventListener('message', async function(e) {
     const data = e.data;
     if (!data) return;
+
+    // --- от плейлистов ---
     if (data === 'close-playlists' || data === 'close-playlist' || data === 'go-home') {
       closeOverlays();
     }
@@ -5611,7 +5675,6 @@ window.onPlayerTrackChanged = function(trackId) {
       db.collection('tracks').where('playlistIds', 'array-contains', data.playlistId).get()
         .then(snap => {
           const ctxTracks = snap.docs.map(d => ({id: d.id, ...d.data()}));
-          // Sort by createdAt DESCENDING to match visual order in playlist (newest first)
           ctxTracks.sort((a, b) => {
             const getTime = (item) => {
               if (!item.createdAt) return 0;
@@ -5619,7 +5682,7 @@ window.onPlayerTrackChanged = function(trackId) {
                 return item.createdAt.toDate ? item.createdAt.toDate().getTime() : new Date(item.createdAt).getTime();
               } catch (e) { return 0; }
             };
-            return getTime(b) - getTime(a); // newest first
+            return getTime(b) - getTime(a);
           });
           window.setPlayerContext(ctxTracks, 'playlist', data.playlistId);
           const track = ctxTracks.find(t => t.id === data.trackId);
@@ -5630,51 +5693,77 @@ window.onPlayerTrackChanged = function(trackId) {
       const modal = document.getElementById('login-modal');
       if (modal) modal.classList.add('open');
     }
+
+    // --- от трека ---
+    else if (data === 'close-track') {
+      closeTrackOverlay();
+    }
+    else if (data.type === 'toggle-track') {
+      const p = player();
+      if (window.currentTrackId === data.trackId && p) { p.toggle(); return; }
+      const track = (window.globalTracks || []).find(t => t.id === data.trackId);
+      if (track && typeof window.loadAndPlayTrack === 'function') {
+        if (typeof window.setPlayerContext === 'function') {
+          window.setPlayerContext(window.globalTracks, 'home');
+        }
+        window.loadAndPlayTrack(track);
+      }
+    }
+    else if (data.type === 'seek-track') {
+      const p = player();
+      if (p && window.currentTrackId === data.trackId) p.seek(data.ratio);
+    }
+    else if (data.type === 'open-playlist-picker') {
+      if (typeof openPlaylistPicker === 'function') openPlaylistPicker(data.trackId);
+    }
+    else if (data.type === 'filter-genre') {
+      closeTrackOverlay();
+      const sel = document.getElementById('siteGenre');
+      if (sel) {
+        sel.value = data.genre;
+        sel.dispatchEvent(new Event('change'));
+      }
+      if (typeof selectedGenres !== 'undefined' && Array.isArray(selectedGenres)) {
+        selectedGenres.length = 0;
+        selectedGenres.push(data.genre);
+        if (typeof renderSelectedGenres === 'function') renderSelectedGenres();
+      }
+      if (typeof filterTracks === 'function') filterTracks();
+    }
     else if (data.type === 'open-track') {
       if (data.trackId && typeof window.openTrackOverlay === 'function') {
         window.openTrackOverlay(data.trackId);
       }
     }
     else if (data.type === 'download-track') {
-      // Handle download from iframe
       const role = getRole();
       if (role === 'guest') {
-  openDownloadRestriction();
-  return;
-}
-      
-      // Download the file
+        openDownloadRestriction();
+        return;
+      }
       const audioUrl = data.audioUrl;
       const title = data.title || 'track';
       const trackId = data.trackId;
-      
       if (!audioUrl) {
         console.warn('No audio URL provided for download');
         return;
       }
-      
       try {
         const response = await fetch(audioUrl, { mode: 'cors' });
         if (!response.ok) throw new Error('Network error');
-        
         const blob = await response.blob();
         const blobUrl = URL.createObjectURL(blob);
-        
         const a = document.createElement('a');
         a.href = blobUrl;
         a.download = `${title}.mp3`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        
         setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-        
-        // Track download in Firestore
+
         const firebaseUid = localStorage.getItem('firebaseUid');
         const role = localStorage.getItem('siteRole') || 'guest';
         let userId = firebaseUid;
-        
-        // For admin/partner users (code-based login), create a unique ID
         if (!userId && (role === 'admin' || role === 'partner')) {
           userId = localStorage.getItem('userId_' + role);
           if (!userId) {
@@ -5682,30 +5771,22 @@ window.onPlayerTrackChanged = function(trackId) {
             localStorage.setItem('userId_' + role, userId);
           }
         }
-        
-        console.log('Download tracking from iframe - userId:', userId, 'role:', role, 'db:', !!db, 'trackId:', trackId);
         if (userId && db) {
           try {
             const userData = {
               downloads: firebase.firestore.FieldValue.arrayUnion(trackId),
               role: role
             };
-            
-            // Add user metadata for Firebase Auth users
             if (role === 'user' || firebaseUid) {
               userData.email = localStorage.getItem('userEmail') || '';
               userData.displayName = localStorage.getItem('userDisplayName') || '';
               userData.createdAt = localStorage.getItem('userCreatedAt') || firebase.firestore.FieldValue.serverTimestamp();
               userData.lastLoginAt = firebase.firestore.FieldValue.serverTimestamp();
             }
-            
             await db.collection('admin_downloads').doc(userId).set(userData, { merge: true });
-            console.log('Download tracked successfully for track:', trackId);
           } catch (e) {
             console.error('Failed to track download:', e);
           }
-        } else {
-          console.warn('Cannot track download - missing userId or db');
         }
       } catch (err) {
         console.error('Download error:', err);
@@ -5713,6 +5794,19 @@ window.onPlayerTrackChanged = function(trackId) {
       }
     }
   });
+
+  // отдаём состояние плеера внутрь iframe трека
+  setInterval(function() {
+    if (!trackIframe || trackIframe.style.display === 'none' || !trackIframe.contentWindow) return;
+    const p = player();
+    trackIframe.contentWindow.postMessage({
+      type: 'player-state',
+      trackId: window.currentTrackId || null,
+      playing: p ? p.playing() : false,
+      currentTime: p ? p.cur() : 0,
+      duration: p ? p.dur() : 0
+    }, '*');
+  }, 400);
 })();
 // === Handle like/dislike/state requests from iframe playlists ===
 window.addEventListener('message', function(e) {
@@ -6001,137 +6095,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, 2000);
 });
-/* ============ страница трека внутри iframe ============ */
-(function () {
-  let trackIframe = null;
-
-  function getFrame() {
-    if (!trackIframe) {
-      trackIframe = document.createElement('iframe');
-      trackIframe.id = 'iframe-track';
-      trackIframe.className = 'app-iframe';
-      trackIframe.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;' +
-        'border:none;z-index:100000;background:var(--bg);display:none;';
-      document.body.appendChild(trackIframe);
-    }
-    return trackIframe;
-  }
-
-  window.openTrackOverlay = function (id) {
-    const f = getFrame();
-    f.src = 'track.html?id=' + encodeURIComponent(id) + '&embed=1';
-    f.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-  };
-
-  window.closeTrackOverlay = function () {
-    if (!trackIframe) return;
-    trackIframe.style.display = 'none';
-    trackIframe.src = '';
-    document.body.style.overflow = '';
-  };
-
-  /* клик по названию трека: открываем overlay, проигрывание НЕ трогаем.
-     capture = true — чтобы обработчик карточки не запустил трек */
-  document.addEventListener('click', function (e) {
-    const link = e.target.closest('.track-title-link');
-    if (!link) return;
-    e.preventDefault();
-    e.stopPropagation();
-    const card = link.closest('.track');
-    const id = card && card.dataset.id;
-    if (id) window.openTrackOverlay(id);
-  }, true);
-
-  /* ---------- доступ к работающему плееру главной ---------- */
-  function player() {
-    if (window.wavesurfer && typeof window.wavesurfer.playPause === 'function') {
-      const w = window.wavesurfer;
-      return {
-        playing: () => { try { return !!w.isPlaying(); } catch (e) { return false; } },
-        cur: () => { try { return w.getCurrentTime() || 0; } catch (e) { return 0; } },
-        dur: () => { try { return w.getDuration() || 0; } catch (e) { return 0; } },
-        toggle: () => w.playPause(),
-        seek: (r) => { try { w.seekTo(r); } catch (e) {} }
-      };
-    }
-    const a = document.querySelector('audio');
-    if (a) {
-      return {
-        playing: () => !a.paused,
-        cur: () => a.currentTime || 0,
-        dur: () => a.duration || 0,
-        toggle: () => { if (a.paused) a.play(); else a.pause(); },
-        seek: (r) => { if (a.duration) a.currentTime = r * a.duration; }
-      };
-    }
-    return null;
-  }
-
-  /* ---------- сообщения со страницы трека ---------- */
-  window.addEventListener('message', function (e) {
-    const d = e.data;
-    if (!d) return;
-
-    if (d === 'close-track') { window.closeTrackOverlay(); return; }
-
-    /* плей/пауза: тот же трек — переключаем, другой — запускаем */
-    if (d.type === 'toggle-track') {
-      const p = player();
-      if (window.currentTrackId === d.trackId && p) { p.toggle(); return; }
-      const track = (window.globalTracks || []).find(t => t.id === d.trackId);
-      if (track && typeof window.loadAndPlayTrack === 'function') {
-        if (typeof window.setPlayerContext === 'function') {
-          window.setPlayerContext(window.globalTracks, 'home');
-        }
-        window.loadAndPlayTrack(track);
-      }
-      return;
-    }
-
-    if (d.type === 'seek-track') {
-      const p = player();
-      if (p && window.currentTrackId === d.trackId) p.seek(d.ratio);
-      return;
-    }
-
-    /* выбор плейлиста — родная модалка главной со всеми правами ролей */
-    if (d.type === 'open-playlist-picker') {
-      if (typeof openPlaylistPicker === 'function') openPlaylistPicker(d.trackId);
-      return;
-    }
-
-    /* клик по жанру на странице трека — фильтруем главную */
-    if (d.type === 'filter-genre') {
-      window.closeTrackOverlay();
-      const sel = document.getElementById('siteGenre');
-      if (sel) {
-        sel.value = d.genre;
-        sel.dispatchEvent(new Event('change'));
-      }
-      if (typeof selectedGenres !== 'undefined' && Array.isArray(selectedGenres)) {
-        selectedGenres.length = 0;
-        selectedGenres.push(d.genre);
-        if (typeof renderSelectedGenres === 'function') renderSelectedGenres();
-      }
-      if (typeof filterTracks === 'function') filterTracks();
-      return;
-    }
-  });
-
-  /* ---------- отдаём состояние плеера внутрь iframe ---------- */
-  setInterval(function () {
-    if (!trackIframe || trackIframe.style.display === 'none' || !trackIframe.contentWindow) return;
-    const p = player();
-    trackIframe.contentWindow.postMessage({
-      type: 'player-state',
-      trackId: window.currentTrackId || null,
-      playing: p ? p.playing() : false,
-      currentTime: p ? p.cur() : 0,
-      duration: p ? p.dur() : 0
-    }, '*');
-  }, 400);
-})();
 /* ---------- модалка создания плейлиста ---------- */
 function askNewPlaylist(role) {
   return new Promise((resolve) => {
