@@ -1145,6 +1145,7 @@
  <script src="genre-ui-fix.js"></script>
 
 <script>
+  
   const WORKER_URL = "https://r2-upload-proxy.nikolfar91.workers.dev";
   const STORAGE_FOLDER_AUDIO = "NIKO_music/audio";
   const STORAGE_FOLDER_COVERS = "NIKO_music/covers";
@@ -3011,6 +3012,10 @@ if (lyricsSearch) lyricsSearch.placeholder = t('searchLyricsPlaceholder') || 'Se
     const lang = btn.dataset.lang;
     window.currentLang = lang;
     switchLanguage(lang);
+        /* транслируем язык во все открытые оверлеи */
+    document.querySelectorAll('iframe').forEach(f => {
+      try { f.contentWindow?.postMessage({ type: 'lang-changed', lang }, '*'); } catch (err) {}
+    });
     updateLangDisplay(lang);
     langMenu?.classList.remove('open');
     
