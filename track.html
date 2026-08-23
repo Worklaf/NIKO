@@ -59,9 +59,28 @@
           <button id="tp-like" class="tp-chip" type="button">❤ <span id="tp-likes">0</span></button>
           <button id="tp-dislike" class="tp-chip" type="button">👎 <span id="tp-dislikes">0</span></button>
           <span class="tp-chip tp-chip-static">▶ <span id="tp-plays">0</span></span>
-          <button id="tp-playlist" class="tp-chip" type="button">➕ Playlista</button>
-          <button id="tp-download" class="tp-chip" type="button">⬇ Pobierz</button>
-          <button id="tp-share" class="tp-chip" type="button">🔗 Udostępnij</button>
+          <button id="tp-playlist" class="tp-chip playlist-btn" type="button" aria-label="Playlista" title="Playlista">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        </button>
+          <button id="tp-share" class="tp-chip share-svg-btn" type="button" aria-label="Udostępnij" title="Udostępnij">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="5" r="3"/>
+            <circle cx="6" cy="12" r="3"/>
+            <circle cx="18" cy="19" r="3"/>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+        </svg>
+        </button>
+        <button id="tp-download" class="tp-chip download-btn" type="button" aria-label="Pobierz" title="Pobierz">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        </button>
           <button id="tp-edit-genre" class="tp-chip tp-admin" type="button" hidden>✏ Styl</button>
           <button id="tp-edit-lyrics" class="tp-chip tp-admin" type="button" hidden>✏ Tekst</button>
         </div>
