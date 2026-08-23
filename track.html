@@ -65,7 +65,7 @@
           <button id="tp-edit-genre" class="tp-chip tp-admin" type="button" hidden>✏ Styl</button>
           <button id="tp-edit-lyrics" class="tp-chip tp-admin" type="button" hidden>✏ Tekst</button>
         </div>
-
+        <div id="tp-playlists" class="tp-playlists"></div>
         <div id="tp-date" class="tp-date"></div>
       </div>
     </section>
@@ -229,6 +229,11 @@ const TP = {
 const isAdmin = TP.role === 'admin';
 const isPartner = TP.role === 'partner';
 
+function isVisibleToRole(item, role) {
+  if (item.visibility === 'hidden') return role === 'admin';
+  if (item.visibility === 'partner') return role === 'admin' || role === 'partner';
+  return true;
+}
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s == null ? '' : s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -311,12 +316,13 @@ function render() {
     } catch (e) {}
   }
 
-  if (isAdmin) {
+    if (isAdmin) {
     $('#tp-edit-genre').hidden = false;
     $('#tp-edit-lyrics').hidden = false;
   }
-}
 
+  renderTrackPlaylists();
+}
 /* ---------- назад ---------- */
 $('#tp-back').addEventListener('click', () => {
   if (IS_EMBED) toParent('close-track');
@@ -331,7 +337,56 @@ $('#tp-prompt-toggle').addEventListener('click', () => {
   $('#tp-prompt-toggle').classList.toggle('open', open);
   $('#tp-prompt-toggle').querySelector('.tp-plus').textContent = open ? '−' : '+';
 });
+async function renderTrackPlaylists() {
+  const box = $('#tp-playlists');
+  if (!box) { console.warn('❌ #tp-playlists not found'); return; }
 
+  const ids = TP.track?.playlistIds || [];
+  console.log('[playlists] track playlistIds:', ids);
+
+  if (ids.length === 0) { box.innerHTML = ''; return; }
+
+  try {
+    const snap = await db.collection('playlists').get();
+    const all = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+    
+    if (typeof isVisibleToRole !== 'function') {
+      console.error('❌ isVisibleToRole не найдена! Вынеси её глобально из openPlaylistPickerLocal.');
+      return;
+    }
+
+    const visible = all.filter(p => ids.includes(p.id) && isVisibleToRole(p, TP.role));
+    console.log('[playlists] visible for role', TP.role, ':', visible.map(x => x.name));
+
+    if (visible.length === 0) { box.innerHTML = ''; return; }
+
+    box.innerHTML = visible.map(p => {
+      const icon = p.visibility === 'public' ? '🌍' :
+                   p.visibility === 'partner' ? '♥' : '🔒';
+      return `<button class="tp-pl-chip" type="button" data-id="${esc(p.id)}">
+        <span>${icon}</span><span>${esc(p.name)}</span>
+      </button>`;
+    }).join('');
+
+    // Делегирование клика — надёжнее, чем вешать на каждую кнопку
+    box.onclick = (e) => {
+      const btn = e.target.closest('.tp-pl-chip');
+      if (!btn) return;
+      
+      const pid = btn.dataset.id;
+      console.log('[playlists] clicked playlist:', pid, '| IS_EMBED:', IS_EMBED);
+      
+      if (IS_EMBED) {
+        toParent({ type: 'open-playlist', id: pid });
+      } else {
+        window.location.href = 'playlist-view.html?id=' + encodeURIComponent(pid);
+      }
+    };
+
+  } catch (e) {
+    console.error('[playlists] error:', e);
+  }
+}
 /* ---------- копирование ---------- */
 function copyToClipboard(text, btn) {
   const done = () => {
@@ -513,13 +568,7 @@ $('#tp-playlist').addEventListener('click', async () => {
     return;
   }
   openPlaylistPickerLocal();
-});
-
-function isVisibleToRole(item, role) {
-  if (item.visibility === 'hidden') return role === 'admin';
-  if (item.visibility === 'partner') return role === 'admin' || role === 'partner';
-  return true;
-}
+}); 
 
 async function openPlaylistPickerLocal() {
   openModal('Playlista', '<div class="tp-muted">…</div>');
