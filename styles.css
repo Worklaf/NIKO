@@ -2921,6 +2921,16 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
   .custom-genre-option.all-genres {
     grid-column: 1 / -1;
   }
+  /* ПК: поджанры всегда развёрнуты, стрелки скрыты */
+  .genre-children,
+  .genre-children.open {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  .genre-arrow {
+    display: none !important;
+  }
 }
 /* ---------- модалка создания плейлиста ---------- */
 .np-field {
@@ -2986,4 +2996,117 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
 
 @media (max-width: 480px) {
   .np-actions { display: grid; grid-template-columns: 1fr 1fr; }
+}
+/* ===== РАСКРЫВАЮЩИЕСЯ ЖАНРЫ ===== */
+
+.genre-parent-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.genre-arrow {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.06);
+  color: #9aa0b5;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  line-height: 1;
+}
+
+.genre-arrow:hover {
+  background: rgba(255,77,166,0.15);
+  color: #ff4da6;
+}
+
+.genre-arrow.expanded {
+  background: rgba(0,209,255,0.15);
+  color: #00d1ff;
+}
+
+/* Контейнер поджанров — скрыт по умолчанию */
+.genre-children {
+  display: none;
+  margin: 0 0 8px 12px;
+  padding: 4px 0 4px 10px;
+  border-left: 2px solid rgba(255,255,255,0.06);
+}
+
+/* РАСКРЫТ: сетка 4 в ряд на ПК */
+.genre-children.open {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.genre-children .custom-genre-option {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.04);
+  font-size: 12.5px;
+  margin-bottom: 0; /* grid управляет отступами */
+}
+
+.genre-children .custom-genre-option:hover {
+  background: rgba(255,77,166,0.08);
+}
+/* ===== Selected sub-genres inside expanded groups ===== */
+.genre-children .custom-genre-option.selected {
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  color: #07060a;
+  border-color: transparent;
+}
+
+.genre-children .custom-genre-option.selected .genre-label {
+  color: #07060a;
+}
+
+.genre-children .custom-genre-option.selected .genre-count {
+  color: #07060a;
+  background: rgba(7,6,10,0.18);
+}
+/* Вертикальный список родителей */
+.custom-genre-options {
+  display: block;
+  max-height: 460px;
+  overflow-y: auto;
+}
+
+.custom-genre-option.genre-parent {
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  margin-bottom: 2px;
+}
+
+/* ===== МОБИЛЬНЫЙ: поджанры 2 в ряд ===== */
+@media (max-width:880px) {
+  .custom-genre-options {
+    max-height: 60vh;
+  }
+  .genre-children {
+    margin-left: 8px;
+    margin-bottom: 6px;
+    padding-left: 8px;
+  }
+  .genre-children.open {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 5px;
+  }
+  .custom-genre-option {
+    padding: 10px 12px;
+  }
+}
+
+/* Совсем узкий экран — 1 колонка */
+@media (max-width:360px) {
+  .genre-children.open {
+    grid-template-columns: 1fr;
+  }
 }
