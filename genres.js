@@ -29,7 +29,7 @@ const GENRE_JUNK = [
   /^\d+(\.\d+)?$/,
   /^\d+\s*\/\s*\d+/,
   /\b(bpm|tempo|takt)\b/i,
-  /^(mood|energy|atmosphere|vibe|instrumentation|instruments|production|mix|mixing|master|mastering|structure|arrangement|vocal style|vocals|voice|lyrics direction|lyrics|language|theme|themes|key|tonality|style guide|reference|prompt)\s*:/i,
+  /^(mood|energy|atmosphere|vibe|instrumentation|instruments|production|mixing|master|mastering|structure|arrangement|vocal style|vocals|voice|lyrics direction|lyrics|language|theme|themes|key|tonality|style guide|reference|prompt)\s*:/i,
   /^themes?\s+of\b/i,
   /→|->/,
 ];
