@@ -80,6 +80,8 @@ const GENRE_ROOTS = [
   [/lo[\s-]?fi|lofi/i,                    'Lo-Fi'],
   [/\bchill(out|hop|step)?\b/i,           'Chillout'],
   [/vapor\s?wave|synth\s?wave|retro\s?wave|outrun|darksynth/i, 'Synthwave'],
+   [/neo[-\s]?baile/i,                      'Neo-Baile'],
+   [/dark\s?romantic/i,                     'Dark Romantic'],
   [/\breggaeton\b/i,                      'Reggaeton'],
   [/\breggae\b|\bska\b/i,                 'Reggae'],
   [/\blatin\b|salsa|bossa|samba|tango|flamenco/i, 'Latin'],
