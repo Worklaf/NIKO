@@ -500,6 +500,58 @@
 .tp-playlists .tp-pl-chip:active {
   transform: translateY(0);
 }
+/* ---------- share / download SVG buttons ---------- */
+.tp-chip.share-svg-btn,
+.tp-chip.download-btn {
+  padding: 8px 10px;
+}
+
+.tp-chip.share-svg-btn svg,
+.tp-chip.download-btn svg {
+  display: block;
+  transition: all 0.2s ease;
+  stroke: #eaeaf2;
+}
+
+.tp-chip.share-svg-btn:hover {
+  border-color: rgba(255,77,166,0.5);
+}
+
+.tp-chip.share-svg-btn:hover svg {
+  stroke: #ff4da6;
+  filter: drop-shadow(0 0 6px rgba(255,77,166,0.5));
+  transform: scale(1.1);
+}
+
+.tp-chip.download-btn:hover {
+  border-color: rgba(77,255,138,0.4);
+}
+
+.tp-chip.download-btn:hover svg {
+  stroke: #4dff8a;
+  filter: drop-shadow(0 0 6px rgba(77,255,138,0.5));
+  transform: scale(1.1);
+}
+/* ---------- playlist button ---------- */
+.tp-chip.playlist-btn {
+  padding: 8px 10px;
+}
+
+.tp-chip.playlist-btn svg {
+  display: block;
+  transition: all 0.2s ease;
+  stroke: #eaeaf2;
+}
+
+.tp-chip.playlist-btn:hover {
+  border-color: rgba(0, 209, 255, 0.5);
+}
+
+.tp-chip.playlist-btn:hover svg {
+  stroke: #00d1ff;
+  filter: drop-shadow(0 0 6px rgba(0, 209, 255, 0.5));
+  transform: scale(1.1);
+}
 /* ===================== планшет и телефон ===================== */
 @media (max-width: 880px) {
   body { padding: 14px; }
