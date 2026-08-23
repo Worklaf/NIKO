@@ -1135,6 +1135,7 @@ body.bg-cover #likedTracksBtn.active {
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
 </head>
 <body class="playlist-view">
 <!-- [FIX] Индикатор офлайн-режима -->
@@ -1142,25 +1143,25 @@ body.bg-cover #likedTracksBtn.active {
 <!-- Replace track modal -->
 <div id="replace-track-modal" class="modal" style="display:none">
   <div class="panel" style="max-width:420px">
-    <h3>🔄 Replace track files</h3>
-    <p style="color:var(--muted);font-size:13px;margin-bottom:16px">Statistics will be preserved</p>
+    <h3 data-i18n="replaceTrackFiles">🔄 Replace track files</h3>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:16px" data-i18n="statsWillStay">Statistics will be preserved</p>
     <div style="margin-bottom:12px;padding:12px;background:rgba(255,255,255,0.05);border-radius:8px">
       <div style="font-weight:600;color:#fff;margin-bottom:4px" id="replace-track-title"></div>
       <div style="color:var(--muted);font-size:12px" id="replace-track-info"></div>
     </div>
-    <label style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px">Title</label>
+    <label style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px" data-i18n="title">Title</label>
     <input id="r-title" type="text" style="width:100%;margin-bottom:12px;padding:8px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:#fff">
-    <label style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px">Artist</label>
+    <label style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px" data-i18n="songArtist">Artist</label>
     <input id="r-artist" type="text" style="width:100%;margin-bottom:12px;padding:8px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:#fff">
-    <label style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px">Genre</label>
+    <label style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px" data-i18n="songGenre">Genre</label>
     <input id="r-genre" type="text" style="width:100%;margin-bottom:12px;padding:8px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:#fff">
-    <label style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px">New MP3 (optional)</label>
+    <label style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px" data-i18n="newMp3Optional">New MP3 (optional)</label>
     <input id="r-audio-file" type="file" accept="audio/*" style="width:100%;margin-bottom:12px">
-    <label style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px">New cover (optional)</label>
+    <label style="display:block;margin-bottom:6px;color:var(--muted);font-size:13px" data-i18n="newCoverOptional">New cover (optional)</label>
     <input id="r-cover-file" type="file" accept="image/*" style="width:100%;margin-bottom:12px">
     <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button id="replace-cancel" class="btn">Cancel</button>
-      <button id="replace-save" class="btn active">🔄 Replace</button>
+      <button id="replace-cancel" class="btn" data-i18n="cancel">Cancel</button>
+      <button id="replace-save" class="btn active" data-i18n="replace">🔄 Replace</button>
     </div>
   </div>
 </div>
@@ -1175,24 +1176,24 @@ body.bg-cover #likedTracksBtn.active {
         <div class="playlist-meta">
           <h1 id="playlistName">Playlist</h1>
           <p id="playlistDesc"></p>
-          <p id="playlistCount">0 track(s) <span id="playlistHiddenBadge" style="display:none;font-size:12px;opacity:.6;margin-left:8px;">👁️‍🗨️ Hidden from home</span></p>
+          <p id="playlistCount">0 track(s) <span id="playlistHiddenBadge" style="display:none;font-size:12px;opacity:.6;margin-left:8px;" data-i18n="hiddenFromHome">👁️‍🗨️ Hidden from home</span></p>
           <div class="playlist-bg-toggle">
-            <label for="bg-selector">🎨 Background</label>
+            <label for="bg-selector">🎨 <span data-i18n="background">Background</span></label>
             <select id="bg-selector">
-              <option value="cover">Cover image</option>
-              <option value="dark">Dark gradient</option>
-              <option value="purple">Purple gradient</option>
-              <option value="blue">Blue gradient</option>
-              <option value="green">Green gradient</option>
-              <option value="orange">Orange gradient</option>
-              <option value="pink">Pink gradient</option>
-              <option value="none">Solid color</option>
+              <option value="cover" data-i18n="coverImage">Cover image</option>
+              <option value="dark" data-i18n="darkGradient">Dark gradient</option>
+              <option value="purple" data-i18n="purpleGradient">Purple gradient</option>
+              <option value="blue" data-i18n="blueGradient">Blue gradient</option>
+              <option value="green" data-i18n="greenGradient">Green gradient</option>
+              <option value="orange" data-i18n="orangeGradient">Orange gradient</option>
+              <option value="pink" data-i18n="pinkGradient">Pink gradient</option>
+              <option value="none" data-i18n="solidColor">Solid color</option>
             </select>
           </div>
           <div class="playlist-bg-toggle" id="hideFromHomeWrap" style="margin-top:12px;display:none;background:rgba(255,77,166,0.08);border:1px solid rgba(255,77,166,0.2);border-radius:10px;padding:10px 12px;">
             <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;font-weight:600;">
               <input type="checkbox" id="playlistHideFromHomeToggle" style="width:20px;height:20px;cursor:pointer;accent-color:#ff4da6;flex-shrink:0;">
-              <span>👁️‍🗨️ Hide tracks from home page</span>
+              <span data-i18n="hideTracksFromHome">👁️‍🗨️ Hide tracks from home page</span>
             </label>
           </div>
         </div>
@@ -1202,39 +1203,37 @@ body.bg-cover #likedTracksBtn.active {
     <!-- RIGHT: Actions + Filters + Tracks -->
     <div class="right-col">
       <!-- Actions Bar -->
-      <div class="playlist-actions-bar">
-        <a class="nav-btn" href="#" title="Home" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage('go-home','*');return false;}location.href='NIKO.html';return false;">🏠 Home</a>
-        <a class="nav-btn" href="#" title="Playlists" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage('show-playlists','*');return false;}location.href='playlists.html';return false;">🎵 Playlists</a>
-        <button id="open-add-to-playlist-top" class="nav-btn">➕ Add</button>
-        <button id="likedTracksBtn" class="nav-btn">❤️ Liked</button>
+           <div class="playlist-actions-bar">
+        <a class="nav-btn" href="#" data-i18n-title="home" title="Home" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage('go-home','*');return false;}location.href='NIKO.html';return false;">🏠 <span data-i18n="home">Home</span></a>
+        <a class="nav-btn" href="#" data-i18n-title="playlists" title="Playlists" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage('show-playlists','*');return false;}location.href='playlists.html';return false;">🎵 <span data-i18n="playlists">Playlists</span></a>
+        <button id="open-add-to-playlist-top" class="nav-btn">➕ <span data-i18n="add">Add</span></button>
+        <button id="likedTracksBtn" class="nav-btn">❤️ <span data-i18n="likedTracks">Liked</span></button>
       </div>
 
-      <!-- Filters -->
       <div class="controls-row">
         <div class="controls-left">
-  <div class="search-box">
-    <span class="search-icon">🔍</span>
-    <input id="searchInput" type="text" placeholder="Search tracks...">
-  </div>
-  <div class="search-box">
-    <span class="search-icon">📝</span>
-    <input id="lyricsSearch" type="text" placeholder="Search lyrics...">
-  </div>
-  <div class="pv-genre-dropdown" id="pv-genre-dropdown">
-  <button class="pv-genre-trigger" id="pv-genre-trigger" type="button">
-    <span id="pv-genre-trigger-label">All genres</span>
-    <span class="pv-genre-arrow">▾</span>
-  </button>
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input id="searchInput" type="text" data-i18n-placeholder="searchTracks" placeholder="Search tracks...">
+          </div>
+          <div class="search-box">
+            <span class="search-icon">📝</span>
+            <input id="lyricsSearch" type="text" data-i18n-placeholder="searchLyrics" placeholder="Search lyrics...">
+          </div>
 
-  <div class="pv-genre-panel" id="pv-genre-panel">
-    <input class="pv-genre-search" id="pv-genre-search" type="text" placeholder="Szukaj gatunku…">
-    <div class="pv-genre-options" id="pv-genre-options"></div>
-  </div>
-</div>
+          <div class="pv-genre-dropdown" id="pv-genre-dropdown">
+            <button class="pv-genre-trigger" id="pv-genre-trigger" type="button">
+              <span id="pv-genre-trigger-label" data-i18n="allGenres">All genres</span>
+              <span class="pv-genre-arrow">▾</span>
+            </button>
+            <div class="pv-genre-panel" id="pv-genre-panel">
+              <input class="pv-genre-search" id="pv-genre-search" type="text" data-i18n-placeholder="searchGenre" placeholder="Search genre...">
+              <div class="pv-genre-options" id="pv-genre-options"></div>
+            </div>
+          </div>
 
-<select id="genreFilter" style="display:none"></select>
-
-</div>
+          <select id="genreFilter" style="display:none"></select>
+        </div>
       </div>
 
       <!-- Tracks -->
@@ -1251,21 +1250,21 @@ body.bg-cover #likedTracksBtn.active {
   <div id="add-to-playlist-modal" class="modal" style="display:none">
     <div class="panel" style="max-width:720px; margin:0 auto;">
       <div style="display:flex;justify-content:space-between;align-items:center;">
-        <h3>➕ Add tracks to playlist</h3>
+        <h3 data-i18n="addTracksToPlaylist">➕ Add tracks to playlist</h3>
         <button id="add-to-playlist-close" class="btn">✕</button>
       </div>
       <div style="margin:14px 0; display:flex; gap:10px; align-items:center;">
         <input id="add-search" placeholder="Search tracks..." style="flex:1; padding:10px 12px; border-radius:10px; background:#0f0f12; color:#fff; border:1px solid rgba(255,255,255,0.06); font-size:14px; outline:none;">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer; font-weight:600; font-size:14px;">
           <input id="add-select-all" type="checkbox" style="width:18px;height:18px; cursor:pointer;">
-          <span>Select all</span>
+          <span data-i18n="selectAll">Select all</span>
         </label>
       </div>
       <div id="add-tracks-list" style="max-height:420px; overflow:auto; border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:10px; background:rgba(0,0,0,0.3)">
       </div>
       <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px;">
         <button id="add-to-playlist-cancel" class="btn">Cancel</button>
-        <button id="add-to-playlist-confirm" class="btn active">Add selected</button>
+        <button id="add-to-playlist-confirm" class="btn active" data-i18n="addSelected">Add selected</button>
       </div>
     </div>
   </div>
@@ -1279,11 +1278,11 @@ body.bg-cover #likedTracksBtn.active {
         <div id="mini-wave" style="flex:1;margin-left:40px"></div>
       </div>
       <div id="mini-controls" class="mini-controls">
-        <button id="mini-prev" class="control-btn" aria-label="Previous" title="Previous">◀</button>
-        <button id="mini-play" class="control-btn" aria-label="Play/Pause" title="Play/Pause">
+        <button id="mini-prev" class="control-btn" aria-label="Previous" title="Previous" data-i18n-title="previous">◀</button>
+        <button id="mini-play" class="control-btn" aria-label="Play/Pause" title="Play/Pause" data-i18n-title="playPause">
           <svg id="mini-play-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3v18l15-9L5 3z"/></svg>
         </button>
-        <button id="mini-next" class="control-btn" aria-label="Next" title="Next">▶</button>
+        <button id="mini-next" class="control-btn" aria-label="Next" title="Next" data-i18n-title="next">▶</button>
         <button id="shuffle-btn" class="control-btn" aria-label="Shuffle" title="Sequential"><span id="shuffle-icon">🔁</span></button>
       </div>
       <div class="time-display" id="mini-time">0:00 / 0:00</div>
@@ -1292,12 +1291,12 @@ body.bg-cover #likedTracksBtn.active {
     <div id="mini-right" class="mini-actions">
       <div class="row icon-row" style="display:flex;gap:8px;align-items:center">
         <input id="mini-volume" type="range" min="0" max="1" step="0.01" value="1" style="width:50px;height:20px" title="Volume">
-        <button id="mini-open-text" class="btn icon" aria-label="Open full text" title="Text">📄</button>
-        <button id="mini-like" class="btn icon" aria-label="Like" title="Like">❤</button>
-        <button id="mini-dislike" class="btn icon" aria-label="Dislike" title="Dislike">👎</button>
-        <button id="mini-visualizer" class="btn icon visualizer-btn" aria-label="Visualizer" title="Visualizer">🌀</button>
-        <button id="mini-comment" class="btn icon" aria-label="Comments" title="Comments">💬</button>
-        <button id="mini-share" class="btn icon share-svg-btn" aria-label="Share" title="Share">
+        <button id="mini-open-text" class="btn icon" aria-label="Open full text" title="Text" data-i18n-title="text">📄</button>
+        <button id="mini-like" class="btn icon" aria-label="Like" title="Like" data-i18n-title="like">❤</button>
+        <button id="mini-dislike" class="btn icon" aria-label="Dislike" title="Dislike" data-i18n-title="dislike">👎</button>
+        <button id="mini-visualizer" class="btn icon visualizer-btn" aria-label="Visualizer" title="Visualizer" data-i18n-title="visualizer">🌀</button>
+        <button id="mini-comment" class="btn icon" aria-label="Comments" title="Comments" data-i18n-title="comments">💬</button>
+        <button id="mini-share" class="btn icon share-svg-btn" aria-label="Share" title="Share" data-i18n-title="share">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="18" cy="5" r="3"/>
           <circle cx="6" cy="12" r="3"/>
@@ -1306,7 +1305,7 @@ body.bg-cover #likedTracksBtn.active {
           <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
         </svg>
       </button>
-        <a id="mini-download" class="btn icon download-btn" href="#" download aria-label="Download" title="Download">
+        <a id="mini-download" class="btn icon download-btn" href="#" download aria-label="Download" title="Download" data-i18n-title="download">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
           <polyline points="7 10 12 15 17 10"/>
@@ -1319,7 +1318,7 @@ body.bg-cover #likedTracksBtn.active {
 <div id="share-modal" class="share-modal">
   <div class="share-modal-content" style="max-width:360px;">
     <div class="share-modal-header">
-      <h3 class="share-modal-title" style="font-size:15px; color:#eaeaf2;">Share Track</h3>
+      <h3 class="share-modal-title" style="font-size:15px; color:#eaeaf2;" data-i18n="shareTrack">Share Track</h3>
       <button class="share-modal-close" id="share-modal-close" style="font-size:20px; color:#bfc3d6;">×</button>
     </div>
     
@@ -1332,13 +1331,13 @@ body.bg-cover #likedTracksBtn.active {
           </svg>
         </div>
         <div>
-          <div style="color:#eaeaf2;font-size:13px;font-weight:600;">Copy Link</div>
-          <div style="color:#666;font-size:11px;">Copy to clipboard</div>
+          <div style="color:#eaeaf2;font-size:13px;font-weight:600;" data-i18n="copyLink">Copy Link</div>
+          <div style="color:#666;font-size:11px;" data-i18n="copyToClipboard">Copy to clipboard</div>
         </div>
       </div>
     </div>
     
-    <div style="color:#bfc3d6;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Share to</div>
+    <div style="color:#bfc3d6;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;" data-i18n="shareTo">Share to</div>
     
     <div class="share-modal-socials" id="share-socials" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
       
@@ -1433,14 +1432,58 @@ body.bg-cover #likedTracksBtn.active {
 const WORKER_URL = "https://r2-upload-proxy.nikolfar91.workers.dev";
 const STORAGE_FOLDER_AUDIO = "NIKO_music/audio";
 const STORAGE_FOLDER_COVERS = "NIKO_music/covers";
+/* ================= ЯЗЫК ================= */
+function pvLangStorageKey() {
+  const role = (typeof getRoleSafe === 'function')
+    ? getRoleSafe()
+    : (localStorage.getItem('siteRole') || 'guest');
+  return role === 'guest' ? 'siteLanguage' : 'siteLanguage_' + role;
+}
 
+/* безопасный перевод: если ключа нет — вернём запасной текст */
+function tt(key, fallback) {
+  try {
+    const v = (typeof t === 'function') ? t(key) : '';
+    return v || fallback || key;
+  } catch (e) { return fallback || key; }
+}
+
+function pvInitLanguage() {
+  const saved =
+    localStorage.getItem(pvLangStorageKey()) ||
+    localStorage.getItem('siteLanguage') ||
+    localStorage.getItem('language') ||
+    'en';
+
+  window.currentLang = saved;
+  if (typeof applyTranslations === 'function') applyTranslations();
+}
+
+/* применить язык при загрузке */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', pvInitLanguage);
+} else {
+  pvInitLanguage();
+}
+
+/* смена языка на главной — применяем и внутри iframe */
+window.addEventListener('message', (e) => {
+  const d = e.data;
+  if (d && d.type === 'lang-changed' && d.lang) {
+    window.currentLang = d.lang;
+    localStorage.setItem(pvLangStorageKey(), d.lang);
+    if (typeof applyTranslations === 'function') applyTranslations();
+    if (typeof renderPvGenres === 'function') renderPvGenres();
+    if (typeof applyFilters === 'function') applyFilters();
+  }
+});
 async function uploadToWorker(file, folder, fileName) {
   const fd = new FormData();
   fd.append('file', file);
   fd.append('fileName', fileName);
   fd.append('folder', folder);
   const res = await fetch(WORKER_URL + '/upload', { method: 'POST', body: fd });
-  if (!res.ok) throw new Error('Upload failed: ' + res.status);
+  if (!res.ok) throw new Error(t('uploadFailed') + ': ' + res.status);
   const data = await res.json();
   return data.url;
 }
@@ -1575,12 +1618,12 @@ window.onPlayerTrackChanged = function(trackId) {
 };
    async function loadPlaylist() {
   if (!playlistId) {
-    document.getElementById('playlistName').textContent = 'Playlist ID missing';
+    document.getElementById('playlistName').textContent = t('playlistIdMissing');
     return;
   }
   const playlistDoc = await db.collection('playlists').doc(playlistId).get();
   if (!playlistDoc.exists) {
-    document.getElementById('playlistName').textContent = 'Playlist not found';
+    document.getElementById('playlistName').textContent = t('playlistNotFound');
     return;
   }
   const playlist = playlistDoc.data();
@@ -1623,7 +1666,7 @@ window.onPlayerTrackChanged = function(trackId) {
         await db.collection('playlists').doc(playlistId).update({ hideFromHome: hideToggle.checked });
         const badge = document.getElementById('playlistHiddenBadge');
         if (badge) badge.style.display = hideToggle.checked ? 'inline' : 'none';
-      } catch (e) { console.error(e); alert('Update failed'); }
+      } catch (e) { console.error(e); alert(t('updateFailed')); }
     };
   }
 
@@ -1686,7 +1729,7 @@ function topGenreKeys(genreString) {
 }
 const NO_GENRE_KEY = '__no_genre__';
 function genreLabel(key) {
-  if (key === NO_GENRE_KEY) return 'Brak gatunku';
+    if (key === NO_GENRE_KEY) return tt('noGenre', 'Brak gatunku');
   return typeof getGenreDisplayName === 'function' ? getGenreDisplayName(key) : key;
 }
 
@@ -1736,9 +1779,9 @@ function renderPvGenres() {
   let html = '';
   if (!q) {
     html +=
-      '<button class="pv-genre-option all-genres' + (!selectedPvGenre ? ' selected' : '') +
+           '<button class="pv-genre-option all-genres' + (!selectedPvGenre ? ' selected' : '') +
         '" type="button" data-genre="">' +
-        '<span class="genre-label">All genres</span>' +
+        '<span class="genre-label">' + escapeHtml(tt('allGenres', 'All genres')) + '</span>' +
         '<span class="genre-count">' + pvGenreTotal + '</span>' +
       '</button>';
   }
@@ -1751,12 +1794,14 @@ function renderPvGenres() {
           '<span class="genre-count">' + (pvGenreCounts.get(k) || 0) + '</span>' +
         '</button>'
       ).join('')
-    : '<div class="pv-genre-empty">Nic nie znaleziono</div>';
+       : '<div class="pv-genre-empty">' + escapeHtml(tt('nothingFound', 'Nic nie znaleziono')) + '</div>';
 
   box.innerHTML = html;
 
   const label = document.getElementById('pv-genre-trigger-label');
-  if (label) label.textContent = selectedPvGenre ? genreLabel(selectedPvGenre) : 'All genres';
+    if (label) label.textContent = selectedPvGenre
+    ? genreLabel(selectedPvGenre)
+    : tt('allGenres', 'All genres');
 }
 
 function closePvGenre() {
@@ -1845,7 +1890,7 @@ function closePvGenre() {
     let currentEditingId = '';
 function formatLyrics(lyrics) {
   if (!lyrics || !lyrics.trim()) {
-    return '<div class="lyrics-empty">No lyrics</div>';
+    return '<div class="lyrics-empty">' + t('noLyrics') + '</div>';
   }
   const lines = lyrics.split('\n');
   let html = '<div class="lyrics-formatted">';
@@ -2179,7 +2224,7 @@ function formatLyrics(lyrics) {
           if (deleteBtn) {
             const track = allTracksFull.find(t => t.id === trackId);
             if (!track) return;
-            if (!confirm(`Delete track "${track.title}"? Files will also be deleted from Cloudflare.`)) return;
+            if (!confirm(t('deleteTrackConfirm').replace('%s', track.title))) return;
             deleteFromWorker(STORAGE_FOLDER_AUDIO, track.audioFileName);
             deleteFromWorker(STORAGE_FOLDER_COVERS, track.coverFileName);
             db.collection('tracks').doc(trackId).delete();
@@ -2230,7 +2275,7 @@ function formatLyrics(lyrics) {
           const title = downloadBtn.dataset.title || 'track';
           const downloadTrackId = downloadBtn.dataset.id || trackId;
           if (!audioUrl) {
-            alert('❌ Аудио не найдено');
+            alert('❌ ' + t('audioNotFound'));
             return;
           }
           
@@ -2248,7 +2293,7 @@ function formatLyrics(lyrics) {
           
           try {
             const res = await fetch(audioUrl);
-            if (!res.ok) throw new Error('Download failed');
+            if (!res.ok) throw new Error(t('downloadFailed'));
             const blob = await res.blob();
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -2303,7 +2348,7 @@ function formatLyrics(lyrics) {
             }
           } catch (e) {
             console.error(e);
-            alert('❌ Ошибка скачивания: ' + e.message);
+            alert('❌ ' + t('downloadError') + ': ' + e.message);
           }
           return;
         }
@@ -2479,8 +2524,8 @@ function formatLyrics(lyrics) {
           document.getElementById('side-content-editor').style.display = 'none';
           document.getElementById('edit-mode-actions').classList.remove('active');
         } catch (e) {
-          console.error('Failed to save lyrics', e);
-          alert('Save failed');
+          console.error(t('failedToSaveLyrics'), e);
+          alert(t('saveFailed'));
         }
       });
       const bgSelector = document.getElementById('bg-selector');
@@ -2501,7 +2546,7 @@ function formatLyrics(lyrics) {
         const newArtist = document.getElementById('r-artist').value.trim();
         const newGenre = document.getElementById('r-genre').value.trim();
         if (!audioFile && !coverFile && !newTitle && !newArtist && !newGenre) {
-          alert('Select at least one field to change'); return;
+          alert(t('selectOneField')); return;
         }
         const track = allTracksFull.find(t => t.id === currentReplacingTrackId);
         if (!track) return;
@@ -2532,10 +2577,10 @@ function formatLyrics(lyrics) {
           }
           await db.collection('tracks').doc(currentReplacingTrackId).update(updateData);
           document.getElementById('replace-track-modal').style.display = 'none';
-          alert('✅ Files replaced successfully!');
+          alert('✅ ' + t('filesReplaced'));
         } catch (e) {
           console.error(e);
-          alert('❌ Replace error: ' + e.message);
+          alert('❌ ' + t('replaceError') + ': ' + e.message);
         } finally {
           btn.textContent = originalText;
           btn.disabled = false;
@@ -2625,7 +2670,7 @@ function formatLyrics(lyrics) {
       if (resolved) {
         try {
           const doc = await db.collection('playlists').doc(resolved).get();
-          if (!doc.exists) { alert('Playlist not found'); return; }
+          if (!doc.exists) { alert(t('playlistNotFound')); return; }
           currentPlaylistDoc = { id: doc.id, ...doc.data() };
 
           if (role !== 'admin') {
@@ -2635,25 +2680,25 @@ function formatLyrics(lyrics) {
 
             if (ownerId) {
               if (!window.currentUserId || String(ownerId) !== String(window.currentUserId)) {
-                alert('You can only add tracks to playlists you created'); return;
+                alert(t('onlyAddOwnPlaylist')); return;
               }
             } else if (ownerRole) {
               if (String(ownerRole) === String(role)) {
                 // ok
               } else if (Array.isArray(allowedPartners) && allowedPartners.length) {
                 if (!window.currentUserId || !allowedPartners.map(String).includes(String(window.currentUserId))) {
-                  alert('You are not allowed to modify this playlist'); return;
+                  alert(t('notAllowedModify')); return;
                 }
               } else {
-                alert('You do not have permission to modify this playlist'); return;
+                alert(t('noPermissionModify')); return;
               }
             } else {
-              alert('You can only add tracks to playlists you created'); return;
+              alert(t('onlyAddOwnPlaylist')); return;
             }
           }
         } catch (e) {
           console.error('Failed to fetch playlist', e);
-          alert('Failed to open playlist'); return;
+          alert(t('failedOpenPlaylist')); return;
         }
       }
 
@@ -2662,7 +2707,7 @@ function formatLyrics(lyrics) {
         window.globalTracks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       } catch (e) {
         console.error('Failed to load tracks', e);
-        alert('Failed to load tracks'); return;
+        alert(t('failedLoadTracks')); return;
       }
 
       renderAddList('');
@@ -2768,7 +2813,7 @@ function formatLyrics(lyrics) {
 });
     window.removeTrackFromPlaylist = async function(trackId, targetPlaylistId) {
       if (!trackId || !targetPlaylistId) return;
-      if (!confirm('Remove this track from playlist?')) return;
+      if (!confirm(t('removeTrackConfirm'))) return;
       try {
         const tref = db.collection('tracks').doc(trackId);
         const pref = db.collection('playlists').doc(targetPlaylistId);
@@ -2799,7 +2844,7 @@ function formatLyrics(lyrics) {
         }
       } catch (e) {
         console.error('Failed to remove from playlist', e);
-        alert('Remove failed');
+        alert(t('removeFailed'));
       }
     };
 
@@ -2858,8 +2903,8 @@ function formatLyrics(lyrics) {
         const selected = Array.from(document.querySelectorAll('.add-select-checkbox:checked'))
           .map(cb => cb.dataset.id)
           .filter(Boolean);
-        if (!selected.length) { alert('No tracks selected'); return; }
-        if (!pid) { alert('No playlist selected'); return; }
+        if (!selected.length) { alert(t('noTracksSelected')); return; }
+        if (!pid) { alert(t('noPlaylistSelected')); return; }
         try {
           const toAdd = [];
           for (const tid of selected) {
@@ -2872,7 +2917,7 @@ function formatLyrics(lyrics) {
             if (!already) toAdd.push(tid);
           }
           if (!toAdd.length) {
-            alert('Selected tracks are already in this playlist');
+            alert(t('alreadyInPlaylist'));
             return;
           }
           const pref = db.collection('playlists').doc(pid);
@@ -2898,9 +2943,9 @@ function formatLyrics(lyrics) {
           await batch.commit();
           await reloadTracks();
           const confirmBtn = document.getElementById(confirmIdLocal);
-          if (confirmBtn) confirmBtn.textContent = 'Added ✓';
+          if (confirmBtn) confirmBtn.textContent = t('added') + ' ✓';
           setTimeout(() => {
-            if (confirmBtn) confirmBtn.textContent = 'Add selected';
+            if (confirmBtn) confirmBtn.textContent = t('addSelected');
             closeAddModal();
             if (typeof renderTracksPage === 'function') renderTracksPage();
             renderAddList('');
@@ -2914,7 +2959,7 @@ function formatLyrics(lyrics) {
           }, 700);
         } catch (err) {
           console.error('Add to playlist failed', err);
-          alert('Add failed — check console for details');
+          alert(t('addFailed'));
         }
       }
       function init() {
@@ -2961,7 +3006,7 @@ function formatLyrics(lyrics) {
 <!-- ===== COMMENTS MODAL ===== -->
 <div id="comments-modal" class="modal" role="dialog" aria-hidden="true" style="display:none">
   <div class="panel" role="document">
-    <h3 id="comments-title">Comments</h3>
+    <h3 id="comments-title" data-i18n="comments">Comments</h3>
     <div id="comments-list" class="comments-list" style="max-height:320px;overflow:auto;margin-top:8px;border-radius:8px;padding:8px;background:rgba(255,255,255,0.02)"></div>
     <div class="emoji-quick-access" style="margin-top:12px;display:flex;gap:6px;">
       <button class="emoji-btn quick-emoji" data-emoji="🔥">🔥</button>
@@ -2973,11 +3018,11 @@ function formatLyrics(lyrics) {
       
     </div>
     <div style="position:relative;margin-top:12px">
-      <textarea id="comment-input" placeholder="Write a comment..." style="width:100%;min-height:80px;padding:12px;border-radius:8px;background:#07060a;border:1px solid rgba(255,255,255,0.08);color:#eaeaf2;box-sizing:border-box;"></textarea>
+      <textarea id="comment-input" placeholder="Write a comment..." data-i18n-placeholder="writeComment" style="width:100%;min-height:80px;padding:12px;border-radius:8px;background:#07060a;border:1px solid rgba(255,255,255,0.08);color:#eaeaf2;box-sizing:border-box;"></textarea>
     </div>
     <div class="row" style="justify-content:flex-end;display:flex;gap:8px;margin-top:12px">
-      <button id="comment-cancel" class="btn">Cancel</button>
-      <button id="comment-send" class="btn active">Send</button>
+      <button id="comment-cancel" class="btn" data-i18n="cancel">Cancel</button>
+      <button id="comment-send" class="btn active" data-i18n="send">Send</button>
     </div>
   </div>
 </div>
@@ -2986,7 +3031,7 @@ function formatLyrics(lyrics) {
 <div id="emoji-popup-modal" class="emoji-popup-modal">
   <div class="panel">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-      <h3 style="margin:0">Emoji</h3>
+      <h3 style="margin:0" data-i18n="emoji">Emoji</h3>
       <button id="emoji-popup-close" class="btn" style="font-size:20px;padding:4px 8px">✕</button>
     </div>
     <div class="emoji-quick-access" id="emoji-quick-access-popup"></div>
@@ -3090,11 +3135,11 @@ function formatLyrics(lyrics) {
   async function loadComments(trackId) {
     const list = document.getElementById('comments-list');
     if (!list) return;
-    list.innerHTML = '<p style="color:#bfc3d6;text-align:center;padding:20px">⏳ Loading...</p>';
+    list.innerHTML = '<p style="color:#bfc3d6;text-align:center;padding:20px">⏳ ' + t('loading') + '...</p>';
     const comments = await loadCommentsFromServer(trackId);
     list.innerHTML = '';
     if (comments.length === 0) {
-      list.innerHTML = '<p style="color:#bfc3d6;text-align:center;padding:20px">No comments yet</p>';
+      list.innerHTML = '<p style="color:#bfc3d6;text-align:center;padding:20px">' + t('noComments') + '</p>';
       return;
     }
     comments.forEach((comment) => {
@@ -3105,7 +3150,7 @@ function formatLyrics(lyrics) {
       const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
       div.innerHTML = `
         ${isAdmin ? `<button class="delete-comment" data-id="${comment.id}" style="position:absolute;top:8px;right:8px;background:none;border:none;color:#ff4da6;cursor:pointer;font-size:14px">✕</button>` : ''}
-        <div style="color:#ff4da6;font-size:12px;margin-bottom:4px">${comment.author || 'Anonymous'} · ${dateStr}</div>
+        <div style="color:#ff4da6;font-size:12px;margin-bottom:4px">${comment.author || t('anonymous')} · ${dateStr}</div>
         <div style="color:#eaeaf2;white-space:pre-wrap">${comment.text}</div>
       `;
       list.appendChild(div);
@@ -3198,12 +3243,12 @@ function formatLyrics(lyrics) {
     document.getElementById('comment-send')?.addEventListener('click', async () => {
       const input = document.getElementById('comment-input');
       const text = input?.value.trim();
-      if (!text) { alert('Write a comment first'); return; }
+      if (!text) { alert(t('writeCommentFirst')); return; }
       const sendBtn = document.getElementById('comment-send');
       const originalText = sendBtn.textContent;
       sendBtn.textContent = '⏳...';
       sendBtn.disabled = true;
-      const comment = { text: text, author: 'User', timestamp: Date.now() };
+      const comment = { text: text, author: t('anonymous'), timestamp: Date.now() };
       const success = await saveCommentToServer(currentCommentTrackId, comment);
       if (success) {
         if (input) input.value = '';
@@ -3211,7 +3256,7 @@ function formatLyrics(lyrics) {
         sendBtn.textContent = '✅';
         setTimeout(() => { sendBtn.textContent = originalText; sendBtn.disabled = false; }, 1000);
       } else {
-        alert('Error sending comment');
+        alert(t('errorSendingComment'));
         sendBtn.textContent = originalText;
         sendBtn.disabled = false;
       }
@@ -3326,7 +3371,7 @@ function formatLyrics(lyrics) {
     const track = (window.globalTracks || []).find(t => t.id === window.currentTrackId) ||
                   (window.currentPlaylistTracks || []).find(t => t.id === window.currentTrackId);
     const trackId = track?.id || window.currentTrackId || '';
-    if (!trackId) { alert('No track selected'); return; }
+    if (!trackId) { alert(t('noTrackSelected')); return; }
     const shareUrl = window.location.origin + '/NIKO.html?track=' + encodeURIComponent(trackId);
     try {
       await navigator.clipboard.writeText(shareUrl);
@@ -3342,7 +3387,7 @@ function formatLyrics(lyrics) {
       const track = (window.globalTracks || []).find(t => t.id === window.currentTrackId) ||
                     (window.currentPlaylistTracks || []).find(t => t.id === window.currentTrackId);
       const shareUrl = window.location.origin + '/NIKO.html?track=' + encodeURIComponent(track?.id || '');
-      const text = encodeURIComponent('Check out: ' + (track?.title || 'Track'));
+      const text = encodeURIComponent(t('checkOut') + ': ' + (track?.title || t('track')));
       const urls = {
         twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${text}`,
         facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
@@ -3351,7 +3396,7 @@ function formatLyrics(lyrics) {
         viber: `viber://forward?text=${text}%20${encodeURIComponent(shareUrl)}`,
         messenger: `fb-messenger://share/?link=${encodeURIComponent(shareUrl)}`,
         tiktok: `https://www.tiktok.com/`,
-        native: () => { if (navigator.share) navigator.share({title: track?.title || 'Track', url: shareUrl}); else alert('Web Share not supported'); }
+        native: () => { if (navigator.share) navigator.share({title: track?.title || 'Track', url: shareUrl}); else alert(t('webShareNotSupported')); }
       };
       if (platform === 'native') { urls.native(); }
       else if (urls[platform]) { window.open(urls[platform], '_blank'); }
@@ -3409,18 +3454,18 @@ function formatLyrics(lyrics) {
   <!-- ===== SIDE PANEL (как на главной) ===== -->
   <div id="side-panel" class="side-panel" aria-hidden="true">
     <div class="side-panel-header">
-      <button id="side-close" class="btn">Close</button>
+      <button id="side-close" class="btn" data-i18n="close">Close</button>
       <div class="side-panel-actions">
-        <button id="copy-text">📋 Copy</button>
-        <button id="edit-text" style="display:none">✏️ Edit</button>
+        <button id="copy-text" data-i18n="copy">📋 Copy</button>
+        <button id="edit-text" style="display:none" data-i18n="edit">✏️ Edit</button>
       </div>
     </div>
-    <h3 id="side-title">Full text</h3>
+    <h3 id="side-title" data-i18n="fullText">Full text</h3>
     <div id="side-content" style="white-space:pre-wrap;color:#eaeaf2;margin-top:8px"></div>
     <textarea id="side-content-editor" style="display:none;width:100%;min-height:300px;padding:12px;border-radius:10px;background:#0f0f12;color:#fff;border:1px solid rgba(255,255,255,0.06);font-family:inherit;font-size:14px;box-sizing:border-box;resize:vertical;"></textarea>
     <div class="edit-mode-actions" id="edit-mode-actions" style="display:none;gap:8px;margin-top:12px;">
-      <button id="edit-cancel" class="btn">Cancel</button>
-      <button id="edit-save" class="btn active">💾 Save</button>
+      <button id="edit-cancel" class="btn" data-i18n="cancel">Cancel</button>
+      <button id="edit-save" class="btn active" data-i18n="save">💾 Save</button>
     </div>
   </div>
 
