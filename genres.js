@@ -35,7 +35,7 @@ const GENRE_JUNK = [
 ];
 
 /* 2. Слова про звук, инструменты и вокал — это не жанр */
-const GENRE_NOISE = /\b(cowbell|cowbells|808s?|bass|basses|sub|kick|snare|hat|hats|drums?|percussion|strings?|guitars?|oud|sitar|piano|keys|pads?|synths?|fx|glitch|riffs?|melody|melodies|hook|hooks|vocal|vocals|voice|voices|phrasing|consonants|adlibs?|ambience|reverb|delay|stereo|mix|mixing|master|mastering|tone|drops?|build[\s-]?up|breakdown|intro|outro|bridge|verse|verses|chorus|lyrics?|attitude|energy|mood|theme|themes|atmosphere|texture|sound|sounds|sfx|width|loudness)\b/i;
+const GENRE_NOISE = /\b(cowbell|cowbells|808s?|bass|basses|sub|kick|snare|hat|hats|drums?|percussion|strings?|guitars?|oud|sitar|piano|keys|pads?|synths?|fx|glitch|riffs?|melody|melodies|hook|hooks|vocal|vocals|voice|voices|phrasing|consonants|adlibs?|ambience|reverb|delay|stereo|mixing|master|mastering|tone|drops?|build[\s-]?up|breakdown|intro|outro|bridge|verse|verses|chorus|lyrics?|attitude|energy|mood|theme|themes|atmosphere|texture|sound|sounds|sfx|width|loudness)\b/i;
 
 /* 3. Исключения: настоящие жанры с «шумными» словами в названии */
 const GENRE_STRONG = /\bdrum\s?(and|n|&)\s?bass\b|\bdnb\b|\bbass\s?house\b|\bbassline\b|\bjungle\b|\bvocal\s?trance\b|\bvocal\s?house\b/i;
