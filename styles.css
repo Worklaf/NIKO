@@ -103,6 +103,13 @@ h1{margin:0;font-size:24px;color:#fff}
 .thumb{width:120px;height:200px;object-fit:cover;border-radius:8px;flex:0 0 120px;align-self:flex-start}
 .info{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
 .title{font-weight:700;color:#fff;margin:0;font-size:18px;line-height:1.3;word-break:break-word;overflow-wrap:break-word}
+/* название трека — ссылка на страницу трека, но выглядит как обычный белый текст */
+.title a.track-title-link,
+.title a.track-title-link:link,
+.title a.track-title-link:visited,
+.title a.track-title-link:hover,
+.title a.track-title-link:active,
+.title a.track-title-link:focus{color:#fff;font:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent;cursor:pointer}
 .meta{color:var(--muted);font-size:13px}
 
 .play-row{display:flex;align-items:center;gap:10px;margin-top:auto;padding-top:6px;flex-wrap:wrap}
@@ -396,272 +403,6 @@ h1{margin:0;font-size:24px;color:#fff}
   }
 }
 
-@media (max-width:880px){
-  body{padding:12px;padding-bottom:160px}
-  h1{font-size:18px}
-    .filter-row {
-    gap: 8px;
-  }
-      .top-actions-row {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 6px;
-    align-items: center;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  .top-actions-row::-webkit-scrollbar {
-    display: none;
-  }
-  .top-actions-row .btn.playlists-chip {
-    flex-shrink: 0;
-    font-size: 11px;
-    padding: 5px 12px;
-  }
-  .sort-controls {
-    order: 4;
-    flex-shrink: 0;
-  }
-  .sort-controls select {
-    font-size: 11px;
-    padding: 5px 8px;
-  }
-    header{
-    flex-direction:row;
-    flex-wrap:wrap;
-    align-items:center;
-    gap:8px;
-    margin-bottom:12px;
-  }
-         .site-logo { order: 0; }
-  .header-right { order: 0; margin-left: auto; }
-  .search-row,
-  .filter-row,
-  .top-actions-row,
-  
-  .playlists-chip{font-size:13px;padding:7px 16px!important}
-  .site-logo .logo-text {
-    font-size: 22px;
-  }
-  .list{grid-template-columns:1fr}
-  .search-wrap{
-    width:100%;
-    margin-left:0;
-    flex-direction:column;
-    gap:8px;
-  }
-  
-  .search-input,.search-select{
-    width:100%;
-    min-width:auto;
-    font-size:14px;
-    padding:8px 10px;
-  }
-  
-  .track{
-    flex-direction:row;
-    padding:8px;
-    gap:10px;
-    align-items:center;
-  }
-  
-  .thumb{
-    width:60px;
-    height:90px;
-    flex:none;
-  }
-  
-  .info{
-    flex:1;
-    gap:6px;
-  }
-  
-  .title{
-    font-size:14px;
-    line-height:1.3;
-    white-space:normal;
-    display:-webkit-box;
-    -webkit-line-clamp:2;
-    -webkit-box-orient:vertical;
-    overflow:hidden;
-  }
-  
-  .meta{
-    font-size:11px;
-  }
-  
-  .counts{
-    flex-wrap:wrap;
-    gap:4px;
-    font-size:10px;
-  }
-  
-  .likes-count,.dislikes-count,.play-count{
-    padding:3px 6px;
-    font-size:10px;
-  }
-  
-  .likes-count .num,.dislikes-count .num,.play-count .num{
-    min-width:20px;
-    font-size:11px;
-  }
-  
-  .play-row{
-    flex-wrap:wrap;
-    gap:4px;
-  }
-  
-  .btn{
-    padding:5px 8px;
-    font-size:11px;
-  }
-  
-    .btn.icon{
-    padding:4px;
-    width:26px;
-    height:26px;
-    font-size:10px;
-  }
-  
-  .btn.icon.comment-btn {
-    width: auto;
-    min-width: 26px;
-  }
-  
-  .comment-count {
-    font-size: 10px;
-    min-width: 14px;
-    display: inline-block;
-    text-align: center;
-  }
-  .lang-bar .btn.icon{
-    width:auto;
-    height:auto;
-    padding:4px 8px;
-    border-radius:6px;
-  }
-
-  header > div[style*="flex"] {
-    order: 3;
-    width: 100%;
-    justify-content: center;
-    margin-top: 8px;
-  }
-
-  header > div[style*="flex"] button {
-    flex: 1;
-    max-width: 80px;
-  }
-  
-  #mini-player{
-    left:0;
-    right:0;
-    bottom:0;
-    padding:8px;
-    gap:8px;
-    flex-direction:column;
-    border-radius:12px 12px 0 0;
-  }
-  
-  #mini-center{
-    width:100%;
-    order:1;
-  }
-  
-  #mini-title{
-    font-size:13px;
-    margin-bottom:4px;
-  }
-  
-  #mini-wave{
-    height:36px;
-    position:relative;
-    margin-left:40px;
-  }
-  
-  #mini-wave img{
-    position:absolute;
-    left:-40px;
-    top:0;
-    width:36px;
-    height:36px;
-  }
-  
-  .mini-controls{
-    gap:10px;
-    margin-top:4px;
-  }
-  
-  .control-btn{
-    padding:6px;
-    font-size:16px;
-  }
-  
-  .time-display{
-    font-size:10px;
-    text-align:center;
-  }
-  
-  #mini-right{
-    width:100%;
-    order:2;
-  }
-  
-  .icon-row{
-    justify-content:space-around;
-    flex-wrap:nowrap;
-    gap:4px;
-    align-items:center;
-  }
-  
-  #mini-right .btn.icon{
-    padding:6px;
-    font-size:14px;
-    width:32px;
-    height:32px;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-  }
-  
-  #mini-volume{
-    width:50px !important;
-    height:20px;
-    margin-right:8px;
-  }
-  
-  .side-panel{
-  width:100%;
-  padding:12px;
-  padding-bottom:120px; /* отступ под плеер */
-  box-sizing:border-box;
-}
-  
-  .emoji-popup-grid{
-    grid-template-columns:repeat(6,1fr);
-    gap:6px;
-  }
-  
-  .emoji-popup-btn{
-    padding:8px;
-    font-size:18px;
-  }
-  
-  .panel{
-    padding:12px;
-    width:95%;
-    max-height:90vh;
-  }
-  
-  .modal{
-    padding:8px;
-  }
-  
-  .list{
-    gap:8px;
-  }
-}
-
 /* Визуализатор - стили кнопок */
 .visualizer-type-btn {
   background: rgba(255,255,255,0.05);
@@ -739,22 +480,6 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
   opacity: 1;
   transform: translateY(-50%) scale(1.2);
 }
-
-/* Для мобильных устройств */
-@media (max-width: 768px) {
-  #viz-prev-btn, #viz-next-btn {
-    font-size: 24px;
-  }
-  
-  #visualizer-name-indicator {
-    font-size: 14px;
-  }
-  
-  .viz-dot {
-    width: 6px;
-    height: 6px;
-  }
-}
 /* Кнопка визуализации в мини-плеере */
 .visualizer-btn {
   position: relative;
@@ -770,43 +495,6 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
   background: #00ff00;
   border-radius: 50%;
   box-shadow: 0 0 10px #00ff00;
-}
-
-@media (max-width:480px){
-  body{padding:8px;padding-bottom:150px}
-  
-  h1{font-size:16px}
-    .site-logo .logo-text {
-    font-size: 20px;
-  }
-  .track{padding:6px;gap:8px}
-  
-  .thumb{
-    width:50px;
-    height:75px;
-  }
-  
-  .title{font-size:13px}
-  .meta{font-size:10px}
-  
-  .counts{gap:3px}
-  .likes-count,.dislikes-count,.play-count{
-    padding:2px 4px;
-    font-size:9px;
-  }
-  
-  .btn.icon{
-    width:24px;
-    height:24px;
-    padding:4px;
-  }
-  
-  #mini-player{padding:6px}
-  #mini-wave{height:32px}
-  .control-btn{padding:5px;font-size:14px}
-  
-  .emoji-popup-grid{grid-template-columns:repeat(5,1fr)}
-  .search-input,.search-select{font-size:13px;padding:6px 8px}
 }
 
 /* PLAYLIST PAGE STYLES */
@@ -1111,6 +799,7 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
   flex-wrap: wrap;
   gap: 4px;
   margin-top: 6px;
+  width: 100%;   /* теги идут во всю ширину строки, а не узкой колонкой */
 }
 .genre-tag {
   background: linear-gradient(90deg, var(--accent), var(--accent2));
@@ -1130,51 +819,6 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
 }
 .genre-tag .remove-genre:hover {
   opacity: 1;
-}
-
-/* ===== Mobile ===== */
-@media (max-width: 880px) {
-  .header-right {
-    order: 2;
-    margin-left: auto;
-  }
-  .filter-row {
-    gap: 8px;
-  }
-  .filter-actions .btn.icon {
-    width: 28px;
-    height: 28px;
-  }
-}
-/* ===== Мобильный порядок: логотип + язык/логин наверху, остальное ниже ===== */
-@media (max-width: 880px) {
-  .site-logo { order: 0; }
-  .header-right {
-    order: 0;
-    margin-left: auto;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .top-actions-row,
-  .search-row,
-  .filter-row {
-    order: 10;
-    width: 100%;
-    flex-basis: 100%;
-  }
-  /* Сортировка остаётся ВНУТРИ top-actions-row */
-  .sort-controls {
-    order: 4;
-    flex-shrink: 0;
-  }
-  /* Поиск на мобильном — одной строкой */
-  .search-main,
-  .search-lyrics {
-    flex: 1 !important;
-    width: auto !important;
-  }
 }
 
 /* ===== Равные селекты фильтров (жанры и владелец) ===== */
@@ -1296,19 +940,6 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
 #floating-logout-btn:hover {
   transform: scale(1.12);
   box-shadow: 0 6px 24px rgba(255, 77, 166, 0.5);
-}
-
-@media (max-width: 880px) {
-  #floating-logout-btn {
-    top: 12px;
-    right: 12px;
-    width: 40px;
-    height: 40px;
-  }
-  #floating-logout-btn svg {
-    width: 18px;
-    height: 18px;
-  }
 }
 /* ===== SKELETON LOADERS ===== */
 .skeleton {
@@ -1541,12 +1172,6 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
   text-align: center;
 }
 
-@media (max-width: 480px) {
-  .share-modal-socials {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
 /* ===== ОВЕРЛЕЙ ЧАТА поверх всего ===== */
 #chat-overlay {
   position: fixed;
@@ -1580,9 +1205,6 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
   width: 20px;
   z-index: 19999;
   display: none;
-}
-@media (max-width: 880px) {
-  #chat-swipe-zone { display: block; }
 }
 
 /* ===== MINI-PLAYER & TRACK BUTTON HOVER GLOWS ===== */
@@ -1740,23 +1362,7 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
 .track:hover .track-date {
   opacity: 0.3;
 }
-
-/* Мобильная адаптация */
-@media (max-width: 880px) {
-  .track-date {
-    width: 22px;
-    font-size: 11px;
-    letter-spacing: 1.3px;
-  }
-}
-
-@media (max-width: 480px) {
-  .track-date {
-    width: 25px;
-    font-size: 11px;
-    letter-spacing: 2px;
-  }
-  }
+  
 /* Pin Pad */
 .pin-pad {
   display: grid;
@@ -1904,28 +1510,6 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
 .login-social-btn.email:hover {
   background: rgba(255,255,255,0.08);
   border-color: rgba(255,255,255,0.18);
-}
-
-/* Mobile */
-@media (max-width: 400px) {
-  .login-panel {
-    padding: 36px 22px 28px;
-    border-radius: 22px;
-  }
-  .pin-btn {
-    padding: 16px;
-    font-size: 18px;
-    border-radius: 14px;
-  }
-  .pin-display {
-    font-size: 30px;
-    letter-spacing: 12px;
-    padding: 12px 18px;
-  }
-  .login-title {
-    font-size: 20px;
-    letter-spacing: 3px;
-  }
 }
 /* ===== EMAIL AUTH MODAL ===== */
 .email-auth-panel {
@@ -2118,19 +1702,6 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
   color: #ff4d4d;
   border-color: rgba(255,77,77,0.25);
   background: rgba(255,77,77,0.05);
-}
-
-@media (max-width: 400px) {
-  .email-auth-panel {
-    padding: 36px 22px 28px;
-    border-radius: 22px;
-  }
-  .email-actions-row {
-    flex-direction: column;
-  }
-  .email-btn {
-    width: 100%;
-  }
 } 
 /* ========================================
    NEON SOLID — Top Controls
@@ -2550,24 +2121,6 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
   gap: 12px;
   margin-bottom: 14px;
   align-items: flex-start;
-}
-
-/* --- Mobile --- */
-@media (max-width: 880px) {
-  .playlists-chip {
-    font-size: 11px !important;
-    padding: 7px 14px !important;
-  }
-  .search-input,
-  .search-select,
-  .filter-select-mobile {
-    font-size: 15px !important;
-    padding: 8px 14px !important;
-  }
-  .sort-controls select {
-    font-size: 11px !important;
-    padding: 7px 28px 7px 12px !important;
-  }
 }/* ========================================
    GENRE TAGS — gradient + readable text
    ======================================== */
@@ -2605,16 +2158,20 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
 
 .filter-genre-col {
   position: relative;
-  z-index: 500;
+  z-index: 500; /* выше треков и метки NEW (z-index:2), ниже мини-плеера/модалок */
 }
 
 .custom-genre-dropdown {
   position: relative;
   width: 100%;
-  display: none; /* hidden until JS opens it */
+  display: block; /* список жанров нужен всегда — и с мультивыбором, и без */
 }
 
 .custom-genre-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   background: #0b0b14;
   border: 2px solid #151520;
   border-radius: 14px;
@@ -2632,17 +2189,30 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
   border-color: rgba(255,77,166,0.3);
 }
 
+/* стрелка справа */
+.custom-genre-trigger::after {
+  content: '\25be';
+  flex: 0 0 auto;
+  font-size: 12px;
+  color: var(--muted);
+  transition: transform 0.2s ease;
+}
+
+.custom-genre-dropdown.open .custom-genre-trigger::after {
+  transform: rotate(180deg);
+  color: var(--accent);
+}
+
 .custom-genre-dropdown.open .custom-genre-trigger {
   border-color: #ff4da6;
 }
 
-.custom-genre-options {
+/* панель: поиск + список */
+.custom-genre-panel {
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
   right: 0;
-  max-height: 260px;
-  overflow-y: auto;
   z-index: 10000;
   background: #0b0b14;
   border: 2px solid #1a1a2e;
@@ -2652,11 +2222,49 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
   display: none;
 }
 
-.custom-genre-dropdown.open .custom-genre-options {
+.custom-genre-dropdown.open .custom-genre-panel {
   display: block;
 }
 
+/* строка поиска по жанрам */
+.genre-search {
+  width: 100%;
+  margin-bottom: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: #eaeaf2;
+  background: #07060a;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  outline: none;
+}
+
+.genre-search:focus {
+  border-color: var(--accent);
+}
+
+.genre-search::placeholder {
+  color: #6f748c;
+}
+
+/* сообщение "ничего не найдено" */
+.genre-search-empty {
+  display: none;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.custom-genre-options {
+  max-height: 260px;
+  overflow-y: auto;
+}
+
 .custom-genre-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   padding: 10px 12px;
   border-radius: 10px;
   cursor: pointer;
@@ -2664,6 +2272,73 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
   color: #eaeaf2;
   transition: all 0.15s ease;
   user-select: none;
+}
+
+/* название жанра (на телефоне длинное название переносится, как и раньше) */
+.custom-genre-option .genre-label {
+  min-width: 0;
+}
+
+/* строка "Все жанры" — сброс фильтра */
+.custom-genre-option.all-genres {
+  font-weight: 700;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* родительский жанр — заголовок группы */
+.custom-genre-option.genre-parent {
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.custom-genre-option.genre-parent .genre-label {
+  color: #fff;
+}
+
+/* подстиль — со сдвигом и побледнее */
+.custom-genre-option.genre-sub {
+  position: relative;
+  padding-left: 26px;
+  font-size: 12.5px;
+}
+
+.custom-genre-option.genre-sub .genre-label {
+  color: #c3c8d8;
+}
+
+.custom-genre-option.genre-sub::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+}
+
+/* счётчик треков: Phonk (24) */
+.custom-genre-option .genre-count {
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  color: #9aa0b5;
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px;
+  padding: 3px 7px;
+}
+
+.custom-genre-option:hover .genre-count {
+  color: #ff4da6;
+  background: rgba(255,77,166,0.14);
+}
+
+.custom-genre-option.selected .genre-count {
+  color: #07060a;
+  background: rgba(7,6,10,0.18);
 }
 
 .custom-genre-option:hover {
@@ -2685,11 +2360,348 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
   border-radius: 3px;
 }
 
-/* ========================================
-   MOBILE STYLES
-   ======================================== */
 
-@media (max-width: 880px) {
+/* ############################################################
+   #  АДАПТИВ: все медиазапросы собраны здесь, в одном месте.
+   #  Порядок: от широких экранов к узким — узкий правило
+   #  перебивает широкое, поэтому !important почти не нужен.
+   ############################################################ */
+
+/* ===== ПЛАНШЕТ И ТЕЛЕФОН  —  до 880px ===== */
+@media (max-width:880px) {
+  body{padding:12px;padding-bottom:160px;
+  }
+  h1{font-size:18px;
+  }
+      .top-actions-row {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .top-actions-row::-webkit-scrollbar {
+    display: none;
+  }
+  .top-actions-row .btn.playlists-chip {
+    flex-shrink: 0;
+    font-size: 11px;
+    padding: 5px 12px;
+  }
+  .sort-controls {
+    order: 4;
+  }
+  .sort-controls select {
+    padding: 5px 8px;
+  }
+    header{
+    flex-direction:row;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:8px;
+    margin-bottom:12px;
+  }
+         .site-logo { order: 0;
+  }
+  .header-right { order: 0;
+  }
+  .search-row,
+  .filter-row,
+  .top-actions-row,
+  
+  .playlists-chip{font-size:13px;padding:7px 16px!important;
+  }
+  .site-logo .logo-text {
+    font-size: 22px;
+  }
+  .list{grid-template-columns:1fr;
+  }
+  .search-wrap{
+    width:100%;
+    margin-left:0;
+    flex-direction:column;
+    gap:8px;
+  }
+  
+  .search-input,.search-select{
+    width:100%;
+    min-width:auto;
+    padding:8px 10px;
+  }
+  
+  .track{
+    flex-direction:row;
+    padding:8px;
+    gap:10px;
+    align-items:center;
+  }
+  
+  .thumb{
+    width:60px;
+    height:90px;
+    flex:none;
+  }
+  
+  .info{
+    flex:1;
+    gap:6px;
+  }
+  
+  .title{
+    font-size:14px;
+    line-height:1.3;
+    white-space:normal;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  
+  .meta{
+    font-size:11px;
+  }
+  
+  .counts{
+    flex-wrap:wrap;
+    gap:4px;
+    font-size:10px;
+  }
+  
+  .likes-count,.dislikes-count,.play-count{
+    padding:3px 6px;
+    font-size:10px;
+  }
+  
+  .likes-count .num,.dislikes-count .num,.play-count .num{
+    min-width:20px;
+    font-size:11px;
+  }
+  
+  .play-row{
+    flex-wrap:wrap;
+    gap:4px;
+  }
+  
+  .btn{
+    padding:5px 8px;
+    font-size:11px;
+  }
+  
+    .btn.icon{
+    padding:4px;
+    width:26px;
+    height:26px;
+    font-size:10px;
+  }
+  
+  .btn.icon.comment-btn {
+    width: auto;
+    min-width: 26px;
+  }
+  
+  .comment-count {
+    font-size: 10px;
+    min-width: 14px;
+    display: inline-block;
+    text-align: center;
+  }
+  .lang-bar .btn.icon{
+    width:auto;
+    height:auto;
+    padding:4px 8px;
+    border-radius:6px;
+  }
+
+  header > div[style*="flex"] {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    margin-top: 8px;
+  }
+
+  header > div[style*="flex"] button {
+    flex: 1;
+    max-width: 80px;
+  }
+  
+  #mini-player{
+    left:0;
+    right:0;
+    bottom:0;
+    padding:8px;
+    gap:8px;
+    flex-direction:column;
+    border-radius:12px 12px 0 0;
+  }
+  
+  #mini-center{
+    width:100%;
+    order:1;
+  }
+  
+  #mini-title{
+    font-size:13px;
+    margin-bottom:4px;
+  }
+  
+  #mini-wave{
+    height:36px;
+    position:relative;
+    margin-left:40px;
+  }
+  
+  #mini-wave img{
+    position:absolute;
+    left:-40px;
+    top:0;
+    width:36px;
+    height:36px;
+  }
+  
+  .mini-controls{
+    gap:10px;
+    margin-top:4px;
+  }
+  
+  .control-btn{
+    padding:6px;
+    font-size:16px;
+  }
+  
+  .time-display{
+    font-size:10px;
+    text-align:center;
+  }
+  
+  #mini-right{
+    width:100%;
+    order:2;
+  }
+  
+  .icon-row{
+    justify-content:space-around;
+    flex-wrap:nowrap;
+    gap:4px;
+    align-items:center;
+  }
+  
+  #mini-right .btn.icon{
+    padding:6px;
+    font-size:14px;
+    width:32px;
+    height:32px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+  }
+  
+  #mini-volume{
+    width:50px !important;
+    height:20px;
+    margin-right:8px;
+  }
+  
+  .side-panel{
+  width:100%;
+  padding:12px;
+  padding-bottom:120px; /* отступ под плеер */
+  box-sizing:border-box;
+  }
+  
+  .emoji-popup-grid{
+    grid-template-columns:repeat(6,1fr);
+    gap:6px;
+  }
+  
+  .emoji-popup-btn{
+    padding:8px;
+    font-size:18px;
+  }
+  
+  .panel{
+    padding:12px;
+    width:95%;
+    max-height:90vh;
+  }
+  
+  .modal{
+    padding:8px;
+  }
+  
+  .list{
+    gap:8px;
+  }
+
+  .header-right {
+    order: 2;
+  }
+  .filter-actions .btn.icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .site-logo { order: 0;
+  }
+  .header-right {
+    order: 0;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .top-actions-row,
+  .search-row,
+  .filter-row {
+    order: 10;
+    width: 100%;
+    flex-basis: 100%;
+  }
+  /* Сортировка остаётся ВНУТРИ top-actions-row */
+  .sort-controls {
+    order: 4;
+  }
+  /* Поиск на мобильном — одной строкой */
+  .search-main,
+  .search-lyrics {
+    flex: 1 !important;
+    width: auto !important;
+  }
+
+  #floating-logout-btn {
+    top: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+  }
+  #floating-logout-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  #chat-swipe-zone { display: block;
+  }
+
+  .track-date {
+    width: 22px;
+    font-size: 11px;
+    letter-spacing: 1.3px;
+  }
+
+  .playlists-chip {
+    font-size: 11px !important;
+    padding: 7px 14px !important;
+  }
+  .search-input,
+  .search-select,
+  .filter-select-mobile {
+    font-size: 15px !important;
+    padding: 8px 14px !important;
+  }
+  .sort-controls select {
+    font-size: 11px !important;
+    padding: 7px 28px 7px 12px !important;
+  }
+
   .selected-genres {
     gap: 6px !important;
     margin-top: 8px !important;
@@ -2700,29 +2712,278 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
     padding: 3px 10px !important;
   }
 
+  /* --- ФИЛЬТРЫ: на мобильном каждая колонка на всю строку --- */
+  .filter-genre-col { overflow: visible; }
+
   .custom-genre-trigger {
     font-size: 15px;
     padding: 8px 14px;
   }
 
+  /* --- СПИСОК ЖАНРОВ: на всю ширину экрана, две колонки --- */
+  body .custom-genre-dropdown.open .custom-genre-panel {
+    position: fixed;
+    left: 20px;
+    right: 55px;
+    top: auto;
+    margin-top: 8px;
+    z-index: 10000;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    background: #0b0b14;
+    border: 2px solid #1a1a2e;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.85);
+  }
+
   .custom-genre-options {
-    max-height: 240px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px;
+    max-height: 60vh;
+    overflow-y: auto;
   }
 
   .custom-genre-option {
-    font-size: 14px;
-    padding: 12px 14px;
+    font-size: 12.5px;
+    padding: 11px 10px;
+    min-width: 0;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.035);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .custom-genre-option .genre-label {
+    overflow: hidden;
+    word-break: break-word;
+    white-space: normal;
+    line-height: 1.35;
+  }
+
+  /* «Все жанры», заголовки групп и «ничего не найдено» — на всю ширину сетки */
+  .custom-genre-option.all-genres,
+  .custom-genre-option.genre-parent,
+  .genre-search-empty {
+    grid-column: 1 / -1;
   }
 }
-@media (min-width: 881px) {
-  .custom-genre-options {
-    right: auto;                 /* снимаем привязку к ширине колонки */
+
+/* ===== УЗКИЙ ПЛАНШЕТ  —  до 768px ===== */
+@media (max-width:768px) {
+  #viz-prev-btn, #viz-next-btn {
+    font-size: 24px;
+  }
+  
+  #visualizer-name-indicator {
+    font-size: 14px;
+  }
+  
+  .viz-dot {
+    width: 6px;
+    height: 6px;
+  }
+}
+
+/* ===== ТЕЛЕФОН  —  до 480px ===== */
+@media (max-width:480px) {
+  body{padding:8px;padding-bottom:150px;
+  }
+  
+  h1{font-size:16px;
+  }
+    .site-logo .logo-text {
+    font-size: 20px;
+  }
+  .track{padding:6px;gap:8px;
+  }
+  
+  .thumb{
+    width:50px;
+    height:75px;
+  }
+  
+  .title{font-size:13px;
+  }
+  .meta{font-size:10px;
+  }
+  
+  .counts{gap:3px;
+  }
+  .likes-count,.dislikes-count,.play-count{
+    padding:2px 4px;
+    font-size:9px;
+  }
+  
+  .btn.icon{
+    width:24px;
+    height:24px;
+    padding:4px;
+  }
+  
+  #mini-player{padding:6px;
+  }
+  #mini-wave{height:32px;
+  }
+  .control-btn{padding:5px;font-size:14px;
+  }
+  
+  .emoji-popup-grid{grid-template-columns:repeat(5,1fr);
+  }
+  .search-input,.search-select{padding:6px 8px;
+  }
+
+  .share-modal-socials {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .track-date {
+    width: 20px;
+    font-size: 9px;
+    letter-spacing: 1px;
+  }
+}
+
+/* ===== УЗКИЙ ТЕЛЕФОН  —  до 400px ===== */
+@media (max-width:400px) {
+  .login-panel {
+    padding: 36px 22px 28px;
+    border-radius: 22px;
+  }
+  .pin-btn {
+    padding: 16px;
+    font-size: 18px;
+    border-radius: 14px;
+  }
+  .pin-display {
+    font-size: 30px;
+    letter-spacing: 12px;
+    padding: 12px 18px;
+  }
+  .login-title {
+    font-size: 20px;
+    letter-spacing: 3px;
+  }
+
+  .email-auth-panel {
+    padding: 36px 22px 28px;
+    border-radius: 22px;
+  }
+  .email-actions-row {
+    flex-direction: column;
+  }
+  .email-btn {
+    width: 100%;
+  }
+}
+
+/* ===== ТОЛЬКО ПК  —  от 881px ===== */
+@media (min-width:881px) {
+  /* панель шире колонки фильтра */
+  .custom-genre-panel {
+    right: auto;                 /* обязательно: снимаем растяжку по колонке */
     width: min(860px, calc(100vw - 60px));
-    max-height: 460px;
-    display: none;
+    padding: 8px;
+  }
+
+  /* жанры в несколько колонок */
+  .custom-genre-options {
+    display: grid;
     grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
     gap: 2px 6px;
+    max-height: 460px;
   }
-  .custom-genre-dropdown.open .custom-genre-options { display: grid; }
-  .custom-genre-option { padding: 8px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .genre-search-empty {
+    grid-column: 1 / -1;
+  }
+
+  /* родительский жанр — на всю ширину, под ним его подстили */
+  .custom-genre-option.genre-parent {
+    grid-column: 1 / -1;
+    margin-top: 4px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    border-radius: 0;
+  }
+
+  .custom-genre-option {
+    padding: 8px 10px;
+  }
+
+  /* в многоколоночной сетке держим одну строку на жанр */
+  .custom-genre-option .genre-label {
+    overflow: hidden;
+    word-break: break-word;
+    white-space: normal;
+    line-height: 1.35;
+  }
+
+  /* "Все жанры" — на всю ширину сетки */
+  .custom-genre-option.all-genres {
+    grid-column: 1 / -1;
+  }
+}
+/* ---------- модалка создания плейлиста ---------- */
+.np-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #8d92a6;
+  text-transform: uppercase;
+}
+
+.np-field input,
+.np-field select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 14px;
+  font: inherit;
+  font-size: 14px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #eaeaf2;
+  background: #07060a;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 12px;
+  outline: none;
+}
+
+.np-field input:focus,
+.np-field select:focus { border-color: var(--accent); }
+
+.np-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #eaeaf2;
+  background: rgba(255,77,166,0.08);
+  border: 1px solid rgba(255,77,166,0.20);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.np-check input { width: 20px; height: 20px; accent-color: var(--accent); flex-shrink: 0; }
+
+.np-error {
+  margin-bottom: 12px;
+  padding: 9px 12px;
+  font-size: 12px;
+  color: #ff6b6b;
+  background: rgba(255,77,77,0.10);
+  border: 1px solid rgba(255,77,77,0.30);
+  border-radius: 10px;
+}
+
+.np-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.np-actions .btn { padding: 11px 20px; border-radius: 50px; font-weight: 700; }
+
+@media (max-width: 480px) {
+  .np-actions { display: grid; grid-template-columns: 1fr 1fr; }
 }
