@@ -3084,7 +3084,46 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
   letter-spacing: 0.2px;
   margin-bottom: 2px;
 }
+/* ---------- playlist icon button (unified) ---------- */
+.btn.icon.add-to-playlist-btn.playlist-btn,
+.nav-btn.playlist-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
 
+.btn.icon.add-to-playlist-btn.playlist-btn svg,
+.nav-btn.playlist-btn svg {
+  display: block;
+  transition: all 0.2s ease;
+  stroke: #eaeaf2;
+}
+
+.btn.icon.add-to-playlist-btn.playlist-btn:hover,
+.nav-btn.playlist-btn:hover {
+  border-color: rgba(0, 209, 255, 0.5);
+  background: rgba(0, 209, 255, 0.08);
+}
+
+.btn.icon.add-to-playlist-btn.playlist-btn:hover svg,
+.nav-btn.playlist-btn:hover svg {
+  stroke: #00d1ff;
+  filter: drop-shadow(0 0 6px rgba(0, 209, 255, 0.5));
+  transform: scale(1.1);
+}
+
+.btn.icon.add-to-playlist-btn.playlist-btn:active,
+.nav-btn.playlist-btn:active {
+  transform: scale(0.95);
+}
 /* ===== МОБИЛЬНЫЙ: поджанры 2 в ряд ===== */
 @media (max-width:880px) {
   .custom-genre-options {
