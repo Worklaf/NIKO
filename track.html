@@ -232,7 +232,16 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script>
+  // Аналитика запускается автоматически, если measurementId есть в конфиге
+  if (typeof firebase !== 'undefined' && firebase.analytics) {
+    firebase.analytics();
+    console.log('📊 Analytics initialized');
+  }
+</script>
+
 <script src="genres.js"></script>
 <script>
 /* ===================== страница трека ===================== */
