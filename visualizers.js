@@ -204,7 +204,7 @@ function initVisualizerParticles(canvas) {
 }
 
 function initAudioVisualizer() {
-  const canvas = document.getElementById('audio-visualizer');
+  const canvas = document.getElementById('circular-spectrum');
   if (!canvas) {
     return;
   }
