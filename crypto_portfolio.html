@@ -225,11 +225,9 @@ canvas { width: 100%; height: 100%; }
 <body>
 <div class="container">
     <div id="corsWarning" style="display:none; background:var(--red-dim); border:1px solid rgba(239,68,68,0.4); border-radius:var(--radius); padding:14px 16px; margin-bottom:16px; font-size:13px; line-height:1.6;">
-      <strong style="color:var(--red)">⚠ Данные не загружаются: файл открыт напрямую (file://)</strong><br>
-      Браузер блокирует запросы к CoinGecko с локального файла (CORS-политика). Чтобы всё заработало, откройте файл через локальный сервер, а не двойным кликом:<br>
-      <div style="margin-top:8px; font-family:monospace; background:rgba(0,0,0,0.3); padding:8px; border-radius:6px;">python3 -m http.server 8000</div>
-      затем откройте <strong>http://localhost:8000/crypto_portfolio.html</strong> в браузере.<br>
-      Либо загрузите файл на любой хостинг (GitHub Pages, Netlify, Vercel и т.п.) — там всё будет работать без этой ошибки.
+      <strong style="color:var(--red)">⚠ CoinGecko временно недоступен</strong><br>
+      Слишком много запросов (429) или CORS-блокировка. Данные вашего портфеля сохранены и отображаются из кэша.<br>
+      Подождите 1–2 минуты и обновите страницу. Если проблема persists — попробуйте открыть с другого устройства или сети.
     </div>
   <div class="header">
     <div class="logo">Crypto<span>Tracker</span></div>
@@ -300,7 +298,7 @@ canvas { width: 100%; height: 100%; }
 
   <!-- MARKET -->
   <div class="tab-panel" id="panel-market">
-    <div class="section-title">все монеты <span style="font-size:13px;color:var(--text-3);font-weight:400;">(топ-250, клик по заголовку для сортировки)</span></div>
+    <div class="section-title">все монеты <span style="font-size:13px;color:var(--text-3);font-weight:400;">(топ-500, клик по заголовку для сортировки)</span></div>
     <div class="table-wrap">
       <table id="marketTable">
         <thead>
@@ -500,36 +498,59 @@ function setupSearchClose() {
 }
 
 // ===================== API =====================
+async function apiFetch(url, attempts) {
+  attempts = attempts || 0;
+  const proxies = ['', 'https://corsproxy.io/?', 'https://api.allorigins.win/raw?url=', 'https://thingproxy.freeboard.io/fetch/'];
+  let lastErr;
+  for (let p of proxies) {
+    try {
+      const res = await fetch(p + url);
+      if (res.ok) return res;
+      if (res.status === 429) { lastErr = new Error('rate limit'); if (attempts < 2) { await new Promise(r => setTimeout(r, 2000)); continue; } }
+      if (res.status === 503) { lastErr = new Error('unavailable'); continue; }
+      return res;
+    } catch (e) { lastErr = e; }
+  }
+  throw lastErr || new Error('fetch failed');
+}
+
 async function fetchAll() {
   try {
     const cache = getCache();
+    if (cache) { allCoins = cache.coins || []; globalData = cache.global; fearData = cache.fear; renderAll(); checkNotifs(); }
     if (cache && Date.now() - cache.time < CACHE_TTL) {
-      allCoins = cache.coins; globalData = cache.global; fearData = cache.fear;
       await refreshExtraCoins();
       hideCorsWarning();
-      renderAll(); checkNotifs(); return;
+      document.getElementById('lastUpdate').textContent = 'кэш: ' + new Date(cache.time).toLocaleTimeString('ru-RU');
+      return;
     }
-    const coinsRes = await fetch(API_BASE + '/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=true&price_change_percentage=24h,7d,30d');
-    if (!coinsRes.ok) throw new Error('coins');
-    allCoins = await coinsRes.json();
-    const globalRes = await fetch(API_BASE + '/global');
-    if (globalRes.ok) globalData = await globalRes.json();
-    const fearRes = await fetch(FEAR_API);
-    if (fearRes.ok) fearData = await fearRes.json();
+    const page1 = await apiFetch(API_BASE + '/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=true&price_change_percentage=24h,7d,30d');
+    if (!page1.ok) throw new Error('coins');
+    const data1 = await page1.json();
+    allCoins = data1;
+    setTimeout(async () => {
+      try {
+        const page2 = await apiFetch(API_BASE + '/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=2&sparkline=true&price_change_percentage=24h,7d,30d');
+        if (page2.ok) { const data2 = await page2.json(); allCoins = [...data1, ...data2]; localStorage.setItem(CACHE_KEY, JSON.stringify({ time: Date.now(), coins: allCoins, global: globalData, fear: fearData })); renderMarket(); renderHeatmap(); }
+      } catch (e2) {}
+    }, 2000);
+    setTimeout(async () => { try { const r = await apiFetch(API_BASE + '/global'); if (r.ok) { globalData = await r.json(); renderHeader(); } } catch(e){} }, 500);
+    setTimeout(async () => { try { const r = await apiFetch(FEAR_API); if (r.ok) { fearData = await r.json(); renderHeader(); } } catch(e){} }, 1000);
     localStorage.setItem(CACHE_KEY, JSON.stringify({ time: Date.now(), coins: allCoins, global: globalData, fear: fearData }));
     await refreshExtraCoins();
     hideCorsWarning();
     renderAll(); checkNotifs();
+    document.getElementById('lastUpdate').textContent = 'обновлено: ' + new Date().toLocaleTimeString('ru-RU');
   } catch (e) {
     console.error(e);
     const cache = getCache();
     if (cache) {
-      allCoins = cache.coins; globalData = cache.global; fearData = cache.fear;
+      allCoins = cache.coins || []; globalData = cache.global; fearData = cache.fear;
       await refreshExtraCoins();
       renderAll(); checkNotifs();
-      document.getElementById('lastUpdate').textContent = 'обновление не удалось, показан кэш от ' + new Date(cache.time).toLocaleTimeString('ru-RU');
+      document.getElementById('lastUpdate').textContent = 'CoinGecko недоступен (429/CORS), показан кэш от ' + new Date(cache.time).toLocaleTimeString('ru-RU');
     } else {
-      document.getElementById('lastUpdate').textContent = 'ошибка загрузки данных';
+      document.getElementById('lastUpdate').textContent = 'CoinGecko недоступен. Добавьте монеты вручную.';
     }
     maybeShowCorsWarning(e);
   }
@@ -585,6 +606,11 @@ function renderHeader() {
     const ethDom = g.market_cap_percentage.eth;
     document.getElementById('stBtcDom').textContent = btcDom.toFixed(1) + '%';
     document.getElementById('stEthDom').textContent = 'eth: ' + ethDom.toFixed(1) + '%';
+  } else {
+    document.getElementById('stCap').textContent = '—';
+    document.getElementById('stCapChange').textContent = '—';
+    document.getElementById('stBtcDom').textContent = '—';
+    document.getElementById('stEthDom').textContent = 'eth: —';
   }
 
   if (fearData && fearData.data && fearData.data[0]) {
@@ -596,6 +622,10 @@ function renderHeader() {
     const bar = document.getElementById('fearBar');
     bar.style.width = f + '%';
     bar.style.background = f < 30 ? 'var(--red)' : f > 70 ? 'var(--green)' : 'var(--yellow)';
+  } else {
+    document.getElementById('stFear').textContent = '—';
+    document.getElementById('stFear').className = 'stat-value neu';
+    document.getElementById('fearBar').style.width = '0%';
   }
 }
 
@@ -646,7 +676,7 @@ function renderPortfolio() {
       '<td>' + fmt$(value) + '</td>' +
       '<td><span class="pnl-big ' + (pnl >= 0 ? 'pos' : 'neg') + '">' + fmtPct(pnl) + '</span></td>' +
       '<td><span class="' + (pnlDollar >= 0 ? 'pos' : 'neg') + '" style="font-weight:700;">' + (pnlDollar >= 0 ? '+' : '') + fmt$(pnlDollar) + '</span></td>' +
-      '<td><button class="btn btn-sm" onclick="toggleAdviceRow(\'' + h.id + '\')">рек ' + (expandedRows[h.id] ? '▲' : '▼') + '</button> <button class="btn btn-sm btn-blue" onclick="openTxModal(\'' + h.id + '\')">транз.</button> <button class="btn btn-sm" onclick="editHolding(\'' + h.id + '\')">изм</button> <button class="btn btn-sm btn-danger" onclick="delHolding(\'' + h.id + '\')">удл</button></td>';
+      '<td><button class="btn btn-sm" onclick="toggleAdviceRow(\'' + h.id + '\')">рек ' + (expandedRows[h.id] ? '▲' : '▼') + '</button> <button class="btn btn-sm btn-blue" onclick="openTxModal(\'' + h.id + '\')">транз.</button> <button class="btn btn-sm btn-danger" onclick="delHolding(\'' + h.id + '\')">удл</button></td>';
     tbody.appendChild(tr);
 
     if (expandedRows[h.id]) {
@@ -1137,7 +1167,7 @@ function searchCoins(query) {
   clearTimeout(searchDebounce);
   searchDebounce = setTimeout(async () => {
     try {
-      const res = await fetch(API_BASE + '/search?query=' + encodeURIComponent(q));
+      const res = await apiFetch(API_BASE + '/search?query=' + encodeURIComponent(q));
       if (!res.ok) return;
       const data = await res.json();
       const remote = (data.coins || []).slice(0, 12).map(c => ({ id: c.id, name: c.name, symbol: c.symbol, image: c.thumb }));
@@ -1183,7 +1213,7 @@ async function selectCoin(id, symbol, image) {
 // that isn't in the top-250, so it behaves identically everywhere (ATH, drawdown, charts...).
 async function fetchExtraCoinFull(id, symbol, image) {
   try {
-    const res = await fetch(API_BASE + '/coins/markets?vs_currency=usd&ids=' + id + '&sparkline=false&price_change_percentage=24h,7d');
+    const res = await apiFetch(API_BASE + '/coins/markets?vs_currency=usd&ids=' + id + '&sparkline=false&price_change_percentage=24h,7d');
     if (res.ok) {
       const data = await res.json();
       if (data && data[0]) {
@@ -1192,9 +1222,8 @@ async function fetchExtraCoinFull(id, symbol, image) {
       }
     }
   } catch (e) { /* ignore, fall back below */ }
-  // fallback: at least get a price if the full endpoint failed
   try {
-    const res2 = await fetch(API_BASE + '/simple/price?ids=' + id + '&vs_currencies=usd&include_market_cap=true&include_24hr_change=true');
+    const res2 = await apiFetch(API_BASE + '/simple/price?ids=' + id + '&vs_currencies=usd&include_market_cap=true&include_24hr_change=true');
     const data2 = await res2.json();
     if (data2[id]) {
       extraCoins[id] = {
@@ -1213,13 +1242,17 @@ async function fetchExtraCoinFull(id, symbol, image) {
 async function refreshExtraCoins() {
   const neededIds = [...new Set(portfolio.map(h => h.coinId).filter(id => id && !allCoins.find(c => c.id === id)))];
   if (!neededIds.length) return;
-  try {
-    const res = await fetch(API_BASE + '/coins/markets?vs_currency=usd&ids=' + neededIds.join(',') + '&sparkline=false&price_change_percentage=24h,7d');
-    if (res.ok) {
-      const data = await res.json();
-      data.forEach(c => { extraCoins[c.id] = c; });
-    }
-  } catch (e) { /* keep previous cached extraCoins values on failure */ }
+  const chunkSize = 50;
+  for (let i = 0; i < neededIds.length; i += chunkSize) {
+    const chunk = neededIds.slice(i, i + chunkSize);
+    try {
+      const res = await apiFetch(API_BASE + '/coins/markets?vs_currency=usd&ids=' + chunk.join(',') + '&sparkline=false&price_change_percentage=24h,7d');
+      if (res.ok) {
+        const data = await res.json();
+        data.forEach(c => { extraCoins[c.id] = c; });
+      }
+    } catch (e) { /* keep previous cached extraCoins values on failure */ }
+  }
 }
 
 // ===================== MODAL / ADD PURCHASE =====================
@@ -1243,6 +1276,8 @@ function closeModal() {
   document.getElementById('mCoinSearch').disabled = false;
   currentEditTxId = null;
 }
+
+
 
 function openAddPurchaseModal() {
   const h = portfolio.find(x => x.id === currentTxHoldingId);
@@ -1281,25 +1316,6 @@ function openEditPurchaseModal(txId) {
   document.getElementById('mStop').value = h.stopLoss || '';
   document.getElementById('mNotes').value = h.notes || '';
   document.getElementById('mExistingHint').style.display = 'none';
-  document.getElementById('modal').classList.add('active');
-}
-
-// "изм" — edit target/stop/notes for existing holding (quantity/price managed via transactions)
-function editHolding(id) {
-  const h = portfolio.find(x => x.id === id);
-  if (!h) return;
-  document.getElementById('modalTitle').textContent = 'изменить настройки позиции (' + h.symbol + ')';
-  document.getElementById('mCoinId').value = h.coinId;
-  document.getElementById('mCoinSearch').value = h.symbol;
-  document.getElementById('mCoinImg').value = '';
-  document.getElementById('mQty').value = '';
-  document.getElementById('mPrice').value = '';
-  document.getElementById('mDate').value = new Date().toISOString().split('T')[0];
-  document.getElementById('mTarget').value = h.targetPrice || '';
-  document.getElementById('mStop').value = h.stopLoss || '';
-  document.getElementById('mNotes').value = h.notes || '';
-  document.getElementById('mExistingHint').style.display = 'block';
-  document.getElementById('mExistingHint').innerHTML = 'Оставьте кол-во и цену пустыми, чтобы изменить только цель/стоп/заметку. Заполните кол-во и цену, чтобы добавить ещё одну покупку.';
   document.getElementById('modal').classList.add('active');
 }
 
@@ -1381,9 +1397,6 @@ function openTxModal(holdingId) {
   const h = portfolio.find(x => x.id === holdingId);
   if (!h) return;
   document.getElementById('txModalTitle').textContent = 'транзакции — ' + h.symbol;
-  document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
-  document.getElementById('txQty').value = '';
-  document.getElementById('txPrice').value = '';
   renderTxList();
   document.getElementById('txModal').classList.add('active');
 }
@@ -1394,7 +1407,7 @@ function renderTxList() {
   const h = portfolio.find(x => x.id === currentTxHoldingId);
   const list = document.getElementById('txList');
   if (!h || !h.purchases || !h.purchases.length) { list.innerHTML = '<div style="color:var(--text-3);font-size:13px;">нет транзакций</div>'; return; }
-  list.innerHTML = h.purchases.map(p => '<div class="tx-row"><span>' + p.date + '</span><span>' + p.amount + ' ' + h.symbol + '</span><span>$' + p.price + '</span><span>' + fmt$(p.amount*p.price) + '</span><div class="tx-actions"><button class="btn btn-sm" onclick="editTx(\'' + p.id + '\')">изм</button><button class="btn btn-sm btn-danger" onclick="delTx(\'' + p.id + '\')">удл</button></div></div>').join('');
+  list.innerHTML = h.purchases.map(p => '<div class="tx-row"><span>' + p.date + '</span><span>' + p.amount + ' ' + h.symbol + '</span><span>$' + p.price + '</span><span>' + fmt$(p.amount*p.price) + '</span><div class="tx-actions"><button class="btn btn-sm" onclick="openEditPurchaseModal(\'' + p.id + '\')">изм</button><button class="btn btn-sm btn-danger" onclick="delTx(\'' + p.id + '\')">удл</button></div></div>').join('');
 }
 
 
@@ -1429,7 +1442,7 @@ async function loadCoinChart(coinId, days, attempt) {
   const loading = document.getElementById('chartLoading');
   loading.textContent = 'загрузка графика' + (attempt > 1 ? ' (попытка ' + attempt + ')' : '') + '...';
   try {
-    const res = await fetch(API_BASE + '/coins/' + coinId + '/market_chart?vs_currency=usd&days=' + days);
+    const res = await apiFetch(API_BASE + '/coins/' + coinId + '/market_chart?vs_currency=usd&days=' + days);
     if (res.status === 429) {
       if (attempt < 3) { await new Promise(r => setTimeout(r, 1500 * attempt)); return loadCoinChart(coinId, days, attempt + 1); }
       loading.textContent = 'CoinGecko временно ограничил запросы (429). Подождите минуту и нажмите период графика снова.';
@@ -1528,7 +1541,10 @@ function importData(e) {
 // ===================== UTILS =====================
 function findCoin(id) {
   if (!id) return null;
-  return allCoins.find(c => c.id === id || c.symbol.toLowerCase() === id) || extraCoins[id] || null;
+  const byIdOrSymbol = allCoins.find(c => c.id === id || c.symbol.toLowerCase() === id);
+  if (byIdOrSymbol) return byIdOrSymbol;
+  if (extraCoins[id]) return extraCoins[id];
+  return Object.values(extraCoins).find(c => c.symbol.toLowerCase() === id) || null;
 }
 
 function fmt$(n) {
