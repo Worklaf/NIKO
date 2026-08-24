@@ -470,6 +470,8 @@ function init() {
   loadAlerts();
   setupTabs();
   setupSearchClose();
+  // Load cached extra coins for instant display
+  try { const cached = JSON.parse(localStorage.getItem('ct_extra_coins') || '{}'); Object.assign(extraCoins, cached); } catch(e){}
   fetchAll();
   setInterval(fetchAll, 60000);
 }
@@ -501,13 +503,16 @@ function setupSearchClose() {
 // ===================== API =====================
 async function apiFetch(url, attempts) {
   attempts = attempts || 0;
-  const proxies = ['', 'https://corsproxy.io/?', 'https://api.allorigins.win/raw?url=', 'https://thingproxy.freeboard.io/fetch/'];
+  const proxies = ['', 'https://corsproxy.io/?', 'https://api.allorigins.win/raw?url='];
   let lastErr;
   for (let p of proxies) {
     try {
-      const res = await fetch(p + url);
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 8000);
+      const res = await fetch(p + url, { signal: ctrl.signal });
+      clearTimeout(t);
       if (res.ok) return res;
-      if (res.status === 429) { lastErr = new Error('rate limit'); if (attempts < 2) { await new Promise(r => setTimeout(r, 2000)); continue; } }
+      if (res.status === 429) { lastErr = new Error('rate limit'); if (attempts < 2) { await new Promise(r => setTimeout(r, 1500)); continue; } }
       if (res.status === 503) { lastErr = new Error('unavailable'); continue; }
       return res;
     } catch (e) { lastErr = e; }
@@ -518,6 +523,7 @@ async function apiFetch(url, attempts) {
 async function fetchAll() {
   try {
     const cache = getCache();
+    // Show cache instantly
     if (cache) { allCoins = cache.coins || []; globalData = cache.global; fearData = cache.fear; renderAll(); checkNotifs(); }
     if (cache && Date.now() - cache.time < CACHE_TTL) {
       await refreshExtraCoins();
@@ -525,18 +531,22 @@ async function fetchAll() {
       document.getElementById('lastUpdate').textContent = 'кэш: ' + new Date(cache.time).toLocaleTimeString('ru-RU');
       return;
     }
+    // Load page 1
     const page1 = await apiFetch(API_BASE + '/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=true&price_change_percentage=24h,7d,30d');
-    if (!page1.ok) throw new Error('coins');
+    if (!page1.ok) throw new Error('coins page 1');
     const data1 = await page1.json();
     allCoins = data1;
-    setTimeout(async () => {
-      try {
-        const page2 = await apiFetch(API_BASE + '/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=2&sparkline=true&price_change_percentage=24h,7d,30d');
-        if (page2.ok) { const data2 = await page2.json(); allCoins = [...data1, ...data2]; localStorage.setItem(CACHE_KEY, JSON.stringify({ time: Date.now(), coins: allCoins, global: globalData, fear: fearData })); renderMarket(); renderHeatmap(); }
-      } catch (e2) {}
-    }, 2000);
-    setTimeout(async () => { try { const r = await apiFetch(API_BASE + '/global'); if (r.ok) { globalData = await r.json(); renderHeader(); } } catch(e){} }, 500);
-    setTimeout(async () => { try { const r = await apiFetch(FEAR_API); if (r.ok) { fearData = await r.json(); renderHeader(); } } catch(e){} }, 1000);
+    // Load page 2 immediately after (no delay)
+    try {
+      const page2 = await apiFetch(API_BASE + '/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=2&sparkline=true&price_change_percentage=24h,7d,30d');
+      if (page2.ok) {
+        const data2 = await page2.json();
+        allCoins = [...data1, ...data2];
+      }
+    } catch (e2) { /* page 2 optional */ }
+    // Global & fear in background
+    try { const r = await apiFetch(API_BASE + '/global'); if (r.ok) globalData = await r.json(); } catch(e){}
+    try { const r = await apiFetch(FEAR_API); if (r.ok) fearData = await r.json(); } catch(e){}
     localStorage.setItem(CACHE_KEY, JSON.stringify({ time: Date.now(), coins: allCoins, global: globalData, fear: fearData }));
     await refreshExtraCoins();
     hideCorsWarning();
@@ -1213,12 +1223,15 @@ async function selectCoin(id, symbol, image) {
 // Fetches full CoinGecko market data (same shape as top-250 list, incl. ATH) for a coin
 // that isn't in the top-250, so it behaves identically everywhere (ATH, drawdown, charts...).
 async function fetchExtraCoinFull(id, symbol, image) {
+  // Check cache first
+  try { const cached = JSON.parse(localStorage.getItem('ct_extra_coins') || '{}'); if (cached[id]) { extraCoins[id] = cached[id]; return true; } } catch(e){}
   try {
     const res = await apiFetch(API_BASE + '/coins/markets?vs_currency=usd&ids=' + id + '&sparkline=false&price_change_percentage=24h,7d');
     if (res.ok) {
       const data = await res.json();
       if (data && data[0]) {
         extraCoins[id] = data[0];
+        try { const all = JSON.parse(localStorage.getItem('ct_extra_coins') || '{}'); all[id] = data[0]; localStorage.setItem('ct_extra_coins', JSON.stringify(all)); } catch(e){}
         return true;
       }
     }
@@ -1232,6 +1245,7 @@ async function fetchExtraCoinFull(id, symbol, image) {
         current_price: data2[id].usd, market_cap: data2[id].usd_market_cap || 0,
         price_change_percentage_24h: data2[id].usd_24h_change || 0, ath: null
       };
+      try { const all = JSON.parse(localStorage.getItem('ct_extra_coins') || '{}'); all[id] = extraCoins[id]; localStorage.setItem('ct_extra_coins', JSON.stringify(all)); } catch(e){}
       return true;
     }
   } catch (e) { /* ignore */ }
@@ -1243,7 +1257,9 @@ async function fetchExtraCoinFull(id, symbol, image) {
 async function refreshExtraCoins() {
   const neededIds = [...new Set(portfolio.map(h => h.coinId).filter(id => id && !allCoins.find(c => c.id === id)))];
   if (!neededIds.length) return;
-  const chunkSize = 50;
+  // Load cached extra coins first for instant display
+  try { const cached = JSON.parse(localStorage.getItem('ct_extra_coins') || '{}'); Object.assign(extraCoins, cached); } catch(e){}
+  const chunkSize = 20;
   for (let i = 0; i < neededIds.length; i += chunkSize) {
     const chunk = neededIds.slice(i, i + chunkSize);
     try {
@@ -1253,7 +1269,11 @@ async function refreshExtraCoins() {
         data.forEach(c => { extraCoins[c.id] = c; });
       }
     } catch (e) { /* keep previous cached extraCoins values on failure */ }
+    // Small delay between chunks to avoid rate limit
+    if (i + chunkSize < neededIds.length) await new Promise(r => setTimeout(r, 300));
   }
+  // Save extra coins cache
+  try { localStorage.setItem('ct_extra_coins', JSON.stringify(extraCoins)); } catch(e){}
 }
 
 // ===================== MODAL / ADD PURCHASE =====================
