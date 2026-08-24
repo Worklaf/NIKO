@@ -542,7 +542,9 @@ async function fetchAll() {
     const cache = getCache();
     // Show cache instantly for immediate UI
     if (cache && cache.coins && cache.coins.length) {
-      allCoins = cache.coins; globalData = cache.global; fearData = cache.fear;
+      allCoins = cache.coins;
+      if (cache.global) globalData = cache.global;
+      if (cache.fear) fearData = cache.fear;
       renderAll(); checkNotifs();
     }
     if (cache && Date.now() - cache.time < CACHE_TTL) {
@@ -564,9 +566,27 @@ async function fetchAll() {
         allCoins = [...data1, ...data2];
       }
     } catch (e2) { console.log('page 2 failed', e2); }
-    // Global & fear
-    try { const r = await apiFetch(API_BASE + '/global'); if (r.ok) globalData = await r.json(); } catch(e){}
-    try { const r = await apiFetch(FEAR_API); if (r.ok) fearData = await r.json(); } catch(e){}
+    // Global & fear — fetch with better error handling
+    try {
+      const r = await apiFetch(API_BASE + '/global');
+      if (r.ok) {
+        const ct = r.headers.get('content-type') || '';
+        if (ct.includes('json')) {
+          globalData = await r.json();
+          renderHeader();
+        }
+      }
+    } catch(e){ console.log('global fetch error', e); }
+    try {
+      const r = await apiFetch(FEAR_API);
+      if (r.ok) {
+        const ct = r.headers.get('content-type') || '';
+        if (ct.includes('json')) {
+          fearData = await r.json();
+          renderHeader();
+        }
+      }
+    } catch(e){ console.log('fear fetch error', e); }
     localStorage.setItem(CACHE_KEY, JSON.stringify({ time: Date.now(), coins: allCoins, global: globalData, fear: fearData }));
     await refreshExtraCoins();
     hideCorsWarning();
@@ -576,7 +596,9 @@ async function fetchAll() {
     console.error('fetchAll error:', e);
     const cache = getCache();
     if (cache && cache.coins && cache.coins.length) {
-      allCoins = cache.coins; globalData = cache.global; fearData = cache.fear;
+      allCoins = cache.coins;
+      if (cache.global) globalData = cache.global;
+      if (cache.fear) fearData = cache.fear;
       await refreshExtraCoins();
       renderAll(); checkNotifs();
       document.getElementById('lastUpdate').textContent = 'CoinGecko недоступен (CORS/429), показан кэш от ' + new Date(cache.time).toLocaleTimeString('ru-RU');
