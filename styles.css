@@ -77,7 +77,7 @@ h1{margin:0;font-size:24px;color:#fff}
 }
 
 .track{
-  background:linear-gradient(145deg, rgba(20,20,35,0.9), rgba(15,15,25,0.95));
+  background:linear-gradient(180deg,var(--card),#0a0910);
   border-radius:var(--radius);
   padding:12px;
   display:flex;
@@ -85,10 +85,10 @@ h1{margin:0;font-size:24px;color:#fff}
   align-items:stretch;
   height:100%;
   box-sizing:border-box;
-  box-shadow:0 4px 12px rgba(0,0,0,.4);
+  box-shadow:0 10px 30px rgba(0,0,0,.6);
   position:relative;
-  border:1px solid rgba(255,255,255,0.1);
-  transition: background .18s ease, transform .08s ease, box-shadow .18s ease, border-color .18s ease;
+  border:1px solid rgba(255,255,255,0.02);
+  transition: background .18s ease, transform .08s ease, box-shadow .18s ease;
 }
 .track:hover{
   background: linear-gradient(135deg, rgba(255, 77, 166, 0.15), rgba(0, 209, 255, 0.15));
@@ -1949,7 +1949,7 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
 .sort-controls::after {
   content: '';
   position: absolute;
-  right: 10px;
+  right: 14px;
   top: 50%;
   transform: translateY(-50%);
   width: 10px;
@@ -2114,7 +2114,7 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
   margin-bottom: 6px;
 }
 .search-row {
-  gap: 16px;
+  gap: 10px;
   margin-bottom: 4px;
 }
 .filter-row {
@@ -2921,16 +2921,6 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
   .custom-genre-option.all-genres {
     grid-column: 1 / -1;
   }
-  /* ПК: поджанры всегда развёрнуты, стрелки скрыты */
-  .genre-children,
-  .genre-children.open {
-    display: grid !important;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-  }
-  .genre-arrow {
-    display: none !important;
-  }
 }
 /* ---------- модалка создания плейлиста ---------- */
 .np-field {
@@ -3057,21 +3047,7 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
 .genre-children .custom-genre-option:hover {
   background: rgba(255,77,166,0.08);
 }
-/* ===== Selected sub-genres inside expanded groups ===== */
-.genre-children .custom-genre-option.selected {
-  background: linear-gradient(90deg, var(--accent), var(--accent2));
-  color: #07060a;
-  border-color: transparent;
-}
 
-.genre-children .custom-genre-option.selected .genre-label {
-  color: #07060a;
-}
-
-.genre-children .custom-genre-option.selected .genre-count {
-  color: #07060a;
-  background: rgba(7,6,10,0.18);
-}
 /* Вертикальный список родителей */
 .custom-genre-options {
   display: block;
@@ -3084,47 +3060,7 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar {
   letter-spacing: 0.2px;
   margin-bottom: 2px;
 }
-/* ---------- playlist icon button (unified) ---------- */
 
-.btn.icon.add-to-playlist-btn.playlist-btn,
-.nav-btn.playlist-btn {
-display: inline-flex;
-align-items: center;
-justify-content: center;
-width: 36px;
-height: 36px;
-padding: 0;
-background: rgba(255,255,255,0.05);
-border: 1px solid rgba(255,255,255,0.10);
-border-radius: 10px;
-cursor: pointer;
-transition: all 0.2s ease;
-}
-
-.btn.icon.add-to-playlist-btn.playlist-btn svg,
-.nav-btn.playlist-btn svg {
-display: block;
-transition: all 0.2s ease;
-stroke: #eaeaf2;
-}
-
-.btn.icon.add-to-playlist-btn.playlist-btn:hover,
-.nav-btn.playlist-btn:hover {
-  border-color: rgba(0, 209, 255, 0.5);
-  background: rgba(0, 209, 255, 0.08);
-}
-
-.btn.icon.add-to-playlist-btn.playlist-btn:hover svg,
-.nav-btn.playlist-btn:hover svg {
-  stroke: #00d1ff;
-  filter: drop-shadow(0 0 6px rgba(0, 209, 255, 0.5));
-  transform: scale(1.1);
-}
-
-.btn.icon.add-to-playlist-btn.playlist-btn:active,
-.nav-btn.playlist-btn:active {
-  transform: scale(0.95);
-}
 /* ===== МОБИЛЬНЫЙ: поджанры 2 в ряд ===== */
 @media (max-width:880px) {
   .custom-genre-options {
@@ -3150,114 +3086,23 @@ stroke: #eaeaf2;
     grid-template-columns: 1fr;
   }
 }
-/* ---------- counts row (plays / likes / dislikes / comments) ---------- */
-.counts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 8px 0 12px;
-}
-
-.counts > div {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 30px;
-  padding: 0 12px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #bfc3d6;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  user-select: none;
-}
-
-.counts .num {
+/* Поджанр выбран — перебиваем фон контейнера */
+.genre-children .custom-genre-option.selected {
+  background: linear-gradient(90deg, var(--accent), var(--accent2)) !important;
+  color: #07060a !important;
+  border-color: transparent !important;
   font-weight: 700;
-  color: #eaeaf2;
 }
 
-/* hover / active */
-.counts > div:hover {
-  border-color: rgba(255,255,255,0.25);
-  color: #000;
-}
- 
-.counts .comments-count:hover {
-  border-color: rgba(0,209,255,0.5);
-  color: #00d1ff;
-  background: rgba(0,209,255,0.10);
+.genre-children .custom-genre-option.selected .genre-count {
+  color: #07060a !important;
+  background: rgba(7,6,10,0.18) !important;
 }
 
-.counts .play-count:hover {
-  border-color: rgba(77,255,138,0.5);
-  color: #4dff8a;
-  background: rgba(77,255,138,0.10);
+/* Дефолт: скрыт */
+.genre-children {
+  display: none;
 }
-/* ---------- play-row: unified icon buttons ---------- */
-.play-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-  margin-top: 4px;
-}
-
-.play-row .btn.icon {
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.10);
-  color: #eaeaf2;
-  transition: all 0.2s ease;
-}
-
-.play-row .btn.icon svg {
-  display: block;
-  stroke: currentColor;
-}
-
-.play-row .btn.icon:hover {
-  border-color: var(--accent);
-  color: #fff;
-  background: rgba(255,77,166,0.12);
-}
-
-/* play button — green accent */
-.play-row .btn.icon.play-btn:hover {
-  border-color: rgba(77,255,138,0.5);
-  color: #4dff8a;
-}
-/* ---------- comment button with badge ---------- */
-.play-row .btn.icon.comment-btn {
-  position: relative;
-}
-
-.play-row .btn.icon.comment-btn .comment-count {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  font-size: 10px;
-  font-weight: 800;
-  line-height: 1;
-  color: #fff;
-  background: linear-gradient(135deg, #ff4da6, #ff2d6e);
-  border: 1.5px solid #0a0a0f;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  box-shadow: 0 2px 6px rgba(255, 77, 166, 0.4);
+.genre-children.open {
+  display: grid;
 }
