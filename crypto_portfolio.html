@@ -256,6 +256,7 @@ canvas { width: 100%; height: 100%; }
     <button class="tab-btn" data-tab="heatmap">тепловая карта</button>
     <button class="tab-btn" data-tab="dca">dca калькулятор</button>
     <button class="tab-btn" data-tab="advisor">ai советник</button>
+    <button class="tab-btn" data-tab="feed">лента</button>
   </div>
 
   <!-- PORTFOLIO -->
@@ -279,6 +280,7 @@ canvas { width: 100%; height: 100%; }
               <th onclick="sortPortfolio('value')">стоимость <span class="sort-arrow">↕</span></th>
               <th onclick="sortPortfolio('pnl')">p&l % <span class="sort-arrow">↕</span></th>
               <th onclick="sortPortfolio('pnlDollar')">p&l $ <span class="sort-arrow">↕</span></th>
+              <th onclick="sortPortfolio('realized')">реализ. $ <span class="sort-arrow">↕</span></th>
               <th class="no-sort"></th>
             </tr></thead>
             <tbody></tbody>
@@ -365,6 +367,13 @@ canvas { width: 100%; height: 100%; }
     <div class="section-title">ai советник</div>
     <div class="section-sub">конкретные рекомендации с цифрами: сколько купить/продать, по какой цене, до какой цели держать</div>
     <div id="advisorList"></div>
+  </div>
+
+  <!-- FEED -->
+  <div class="tab-panel" id="panel-feed">
+    <div class="section-title">лента транзакций</div>
+    <div class="section-sub">все покупки и продажи по всему портфелю в хронологическом порядке</div>
+    <div id="feedList"></div>
   </div>
 </div>
 
@@ -489,8 +498,33 @@ function setupTabs() {
       document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
       if (btn.dataset.tab === 'advisor') renderAdvisor();
       if (btn.dataset.tab === 'dca') initDCA();
+      if (btn.dataset.tab === 'feed') renderFeed();
     });
   });
+}
+
+function renderFeed() {
+  const list = document.getElementById('feedList');
+  let allTx = [];
+  portfolio.forEach(h => {
+    const c = findCoin(h.coinId || h.symbol.toLowerCase());
+    if (!c) return;
+    (h.purchases || []).forEach(p => {
+      allTx.push({ ...p, symbol: h.symbol, name: c.name, image: c.image });
+    });
+  });
+  allTx.sort((a, b) => new Date(b.date) - new Date(a.date));
+  if (!allTx.length) { list.innerHTML = '<div style="color:var(--text-3);padding:20px;">нет транзакций</div>'; return; }
+  let html2 = '<div class="table-wrap"><table><thead><tr><th>дата</th><th>монета</th><th>тип</th><th>кол-во</th><th>цена</th><th>сумма</th><th>реализ. p&l</th></tr></thead><tbody>';
+  allTx.forEach(tx => {
+    const isSell = tx.type === 'sell';
+    const typeClass = isSell ? 'neg' : 'pos';
+    const typeText = isSell ? 'ПРОДАЖА' : 'ПОКУПКА';
+    const pnlCell = (isSell && tx.realizedPnl) ? '<span class="' + (tx.realizedPnl >= 0 ? 'pos' : 'neg') + '">' + (tx.realizedPnl >= 0 ? '+' : '') + fmt$(tx.realizedPnl) + '</span>' : '—';
+    html2 += '<tr><td>' + tx.date + '</td><td><div class="coin-cell"><div class="coin-img"><img src="' + tx.image + '" alt="" onerror="this.style.display=\'none\';this.parentNode.textContent=\'' + tx.symbol[0] + '\'"></div><div><div style="font-weight:600">' + tx.name + '</div><div class="coin-symbol">' + tx.symbol + '</div></div></div></td><td><span class="' + typeClass + '" style="font-weight:700;font-size:12px;">' + typeText + '</span></td><td>' + tx.amount + '</td><td>' + fmt$(tx.price) + '</td><td>' + fmt$(tx.amount * tx.price) + '</td><td>' + pnlCell + '</td></tr>';
+  });
+  html2 += '</tbody></table></div>';
+  list.innerHTML = html2;
 }
 
 function setupSearchClose() {
@@ -634,17 +668,22 @@ function renderAll() {
 
 // ===================== HEADER =====================
 function renderHeader() {
-  let totalVal = 0, totalInv = 0;
+  let totalVal = 0, totalInv = 0, totalRealized = 0;
   portfolio.forEach(h => {
     const c = findCoin(h.coinId || h.symbol.toLowerCase());
     if (!c) return;
     totalVal += h.amount * c.current_price;
     totalInv += h.amount * h.avgPrice;
+    totalRealized += h.realizedPnl || 0;
   });
   const pnl = totalInv > 0 ? ((totalVal - totalInv) / totalInv) * 100 : 0;
+  const btcCoin = findCoin('bitcoin');
+  const btcPrice = btcCoin ? btcCoin.current_price : 0;
+  const btcValue = btcPrice > 0 ? totalVal / btcPrice : 0;
   document.getElementById('stTotal').textContent = fmt$(totalVal);
+  document.getElementById('stTotal').title = btcPrice > 0 ? ('≈ ' + btcValue.toFixed(4) + ' BTC') : '';
   const pnlEl = document.getElementById('stPnl');
-  pnlEl.textContent = fmtPct(pnl);
+  pnlEl.textContent = fmtPct(pnl) + (totalRealized !== 0 ? ' (реализ: ' + (totalRealized >= 0 ? '+' : '') + fmt$(totalRealized) + ')' : '');
   pnlEl.className = 'stat-sub ' + (pnl >= 0 ? 'pos' : 'neg');
   document.getElementById('stInvested').textContent = fmt$(totalInv);
 
@@ -692,7 +731,8 @@ function getPortfolioRows() {
     const inv = h.amount * h.avgPrice;
     const pnl = h.avgPrice > 0 ? ((c.current_price - h.avgPrice) / h.avgPrice) * 100 : 0;
     const pnlDollar = value - inv;
-    rows.push({ h, c, value, inv, pnl, pnlDollar, price: c.current_price, amount: h.amount, avgPrice: h.avgPrice });
+    const realized = h.realizedPnl || 0;
+    rows.push({ h, c, value, inv, pnl, pnlDollar, realized, price: c.current_price, amount: h.amount, avgPrice: h.avgPrice });
   });
   if (portfolioSort.col) {
     rows.sort((a, b) => {
@@ -1336,10 +1376,12 @@ function openModal() {
   document.getElementById('modalTitle').textContent = 'добавить покупку';
   document.getElementById('mCoinId').value = '';
   document.getElementById('mCoinSearch').value = '';
+  document.getElementById('mCoinSearch').disabled = false;
   document.getElementById('mCoinImg').value = '';
   document.getElementById('mQty').value = '';
   document.getElementById('mPrice').value = '';
   document.getElementById('mDate').value = new Date().toISOString().split('T')[0];
+  document.querySelector('input[name="txType"][value="buy"]').checked = true;
   document.getElementById('mTarget').value = '';
   document.getElementById('mStop').value = '';
   document.getElementById('mNotes').value = '';
@@ -1359,7 +1401,7 @@ function openAddPurchaseModal() {
   const h = portfolio.find(x => x.id === currentTxHoldingId);
   if (!h) return;
   currentEditTxId = null;
-  document.getElementById('modalTitle').textContent = 'добавить покупку — ' + h.symbol;
+  document.getElementById('modalTitle').textContent = 'добавить транзакцию — ' + h.symbol;
   document.getElementById('mCoinId').value = h.coinId;
   document.getElementById('mCoinSearch').value = h.symbol;
   document.getElementById('mCoinSearch').disabled = true;
@@ -1367,6 +1409,7 @@ function openAddPurchaseModal() {
   document.getElementById('mQty').value = '';
   document.getElementById('mPrice').value = '';
   document.getElementById('mDate').value = new Date().toISOString().split('T')[0];
+  document.querySelector('input[name="txType"][value="buy"]').checked = true;
   document.getElementById('mTarget').value = h.targetPrice || '';
   document.getElementById('mStop').value = h.stopLoss || '';
   document.getElementById('mNotes').value = h.notes || '';
@@ -1388,6 +1431,8 @@ function openEditPurchaseModal(txId) {
   document.getElementById('mQty').value = p.amount;
   document.getElementById('mPrice').value = p.price;
   document.getElementById('mDate').value = p.date;
+  const typeRadio = document.querySelector('input[name="txType"][value="' + (p.type || 'buy') + '"]');
+  if (typeRadio) typeRadio.checked = true;
   document.getElementById('mTarget').value = h.targetPrice || '';
   document.getElementById('mStop').value = h.stopLoss || '';
   document.getElementById('mNotes').value = h.notes || '';
@@ -1403,6 +1448,8 @@ function saveHolding() {
   const amount = parseFloat(document.getElementById('mQty').value) || 0;
   const price = parseFloat(document.getElementById('mPrice').value) || 0;
   const date = document.getElementById('mDate').value || new Date().toISOString().split('T')[0];
+  const txTypeEl = document.querySelector('input[name="txType"]:checked');
+  const txType = txTypeEl ? txTypeEl.value : 'buy';
   const target = parseFloat(document.getElementById('mTarget').value) || null;
   const stop = parseFloat(document.getElementById('mStop').value) || null;
   const notes = document.getElementById('mNotes').value || '';
@@ -1416,6 +1463,8 @@ function saveHolding() {
       if (amount > 0) p.amount = amount;
       if (price > 0) p.price = price;
       p.date = date;
+      if (txType) p.type = txType;
+      recalcRealizedPnl(h);
       recomputeHolding(h);
     }
     if (target !== null) h.targetPrice = target;
@@ -1432,10 +1481,18 @@ function saveHolding() {
   if (amount > 0 && price > 0) {
     if (h) {
       h.purchases = h.purchases || [];
-      h.purchases.push({ id: uid(), date, amount, price });
+      if (txType === 'sell') {
+        const canSell = h.amount;
+        if (amount > canSell) return alert('нельзя продать больше чем есть (' + canSell.toFixed(6) + ')');
+        h.purchases.push({ id: uid(), date, amount, price, type: 'sell', realizedPnl: amount * (price - h.avgPrice) });
+      } else {
+        h.purchases.push({ id: uid(), date, amount, price, type: 'buy' });
+      }
+      recalcRealizedPnl(h);
       recomputeHolding(h);
     } else {
-      h = { id: uid(), coinId, symbol, amount, avgPrice: price, purchases: [{ id: uid(), date, amount, price }], targetPrice: null, stopLoss: null, notes: '' };
+      if (txType === 'sell') return alert('нельзя продать монету которой нет в портфеле');
+      h = { id: uid(), coinId, symbol, amount, avgPrice: price, purchases: [{ id: uid(), date, amount, price, type: 'buy' }], targetPrice: null, stopLoss: null, notes: '', realizedPnl: 0 };
       portfolio.push(h);
     }
   } else if (!h) {
@@ -1462,9 +1519,33 @@ function delHolding(id) {
 }
 
 function recomputeHolding(h) {
-  h.amount = h.purchases.reduce((s, p) => s + p.amount, 0);
-  const totalCost = h.purchases.reduce((s, p) => s + p.amount * p.price, 0);
-  h.avgPrice = h.amount > 0 ? +(totalCost / h.amount).toFixed(8) : 0;
+  const buys = h.purchases.filter(p => p.type !== 'sell');
+  const totalBuyAmount = buys.reduce((s, p) => s + p.amount, 0);
+  const totalBuyCost = buys.reduce((s, p) => s + p.amount * p.price, 0);
+  h.avgPrice = totalBuyAmount > 0 ? +(totalBuyCost / totalBuyAmount).toFixed(8) : 0;
+  const totalAmount = h.purchases.reduce((s, p) => s + (p.type === 'sell' ? -p.amount : p.amount), 0);
+  h.amount = Math.max(0, totalAmount);
+}
+
+function recalcRealizedPnl(h) {
+  // Sort by date to process chronologically
+  const sorted = [...h.purchases].sort((a, b) => new Date(a.date) - new Date(b.date));
+  let runningAvg = 0;
+  let runningQty = 0;
+  let realized = 0;
+  sorted.forEach(p => {
+    if (p.type === 'sell') {
+      const pnl = p.amount * (p.price - runningAvg);
+      p.realizedPnl = pnl;
+      realized += pnl;
+      runningQty -= p.amount;
+    } else {
+      runningQty += p.amount;
+      const cost = runningQty > p.amount ? runningAvg * (runningQty - p.amount) + p.amount * p.price : p.amount * p.price;
+      runningAvg = runningQty > 0 ? cost / runningQty : 0;
+    }
+  });
+  h.realizedPnl = realized;
 }
 
 // ===================== TRANSACTIONS MODAL =====================
@@ -1573,14 +1654,19 @@ function loadPortfolio() {
     const d = localStorage.getItem(PORTFOLIO_KEY);
     if (d) portfolio = JSON.parse(d);
   } catch {}
-  // migration: ensure ids and purchases exist
+  // migration: ensure ids, types and purchases exist
   portfolio.forEach(h => {
     if (!h.id) h.id = uid();
     if (!h.purchases || !h.purchases.length) {
-      h.purchases = [{ id: uid(), date: new Date().toISOString().split('T')[0], amount: h.amount, price: h.avgPrice }];
+      h.purchases = [{ id: uid(), date: new Date().toISOString().split('T')[0], amount: h.amount, price: h.avgPrice, type: 'buy' }];
     } else {
-      h.purchases.forEach(p => { if (!p.id) p.id = uid(); });
+      h.purchases.forEach(p => {
+        if (!p.id) p.id = uid();
+        if (!p.type) p.type = 'buy';
+      });
     }
+    // Recalculate realized P&L from sell transactions
+    recalcRealizedPnl(h);
     recomputeHolding(h);
   });
   savePortfolio();
