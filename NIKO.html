@@ -5520,12 +5520,15 @@ function renderPagination(total, current) {
 
   const pages = [];
 
-  if (total <= 7) {
+  // Адаптивный delta в зависимости от ширины экрана
+  const isMobile = window.innerWidth < 768;
+  const delta = isMobile ? 1 : 2;
+
+  if (total <= (isMobile ? 7 : 9)) {
     // Мало страниц — показываем все
     for (let i=1; i<=total; i++) pages.push(i);
   } else {
-    // Много страниц — компактный вид
-    const delta = 1; // сколько страниц показывать слева/справа от текущей
+    // Много страниц — показываем больше вокруг текущей
 
     // Всегда показываем первую страницу
     pages.push(1);
