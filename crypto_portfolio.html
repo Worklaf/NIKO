@@ -395,8 +395,15 @@ canvas { width: 100%; height: 100%; }
       <div class="form-group"><label>количество</label><input type="number" id="mQty" step="any" placeholder="0.5"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>цена покупки ($)</label><input type="number" id="mPrice" step="any" placeholder="45000"></div>
-      <div class="form-group"><label>дата покупки</label><input type="date" id="mDate"></div>
+      <div class="form-group"><label>цена ($)</label><input type="number" id="mPrice" step="any" placeholder="45000"></div>
+      <div class="form-group"><label>дата</label><input type="date" id="mDate"></div>
+      <div class="form-group">
+        <label>тип</label>
+        <div style="display:flex;gap:16px;align-items:center;height:42px;">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;color:var(--text);"><input type="radio" name="txType" value="buy" checked style="accent-color:var(--green);"> покупка</label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;color:var(--text);"><input type="radio" name="txType" value="sell" style="accent-color:var(--red);"> продажа</label>
+        </div>
+      </div>
     </div>
     <div class="form-hint" id="mExistingHint" style="display:none; margin-bottom:8px;"></div>
     <div class="form-row">
@@ -1381,7 +1388,8 @@ function openModal() {
   document.getElementById('mQty').value = '';
   document.getElementById('mPrice').value = '';
   document.getElementById('mDate').value = new Date().toISOString().split('T')[0];
-  document.querySelector('input[name="txType"][value="buy"]').checked = true;
+  const buyRadio = document.querySelector('input[name="txType"][value="buy"]');
+  if (buyRadio) buyRadio.checked = true;
   document.getElementById('mTarget').value = '';
   document.getElementById('mStop').value = '';
   document.getElementById('mNotes').value = '';
@@ -1409,7 +1417,8 @@ function openAddPurchaseModal() {
   document.getElementById('mQty').value = '';
   document.getElementById('mPrice').value = '';
   document.getElementById('mDate').value = new Date().toISOString().split('T')[0];
-  document.querySelector('input[name="txType"][value="buy"]').checked = true;
+  const buyRadio = document.querySelector('input[name="txType"][value="buy"]');
+  if (buyRadio) buyRadio.checked = true;
   document.getElementById('mTarget').value = h.targetPrice || '';
   document.getElementById('mStop').value = h.stopLoss || '';
   document.getElementById('mNotes').value = h.notes || '';
