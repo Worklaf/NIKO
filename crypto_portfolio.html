@@ -227,8 +227,8 @@ canvas { width: 100%; height: 100%; }
 <div class="container">
     <div id="corsWarning" style="display:none; background:var(--red-dim); border:1px solid rgba(239,68,68,0.4); border-radius:var(--radius); padding:14px 16px; margin-bottom:16px; font-size:13px; line-height:1.6;">
       <strong style="color:var(--red)">⚠ CoinGecko временно недоступен</strong><br>
-      Слишком много запросов (429) или CORS-блокировка. Данные вашего портфеля сохранены и отображаются из кэша.<br>
-      Подождите 1–2 минуты и обновите страницу. Если проблема persists — попробуйте открыть с другого устройства или сети.
+      CORS-блокировка или лимит запросов (429). Данные вашего портфеля сохранены и отображаются из кэша.<br>
+      <strong>Решение:</strong> откройте страницу через VPN, или подождите 2–3 минуты и обновите. Если проблема повторяется — CoinGecko блокирует ваш IP/домен.
     </div>
   <div class="header">
     <div class="logo">Crypto<span>Tracker</span></div>
@@ -300,6 +300,10 @@ canvas { width: 100%; height: 100%; }
   <!-- MARKET -->
   <div class="tab-panel" id="panel-market">
     <div class="section-title">все монеты <span style="font-size:13px;color:var(--text-3);font-weight:400;">(топ-500, клик по заголовку для сортировки)</span></div>
+    <div class="toolbar" style="margin-bottom:12px;">
+      <input type="text" id="marketSearch" placeholder="поиск по названию или тикеру..." oninput="filterMarket(this.value)" style="padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-size:14px;outline:none;min-width:280px;flex:1;max-width:400px;">
+      <span id="marketCount" style="font-size:13px;color:var(--text-3);margin-left:8px;"></span>
+    </div>
     <div class="table-wrap">
       <table id="marketTable">
         <thead>
@@ -503,17 +507,30 @@ function setupSearchClose() {
 // ===================== API =====================
 async function apiFetch(url, attempts) {
   attempts = attempts || 0;
-  const proxies = ['', 'https://corsproxy.io/?', 'https://api.allorigins.win/raw?url='];
+  // Try direct first with explicit CORS mode
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 10000);
+    const res = await fetch(url, { mode: 'cors', referrerPolicy: 'no-referrer', headers: { 'Accept': 'application/json' }, signal: ctrl.signal });
+    clearTimeout(t);
+    if (res.ok) return res;
+  } catch (e) {}
+  // Fallback proxies
+  const proxies = [
+    'https://api.allorigins.win/raw?url=',
+    'https://api.codetabs.com/v1/proxy?quest=',
+    'https://thingproxy.freeboard.io/fetch/'
+  ];
   let lastErr;
   for (let p of proxies) {
     try {
       const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 8000);
-      const res = await fetch(p + url, { signal: ctrl.signal });
+      const t = setTimeout(() => ctrl.abort(), 10000);
+      const res = await fetch(p + encodeURIComponent(url), { signal: ctrl.signal });
       clearTimeout(t);
       if (res.ok) return res;
-      if (res.status === 429) { lastErr = new Error('rate limit'); if (attempts < 2) { await new Promise(r => setTimeout(r, 1500)); continue; } }
-      if (res.status === 503) { lastErr = new Error('unavailable'); continue; }
+      if (res.status === 429) { lastErr = new Error('rate limit'); if (attempts < 2) { await new Promise(r => setTimeout(r, 2000)); continue; } }
+      if (res.status === 403 || res.status === 503) { lastErr = new Error('proxy blocked'); continue; }
       return res;
     } catch (e) { lastErr = e; }
   }
@@ -523,8 +540,11 @@ async function apiFetch(url, attempts) {
 async function fetchAll() {
   try {
     const cache = getCache();
-    // Show cache instantly
-    if (cache) { allCoins = cache.coins || []; globalData = cache.global; fearData = cache.fear; renderAll(); checkNotifs(); }
+    // Show cache instantly for immediate UI
+    if (cache && cache.coins && cache.coins.length) {
+      allCoins = cache.coins; globalData = cache.global; fearData = cache.fear;
+      renderAll(); checkNotifs();
+    }
     if (cache && Date.now() - cache.time < CACHE_TTL) {
       await refreshExtraCoins();
       hideCorsWarning();
@@ -533,18 +553,18 @@ async function fetchAll() {
     }
     // Load page 1
     const page1 = await apiFetch(API_BASE + '/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=true&price_change_percentage=24h,7d,30d');
-    if (!page1.ok) throw new Error('coins page 1');
+    if (!page1.ok) throw new Error('coins page 1 status ' + page1.status);
     const data1 = await page1.json();
     allCoins = data1;
-    // Load page 2 immediately after (no delay)
+    // Load page 2
     try {
       const page2 = await apiFetch(API_BASE + '/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=2&sparkline=true&price_change_percentage=24h,7d,30d');
       if (page2.ok) {
         const data2 = await page2.json();
         allCoins = [...data1, ...data2];
       }
-    } catch (e2) { /* page 2 optional */ }
-    // Global & fear in background
+    } catch (e2) { console.log('page 2 failed', e2); }
+    // Global & fear
     try { const r = await apiFetch(API_BASE + '/global'); if (r.ok) globalData = await r.json(); } catch(e){}
     try { const r = await apiFetch(FEAR_API); if (r.ok) fearData = await r.json(); } catch(e){}
     localStorage.setItem(CACHE_KEY, JSON.stringify({ time: Date.now(), coins: allCoins, global: globalData, fear: fearData }));
@@ -553,15 +573,15 @@ async function fetchAll() {
     renderAll(); checkNotifs();
     document.getElementById('lastUpdate').textContent = 'обновлено: ' + new Date().toLocaleTimeString('ru-RU');
   } catch (e) {
-    console.error(e);
+    console.error('fetchAll error:', e);
     const cache = getCache();
-    if (cache) {
-      allCoins = cache.coins || []; globalData = cache.global; fearData = cache.fear;
+    if (cache && cache.coins && cache.coins.length) {
+      allCoins = cache.coins; globalData = cache.global; fearData = cache.fear;
       await refreshExtraCoins();
       renderAll(); checkNotifs();
-      document.getElementById('lastUpdate').textContent = 'CoinGecko недоступен (429/CORS), показан кэш от ' + new Date(cache.time).toLocaleTimeString('ru-RU');
+      document.getElementById('lastUpdate').textContent = 'CoinGecko недоступен (CORS/429), показан кэш от ' + new Date(cache.time).toLocaleTimeString('ru-RU');
     } else {
-      document.getElementById('lastUpdate').textContent = 'CoinGecko недоступен. Добавьте монеты вручную.';
+      document.getElementById('lastUpdate').textContent = 'CoinGecko недоступен. Данные загрузятся позже.';
     }
     maybeShowCorsWarning(e);
   }
@@ -761,10 +781,21 @@ function drawPortChart() {
 }
 
 // ===================== MARKET with SORT =====================
+let marketFilter = '';
+
+function filterMarket(query) {
+  marketFilter = query.toLowerCase().trim();
+  renderMarket();
+}
+
 function renderMarket() {
   const tbody = document.querySelector('#marketTable tbody');
   tbody.innerHTML = '';
   let sorted = [...allCoins];
+  // Apply filter
+  if (marketFilter) {
+    sorted = sorted.filter(c => c.name.toLowerCase().includes(marketFilter) || c.symbol.toLowerCase().includes(marketFilter));
+  }
   const col = marketSort.col;
   const dir = marketSort.dir;
   sorted.sort((a, b) => {
@@ -772,6 +803,8 @@ function renderMarket() {
     if (col === 'ath_change_percentage') { av = a.ath ? ((a.current_price - a.ath)/a.ath)*100 : 0; bv = b.ath ? ((b.current_price - b.ath)/b.ath)*100 : 0; }
     return dir === 'asc' ? av - bv : bv - av;
   });
+
+  document.getElementById('marketCount').textContent = sorted.length + ' монет';
 
   sorted.forEach((c, i) => {
     const hasAth = typeof c.ath === 'number' && c.ath > 0;
