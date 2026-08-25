@@ -473,8 +473,9 @@ canvas { width: 100%; height: 100%; }
 </div>
 
 <script>
-const API_BASE = '[api.coingecko.com](https://api.coingecko.com/api/v3)';
-const FEAR_API = '[api.alternative.me](https://api.alternative.me/fng/?limit=1)';
+const API_BASE = 'https://api.coingecko.com/api/v3';
+const FEAR_API = 'https://api.alternative.me/fng/?limit=1';
+
 const CACHE_KEY = 'ct_cache_v5';
 const PORTFOLIO_KEY = 'ct_portfolio_v5';
 const NOTIF_KEY = 'ct_notifs_v5';
@@ -556,7 +557,7 @@ function pushBrowserNotification(title, body) {
   if (!('Notification' in window)) return;
   if (Notification.permission !== 'granted') return;
   try {
-    new Notification(title, { body, icon: '[coingecko.com](https://www.coingecko.com/favicon.ico)' });
+    new Notification(title, { body, icon: 'https://www.coingecko.com/favicon.ico' });
   } catch (e) {}
 }
 
@@ -565,15 +566,20 @@ async function apiFetch(url, attempts) {
   try {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 10000);
-    const res = await fetch(url, { mode: 'cors', referrerPolicy: 'no-referrer', headers: { 'Accept': 'application/json' }, signal: ctrl.signal });
+    const res = await fetch(url, {
+      mode: 'cors',
+      referrerPolicy: 'no-referrer',
+      headers: { 'Accept': 'application/json' },
+      signal: ctrl.signal
+    });
     clearTimeout(t);
     if (res.ok) return res;
   } catch (e) {}
 
   const proxies = [
-    '[api.allorigins.win](https://api.allorigins.win/raw?url=)',
-    '[api.codetabs.com](https://api.codetabs.com/v1/proxy?quest=)',
-    '[thingproxy.freeboard.io](https://thingproxy.freeboard.io/fetch/)'
+    'https://api.allorigins.win/raw?url=',
+    'https://api.codetabs.com/v1/proxy?quest=',
+    'https://thingproxy.freeboard.io/fetch/'
   ];
 
   let lastErr;
@@ -584,6 +590,7 @@ async function apiFetch(url, attempts) {
       const res = await fetch(p + encodeURIComponent(url), { signal: ctrl.signal });
       clearTimeout(t);
       if (res.ok) return res;
+
       if (res.status === 429) {
         lastErr = new Error('rate limit');
         if (attempts < 2) {
@@ -591,15 +598,21 @@ async function apiFetch(url, attempts) {
           continue;
         }
       }
+
       if (res.status === 403 || res.status === 503) {
         lastErr = new Error('proxy blocked');
         continue;
       }
+
       return res;
-    } catch (e) { lastErr = e; }
+    } catch (e) {
+      lastErr = e;
+    }
   }
+
   throw lastErr || new Error('fetch failed');
 }
+
 
 async function fetchAll() {
   try {
