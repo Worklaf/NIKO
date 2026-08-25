@@ -1366,6 +1366,7 @@ async function apiFetch(url, attempts) {
   // Use proxy servers for CORS issues
   const proxies = [
   'https://api.allorigins.win/raw?url=',
+  'https://corsproxy.io/?',
   'https://api.codetabs.com/v1/proxy?quest=',
   'https://thingproxy.freeboard.io/fetch/'
   ];
@@ -2775,7 +2776,7 @@ async function selectCoin(id, symbol, image) {
 async function fetchExtraCoinFull(id, symbol, image) {
   try { const cached = JSON.parse(localStorage.getItem('ct_extra_coins') || '{}'); if (cached[id]) { extraCoins[id] = cached[id]; return true; } } catch(e){}
   try {
-    const res = await apiFetch(API_BASE + '/coins/markets?vs_currency=usd&ids=' + id + '&sparkline=false&price_change_percentage=24h,7d');
+    const res = await apiFetch(API_BASE + '/coins/markets?vs_currency=usd&ids=' + id + '&sparkline=true&price_change_percentage=24h,7d,30d');
     if (res.ok) {
       const data = await res.json();
       if (data && data[0]) {
@@ -2809,7 +2810,7 @@ async function refreshExtraCoins() {
   for (let i = 0; i < neededIds.length; i += chunkSize) {
     const chunk = neededIds.slice(i, i + chunkSize);
     try {
-      const res = await apiFetch(API_BASE + '/coins/markets?vs_currency=usd&ids=' + chunk.join(',') + '&sparkline=false&price_change_percentage=24h,7d');
+      const res = await apiFetch(API_BASE + '/coins/markets?vs_currency=usd&ids=' + chunk.join(',') + '&sparkline=true&price_change_percentage=24h,7d,30d');
       if (res.ok) {
         const data = await res.json();
         data.forEach(c => { extraCoins[c.id] = c; });
