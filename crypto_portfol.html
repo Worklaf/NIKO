@@ -1,0 +1,1787 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crypto Portfolio Tracker</title>
+<style>
+:root {
+  --bg: #0a0e1a; --surface: #111827; --surface-2: #1a2236; --border: #1f2937;
+  --text: #f1f5f9; --text-2: #94a3b8; --text-3: #64748b;
+  --green: #22c55e; --green-dim: rgba(34,197,94,0.12); --green-glow: rgba(34,197,94,0.25);
+  --red: #ef4444; --red-dim: rgba(239,68,68,0.12); --red-glow: rgba(239,68,68,0.25);
+  --yellow: #f59e0b; --yellow-dim: rgba(245,158,11,0.12);
+  --blue: #3b82f6; --blue-dim: rgba(59,130,246,0.12);
+  --radius: 12px; --radius-sm: 8px; --shadow: 0 4px 20px rgba(0,0,0,0.4);
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.5; min-height: 100vh; }
+.container { max-width: 1400px; margin: 0 auto; padding: 16px; }
+
+/* Header */
+.header { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.logo span { color: var(--green); }
+.last-update { font-size: 12px; color: var(--text-3); }
+
+/* Notifications bell */
+.notif-bell { position: relative; cursor: pointer; padding: 8px; border-radius: var(--radius-sm); background: var(--surface); border: 1px solid var(--border); }
+.notif-bell:hover { background: var(--surface-2); }
+.notif-badge { position: absolute; top: -4px; right: -4px; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; }
+.notif-dropdown { position: absolute; right: 0; top: 44px; width: 340px; max-height: 400px; overflow-y: auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); z-index: 100; display: none; padding: 12px; }
+.notif-dropdown.active { display: block; }
+.notif-item { padding: 10px; border-radius: var(--radius-sm); margin-bottom: 6px; font-size: 13px; border-left: 3px solid var(--border); }
+.notif-item.buy { border-left-color: var(--green); background: var(--green-dim); }
+.notif-item.sell { border-left-color: var(--red); background: var(--red-dim); }
+.notif-item.info { border-left-color: var(--blue); background: var(--blue-dim); }
+.notif-time { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+.notif-empty { color: var(--text-3); padding: 20px; text-align: center; font-size: 13px; }
+.notif-section-title { font-size: 11px; text-transform: uppercase; color: var(--text-3); letter-spacing: 0.5px; margin: 10px 0 6px; }
+.pending-alert-item { padding: 8px 10px; border-radius: var(--radius-sm); margin-bottom: 6px; font-size: 12px; background: var(--surface-2); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.pending-alert-item button { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 14px; }
+.pending-alert-item button:hover { color: var(--red); }
+
+/* Stats */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; transition: transform 0.2s; }
+.stat-card:hover { transform: translateY(-2px); }
+.stat-label { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.stat-value { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.stat-sub { font-size: 13px; margin-top: 4px; font-weight: 500; }
+.pos { color: var(--green); }
+.neg { color: var(--red); }
+.neu { color: var(--text-2); }
+
+/* Gauge */
+.gauge-track { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 8px; }
+.gauge-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+.gauge-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-3); margin-top: 4px; }
+
+/* Tabs */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 24px; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab-btn { padding: 12px 18px; background: transparent; border: none; color: var(--text-2); cursor: pointer; font-size: 14px; font-weight: 600; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; transition: all 0.2s; font-family: inherit; }
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--text); border-bottom-color: var(--green); }
+.tab-panel { display: none; animation: fadeIn 0.3s; }
+.tab-panel.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Section */
+.section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.section-sub { font-size: 13px; color: var(--text-2); margin-bottom: 16px; margin-top: -8px; }
+.toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+
+/* Buttons */
+.btn { padding: 10px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+.btn:hover { background: var(--border); }
+.btn-primary { background: var(--green); color: #000; border-color: var(--green); }
+.btn-primary:hover { opacity: 0.9; }
+.btn-danger { background: var(--red-dim); color: var(--red); border-color: rgba(239,68,68,0.3); }
+.btn-danger:hover { background: rgba(239,68,68,0.2); }
+.btn-blue { background: var(--blue-dim); color: var(--blue); border-color: rgba(59,130,246,0.3); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+/* Table */
+.table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; padding: 12px 14px; color: var(--text-3); font-weight: 600; border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; cursor: pointer; user-select: none; }
+th:hover { color: var(--text); }
+th.no-sort { cursor: default; }
+th.no-sort:hover { color: var(--text-3); }
+th .sort-arrow { font-size: 10px; margin-left: 4px; opacity: 0.5; }
+th.sort-asc .sort-arrow, th.sort-desc .sort-arrow { opacity: 1; color: var(--green); }
+td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr:hover { background: rgba(255,255,255,0.02); }
+tr:last-child td { border-bottom: none; }
+tr.expand-row td { white-space: normal; background: rgba(255,255,255,0.015); }
+
+.coin-cell { display: flex; align-items: center; gap: 10px; }
+.coin-img { width: 28px; height: 28px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; overflow: hidden; }
+.coin-img img { width: 100%; height: 100%; object-fit: cover; }
+.coin-name { font-weight: 600; cursor: pointer; }
+.coin-name:hover { color: var(--green); text-decoration: underline; }
+.coin-symbol { font-size: 12px; color: var(--text-3); }
+
+/* P&L Big */
+.pnl-big { font-size: 16px; font-weight: 700; padding: 4px 10px; border-radius: 20px; display: inline-block; }
+.pnl-big.pos { background: var(--green-dim); color: var(--green); }
+.pnl-big.neg { background: var(--red-dim); color: var(--red); }
+
+/* Forms */
+.form-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.form-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 140px; }
+.form-group label { font-size: 12px; color: var(--text-2); font-weight: 600; }
+.form-group input, .form-group select {
+  padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--text); font-size: 14px; outline: none; font-family: inherit;
+}
+.form-group input:focus, .form-group select:focus { border-color: var(--green); }
+.form-hint { font-size: 11px; color: var(--text-3); margin-top: 2px; line-height: 1.4; }
+
+/* Search dropdown */
+.search-wrap { position: relative; }
+.search-results {
+  position: absolute; top: 100%; left: 0; right: 0; max-height: 240px; overflow-y: auto;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  z-index: 50; display: none; margin-top: 4px;
+}
+.search-results.active { display: block; }
+.search-item { padding: 10px 12px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+.search-item:hover { background: var(--border); }
+.search-item img { width: 20px; height: 20px; border-radius: 50%; }
+.search-item:last-child { border-bottom: none; }
+.search-loading { padding: 10px 12px; font-size: 12px; color: var(--text-3); }
+
+/* Cards */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+
+/* Advice cards */
+.advice-card {
+  border-left: 3px solid var(--border); padding: 20px;
+  background: var(--surface); border-radius: 0 var(--radius) var(--radius) 0;
+  margin-bottom: 16px; border-top: 1px solid var(--border); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  position: relative; overflow: hidden;
+}
+.advice-card.buy { border-left-color: var(--green); background: var(--green-dim); }
+.advice-card.sell { border-left-color: var(--red); background: var(--red-dim); }
+.advice-card.hold { border-left-color: var(--yellow); background: var(--yellow-dim); }
+.advice-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.advice-title { font-weight: 700; font-size: 16px; }
+.advice-badge { font-size: 11px; padding: 4px 12px; border-radius: 20px; font-weight: 700; text-transform: uppercase; }
+.badge-buy { background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+.badge-sell { background: var(--red-dim); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+.badge-hold { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(245,158,11,0.3); }
+.advice-text { font-size: 14px; color: var(--text-2); line-height: 1.7; margin-bottom: 12px; }
+.advice-action { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); }
+.advice-action-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+.advice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+.advice-metric { background: rgba(0,0,0,0.2); padding: 10px; border-radius: var(--radius-sm); text-align: center; }
+.advice-metric-value { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.advice-metric-label { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.advice-btn { margin-top: 12px; }
+
+/* DCA Result */
+.dca-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-top: 16px; }
+.dca-metric { text-align: center; padding: 16px; background: var(--surface-2); border-radius: var(--radius-sm); }
+.dca-metric-value { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.dca-metric-label { font-size: 12px; color: var(--text-2); margin-top: 4px; }
+
+/* Heatmap */
+.heatmap { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 3px; }
+.heatmap-item { border-radius: var(--radius-sm); padding: 12px 8px; text-align: center; font-size: 12px; cursor: pointer; transition: all 0.2s; min-height: 75px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px solid transparent; }
+.heatmap-item:hover { transform: scale(1.05); border-color: rgba(255,255,255,0.1); z-index: 2; position: relative; }
+.hm-symbol { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+.hm-change { font-variant-numeric: tabular-nums; font-weight: 600; }
+.hm-cap { font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 3px; }
+
+/* Modal */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; backdrop-filter: blur(4px); }
+.modal-overlay.active { display: flex; }
+#modal.modal-overlay { z-index: 1001; }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow); }
+.modal.modal-wide { max-width: 680px; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-title { font-size: 18px; font-weight: 700; }
+.modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-2); line-height: 1; }
+
+/* Charts */
+.chart-container { width: 100%; height: 260px; position: relative; }
+canvas { width: 100%; height: 100%; }
+.pie-chart { width: 180px; height: 180px; }
+.pie-legend { display: flex; flex-direction: column; gap: 8px; }
+.legend-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+/* Transactions */
+.tx-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.tx-row:last-child { border-bottom: none; }
+.tx-row span { flex: 1; }
+.tx-row .tx-actions { flex: 0; display: flex; gap: 6px; white-space: nowrap; }
+
+/* Flex */
+.flex-row { display: flex; gap: 20px; flex-wrap: wrap; }
+.flex-col { flex: 1; min-width: 300px; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .stat-value { font-size: 20px; }
+  .tab-btn { padding: 10px 12px; font-size: 13px; }
+  .form-row { flex-direction: column; }
+  .form-group { min-width: 100%; }
+  .notif-dropdown { width: 280px; right: -40px; }
+  #portTable th, #portTable td { padding: 8px 6px; font-size: 12px; }
+  .pie-chart { width: 140px; height: 140px; }
+}
+</style>
+<base target="_blank">
+</head>
+<body>
+<div class="container">
+    <div id="corsWarning" style="display:none; background:var(--red-dim); border:1px solid rgba(239,68,68,0.4); border-radius:var(--radius); padding:14px 16px; margin-bottom:16px; font-size:13px; line-height:1.6;">
+      <strong style="color:var(--red)">⚠ CoinGecko временно недоступен</strong><br>
+      CORS-блокировка или лимит запросов (429). Данные вашего портфеля сохранены и отображаются из кэша.<br>
+      <strong>Решение:</strong> откройте страницу через VPN, или подождите 2–3 минуты и обновите. Если проблема повторяется — CoinGecko блокирует ваш IP/домен.
+    </div>
+  <div class="header">
+    <div class="logo">Crypto<span>Tracker</span></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="last-update" id="lastUpdate">загрузка...</div>
+      <div class="notif-bell" onclick="toggleNotif(event)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+        <div class="notif-dropdown" id="notifDropdown" onclick="event.stopPropagation()"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-grid" id="statsGrid">
+    <div class="stat-card"><div class="stat-label">портфель</div><div class="stat-value" id="stTotal">$0</div><div class="stat-sub" id="stPnl">0%</div></div>
+    <div class="stat-card"><div class="stat-label">вложено</div><div class="stat-value" id="stInvested">$0</div><div class="stat-sub neu">всего инвестиций</div></div>
+    <div class="stat-card"><div class="stat-label">btc доминация</div><div class="stat-value" id="stBtcDom">—</div><div class="stat-sub neu" id="stEthDom">eth: —</div></div>
+    <div class="stat-card"><div class="stat-label">fear & greed</div><div class="stat-value" id="stFear">—</div><div class="gauge-track"><div class="gauge-fill" id="fearBar" style="width:0%;background:var(--yellow)"></div></div><div class="gauge-labels"><span>fear</span><span>neutral</span><span>greed</span></div></div>
+    <div class="stat-card"><div class="stat-label">капитализация</div><div class="stat-value" id="stCap">—</div><div class="stat-sub" id="stCapChange">—</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="portfolio">портфель</button>
+    <button class="tab-btn" data-tab="market">рынок</button>
+    <button class="tab-btn" data-tab="heatmap">тепловая карта</button>
+    <button class="tab-btn" data-tab="dca">dca калькулятор</button>
+    <button class="tab-btn" data-tab="advisor">ai советник</button>
+    <button class="tab-btn" data-tab="feed">лента</button>
+  </div>
+
+  <!-- PORTFOLIO -->
+  <div class="tab-panel active" id="panel-portfolio">
+    <!-- Distribution block: pie + legend horizontally -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="section-title" style="margin-bottom:12px;">распределение</div>
+      <div style="display:flex;align-items:flex-start;gap:24px;flex-wrap:wrap;">
+        <canvas class="pie-chart" id="pieCanvas" width="180" height="180" style="flex-shrink:0;"></canvas>
+        <div id="pieLegend" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px 16px;flex:1;align-content:start;"></div>
+      </div>
+    </div>
+
+    <div class="section-title">мои активы</div>
+    <div class="toolbar">
+      <button class="btn btn-primary" onclick="openModal()">+ добавить монету</button>
+      <button class="btn btn-sm" onclick="exportData()">экспорт JSON</button>
+      <button class="btn btn-sm" onclick="document.getElementById('importFile').click()">импорт JSON</button>
+      <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
+    </div>
+    <div class="table-wrap">
+      <table id="portTable">
+        <thead><tr>
+          <th class="no-sort">монета</th>
+          <th onclick="sortPortfolio('amount')">кол-во <span class="sort-arrow">↕</span></th>
+          <th onclick="sortPortfolio('avgPrice')">средняя <span class="sort-arrow">↕</span></th>
+          <th onclick="sortPortfolio('price')">цена <span class="sort-arrow">↕</span></th>
+          <th onclick="sortPortfolio('value')">стоимость <span class="sort-arrow">↕</span></th>
+          <th onclick="sortPortfolio('pnl')">p&l % <span class="sort-arrow">↕</span></th>
+          <th onclick="sortPortfolio('pnlDollar')">p&l $ <span class="sort-arrow">↕</span></th>
+          <th onclick="sortPortfolio('realized')">реализ. $ <span class="sort-arrow">↕</span></th>
+          <th class="no-sort"></th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MARKET -->
+  <div class="tab-panel" id="panel-market">
+    <div class="section-title">все монеты <span style="font-size:13px;color:var(--text-3);font-weight:400;">(топ-500, клик по заголовку для сортировки)</span></div>
+    <div class="toolbar" style="margin-bottom:12px;">
+      <input type="text" id="marketSearch" placeholder="поиск по названию или тикеру..." oninput="filterMarket(this.value)" style="padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-size:14px;outline:none;min-width:280px;flex:1;max-width:400px;">
+      <span id="marketCount" style="font-size:13px;color:var(--text-3);margin-left:8px;"></span>
+    </div>
+    <div class="table-wrap">
+      <table id="marketTable">
+        <thead>
+          <tr>
+            <th onclick="sortMarket('market_cap_rank')"># <span class="sort-arrow">↕</span></th>
+            <th class="no-sort">монета</th>
+            <th onclick="sortMarket('current_price')">цена <span class="sort-arrow">↕</span></th>
+            <th onclick="sortMarket('price_change_percentage_24h')">24ч <span class="sort-arrow">↕</span></th>
+            <th onclick="sortMarket('price_change_percentage_7d_in_currency')">7д <span class="sort-arrow">↕</span></th>
+            <th onclick="sortMarket('market_cap')">кап <span class="sort-arrow">↕</span></th>
+            <th onclick="sortMarket('total_volume')">объём <span class="sort-arrow">↕</span></th>
+            <th onclick="sortMarket('ath_change_percentage')">от ath <span class="sort-arrow">↕</span></th>
+            <th class="no-sort">график</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- HEATMAP -->
+  <div class="tab-panel" id="panel-heatmap">
+    <div class="section-title">тепловая карта</div>
+    <div class="section-sub">размер = капитализация · цвет = изменение 24ч</div>
+    <div class="heatmap" id="heatmapGrid"></div>
+  </div>
+
+  <!-- DCA -->
+  <div class="tab-panel" id="panel-dca">
+    <div class="section-title">dca калькулятор</div>
+    <div class="section-sub">выберите монету — рекомендация появится сразу, сумму докупки можно скорректировать</div>
+    <div class="card">
+      <div class="form-row">
+        <div class="form-group"><label>монета из портфеля</label><select id="dcaCoin" onchange="updateDCA()"></select></div>
+        <div class="form-group"><label>текущая средняя ($)</label><input type="number" id="dcaAvg" readonly></div>
+        <div class="form-group"><label>текущее количество</label><input type="number" id="dcaQty" readonly></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>текущая цена ($)</label><input type="number" id="dcaPrice" readonly></div>
+        <div class="form-group"><label>сумма докупки ($)</label><input type="number" id="dcaInvest" placeholder="1000" oninput="calcDCA(true)"></div>
+        <div class="form-group"><label>или количество</label><input type="number" id="dcaAddQty" placeholder="0" oninput="calcDCA(false)"></div>
+      </div>
+      <div id="dcaResult" style="display:none;">
+        <div class="dca-grid">
+          <div class="dca-metric"><div class="dca-metric-value" id="dcaNewAvg">$0</div><div class="dca-metric-label">новая средняя</div></div>
+          <div class="dca-metric"><div class="dca-metric-value" id="dcaTotalQty">0</div><div class="dca-metric-label">итого монет</div></div>
+          <div class="dca-metric"><div class="dca-metric-value" id="dcaTotalInv">$0</div><div class="dca-metric-label">всего вложено</div></div>
+          <div class="dca-metric"><div class="dca-metric-value pos" id="dcaBreakEven">0%</div><div class="dca-metric-label">нужен рост до окупа</div></div>
+          <div class="dca-metric"><div class="dca-metric-value" id="dcaCurPnl">0%</div><div class="dca-metric-label">текущий p&l</div></div>
+          <div class="dca-metric"><div class="dca-metric-value" id="dcaRec" style="font-size:15px;">—</div><div class="dca-metric-label">рекомендация</div></div>
+        </div>
+        <div id="dcaAction" style="margin-top:16px; padding:14px; border-radius:var(--radius-sm); font-size:14px; line-height:1.6;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADVISOR -->
+  <div class="tab-panel" id="panel-advisor">
+    <div class="section-title">ai советник</div>
+    <div class="section-sub">конкретные рекомендации с цифрами: сколько купить/продать, по какой цене, до какой цели держать</div>
+    <div id="advisorList"></div>
+  </div>
+
+  <!-- FEED -->
+  <div class="tab-panel" id="panel-feed">
+    <div class="section-title">лента транзакций</div>
+    <div class="section-sub">все покупки и продажи по всему портфелю в хронологическом порядке</div>
+    <div id="feedList"></div>
+  </div>
+</div>
+
+<!-- ADD/PURCHASE MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="modalTitle">добавить покупку</div><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div class="form-row">
+      <div class="form-group" style="flex:2;">
+        <label>монета</label>
+        <div class="search-wrap">
+          <input type="text" id="mCoinSearch" placeholder="введите название или тикер (любая монета)..." oninput="searchCoins(this.value)" onfocus="searchCoins(this.value)" autocomplete="off">
+          <input type="hidden" id="mCoinId">
+          <input type="hidden" id="mCoinImg">
+          <div class="search-results" id="searchResults"></div>
+        </div>
+        <div class="form-hint">поиск идёт по топ-250 и по всей базе CoinGecko — можно выбрать любую монету</div>
+      </div>
+      <div class="form-group"><label>количество</label><input type="number" id="mQty" step="any" placeholder="0.5"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>цена ($)</label><input type="number" id="mPrice" step="any" placeholder="45000"></div>
+      <div class="form-group"><label>дата</label><input type="date" id="mDate"></div>
+      <div class="form-group">
+        <label>тип</label>
+        <div style="display:flex;gap:16px;align-items:center;height:42px;">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;color:var(--text);"><input type="radio" name="txType" value="buy" checked style="accent-color:var(--green);"> покупка</label>
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;color:var(--text);"><input type="radio" name="txType" value="sell" style="accent-color:var(--red);"> продажа</label>
+        </div>
+      </div>
+    </div>
+    <div class="form-hint" id="mExistingHint" style="display:none; margin-bottom:8px;"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>цель продажи ($)</label>
+        <input type="number" id="mTarget" step="any" placeholder="100000">
+        <div class="form-hint">при достижении этой цены AI посоветует зафиксировать прибыль</div>
+      </div>
+      <div class="form-group">
+        <label>стоп-лосс ($)</label>
+        <input type="number" id="mStop" step="any" placeholder="35000">
+        <div class="form-hint">при падении до этой цены AI посоветует выйти из позиции</div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:1;">
+        <label>заметка / стратегия</label>
+        <input type="text" id="mNotes" placeholder="например: долгосрок, ходл до 100к">
+        <div class="form-hint">видна в AI-советнике, помогает помнить почему купили</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:16px;">
+      <button class="btn" onclick="closeModal()">отмена</button>
+      <button class="btn btn-primary" onclick="saveHolding()">сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- TRANSACTIONS MODAL -->
+<div class="modal-overlay" id="txModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="txModalTitle">транзакции</div><button class="modal-close" onclick="closeTxModal()">&times;</button></div>
+    <div id="txList"></div>
+    <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px;">
+      <button class="btn btn-primary btn-sm" onclick="openAddPurchaseModal()">+ добавить покупку</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHART MODAL -->
+<div class="modal-overlay" id="chartModal">
+  <div class="modal modal-wide">
+    <div class="modal-header"><div class="modal-title" id="chartModalTitle">график</div><button class="modal-close" onclick="closeChartModal()">&times;</button></div>
+    <div class="form-row" style="margin-bottom:4px;">
+      <button class="btn btn-sm" onclick="loadCoinChart(currentChartCoin,7)">7д</button>
+      <button class="btn btn-sm" onclick="loadCoinChart(currentChartCoin,30)">30д</button>
+      <button class="btn btn-sm" onclick="loadCoinChart(currentChartCoin,90)">90д</button>
+      <button class="btn btn-sm" onclick="loadCoinChart(currentChartCoin,365)">1г</button>
+    </div>
+    <div class="chart-container" style="height:320px;"><canvas id="realChartCanvas"></canvas></div>
+    <div id="chartLoading" style="text-align:center;color:var(--text-3);font-size:13px;margin-top:8px;"></div>
+  </div>
+</div>
+
+<script>
+const API_BASE = 'https://api.coingecko.com/api/v3';
+const FEAR_API = 'https://api.alternative.me/fng/?limit=1';
+const CACHE_COINS_KEY = 'ct_cache_coins_v5';
+const CACHE_GLOBAL_KEY = 'ct_cache_global_v5';
+const CACHE_FEAR_KEY = 'ct_cache_fear_v5';
+const PORTFOLIO_KEY = 'ct_portfolio_v4';
+const NOTIF_KEY = 'ct_notifs_v4';
+const ALERTS_KEY = 'ct_alerts_v4';
+const CACHE_TTL = 60 * 1000;
+
+let allCoins = [];
+let extraCoins = {}; // coins not in top250, found via /search, keyed by id
+let globalData = null;
+let fearData = null;
+let portfolio = [];
+let notifications = [];
+let alertsList = []; // pending price alerts {id,coinId,symbol,type,value,suggestedAmount,fired}
+let marketSort = { col: 'market_cap_rank', dir: 'asc' };
+let portfolioSort = { col: null, dir: 'desc' };
+let expandedRows = {}; // holdingId -> bool
+let currentTxHoldingId = null;
+let currentChartCoin = null;
+let searchDebounce = null;
+let currentEditTxId = null;
+let advisorFilter = 'all'; // 'all' | 'buy' | 'sell' | 'hold'
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+
+function init() {
+  loadPortfolio();
+  loadNotifs();
+  loadAlerts();
+  setupTabs();
+  setupSearchClose();
+  // Load cached extra coins for instant display
+  try { const cached = JSON.parse(localStorage.getItem('ct_extra_coins') || '{}'); Object.assign(extraCoins, cached); } catch(e){}
+  // Clean up old cache key to free space
+  try { localStorage.removeItem('ct_cache_v4'); } catch(e){}
+  fetchAll();
+  setInterval(fetchAll, 60000);
+}
+
+function setupTabs() {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+      if (btn.dataset.tab === 'advisor') renderAdvisor();
+      if (btn.dataset.tab === 'dca') initDCA();
+      if (btn.dataset.tab === 'feed') renderFeed();
+    });
+  });
+}
+
+function renderFeed() {
+  const list = document.getElementById('feedList');
+  let allTx = [];
+  portfolio.forEach(h => {
+    const c = findCoin(h.coinId || h.symbol.toLowerCase());
+    if (!c) return;
+    (h.purchases || []).forEach(p => {
+      allTx.push({ ...p, symbol: h.symbol, name: c.name, image: c.image });
+    });
+  });
+  allTx.sort((a, b) => new Date(b.date) - new Date(a.date));
+  if (!allTx.length) { list.innerHTML = '<div style="color:var(--text-3);padding:20px;">нет транзакций</div>'; return; }
+  let html2 = '<div class="table-wrap"><table><thead><tr><th>дата</th><th>монета</th><th>тип</th><th>кол-во</th><th>цена</th><th>сумма</th><th>реализ. p&l</th></tr></thead><tbody>';
+  allTx.forEach(tx => {
+    const isSell = tx.type === 'sell';
+    const typeClass = isSell ? 'neg' : 'pos';
+    const typeText = isSell ? 'ПРОДАЖА' : 'ПОКУПКА';
+    const pnlCell = (isSell && tx.realizedPnl) ? '<span class="' + (tx.realizedPnl >= 0 ? 'pos' : 'neg') + '">' + (tx.realizedPnl >= 0 ? '+' : '') + fmt$(tx.realizedPnl) + '</span>' : '—';
+    html2 += '<tr><td>' + tx.date + '</td><td><div class="coin-cell"><div class="coin-img"><img src="' + tx.image + '" alt="" onerror="this.style.display=\'none\';this.parentNode.textContent=\'' + tx.symbol[0] + '\'"></div><div><div style="font-weight:600">' + tx.name + '</div><div class="coin-symbol">' + tx.symbol + '</div></div></div></td><td><span class="' + typeClass + '" style="font-weight:700;font-size:12px;">' + typeText + '</span></td><td>' + tx.amount + '</td><td>' + fmt$(tx.price) + '</td><td>' + fmt$(tx.amount * tx.price) + '</td><td>' + pnlCell + '</td></tr>';
+  });
+  html2 += '</tbody></table></div>';
+  list.innerHTML = html2;
+}
+
+function setupSearchClose() {
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.search-wrap')) {
+      document.getElementById('searchResults').classList.remove('active');
+    }
+    if (!e.target.closest('.notif-bell')) {
+      document.getElementById('notifDropdown').classList.remove('active');
+    }
+  });
+}
+
+// ===================== API =====================
+async function apiFetch(url, attempts) {
+  attempts = attempts || 0;
+  // Try direct first with explicit CORS mode
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 10000);
+    const res = await fetch(url, { mode: 'cors', referrerPolicy: 'no-referrer', headers: { 'Accept': 'application/json' }, signal: ctrl.signal });
+    clearTimeout(t);
+    if (res.ok) return res;
+  } catch (e) {}
+  // Fallback proxies
+  const proxies = [
+    'https://api.allorigins.win/raw?url=',
+    'https://api.codetabs.com/v1/proxy?quest=',
+    'https://thingproxy.freeboard.io/fetch/'
+  ];
+  let lastErr;
+  for (let p of proxies) {
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 10000);
+      const res = await fetch(p + encodeURIComponent(url), { signal: ctrl.signal });
+      clearTimeout(t);
+      if (res.ok) return res;
+      if (res.status === 429) { lastErr = new Error('rate limit'); if (attempts < 2) { await new Promise(r => setTimeout(r, 2000)); continue; } }
+      if (res.status === 403 || res.status === 503) { lastErr = new Error('proxy blocked'); continue; }
+      return res;
+    } catch (e) { lastErr = e; }
+  }
+  throw lastErr || new Error('fetch failed');
+}
+
+async function fetchAll() {
+  try {
+    const cache = getCache();
+    // Show cache instantly for immediate UI
+    if (cache && cache.coins && cache.coins.length) {
+      allCoins = cache.coins;
+      if (cache.global) globalData = cache.global;
+      if (cache.fear) fearData = cache.fear;
+      renderAll(); checkNotifs();
+    }
+    if (cache && Date.now() - cache.time < CACHE_TTL) {
+      await refreshExtraCoins();
+      hideCorsWarning();
+      document.getElementById('lastUpdate').textContent = 'кэш: ' + new Date(cache.time).toLocaleTimeString('ru-RU');
+      return;
+    }
+    // Load page 1
+    const page1 = await apiFetch(API_BASE + '/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=true&price_change_percentage=24h,7d,30d');
+    if (!page1.ok) throw new Error('coins page 1 status ' + page1.status);
+    const data1 = await page1.json();
+    allCoins = data1;
+    // Load page 2
+    try {
+      const page2 = await apiFetch(API_BASE + '/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=2&sparkline=true&price_change_percentage=24h,7d,30d');
+      if (page2.ok) {
+        const data2 = await page2.json();
+        allCoins = [...data1, ...data2];
+      }
+    } catch (e2) { console.log('page 2 failed', e2); }
+    // Global & fear — fetch with better error handling
+    try {
+      const r = await apiFetch(API_BASE + '/global');
+      if (r.ok) {
+        const ct = r.headers.get('content-type') || '';
+        if (ct.includes('json')) {
+          globalData = await r.json();
+          renderHeader();
+        }
+      }
+    } catch(e){ console.log('global fetch error', e); }
+    try {
+      const r = await apiFetch(FEAR_API);
+      if (r.ok) {
+        const ct = r.headers.get('content-type') || '';
+        if (ct.includes('json')) {
+          fearData = await r.json();
+          renderHeader();
+        }
+      }
+    } catch(e){ console.log('fear fetch error', e); }
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ time: Date.now(), coins: allCoins, global: globalData, fear: fearData }));
+    await refreshExtraCoins();
+    hideCorsWarning();
+    renderAll(); checkNotifs();
+    document.getElementById('lastUpdate').textContent = 'обновлено: ' + new Date().toLocaleTimeString('ru-RU');
+  } catch (e) {
+    console.error('fetchAll error:', e);
+    const cache = getCache();
+    if (cache && cache.coins && cache.coins.length) {
+      allCoins = cache.coins;
+      if (cache.global) globalData = cache.global;
+      if (cache.fear) fearData = cache.fear;
+      await refreshExtraCoins();
+      renderAll(); checkNotifs();
+      document.getElementById('lastUpdate').textContent = 'CoinGecko недоступен (CORS/429), показан кэш от ' + new Date(cache.time).toLocaleTimeString('ru-RU');
+    } else {
+      document.getElementById('lastUpdate').textContent = 'CoinGecko недоступен. Данные загрузятся позже.';
+    }
+    maybeShowCorsWarning(e);
+  }
+}
+
+function maybeShowCorsWarning(e) {
+  const isFileProtocol = location.protocol === 'file:';
+  const looksLikeFetchFail = e && (e.message === 'Failed to fetch' || /networkerror|failed to fetch/i.test(e.message || ''));
+  if (isFileProtocol && looksLikeFetchFail && !allCoins.length) {
+    document.getElementById('corsWarning').style.display = 'block';
+  }
+}
+
+function hideCorsWarning() {
+  const el = document.getElementById('corsWarning');
+  if (el) el.style.display = 'none';
+}
+
+function getCacheCoins() { try { return JSON.parse(localStorage.getItem(CACHE_COINS_KEY)); } catch { return null; } }
+function getCacheGlobal() { try { return JSON.parse(localStorage.getItem(CACHE_GLOBAL_KEY)); } catch { return null; } }
+function getCacheFear() { try { return JSON.parse(localStorage.getItem(CACHE_FEAR_KEY)); } catch { return null; } }
+
+function renderAll() {
+  renderHeader(); renderPortfolio(); renderMarket(); renderHeatmap();
+  initDCA();
+  if (document.getElementById('panel-advisor').classList.contains('active')) renderAdvisor();
+  updateNotifBadge();
+  document.getElementById('lastUpdate').textContent = 'обновлено: ' + new Date().toLocaleTimeString('ru-RU');
+}
+
+// ===================== HEADER =====================
+function renderHeader() {
+  let totalVal = 0, totalInv = 0, totalRealized = 0;
+  portfolio.forEach(h => {
+    const c = findCoin(h.coinId || h.symbol.toLowerCase());
+    if (!c) return;
+    totalVal += h.amount * c.current_price;
+    totalInv += h.amount * h.avgPrice;
+    totalRealized += h.realizedPnl || 0;
+  });
+  const pnl = totalInv > 0 ? ((totalVal - totalInv) / totalInv) * 100 : 0;
+  const pnlDollar = totalVal - totalInv;
+  const btcCoin = findCoin('bitcoin');
+  const btcPrice = btcCoin ? btcCoin.current_price : 0;
+  const btcValue = btcPrice > 0 ? totalVal / btcPrice : 0;
+  document.getElementById('stTotal').textContent = fmt$(totalVal);
+  document.getElementById('stTotal').title = btcPrice > 0 ? ('≈ ' + btcValue.toFixed(4) + ' BTC') : '';
+  const pnlEl = document.getElementById('stPnl');
+  pnlEl.innerHTML = fmtPct(pnl) + '<br><span style="font-size:13px;font-weight:600;">' + (pnlDollar >= 0 ? '+' : '') + fmt$(pnlDollar) + '</span>';
+  pnlEl.className = 'stat-sub ' + (pnl >= 0 ? 'pos' : 'neg');
+  document.getElementById('stInvested').textContent = fmt$(totalInv);
+
+  if (globalData && globalData.data) {
+    const g = globalData.data;
+    document.getElementById('stCap').textContent = fmtLarge(g.total_market_cap.usd);
+    const capCh = g.market_cap_change_percentage_24h_usd;
+    const capEl = document.getElementById('stCapChange');
+    capEl.textContent = fmtPct(capCh) + ' (24ч)';
+    capEl.className = 'stat-sub ' + (capCh >= 0 ? 'pos' : 'neg');
+    const btcDom = g.market_cap_percentage.btc;
+    const ethDom = g.market_cap_percentage.eth;
+    document.getElementById('stBtcDom').textContent = btcDom.toFixed(1) + '%';
+    document.getElementById('stEthDom').textContent = 'eth: ' + ethDom.toFixed(1) + '%';
+  } else {
+    document.getElementById('stCap').textContent = '—';
+    document.getElementById('stCapChange').textContent = '—';
+    document.getElementById('stBtcDom').textContent = '—';
+    document.getElementById('stEthDom').textContent = 'eth: —';
+  }
+
+  if (fearData && fearData.data && fearData.data[0]) {
+    const f = parseInt(fearData.data[0].value);
+    const cls = f < 25 ? 'neg' : f > 75 ? 'pos' : 'neu';
+    const txt = f < 25 ? 'страх' : f > 75 ? 'жадность' : 'нейтрально';
+    document.getElementById('stFear').textContent = f + ' (' + txt + ')';
+    document.getElementById('stFear').className = 'stat-value ' + cls;
+    const bar = document.getElementById('fearBar');
+    bar.style.width = f + '%';
+    bar.style.background = f < 30 ? 'var(--red)' : f > 70 ? 'var(--green)' : 'var(--yellow)';
+  } else {
+    document.getElementById('stFear').textContent = '—';
+    document.getElementById('stFear').className = 'stat-value neu';
+    document.getElementById('fearBar').style.width = '0%';
+  }
+}
+
+// ===================== PORTFOLIO =====================
+function getPortfolioRows() {
+  const rows = [];
+  portfolio.forEach(h => {
+    const c = findCoin(h.coinId || h.symbol.toLowerCase());
+    if (!c) return;
+    const value = h.amount * c.current_price;
+    const inv = h.amount * h.avgPrice;
+    const pnl = h.avgPrice > 0 ? ((c.current_price - h.avgPrice) / h.avgPrice) * 100 : 0;
+    const pnlDollar = value - inv;
+    const realized = h.realizedPnl || 0;
+    rows.push({ h, c, value, inv, pnl, pnlDollar, realized, price: c.current_price, amount: h.amount, avgPrice: h.avgPrice });
+  });
+  if (portfolioSort.col) {
+    rows.sort((a, b) => {
+      const av = a[portfolioSort.col], bv = b[portfolioSort.col];
+      return portfolioSort.dir === 'asc' ? av - bv : bv - av;
+    });
+  }
+  return rows;
+}
+
+function sortPortfolio(col) {
+  if (portfolioSort.col === col) portfolioSort.dir = portfolioSort.dir === 'asc' ? 'desc' : 'asc';
+  else { portfolioSort.col = col; portfolioSort.dir = 'desc'; }
+  renderPortfolio();
+}
+
+function renderPortfolio() {
+  const tbody = document.querySelector('#portTable tbody');
+  tbody.innerHTML = '';
+  let totalVal = 0;
+  const pieData = [];
+  const rows = getPortfolioRows();
+
+  rows.forEach((r, idx) => {
+    const { h, c, value, pnl, pnlDollar } = r;
+    totalVal += value;
+    pieData.push({ label: h.symbol, value: value, color: getColor(idx) });
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td><div class="coin-cell"><div class="coin-img"><img src="' + c.image + '" alt="" onerror="this.style.display=\'none\';this.parentNode.textContent=\'' + h.symbol[0] + '\'"></div><div><div class="coin-name" onclick="openChartModal(\'' + h.coinId + '\',\'' + h.symbol + '\')">' + c.name + '</div><div class="coin-symbol">' + h.symbol + '</div></div></div></td>' +
+      '<td>' + h.amount.toLocaleString() + '</td>' +
+      '<td>$' + h.avgPrice.toLocaleString() + '</td>' +
+      '<td>' + fmt$(c.current_price) + '</td>' +
+      '<td>' + fmt$(value) + '</td>' +
+      '<td><span class="pnl-big ' + (pnl >= 0 ? 'pos' : 'neg') + '">' + fmtPct(pnl) + '</span></td>' +
+      '<td><span class="' + (pnlDollar >= 0 ? 'pos' : 'neg') + '" style="font-weight:700;">' + (pnlDollar >= 0 ? '+' : '') + fmt$(pnlDollar) + '</span></td>' +
+      '<td><button class="btn btn-sm" onclick="toggleAdviceRow(\'' + h.id + '\')">рек ' + (expandedRows[h.id] ? '▲' : '▼') + '</button> <button class="btn btn-sm btn-blue" onclick="openTxModal(\'' + h.id + '\')">транз.</button> <button class="btn btn-sm btn-danger" onclick="delHolding(\'' + h.id + '\')">удл</button></td>';
+    tbody.appendChild(tr);
+
+    if (expandedRows[h.id]) {
+      const adv = generateCoinAdvice(h, c);
+      const exTr = document.createElement('tr');
+      exTr.className = 'expand-row';
+      exTr.innerHTML = '<td colspan="8"><div class="advice-card ' + adv.type + '" style="margin-bottom:0;"><div class="advice-header"><div class="advice-title">Рекомендация</div><span class="advice-badge badge-' + adv.badge + '">' + (adv.badge==='buy'?'КУПИТЬ':adv.badge==='sell'?'ПРОДАТЬ':'ДЕРЖАТЬ') + '</span></div><div class="advice-text">' + adv.text + '</div>' + adv.actionHtml + '</div></td>';
+      tbody.appendChild(exTr);
+    }
+  });
+
+  drawPie(pieData, totalVal);
+  drawPortChart();
+}
+
+function toggleAdviceRow(id) {
+  expandedRows[id] = !expandedRows[id];
+  renderPortfolio();
+}
+
+function drawPie(data, total) {
+  const canvas = document.getElementById('pieCanvas');
+  const ctx = canvas.getContext('2d');
+  const legend = document.getElementById('pieLegend');
+  ctx.clearRect(0, 0, 180, 180);
+  legend.innerHTML = '';
+  if (!data.length) return;
+  // Filter: only >1% individually, rest -> "Остальные"
+  let filtered = [];
+  let othersValue = 0;
+  data.forEach(d => {
+    const pct = total > 0 ? (d.value / total) * 100 : 0;
+    if (pct >= 1) {
+      filtered.push(d);
+    } else {
+      othersValue += d.value;
+    }
+  });
+  if (othersValue > 0) {
+    filtered.push({ label: 'Остальные', value: othersValue, color: '#64748b' });
+  }
+  let start = 0;
+  filtered.forEach(d => {
+    const slice = (d.value / total) * 2 * Math.PI;
+    ctx.beginPath(); ctx.moveTo(90, 90); ctx.arc(90, 90, 70, start, start + slice);
+    ctx.fillStyle = d.color; ctx.fill();
+    start += slice;
+  });
+  ctx.beginPath(); ctx.arc(90, 90, 40, 0, 2 * Math.PI);
+  ctx.fillStyle = '#111827'; ctx.fill();
+  legend.innerHTML = filtered.map(d => '<div class="legend-row" style="white-space:nowrap;"><div class="legend-dot" style="background:' + d.color + '"></div><span>' + d.label + ' <span style="color:var(--text-3)">' + ((d.value/total)*100).toFixed(1) + '%</span></span></div>').join('');
+}
+
+// ===================== MARKET with SORT =====================
+let marketFilter = '';
+
+function filterMarket(query) {
+  marketFilter = query.toLowerCase().trim();
+  renderMarket();
+}
+
+function renderMarket() {
+  const tbody = document.querySelector('#marketTable tbody');
+  tbody.innerHTML = '';
+  let sorted = [...allCoins];
+  // Apply filter
+  if (marketFilter) {
+    sorted = sorted.filter(c => c.name.toLowerCase().includes(marketFilter) || c.symbol.toLowerCase().includes(marketFilter));
+  }
+  const col = marketSort.col;
+  const dir = marketSort.dir;
+  sorted.sort((a, b) => {
+    let av = a[col] || 0; let bv = b[col] || 0;
+    if (col === 'ath_change_percentage') { av = a.ath ? ((a.current_price - a.ath)/a.ath)*100 : 0; bv = b.ath ? ((b.current_price - b.ath)/b.ath)*100 : 0; }
+    return dir === 'asc' ? av - bv : bv - av;
+  });
+
+  document.getElementById('marketCount').textContent = sorted.length + ' монет';
+
+  sorted.forEach((c, i) => {
+    const hasAth = typeof c.ath === 'number' && c.ath > 0;
+    const fromAth = hasAth ? ((c.current_price - c.ath) / c.ath) * 100 : null;
+    const spark = c.sparkline_in_7d ? c.sparkline_in_7d.price : [];
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + (c.market_cap_rank || i+1) + '</td>' +
+      '<td><div class="coin-cell"><div class="coin-img"><img src="' + c.image + '" alt="" onerror="this.style.display=\'none\';this.parentNode.textContent=\'' + c.symbol[0].toUpperCase() + '\'"></div><div><div class="coin-name" onclick="openChartModal(\'' + c.id + '\',\'' + c.symbol.toUpperCase() + '\')">' + c.name + '</div><div class="coin-symbol">' + c.symbol.toUpperCase() + '</div></div></div></td>' +
+      '<td>' + fmt$(c.current_price) + '</td>' +
+      '<td class="' + (c.price_change_percentage_24h >= 0 ? 'pos' : 'neg') + '">' + fmtPct(c.price_change_percentage_24h || 0) + '</td>' +
+      '<td class="' + ((c.price_change_percentage_7d_in_currency || 0) >= 0 ? 'pos' : 'neg') + '">' + fmtPct(c.price_change_percentage_7d_in_currency || 0) + '</td>' +
+      '<td>' + fmtLarge(c.market_cap) + '</td>' +
+      '<td>' + fmtLarge(c.total_volume) + '</td>' +
+      '<td class="' + (hasAth ? (fromAth >= 0 ? 'pos' : 'neg') : 'neu') + '">' + (hasAth ? fmtPct(fromAth) : 'н/д') + '</td>' +
+      '<td>' + drawSparkline(spark) + '</td>';
+    tbody.appendChild(tr);
+  });
+
+  document.querySelectorAll('#marketTable th').forEach(th => th.classList.remove('sort-asc', 'sort-desc'));
+  const activeTh = document.querySelector('#marketTable th[onclick*="' + col + '"]');
+  if (activeTh) activeTh.classList.add(dir === 'asc' ? 'sort-asc' : 'sort-desc');
+}
+
+function sortMarket(col) {
+  if (marketSort.col === col) marketSort.dir = marketSort.dir === 'asc' ? 'desc' : 'asc';
+  else { marketSort.col = col; marketSort.dir = 'desc'; }
+  renderMarket();
+}
+
+function drawSparkline(prices) {
+  if (!prices || prices.length < 2) return '';
+  const w = 100, h = 32;
+  const min = Math.min(...prices), max = Math.max(...prices);
+  const range = max - min || 1;
+  const pts = prices.map((p, i) => (i / (prices.length - 1)) * w + ',' + (h - ((p - min) / range) * h)).join(' ');
+  const color = prices[prices.length-1] >= prices[0] ? '#22c55e' : '#ef4444';
+  return '<svg width="' + w + '" height="' + h + '" style="vertical-align:middle"><polyline points="' + pts + '" fill="none" stroke="' + color + '" stroke-width="1.5"/></svg>';
+}
+
+// ===================== HEATMAP =====================
+function renderHeatmap() {
+  const grid = document.getElementById('heatmapGrid');
+  grid.innerHTML = '';
+  allCoins.forEach(c => {
+    const ch = c.price_change_percentage_24h || 0;
+    const intensity = Math.min(Math.abs(ch) / 15, 1);
+    const isUp = ch >= 0;
+    const size = Math.max(1, Math.log10(c.market_cap / 1e8 + 1));
+    const el = document.createElement('div');
+    el.className = 'heatmap-item';
+    el.style.background = isUp ? 'rgba(34,197,94,' + (intensity * 0.6 + 0.15) + ')' : 'rgba(239,68,68,' + (intensity * 0.6 + 0.15) + ')';
+    el.style.gridColumn = 'span ' + Math.min(Math.ceil(size), 4);
+    el.style.gridRow = 'span ' + Math.min(Math.ceil(size), 4);
+    el.onclick = () => openChartModal(c.id, c.symbol.toUpperCase());
+    el.innerHTML = '<div class="hm-symbol">' + c.symbol.toUpperCase() + '</div><div class="hm-change ' + (isUp?'pos':'neg') + '">' + fmtPct(ch) + '</div><div class="hm-cap">' + fmtLarge(c.market_cap) + '</div>';
+    grid.appendChild(el);
+  });
+}
+
+// ===================== DCA =====================
+function initDCA() {
+  const sel = document.getElementById('dcaCoin');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">выберите монету</option>' + portfolio.map(h => '<option value="' + h.id + '">' + h.symbol + '</option>').join('');
+  if (prev && portfolio.some(h => h.id === prev)) {
+    sel.value = prev;
+    updateDCA();
+  }
+}
+
+function updateDCA() {
+  const id = document.getElementById('dcaCoin').value;
+  const h = portfolio.find(x => x.id === id);
+  if (!h) { document.getElementById('dcaResult').style.display = 'none'; return; }
+  const c = findCoin(h.coinId || h.symbol.toLowerCase());
+  if (!c) return;
+  document.getElementById('dcaAvg').value = h.avgPrice;
+  document.getElementById('dcaQty').value = h.amount;
+  document.getElementById('dcaPrice').value = c.current_price;
+  // auto-fill a sensible default investment so recommendation shows immediately
+  const inv = h.amount * h.avgPrice;
+  const defaultInvest = Math.max(10, Math.round((inv * 0.2) * 100) / 100);
+  document.getElementById('dcaInvest').value = defaultInvest;
+  document.getElementById('dcaAddQty').value = '';
+  calcDCA(true);
+}
+
+function calcDCA(fromInvest) {
+  const id = document.getElementById('dcaCoin').value;
+  const h = portfolio.find(x => x.id === id);
+  if (!h) return;
+  const c = findCoin(h.coinId || h.symbol.toLowerCase());
+  if (!c) return;
+  let invest = parseFloat(document.getElementById('dcaInvest').value) || 0;
+  let addQty = parseFloat(document.getElementById('dcaAddQty').value) || 0;
+  if (fromInvest === true) { addQty = invest > 0 ? invest / c.current_price : 0; document.getElementById('dcaAddQty').value = addQty ? addQty.toFixed(6) : ''; }
+  else if (fromInvest === false) { invest = addQty * c.current_price; document.getElementById('dcaInvest').value = invest ? invest.toFixed(2) : ''; }
+  const qty = addQty;
+  if (qty <= 0) { document.getElementById('dcaResult').style.display = 'none'; return; }
+
+  const totalQty = h.amount + qty;
+  const totalInv = h.amount * h.avgPrice + qty * c.current_price;
+  const newAvg = totalInv / totalQty;
+  const breakEven = ((newAvg - c.current_price) / c.current_price) * 100;
+  const curPnl = h.avgPrice > 0 ? ((c.current_price - h.avgPrice) / h.avgPrice) * 100 : 0;
+
+  let recText = '', recClass = '', actionHtml = '';
+
+  if (curPnl < -50) {
+    recText = 'СИЛЬНАЯ ДОКУПКА'; recClass = 'pos';
+    actionHtml = '<div style="background:var(--green-dim);border-left:3px solid var(--green);padding:12px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;">' +
+      '<strong style="color:var(--green)">Просадка &gt;50% — хороший момент для усреднения.</strong> С выбранной суммой:<br>' +
+      'Докупить на <strong>' + fmt$(invest || qty * c.current_price) + '</strong> → получите <strong>' + qty.toFixed(4) + ' ' + h.symbol + '</strong><br>' +
+      'Средняя цена изменится с <strong>$' + h.avgPrice + '</strong> → <strong>$' + newAvg.toFixed(2) + '</strong><br>' +
+      'Для окупаемости нужен рост всего <strong>+' + breakEven.toFixed(1) + '%</strong> (сейчас ' + fmtPct(curPnl) + ')' +
+      '</div>';
+  } else if (curPnl < -20) {
+    recText = 'УМЕРЕННАЯ ДОКУПКА'; recClass = 'pos';
+    actionHtml = '<div style="background:var(--green-dim);border-left:3px solid var(--green);padding:12px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;">' +
+      '<strong style="color:var(--green)">Просадка -20..-50%: докупайте частями на каждые -10%.</strong><br>' +
+      'Докупить на <strong>' + fmt$(invest || qty * c.current_price) + '</strong> → получите <strong>' + qty.toFixed(4) + ' ' + h.symbol + '</strong><br>' +
+      'Средняя цена изменится с <strong>$' + h.avgPrice + '</strong> → <strong>$' + newAvg.toFixed(2) + '</strong>' +
+      '</div>';
+  } else if (curPnl > 30) {
+    recText = 'ДОКУПКА НЕ РЕКОМЕНДУЕТСЯ'; recClass = 'neg';
+    actionHtml = '<div style="background:var(--red-dim);border-left:3px solid var(--red);padding:12px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;">' +
+      '<strong style="color:var(--red)">Почему не докупать:</strong><br>' +
+      'Монета уже в плюсе на <strong>' + fmtPct(curPnl) + '</strong>. Докупка поднимет среднюю с <strong>$' + h.avgPrice + '</strong> → <strong>$' + newAvg.toFixed(2) + '</strong><br>' +
+      'Это увеличит риск: для окупа нужен рост <strong>+' + breakEven.toFixed(1) + '%</strong> вместо текущих ' + fmtPct(curPnl) + '<br>' +
+      '<em style="color:var(--text-3)">Лучше зафиксировать часть прибыли или ждать отката</em>' +
+      '</div>';
+  } else {
+    recText = 'НЕЙТРАЛЬНО'; recClass = 'neu';
+    actionHtml = '<div style="background:rgba(245,158,11,0.08);border-left:3px solid var(--yellow);padding:12px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;">' +
+      '<strong style="color:var(--yellow)">Анализ:</strong><br>' +
+      'Текущий p&l: <strong>' + fmtPct(curPnl) + '</strong>. Докупка на <strong>' + fmt$(invest || qty * c.current_price) + '</strong> изменит среднюю с <strong>$' + h.avgPrice + '</strong> → <strong>$' + newAvg.toFixed(2) + '</strong><br>' +
+      'Для окупа после докупки нужен рост <strong>+' + breakEven.toFixed(1) + '%</strong><br>' +
+      '<em style="color:var(--text-3)">Решение зависит от вашей стратегии. Если верите в рост — докупайте. Если нет — подождите.</em>' +
+      '</div>';
+  }
+
+  document.getElementById('dcaNewAvg').textContent = '$' + newAvg.toFixed(2);
+  document.getElementById('dcaTotalQty').textContent = totalQty.toFixed(4);
+  document.getElementById('dcaTotalInv').textContent = fmt$(totalInv);
+  document.getElementById('dcaBreakEven').textContent = '+' + breakEven.toFixed(1) + '%';
+  document.getElementById('dcaCurPnl').textContent = fmtPct(curPnl);
+  document.getElementById('dcaCurPnl').className = 'dca-metric-value ' + (curPnl >= 0 ? 'pos' : 'neg');
+  document.getElementById('dcaRec').textContent = recText;
+  document.getElementById('dcaRec').className = 'dca-metric-value ' + recClass;
+  document.getElementById('dcaAction').innerHTML = actionHtml;
+  document.getElementById('dcaResult').style.display = 'block';
+}
+
+// ===================== SHARED ADVICE GENERATOR (used by Advisor tab AND Portfolio expand row) =====================
+function generateCoinAdvice(h, c) {
+  const pnl = h.avgPrice > 0 ? ((c.current_price - h.avgPrice) / h.avgPrice) * 100 : 0;
+  const hasAth = typeof c.ath === 'number' && c.ath > 0;
+  const drawdown = hasAth ? ((c.current_price - c.ath) / c.ath) * 100 : null;
+  const val = h.amount * c.current_price;
+  const inv = h.amount * h.avgPrice;
+  const ch24 = c.price_change_percentage_24h || 0;
+  let type = 'hold', badge = 'hold', text = '', actionHtml = '';
+
+  if (pnl > 100) {
+    type = 'sell'; badge = 'sell';
+    const sellQty = h.amount * 0.5;
+    const sellValue = sellQty * c.current_price;
+    const remaining = h.amount - sellQty;
+    const remainingValue = remaining * c.current_price;
+    text = 'Прибыль <strong>+' + pnl.toFixed(0) + '%</strong>! Позиция сильно переросла.';
+    actionHtml = '<div class="advice-action"><div class="advice-action-title">Конкретный план действий:</div><div class="advice-grid">' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + sellQty.toFixed(4) + '</div><div class="advice-metric-label">продать ' + h.symbol + '</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(sellValue) + '</div><div class="advice-metric-label">получите</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(inv) + '</div><div class="advice-metric-label">вложенное возвращено</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + remaining.toFixed(4) + '</div><div class="advice-metric-label">остаётся (бесплатно)</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(remainingValue) + '</div><div class="advice-metric-label">стоимость остатка</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value" style="color:var(--green)">0 риск</div><div class="advice-metric-label">дальнейший риск</div></div>' +
+      '</div><div class="advice-btn">' + alertBtn(h, 'below', c.current_price * 0.9, 0, 'защитить прибыль') + '</div></div>';
+  } else if (pnl > 50) {
+    type = 'sell'; badge = 'sell';
+    const sellQty = inv / c.current_price;
+    const remaining = h.amount - sellQty;
+    text = 'Прибыль <strong>+' + pnl.toFixed(0) + '%</strong>. Хороший момент забрать вложенное.';
+    actionHtml = '<div class="advice-action"><div class="advice-action-title">Конкретный план действий:</div><div class="advice-grid">' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + sellQty.toFixed(4) + '</div><div class="advice-metric-label">продать ' + h.symbol + '</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(inv) + '</div><div class="advice-metric-label">возвращаете вложенное</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + remaining.toFixed(4) + '</div><div class="advice-metric-label">остаётся (бесплатно)</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(remaining * c.current_price) + '</div><div class="advice-metric-label">стоимость остатка</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value" style="color:var(--green)">+' + ((remaining * c.current_price) / inv * 100).toFixed(0) + '%</div><div class="advice-metric-label">чистая прибыль</div></div>' +
+      '</div><div class="advice-btn">' + alertBtn(h, 'below', c.current_price * 0.85, 0, 'защитить прибыль') + '</div></div>';
+  } else if (pnl < -60 && ch24 > 0) {
+    type = 'buy'; badge = 'buy';
+    const docupInv = inv * 0.5;
+    const docupQty = docupInv / c.current_price;
+    const newAvg2 = (h.amount * h.avgPrice + docupQty * c.current_price) / (h.amount + docupQty);
+    const be2 = ((newAvg2 - c.current_price) / c.current_price) * 100;
+    text = 'Убыток <strong>' + pnl.toFixed(0) + '%</strong>, но сегодня <strong>+' + ch24.toFixed(1) + '%</strong>. Сильная просадка с признаками отскока.';
+    actionHtml = '<div class="advice-action"><div class="advice-action-title">Конкретный план докупки:</div><div class="advice-grid">' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(docupInv) + '</div><div class="advice-metric-label">инвестируйте</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + docupQty.toFixed(4) + '</div><div class="advice-metric-label">получите ' + h.symbol + '</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">$' + h.avgPrice + ' → $' + newAvg2.toFixed(2) + '</div><div class="advice-metric-label">средняя цена</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value" style="color:var(--green)">+' + be2.toFixed(1) + '%</div><div class="advice-metric-label">нужен рост до окупа</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + (h.amount + docupQty).toFixed(4) + '</div><div class="advice-metric-label">итого монет</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(inv + docupInv) + '</div><div class="advice-metric-label">всего вложено</div></div>' +
+      '</div><div class="advice-btn">' + alertBtn(h, 'below', c.current_price * 0.95, docupInv, 'докупить') + '</div></div>';
+  } else if (pnl < -40) {
+    type = 'buy'; badge = 'buy';
+    const docupInv = inv * 0.3;
+    const docupQty = docupInv / c.current_price;
+    const newAvg2 = (h.amount * h.avgPrice + docupQty * c.current_price) / (h.amount + docupQty);
+    text = 'Убыток <strong>' + pnl.toFixed(0) + '%</strong>.' + (hasAth ? (' Просадка от ATH <strong>' + drawdown.toFixed(0) + '%</strong>.') : ' <span style="color:var(--text-3)">(данные ATH недоступны для этой монеты)</span>');
+    const nextInv = inv * 0.3;
+    actionHtml = '<div class="advice-action"><div class="advice-action-title">Конкретный план докупки:</div><div class="advice-grid">' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(docupInv) + '</div><div class="advice-metric-label">инвестируйте сейчас</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + docupQty.toFixed(4) + '</div><div class="advice-metric-label">получите ' + h.symbol + '</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">$' + h.avgPrice + ' → $' + newAvg2.toFixed(2) + '</div><div class="advice-metric-label">средняя цена</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + (h.amount + docupQty).toFixed(4) + '</div><div class="advice-metric-label">итого монет</div></div>' +
+      '</div><div style="margin-top:8px;font-size:12px;color:var(--text-3)">DCA-стратегия: докупайте на каждые -10% просадки. Следующая докупка на ' + fmt$(nextInv) + ' при цене ниже ' + fmt$(c.current_price * 0.9) + '</div>' +
+      '<div class="advice-btn">' + alertBtn(h, 'below', c.current_price * 0.9, nextInv, 'докупить') + '</div></div>';
+  } else if (h.stopLoss && c.current_price <= h.stopLoss) {
+    type = 'sell'; badge = 'sell';
+    const loss = inv - val;
+    text = '<strong style="color:var(--red)">СТОП-ЛОСС СРАБОТАЛ!</strong> Цена $' + c.current_price + ' достигла стопа $' + h.stopLoss + '.';
+    actionHtml = '<div class="advice-action"><div class="advice-action-title">Действие:</div><div class="advice-grid">' +
+      '<div class="advice-metric"><div class="advice-metric-value" style="color:var(--red)">' + fmt$(loss) + '</div><div class="advice-metric-label">фиксированный убыток</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + fmtPct(pnl) + '</div><div class="advice-metric-label">убыток в %</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + h.amount.toFixed(4) + '</div><div class="advice-metric-label">продать всё</div></div>' +
+      '</div><div style="margin-top:8px;font-size:13px;color:var(--red)"><strong>Рекомендуется полный выход из позиции</strong> чтобы избежать дальнейших потерь.</div></div>';
+  } else if (h.targetPrice && c.current_price >= h.targetPrice) {
+    type = 'sell'; badge = 'sell';
+    text = '<strong style="color:var(--green)">ЦЕЛЬ ДОСТИГНУТА!</strong> Цель $' + h.targetPrice + ' достигнута, текущая $' + c.current_price + '.';
+    const sellQty = h.amount * 0.5;
+    actionHtml = '<div class="advice-action"><div class="advice-action-title">Конкретный план:</div><div class="advice-grid">' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + sellQty.toFixed(4) + '</div><div class="advice-metric-label">продать 50%</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(sellQty * c.current_price) + '</div><div class="advice-metric-label">получите</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + (h.amount - sellQty).toFixed(4) + '</div><div class="advice-metric-label">держать остаток</div></div>' +
+      '</div><div style="margin-top:8px;font-size:13px;">Зафиксируйте часть прибыли. Остаток можно держать до следующей цели (например, x2 от цели = $' + (h.targetPrice * 2) + ')</div></div>';
+  } else if (ch24 > 20) {
+    type = 'sell'; badge = 'sell';
+    const sellQty = h.amount * 0.3;
+    text = 'Взрывной рост <strong>+' + ch24.toFixed(1) + '%</strong> за 24ч! Возможен откат.';
+    actionHtml = '<div class="advice-action"><div class="advice-action-title">Конкретный план:</div><div class="advice-grid">' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + sellQty.toFixed(4) + '</div><div class="advice-metric-label">продать 30%</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(sellQty * c.current_price) + '</div><div class="advice-metric-label">фиксируете прибыль</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + (h.amount - sellQty).toFixed(4) + '</div><div class="advice-metric-label">держать 70%</div></div>' +
+      '</div><div style="margin-top:8px;font-size:13px;">Резкий рост часто сопровождается коррекцией. Частичная фиксация защищает прибыль.</div></div>';
+  } else if (hasAth && drawdown < -80 && ch24 > 5) {
+    type = 'buy'; badge = 'buy';
+    const docupInv = inv * 0.2;
+    const docupQty = docupInv / c.current_price;
+    text = 'Монета упала на <strong>' + drawdown.toFixed(0) + '%</strong> от ATH, но сегодня растёт <strong>+' + ch24.toFixed(1) + '%</strong>. Возможно дно.';
+    actionHtml = '<div class="advice-action"><div class="advice-action-title">Конкретный план:</div><div class="advice-grid">' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(docupInv) + '</div><div class="advice-metric-label">небольшая докупка</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + docupQty.toFixed(4) + '</div><div class="advice-metric-label">получите ' + h.symbol + '</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(docupInv * 3) + '</div><div class="advice-metric-label">потенциал x3 к ATH</div></div>' +
+      '</div><div style="margin-top:8px;font-size:13px;">Глубокая просадка + первые признаки роста = потенциальное дно. Но рискованно, инвестируйте небольшую часть.</div></div>';
+  } else {
+    text = 'P&L <strong>' + fmtPct(pnl) + '</strong>' + (hasAth ? (', от ATH <strong>' + fmtPct(drawdown) + '</strong>') : ', от ATH <strong>н/д</strong>') + ', 24ч <strong>' + fmtPct(ch24) + '</strong>.';
+    actionHtml = '<div class="advice-action"><div class="advice-action-title">Текущая ситуация:</div><div class="advice-grid">' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(val) + '</div><div class="advice-metric-label">текущая стоимость</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(inv) + '</div><div class="advice-metric-label">вложено</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + fmtPct(pnl) + '</div><div class="advice-metric-label">p&l</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(h.targetPrice || 0) + '</div><div class="advice-metric-label">цель</div></div>' +
+      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(h.stopLoss || 0) + '</div><div class="advice-metric-label">стоп</div></div>' +
+      '</div><div style="margin-top:8px;font-size:13px;color:var(--text-3)">Позиция в норме. Действий не требуется. Ждите цели или стопа.</div></div>';
+  }
+
+  if (h.notes) text += '<div style="margin-top:8px;padding:8px;background:rgba(59,130,246,0.08);border-radius:6px;font-size:12px;color:var(--text-3);border-left:2px solid var(--blue)">Ваша заметка: ' + h.notes + '</div>';
+
+  return { type, badge, text, actionHtml };
+}
+
+function alertBtn(h, dir, priceVal, suggestedAmount, actionWord) {
+  priceVal = Math.round(priceVal * 10000) / 10000;
+  const label = actionWord + (suggestedAmount > 0 ? (' на ~' + fmt$(suggestedAmount)) : '') + ' если ' + (dir === 'below' ? 'ниже ' : 'выше ') + fmt$(priceVal);
+  return '<button class="btn btn-sm ' + (dir==='below'?'btn-primary':'') + '" id="albtn_' + h.id + '_' + dir + '" onclick="createAlertFromAdvisor(\'' + h.id + '\',\'' + dir + '\',' + priceVal + ',' + (suggestedAmount||0) + ',\'' + h.symbol + '\',this)">Алерт: ' + label + '</button>';
+}
+
+// ===================== ADVISOR =====================
+function renderAdvisor() {
+  const list = document.getElementById('advisorList');
+  list.innerHTML = '';
+
+  // Filter buttons
+  list.innerHTML += '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">' +
+    '<button class="btn btn-sm ' + (advisorFilter==='all'?'btn-primary':'') + '" onclick="setAdvisorFilter(\'all\')">Все</button>' +
+    '<button class="btn btn-sm ' + (advisorFilter==='buy'?'btn-primary':'') + '" onclick="setAdvisorFilter(\'buy\')">Купить</button>' +
+    '<button class="btn btn-sm ' + (advisorFilter==='sell'?'btn-primary':'') + '" onclick="setAdvisorFilter(\'sell\')">Продать</button>' +
+    '<button class="btn btn-sm ' + (advisorFilter==='hold'?'btn-primary':'') + '" onclick="setAdvisorFilter(\'hold\')">Держать</button>' +
+    '</div>';
+
+  let marketTxt = 'Рынок нейтрален. ';
+  if (fearData && fearData.data && fearData.data[0]) {
+    const f = parseInt(fearData.data[0].value);
+    if (f < 25) marketTxt = '<strong style="color:var(--green)">Рынок в экстремальном страхе</strong> — исторически лучшее время для покупок. ';
+    else if (f < 45) marketTxt = '<strong style="color:var(--green)">Рынок в страхе</strong> — рассмотрите постепенные покупки (DCA). ';
+    else if (f > 75) marketTxt = '<strong style="color:var(--red)">Рынок в жадности</strong> — возможна коррекция, фиксируйте прибыль. ';
+    else if (f > 55) marketTxt = '<strong style="color:var(--yellow)">Рынок оптимистичен</strong> — будьте осторожны с новыми входами. ';
+  }
+  if (globalData && globalData.data) {
+    const g = globalData.data;
+    marketTxt += 'BTC доминация <strong>' + g.market_cap_percentage.btc.toFixed(1) + '%</strong>. ';
+    if (g.market_cap_percentage.btc > 55) marketTxt += 'Высокая доминация BTC — альты могут отставать, фокус на BTC. ';
+    else if (g.market_cap_percentage.btc < 45) marketTxt += 'Низкая доминация BTC — возможен <strong>сезон альтов</strong>, рассмотрите альты. ';
+  }
+  list.innerHTML += '<div class="advice-card hold"><div class="advice-header"><div class="advice-title">Общий рыночный контекст</div><span class="advice-badge badge-hold">анализ</span></div><div class="advice-text">' + marketTxt + '</div></div>';
+
+  let shown = 0;
+  portfolio.forEach(h => {
+    const c = findCoin(h.coinId || h.symbol.toLowerCase());
+    if (!c) return;
+    const adv = generateCoinAdvice(h, c);
+    // Apply filter
+    if (advisorFilter !== 'all' && adv.badge !== advisorFilter) return;
+    shown++;
+
+    // Auto-create alert for actionable recommendations
+    if (adv.badge === 'buy' || adv.badge === 'sell') {
+      const pnl = h.avgPrice > 0 ? ((c.current_price - h.avgPrice) / h.avgPrice) * 100 : 0;
+      const ch24 = c.price_change_percentage_24h || 0;
+      const hasAth = typeof c.ath === 'number' && c.ath > 0;
+      const drawdown = hasAth ? ((c.current_price - c.ath) / c.ath) * 100 : null;
+      const inv = h.amount * h.avgPrice;
+      let alertType, alertValue, alertAmount = 0;
+
+      if (pnl > 100) { alertType = 'below'; alertValue = c.current_price * 0.9; }
+      else if (pnl > 50) { alertType = 'below'; alertValue = c.current_price * 0.85; }
+      else if (pnl < -60 && ch24 > 0) { alertType = 'below'; alertValue = c.current_price * 0.95; alertAmount = inv * 0.5; }
+      else if (pnl < -40) { alertType = 'below'; alertValue = c.current_price * 0.9; alertAmount = inv * 0.3; }
+      else if (h.stopLoss && c.current_price <= h.stopLoss) { alertType = 'below'; alertValue = h.stopLoss; }
+      else if (h.targetPrice && c.current_price >= h.targetPrice) { alertType = 'above'; alertValue = h.targetPrice; }
+      else if (ch24 > 20) { alertType = 'below'; alertValue = c.current_price * 0.8; }
+      else if (hasAth && drawdown < -80 && ch24 > 5) { alertType = 'below'; alertValue = c.current_price * 0.95; alertAmount = inv * 0.2; }
+
+      if (alertType) {
+        createAlertFromAdvisor(h.id, alertType, alertValue, alertAmount, h.symbol, null);
+      }
+    }
+
+    list.innerHTML += '<div class="advice-card ' + adv.type + '"><div class="advice-header"><div class="advice-title">' + c.name + ' (' + h.symbol + ')</div><span class="advice-badge badge-' + adv.badge + '">' + (adv.badge==='buy'?'КУПИТЬ':adv.badge==='sell'?'ПРОДАТЬ':'ДЕРЖАТЬ') + '</span></div><div class="advice-text">' + adv.text + '</div>' + adv.actionHtml + '</div>';
+  });
+  if (shown === 0) {
+    list.innerHTML += '<div style="color:var(--text-3);padding:20px;text-align:center;">Нет рекомендаций типа «' + (advisorFilter==='buy'?'КУПИТЬ':advisorFilter==='sell'?'ПРОДАТЬ':'ДЕРЖАТЬ') + '»</div>';
+  }
+}
+
+function setAdvisorFilter(filter) {
+  advisorFilter = filter;
+  renderAdvisor();
+}
+
+function createAlertFromAdvisor(holdingId, type, value, suggestedAmount, symbol, btnEl) {
+  value = Math.round(value * 10000) / 10000;
+  const already = alertsList.find(a => a.coinId_h === holdingId && a.type === type && Math.abs(a.value - value) < 0.0001 && !a.fired);
+  if (already) { if (btnEl) { btnEl.textContent = '✓ уже создан'; btnEl.disabled = true; } return; }
+  const h = portfolio.find(x => x.id === holdingId);
+  if (!h) return;
+  alertsList.push({ id: uid(), coinId: h.coinId, coinId_h: holdingId, symbol: symbol, type, value, suggestedAmount: suggestedAmount || 0, fired: false, created: Date.now() });
+  saveAlerts();
+  if (btnEl) { btnEl.textContent = '✓ алерт создан (сработает при достижении цены)'; btnEl.disabled = true; }
+  updateNotifBadge();
+}
+
+// ===================== NOTIFICATIONS / ALERTS =====================
+function checkNotifs() {
+  let changed = false;
+  alertsList.forEach(a => {
+    if (a.fired) return;
+    const c = findCoin(a.coinId);
+    if (!c) return;
+    const price = c.current_price;
+    const triggered = a.type === 'below' ? price <= a.value : price >= a.value;
+    if (triggered) {
+      a.fired = true;
+      changed = true;
+      const dirTxt = a.type === 'below' ? 'упала ниже' : 'выросла выше';
+      let txt = 'Цена ' + a.symbol + ' ' + dirTxt + ' ' + fmt$(a.value) + '.';
+      if (a.suggestedAmount > 0) txt += ' Рекомендуется докупить на ~' + fmt$(a.suggestedAmount) + '.';
+      addNotification(txt, a.type === 'below' ? 'buy' : 'sell');
+    }
+  });
+  if (changed) saveAlerts();
+}
+
+function toggleNotif(e) {
+  if (e) e.stopPropagation();
+  const dd = document.getElementById('notifDropdown');
+  dd.classList.toggle('active');
+  if (dd.classList.contains('active')) {
+    renderNotifList();
+    // opening the dropdown clears unread state
+    notifications.forEach(n => n.read = true);
+    saveNotifs();
+    updateNotifBadge();
+  }
+}
+
+function renderNotifList() {
+  const dd = document.getElementById('notifDropdown');
+  let html = '';
+  if (!notifications.length) {
+    html += '<div class="notif-empty">Нет уведомлений</div>';
+  } else {
+    html += notifications.slice().reverse().slice(0, 30).map(n => {
+      const time = new Date(n.time).toLocaleString('ru-RU');
+      return '<div class="notif-item ' + (n.type==='buy'?'buy':n.type==='sell'?'sell':'info') + '"><div>' + n.text + '</div><div class="notif-time">' + time + '</div></div>';
+    }).join('');
+  }
+  const pending = alertsList.filter(a => !a.fired);
+  if (pending.length) {
+    html += '<div class="notif-section-title">Активные алерты (' + pending.length + ')</div>';
+    html += pending.map(a => '<div class="pending-alert-item"><span>' + a.symbol + ' ' + (a.type==='below'?'ниже':'выше') + ' ' + fmt$(a.value) + (a.suggestedAmount>0 ? (' · ~' + fmt$(a.suggestedAmount)) : '') + '</span><button onclick="removeAlert(\'' + a.id + '\')" title="удалить">&times;</button></div>').join('');
+  }
+  dd.innerHTML = html;
+}
+
+function removeAlert(id) {
+  alertsList = alertsList.filter(a => a.id !== id);
+  saveAlerts();
+  renderNotifList();
+}
+
+function updateNotifBadge() {
+  const unread = notifications.filter(n => !n.read).length;
+  const badge = document.getElementById('notifBadge');
+  if (unread > 0) { badge.textContent = unread; badge.style.display = 'block'; }
+  else badge.style.display = 'none';
+}
+
+function addNotification(text, type) {
+  notifications.push({ id: uid(), text, type, time: Date.now(), read: false });
+  saveNotifs();
+  updateNotifBadge();
+}
+
+function loadNotifs() { try { const d = localStorage.getItem(NOTIF_KEY); if (d) notifications = JSON.parse(d); } catch {} }
+function saveNotifs() { localStorage.setItem(NOTIF_KEY, JSON.stringify(notifications)); }
+function loadAlerts() { try { const d = localStorage.getItem(ALERTS_KEY); if (d) alertsList = JSON.parse(d); } catch {} }
+function saveAlerts() { localStorage.setItem(ALERTS_KEY, JSON.stringify(alertsList)); }
+
+// ===================== SEARCH COINS (top250 + full CoinGecko search) =====================
+function searchCoins(query) {
+  const results = document.getElementById('searchResults');
+  const q = query.toLowerCase().trim();
+  if (!q) { results.classList.remove('active'); return; }
+
+  const local = allCoins.filter(c => c.name.toLowerCase().includes(q) || c.symbol.toLowerCase().includes(q)).slice(0, 8);
+  renderSearchResults(local, true);
+
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(async () => {
+    try {
+      const res = await apiFetch(API_BASE + '/search?query=' + encodeURIComponent(q));
+      if (!res.ok) return;
+      const data = await res.json();
+      const remote = (data.coins || []).slice(0, 12).map(c => ({ id: c.id, name: c.name, symbol: c.symbol, image: c.thumb }));
+      const localIds = new Set(local.map(c => c.id));
+      const merged = local.concat(remote.filter(c => !localIds.has(c.id)));
+      renderSearchResults(merged.slice(0, 12), false);
+    } catch (e) { /* ignore network errors, keep local results */ }
+  }, 350);
+}
+
+function renderSearchResults(list, loadingMore) {
+  const results = document.getElementById('searchResults');
+  if (!list.length) {
+    results.innerHTML = loadingMore ? '<div class="search-loading">ищем на CoinGecko...</div>' : '<div class="search-loading">ничего не найдено</div>';
+    results.classList.add('active');
+    return;
+  }
+  results.innerHTML = list.map(c => '<div class="search-item" onclick="selectCoin(\'' + c.id + '\',\'' + (c.symbol||'').toUpperCase() + '\',\'' + (c.image||'') + '\')"><img src="' + (c.image||'') + '" alt="" onerror="this.style.display=\'none\'"><div><div style="font-weight:600">' + c.name + '</div><div style="font-size:11px;color:var(--text-3)">' + (c.symbol||'').toUpperCase() + '</div></div></div>').join('') + (loadingMore ? '<div class="search-loading">ищем ещё на CoinGecko...</div>' : '');
+  results.classList.add('active');
+}
+
+async function selectCoin(id, symbol, image) {
+  document.getElementById('mCoinId').value = id;
+  document.getElementById('mCoinSearch').value = symbol;
+  document.getElementById('mCoinImg').value = image;
+  document.getElementById('searchResults').classList.remove('active');
+
+  const hint = document.getElementById('mExistingHint');
+  const existing = portfolio.find(h => h.coinId === id);
+  if (existing) {
+    hint.style.display = 'block';
+    hint.innerHTML = 'У вас уже есть <strong>' + existing.amount + ' ' + existing.symbol + '</strong> (средняя $' + existing.avgPrice + '). Эта покупка добавится к существующей позиции, средняя цена пересчитается.';
+  } else {
+    hint.style.display = 'none';
+  }
+
+  if (!findCoin(id)) {
+    await fetchExtraCoinFull(id, symbol, image);
+  }
+}
+
+// Fetches full CoinGecko market data (same shape as top-250 list, incl. ATH) for a coin
+// that isn't in the top-250, so it behaves identically everywhere (ATH, drawdown, charts...).
+async function fetchExtraCoinFull(id, symbol, image) {
+  // Check cache first
+  try { const cached = JSON.parse(localStorage.getItem('ct_extra_coins') || '{}'); if (cached[id]) { extraCoins[id] = cached[id]; return true; } } catch(e){}
+  try {
+    const res = await apiFetch(API_BASE + '/coins/markets?vs_currency=usd&ids=' + id + '&sparkline=false&price_change_percentage=24h,7d');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data[0]) {
+        extraCoins[id] = data[0];
+        try { const all = JSON.parse(localStorage.getItem('ct_extra_coins') || '{}'); all[id] = data[0]; localStorage.setItem('ct_extra_coins', JSON.stringify(all)); } catch(e){}
+        return true;
+      }
+    }
+  } catch (e) { /* ignore, fall back below */ }
+  try {
+    const res2 = await apiFetch(API_BASE + '/simple/price?ids=' + id + '&vs_currencies=usd&include_market_cap=true&include_24hr_change=true');
+    const data2 = await res2.json();
+    if (data2[id]) {
+      extraCoins[id] = {
+        id, symbol: (symbol || id).toLowerCase(), name: symbol || id, image: image || '',
+        current_price: data2[id].usd, market_cap: data2[id].usd_market_cap || 0,
+        price_change_percentage_24h: data2[id].usd_24h_change || 0, ath: null
+      };
+      try { const all = JSON.parse(localStorage.getItem('ct_extra_coins') || '{}'); all[id] = extraCoins[id]; localStorage.setItem('ct_extra_coins', JSON.stringify(all)); } catch(e){}
+      return true;
+    }
+  } catch (e) { /* ignore */ }
+  return false;
+}
+
+// Keeps extraCoins (portfolio coins outside top-250) fresh on every refresh cycle,
+// same as the top-250 list, so price/ATH/24h change stay current.
+async function refreshExtraCoins() {
+  const neededIds = [...new Set(portfolio.map(h => h.coinId).filter(id => id && !allCoins.find(c => c.id === id)))];
+  if (!neededIds.length) return;
+  // Load cached extra coins first for instant display
+  try { const cached = JSON.parse(localStorage.getItem('ct_extra_coins') || '{}'); Object.assign(extraCoins, cached); } catch(e){}
+  const chunkSize = 20;
+  for (let i = 0; i < neededIds.length; i += chunkSize) {
+    const chunk = neededIds.slice(i, i + chunkSize);
+    try {
+      const res = await apiFetch(API_BASE + '/coins/markets?vs_currency=usd&ids=' + chunk.join(',') + '&sparkline=false&price_change_percentage=24h,7d');
+      if (res.ok) {
+        const data = await res.json();
+        data.forEach(c => { extraCoins[c.id] = c; });
+      }
+    } catch (e) { /* keep previous cached extraCoins values on failure */ }
+    // Small delay between chunks to avoid rate limit
+    if (i + chunkSize < neededIds.length) await new Promise(r => setTimeout(r, 300));
+  }
+  // Save extra coins cache
+  try { localStorage.setItem('ct_extra_coins', JSON.stringify(extraCoins)); } catch(e){}
+}
+
+// ===================== MODAL / ADD PURCHASE =====================
+function openModal() {
+  document.getElementById('modalTitle').textContent = 'добавить покупку';
+  document.getElementById('mCoinId').value = '';
+  document.getElementById('mCoinSearch').value = '';
+  document.getElementById('mCoinSearch').disabled = false;
+  document.getElementById('mCoinImg').value = '';
+  document.getElementById('mQty').value = '';
+  document.getElementById('mPrice').value = '';
+  document.getElementById('mDate').value = new Date().toISOString().split('T')[0];
+  const buyRadio = document.querySelector('input[name="txType"][value="buy"]');
+  if (buyRadio) buyRadio.checked = true;
+  document.getElementById('mTarget').value = '';
+  document.getElementById('mStop').value = '';
+  document.getElementById('mNotes').value = '';
+  document.getElementById('mExistingHint').style.display = 'none';
+  document.getElementById('modal').classList.add('active');
+}
+
+function closeModal() { 
+  document.getElementById('modal').classList.remove('active'); 
+  document.getElementById('mCoinSearch').disabled = false;
+  currentEditTxId = null;
+}
+
+
+
+function openAddPurchaseModal() {
+  const h = portfolio.find(x => x.id === currentTxHoldingId);
+  if (!h) return;
+  currentEditTxId = null;
+  document.getElementById('modalTitle').textContent = 'добавить транзакцию — ' + h.symbol;
+  document.getElementById('mCoinId').value = h.coinId;
+  document.getElementById('mCoinSearch').value = h.symbol;
+  document.getElementById('mCoinSearch').disabled = true;
+  document.getElementById('mCoinImg').value = '';
+  document.getElementById('mQty').value = '';
+  document.getElementById('mPrice').value = '';
+  document.getElementById('mDate').value = new Date().toISOString().split('T')[0];
+  const buyRadio = document.querySelector('input[name="txType"][value="buy"]');
+  if (buyRadio) buyRadio.checked = true;
+  document.getElementById('mTarget').value = h.targetPrice || '';
+  document.getElementById('mStop').value = h.stopLoss || '';
+  document.getElementById('mNotes').value = h.notes || '';
+  document.getElementById('mExistingHint').style.display = 'none';
+  document.getElementById('modal').classList.add('active');
+}
+
+function openEditPurchaseModal(txId) {
+  const h = portfolio.find(x => x.id === currentTxHoldingId);
+  if (!h) return;
+  const p = h.purchases.find(x => x.id === txId);
+  if (!p) return;
+  currentEditTxId = txId;
+  document.getElementById('modalTitle').textContent = 'изменить транзакцию — ' + h.symbol;
+  document.getElementById('mCoinId').value = h.coinId;
+  document.getElementById('mCoinSearch').value = h.symbol;
+  document.getElementById('mCoinSearch').disabled = true;
+  document.getElementById('mCoinImg').value = '';
+  document.getElementById('mQty').value = p.amount;
+  document.getElementById('mPrice').value = p.price;
+  document.getElementById('mDate').value = p.date;
+  const typeRadio = document.querySelector('input[name="txType"][value="' + (p.type || 'buy') + '"]');
+  if (typeRadio) typeRadio.checked = true;
+  document.getElementById('mTarget').value = h.targetPrice || '';
+  document.getElementById('mStop').value = h.stopLoss || '';
+  document.getElementById('mNotes').value = h.notes || '';
+  document.getElementById('mExistingHint').style.display = 'none';
+  document.getElementById('modal').classList.add('active');
+}
+
+function saveHolding() {
+  const coinId = document.getElementById('mCoinId').value;
+  if (!coinId) return alert('выберите монету из списка поиска');
+  const c = findCoin(coinId);
+  const symbol = (document.getElementById('mCoinSearch').value || (c ? c.symbol : '')).toUpperCase();
+  const amount = parseFloat(document.getElementById('mQty').value) || 0;
+  const price = parseFloat(document.getElementById('mPrice').value) || 0;
+  const date = document.getElementById('mDate').value || new Date().toISOString().split('T')[0];
+  const txTypeEl = document.querySelector('input[name="txType"]:checked');
+  const txType = txTypeEl ? txTypeEl.value : 'buy';
+  const target = parseFloat(document.getElementById('mTarget').value) || null;
+  const stop = parseFloat(document.getElementById('mStop').value) || null;
+  const notes = document.getElementById('mNotes').value || '';
+
+  let h = portfolio.find(x => x.coinId === coinId);
+
+  // Редактирование существующей транзакции
+  if (currentEditTxId && h) {
+    const p = h.purchases.find(x => x.id === currentEditTxId);
+    if (p) {
+      if (amount > 0) p.amount = amount;
+      if (price > 0) p.price = price;
+      p.date = date;
+      if (txType) p.type = txType;
+      recalcRealizedPnl(h);
+      recomputeHolding(h);
+    }
+    if (target !== null) h.targetPrice = target;
+    if (stop !== null) h.stopLoss = stop;
+    if (notes !== '') h.notes = notes;
+    currentEditTxId = null;
+    savePortfolio();
+    closeModal();
+    renderAll();
+    if (currentTxHoldingId) renderTxList();
+    return;
+  }
+
+  if (amount > 0 && price > 0) {
+    if (h) {
+      h.purchases = h.purchases || [];
+      if (txType === 'sell') {
+        const canSell = h.amount;
+        if (amount > canSell) return alert('нельзя продать больше чем есть (' + canSell.toFixed(6) + ')');
+        h.purchases.push({ id: uid(), date, amount, price, type: 'sell', realizedPnl: amount * (price - h.avgPrice) });
+      } else {
+        h.purchases.push({ id: uid(), date, amount, price, type: 'buy' });
+      }
+      recalcRealizedPnl(h);
+      recomputeHolding(h);
+    } else {
+      if (txType === 'sell') return alert('нельзя продать монету которой нет в портфеле');
+      h = { id: uid(), coinId, symbol, amount, avgPrice: price, purchases: [{ id: uid(), date, amount, price, type: 'buy' }], targetPrice: null, stopLoss: null, notes: '', realizedPnl: 0 };
+      portfolio.push(h);
+    }
+  } else if (!h) {
+    return alert('укажите количество и цену для новой монеты');
+  }
+
+  if (target) h.targetPrice = target; else if (document.getElementById('mTarget').value === '') { /* keep existing */ }
+  if (stop) h.stopLoss = stop;
+  if (notes) h.notes = notes;
+
+  savePortfolio();
+  closeModal();
+  renderAll();
+  if (currentTxHoldingId) renderTxList();
+}
+
+function delHolding(id) {
+  if (confirm('удалить позицию целиком (все транзакции)?')) {
+    portfolio = portfolio.filter(h => h.id !== id);
+    delete expandedRows[id];
+    savePortfolio();
+    renderAll();
+  }
+}
+
+function recomputeHolding(h) {
+  const buys = h.purchases.filter(p => p.type !== 'sell');
+  const totalBuyAmount = buys.reduce((s, p) => s + p.amount, 0);
+  const totalBuyCost = buys.reduce((s, p) => s + p.amount * p.price, 0);
+  h.avgPrice = totalBuyAmount > 0 ? +(totalBuyCost / totalBuyAmount).toFixed(8) : 0;
+  const totalAmount = h.purchases.reduce((s, p) => s + (p.type === 'sell' ? -p.amount : p.amount), 0);
+  h.amount = Math.max(0, totalAmount);
+}
+
+function recalcRealizedPnl(h) {
+  // Sort by date to process chronologically
+  const sorted = [...h.purchases].sort((a, b) => new Date(a.date) - new Date(b.date));
+  let runningAvg = 0;
+  let runningQty = 0;
+  let realized = 0;
+  sorted.forEach(p => {
+    if (p.type === 'sell') {
+      const pnl = p.amount * (p.price - runningAvg);
+      p.realizedPnl = pnl;
+      realized += pnl;
+      runningQty -= p.amount;
+    } else {
+      runningQty += p.amount;
+      const cost = runningQty > p.amount ? runningAvg * (runningQty - p.amount) + p.amount * p.price : p.amount * p.price;
+      runningAvg = runningQty > 0 ? cost / runningQty : 0;
+    }
+  });
+  h.realizedPnl = realized;
+}
+
+// ===================== TRANSACTIONS MODAL =====================
+function openTxModal(holdingId) {
+  currentTxHoldingId = holdingId;
+  const h = portfolio.find(x => x.id === holdingId);
+  if (!h) return;
+  document.getElementById('txModalTitle').textContent = 'транзакции — ' + h.symbol;
+  renderTxList();
+  document.getElementById('txModal').classList.add('active');
+}
+
+function closeTxModal() { document.getElementById('txModal').classList.remove('active'); currentTxHoldingId = null; renderPortfolio(); }
+
+function renderTxList() {
+  const h = portfolio.find(x => x.id === currentTxHoldingId);
+  const list = document.getElementById('txList');
+  if (!h || !h.purchases || !h.purchases.length) { list.innerHTML = '<div style="color:var(--text-3);font-size:13px;">нет транзакций</div>'; return; }
+  list.innerHTML = h.purchases.map(p => '<div class="tx-row"><span>' + p.date + '</span><span>' + p.amount + ' ' + h.symbol + '</span><span>$' + p.price + '</span><span>' + fmt$(p.amount*p.price) + '</span><div class="tx-actions"><button class="btn btn-sm" onclick="openEditPurchaseModal(\'' + p.id + '\')">изм</button><button class="btn btn-sm btn-danger" onclick="delTx(\'' + p.id + '\')">удл</button></div></div>').join('');
+}
+
+
+
+
+
+function delTx(txId) {
+  const h = portfolio.find(x => x.id === currentTxHoldingId);
+  if (!h) return;
+  if (h.purchases.length <= 1) { if (!confirm('это последняя транзакция, удаление удалит всю позицию. продолжить?')) return; delHolding(h.id); closeTxModal(); return; }
+  if (!confirm('удалить транзакцию?')) return;
+  h.purchases = h.purchases.filter(x => x.id !== txId);
+  recomputeHolding(h);
+  savePortfolio();
+  renderTxList();
+  renderHeader();
+}
+
+// ===================== REAL PRICE CHART MODAL =====================
+function openChartModal(coinId, symbol) {
+  currentChartCoin = coinId;
+  document.getElementById('chartModalTitle').textContent = 'график — ' + symbol;
+  document.getElementById('chartModal').classList.add('active');
+  loadCoinChart(coinId, 30);
+}
+
+function closeChartModal() { document.getElementById('chartModal').classList.remove('active'); currentChartCoin = null; }
+
+async function loadCoinChart(coinId, days, attempt) {
+  if (!coinId) return;
+  attempt = attempt || 1;
+  const loading = document.getElementById('chartLoading');
+  loading.textContent = 'загрузка графика' + (attempt > 1 ? ' (попытка ' + attempt + ')' : '') + '...';
+  try {
+    const res = await apiFetch(API_BASE + '/coins/' + coinId + '/market_chart?vs_currency=usd&days=' + days);
+    if (res.status === 429) {
+      if (attempt < 3) { await new Promise(r => setTimeout(r, 1500 * attempt)); return loadCoinChart(coinId, days, attempt + 1); }
+      loading.textContent = 'CoinGecko временно ограничил запросы (429). Подождите минуту и нажмите период графика снова.';
+      return;
+    }
+    if (res.status === 404) {
+      loading.textContent = 'у CoinGecko нет исторических данных для этой монеты.';
+      return;
+    }
+    if (!res.ok) throw new Error('chart fetch failed: ' + res.status);
+    const data = await res.json();
+    const prices = data.prices || [];
+    if (!prices.length) {
+      loading.textContent = 'нет данных для выбранного периода.';
+      return;
+    }
+    drawRealChart(prices);
+    loading.textContent = '';
+  } catch (e) {
+    if (attempt < 3) { await new Promise(r => setTimeout(r, 1000 * attempt)); return loadCoinChart(coinId, days, attempt + 1); }
+    loading.textContent = 'не удалось загрузить график: ' + (e.message || 'сетевая ошибка') + '. Попробуйте другой период или повторите позже.';
+  }
+}
+
+function drawRealChart(prices) {
+  const canvas = document.getElementById('realChartCanvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width = canvas.offsetWidth || 600;
+  const h = canvas.height = 320;
+  ctx.clearRect(0, 0, w, h);
+  if (!prices.length) return;
+  const values = prices.map(p => p[1]);
+  const min = Math.min(...values), max = Math.max(...values);
+  const range = max - min || 1;
+  ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 4; i++) { const y = 20 + (i/4)*(h-40); ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+  const up = values[values.length-1] >= values[0];
+  ctx.beginPath(); ctx.moveTo(0, h-20-((values[0]-min)/range)*(h-40));
+  values.forEach((v,i) => { const x = (i/(values.length-1))*w; const y = h-20-((v-min)/range)*(h-40); ctx.lineTo(x,y); });
+  ctx.lineTo(w,h); ctx.lineTo(0,h); ctx.fillStyle = up ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)'; ctx.fill();
+  ctx.beginPath(); ctx.strokeStyle = up ? '#22c55e' : '#ef4444'; ctx.lineWidth = 2;
+  values.forEach((v,i) => { const x = (i/(values.length-1))*w; const y = h-20-((v-min)/range)*(h-40); if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+  ctx.stroke();
+  ctx.fillStyle = '#64748b'; ctx.font = '11px sans-serif';
+  ctx.fillText('$' + max.toLocaleString(undefined,{maximumFractionDigits:2}), 8, 14);
+  ctx.fillText('$' + min.toLocaleString(undefined,{maximumFractionDigits:2}), 8, h-4);
+}
+
+// ===================== STORAGE / IMPORT-EXPORT =====================
+function loadPortfolio() {
+  try {
+    const d = localStorage.getItem(PORTFOLIO_KEY);
+    if (d) portfolio = JSON.parse(d);
+  } catch {}
+  // migration: ensure ids, types and purchases exist
+  portfolio.forEach(h => {
+    if (!h.id) h.id = uid();
+    if (!h.purchases || !h.purchases.length) {
+      h.purchases = [{ id: uid(), date: new Date().toISOString().split('T')[0], amount: h.amount, price: h.avgPrice, type: 'buy' }];
+    } else {
+      h.purchases.forEach(p => {
+        if (!p.id) p.id = uid();
+        if (!p.type) p.type = 'buy';
+      });
+    }
+    // Recalculate realized P&L from sell transactions
+    recalcRealizedPnl(h);
+    recomputeHolding(h);
+  });
+  savePortfolio();
+}
+function savePortfolio() { localStorage.setItem(PORTFOLIO_KEY, JSON.stringify(portfolio)); }
+
+function exportData() {
+  const data = { portfolio, notifications, alerts: alertsList, exported: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'crypto-portfolio-' + new Date().toISOString().split('T')[0] + '.json';
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (data.portfolio) { portfolio = data.portfolio; loadPortfolio(); }
+      if (data.notifications) { notifications = data.notifications; saveNotifs(); }
+      if (data.alerts) { alertsList = data.alerts; saveAlerts(); }
+      renderAll();
+      alert('данные импортированы');
+    } catch { alert('ошибка импорта'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ===================== UTILS =====================
+function findCoin(id) {
+  if (!id) return null;
+  const byIdOrSymbol = allCoins.find(c => c.id === id || c.symbol.toLowerCase() === id);
+  if (byIdOrSymbol) return byIdOrSymbol;
+  if (extraCoins[id]) return extraCoins[id];
+  return Object.values(extraCoins).find(c => c.symbol.toLowerCase() === id) || null;
+}
+
+function fmt$(n) {
+  if (typeof n !== 'number' || isNaN(n)) return '$0';
+  const sign = n < 0 ? '-' : '';
+  const a = Math.abs(n);
+  if (a >= 1e9) return sign + '$' + (a/1e9).toFixed(2) + 'B';
+  if (a >= 1e6) return sign + '$' + (a/1e6).toFixed(1) + 'M';
+  if (a >= 1000) return sign + '$' + a.toLocaleString('en-US', {maximumFractionDigits: 0});
+  if (a >= 1) return sign + '$' + a.toLocaleString('en-US', {maximumFractionDigits: 2});
+  if (a >= 0.01) return sign + '$' + a.toFixed(4);
+  if (a === 0) return '$0';
+  return sign + '$' + a.toFixed(8).replace(/0+$/, '').replace(/\.$/, '');
+}
+
+function fmtLarge(n) {
+  if (typeof n !== 'number' || isNaN(n)) return '$0';
+  if (n >= 1e12) return '$' + (n/1e12).toFixed(2) + 'T';
+  if (n >= 1e9) return '$' + (n/1e9).toFixed(1) + 'B';
+  if (n >= 1e6) return '$' + (n/1e6).toFixed(1) + 'M';
+  return '$' + n.toLocaleString();
+}
+
+function fmtPct(n) {
+  if (typeof n !== 'number' || isNaN(n)) return '0.00%';
+  return (n > 0 ? '+' : '') + n.toFixed(2) + '%';
+}
+
+function getColor(i) {
+  const colors = ['#3b82f6', '#ef4444', '#22c55e', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4', '#84cc16'];
+  return colors[i % colors.length];
+}
+
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
