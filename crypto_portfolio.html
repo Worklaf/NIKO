@@ -476,8 +476,7 @@ canvas { width: 100%; height: 100%; }
 // Firebase SDK imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
-import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, collection, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -491,17 +490,20 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const db = getFirestore(app);
-const auth = getAuth(app);
+try {
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const db = getFirestore(app);
 
-// Global Firebase variables for use in other scripts
-window.firebaseDB = db;
-window.firebaseAuth = auth;
-
-// Anonymous auth
-signInAnonymously(auth).catch(console.error);
+  // Global Firebase variables for use in other scripts
+  window.firebaseDB = db;
+  window.firebaseReady = true;
+  console.log('Firebase initialized successfully');
+} catch (e) {
+  console.error('Firebase initialization failed:', e);
+  window.firebaseDB = null;
+  window.firebaseReady = false;
+}
 </script>
 
 <script>
@@ -536,30 +538,11 @@ let autoAlertsEnabled = true;
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
 
 async function init() {
-  // Wait for Firebase to initialize
-  if (window.firebaseAuth) {
-    onAuthStateChanged(window.firebaseAuth, (user) => {
-      if (user) {
-        console.log('Firebase auth ready, user:', user.uid);
-        loadPortfolio();
-        loadNotifs();
-        loadAlerts();
-        loadAutoAlertSettings();
-      } else {
-        // Fallback if auth fails
-        loadPortfolio();
-        loadNotifs();
-        loadAlerts();
-        loadAutoAlertSettings();
-      }
-    });
-  } else {
-    // Fallback if Firebase not available
-    loadPortfolio();
-    loadNotifs();
-    loadAlerts();
-    loadAutoAlertSettings();
-  }
+  // Load data (Firebase if available, otherwise localStorage)
+  loadPortfolio();
+  loadNotifs();
+  loadAlerts();
+  loadAutoAlertSettings();
   
   setupTabs();
   setupSearchClose();
