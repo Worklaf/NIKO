@@ -563,9 +563,11 @@ function pushBrowserNotification(title, body) {
 
 async function apiFetch(url, attempts) {
   attempts = attempts || 0;
+  
+  // Try direct fetch first
   try {
     const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 10000);
+    const t = setTimeout(() => ctrl.abort(), 8000);
     const res = await fetch(url, {
       mode: 'cors',
       referrerPolicy: 'no-referrer',
@@ -574,20 +576,24 @@ async function apiFetch(url, attempts) {
     });
     clearTimeout(t);
     if (res.ok) return res;
-  } catch (e) {}
+  } catch (e) {
+    console.log('Direct fetch failed, trying proxy:', e.message);
+  }
 
+  // Use proxy servers for CORS issues
   const proxies = [
+  'https://api.allorigins.win/raw?url=',
   'https://api.codetabs.com/v1/proxy?quest=',
   'https://thingproxy.freeboard.io/fetch/'
-];
-
+  ];
 
   let lastErr;
   for (let p of proxies) {
     try {
       const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 10000);
-      const res = await fetch(p + encodeURIComponent(url), { signal: ctrl.signal });
+      const t = setTimeout(() => ctrl.abort(), 12000);
+      const proxyUrl = p + encodeURIComponent(url);
+      const res = await fetch(proxyUrl, { signal: ctrl.signal });
       clearTimeout(t);
       if (res.ok) return res;
 
@@ -679,16 +685,26 @@ async function fetchAll() {
       portfolioCoins: allCoins.filter(c => portfolio.some(p => p.coinId === c.id))
     };
     try {
+      // Clear old cache first to free space
+      localStorage.removeItem(CACHE_KEY);
       localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
     } catch (e) {
       console.warn('Failed to save cache (quota exceeded), using minimal cache');
+      // Try to clear all related caches to free space
+      try {
+ sessionStorage.clear();
+      } catch(se){}
       // Save minimal data if quota exceeded
-      localStorage.setItem(CACHE_KEY, JSON.stringify({
-        time: Date.now(),
-        global: globalData,
-        fear: fearData,
-        portfolioCoins: []
-      }));
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+          time: Date.now(),
+          global: globalData,
+          fear: fearData,
+          portfolioCoins: []
+        }));
+      } catch (e2) {
+        console.error('Cannot save even minimal cache:', e2);
+      }
     }
     await refreshExtraCoins();
     syncAutoAlertsFromAdvisor();
