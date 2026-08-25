@@ -582,18 +582,21 @@ async function apiFetch(url, attempts) {
 
 async function fetchAll() {
   try {
-    const cache = getCache();
+    const cacheCoins = getCacheCoins();
+    const cacheGlobal = getCacheGlobal();
+    const cacheFear = getCacheFear();
     // Show cache instantly for immediate UI
-    if (cache && cache.coins && cache.coins.length) {
-      allCoins = cache.coins;
-      if (cache.global) globalData = cache.global;
-      if (cache.fear) fearData = cache.fear;
+    if (cacheCoins && cacheCoins.length) {
+      allCoins = cacheCoins;
+      if (cacheGlobal) globalData = cacheGlobal;
+      if (cacheFear) fearData = cacheFear;
       renderAll(); checkNotifs();
     }
-    if (cache && Date.now() - cache.time < CACHE_TTL) {
+    const cacheTime = localStorage.getItem('ct_cache_time');
+    if (cacheTime && Date.now() - parseInt(cacheTime) < CACHE_TTL) {
       await refreshExtraCoins();
       hideCorsWarning();
-      document.getElementById('lastUpdate').textContent = 'кэш: ' + new Date(cache.time).toLocaleTimeString('ru-RU');
+      document.getElementById('lastUpdate').textContent = 'кэш: ' + new Date(parseInt(cacheTime)).toLocaleTimeString('ru-RU');
       return;
     }
     // Load page 1
