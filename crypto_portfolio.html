@@ -577,10 +577,10 @@ async function apiFetch(url, attempts) {
   } catch (e) {}
 
   const proxies = [
-    'https://api.allorigins.win/raw?url=',
-    'https://api.codetabs.com/v1/proxy?quest=',
-    'https://thingproxy.freeboard.io/fetch/'
-  ];
+  'https://api.codetabs.com/v1/proxy?quest=',
+  'https://thingproxy.freeboard.io/fetch/'
+];
+
 
   let lastErr;
   for (let p of proxies) {
