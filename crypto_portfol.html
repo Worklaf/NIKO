@@ -615,52 +615,58 @@ let autoAlertsEnabled = true;
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
 
-// Coin categories and risk levels with subcategories
+// Coin categories and risk levels with subcategories and project quality
 const coinCategories = {
   // Fundamental L1 — low/medium risk with subcategories
-  'btc': { category: 'fundamental_l1', subcategory: 'l1_bluechip', risk: 'low', name: 'Bitcoin', btcCorrelation: 1.0 },
-  'eth': { category: 'fundamental_l1', subcategory: 'l1_bluechip', risk: 'low', name: 'Ethereum', btcCorrelation: 0.85 },
-  'sol': { category: 'fundamental_l1', subcategory: 'l1_high_growth', risk: 'medium', name: 'Solana', btcCorrelation: 0.75 },
-  'near': { category: 'fundamental_l1', subcategory: 'l1_high_growth', risk: 'medium', name: 'NEAR', btcCorrelation: 0.7 },
-  'sei': { category: 'fundamental_l1', subcategory: 'l1_high_growth', risk: 'medium', name: 'Sei', btcCorrelation: 0.65 },
-  'ada': { category: 'fundamental_l1', subcategory: 'l1_slow_growth', risk: 'low', name: 'Cardano', btcCorrelation: 0.8 },
-  'dot': { category: 'fundamental_l1', subcategory: 'l1_slow_growth', risk: 'low', name: 'Polkadot', btcCorrelation: 0.75 },
-  'atom': { category: 'fundamental_l1', subcategory: 'l1_slow_growth', risk: 'low', name: 'Cosmos', btcCorrelation: 0.7 },
+  'btc': { category: 'fundamental_l1', subcategory: 'l1_bluechip', risk: 'low', quality: 'strong', name: 'Bitcoin', btcCorrelation: 1.0 },
+  'eth': { category: 'fundamental_l1', subcategory: 'l1_bluechip', risk: 'low', quality: 'strong', name: 'Ethereum', btcCorrelation: 0.85 },
+  'sol': { category: 'fundamental_l1', subcategory: 'l1_high_growth', risk: 'medium', quality: 'strong', name: 'Solana', btcCorrelation: 0.75 },
+  'near': { category: 'fundamental_l1', subcategory: 'l1_high_growth', risk: 'medium', quality: 'strong', name: 'NEAR', btcCorrelation: 0.7 },
+  'sei': { category: 'fundamental_l1', subcategory: 'l1_high_growth', risk: 'medium', quality: 'strong', name: 'Sei', btcCorrelation: 0.65 },
+  'ada': { category: 'fundamental_l1', subcategory: 'l1_slow_growth', risk: 'low', quality: 'medium', name: 'Cardano', btcCorrelation: 0.8 },
+  'dot': { category: 'fundamental_l1', subcategory: 'l1_slow_growth', risk: 'low', quality: 'medium', name: 'Polkadot', btcCorrelation: 0.75 },
+  'atom': { category: 'fundamental_l1', subcategory: 'l1_slow_growth', risk: 'low', quality: 'medium', name: 'Cosmos', btcCorrelation: 0.7 },
   
   // Fundamental L2 — low/medium risk with subcategories
-  'arb': { category: 'fundamental_l2', subcategory: 'l2_high_growth', risk: 'medium', name: 'Arbitrum', btcCorrelation: 0.8 },
-  'mnt': { category: 'fundamental_l2', subcategory: 'l2_high_growth', risk: 'medium', name: 'Mantle', btcCorrelation: 0.7 },
-  'pol': { category: 'fundamental_l2', subcategory: 'l2_slow_growth', risk: 'low', name: 'Polygon', btcCorrelation: 0.85 },
+  'arb': { category: 'fundamental_l2', subcategory: 'l2_high_growth', risk: 'medium', quality: 'strong', name: 'Arbitrum', btcCorrelation: 0.8 },
+  'mnt': { category: 'fundamental_l2', subcategory: 'l2_high_growth', risk: 'medium', quality: 'medium', name: 'Mantle', btcCorrelation: 0.7 },
+  'pol': { category: 'fundamental_l2', subcategory: 'l2_slow_growth', risk: 'low', quality: 'medium', name: 'Polygon', btcCorrelation: 0.85 },
   
   // Exchange tokens — low/medium risk
-  'bnb': { category: 'exchange', subcategory: 'exchange_bluechip', risk: 'low', name: 'BNB', btcCorrelation: 0.7 },
-  'bgb': { category: 'exchange', subcategory: 'exchange_mid_tier', risk: 'medium', name: 'Bitget', btcCorrelation: 0.6 },
+  'bnb': { category: 'exchange', subcategory: 'exchange_bluechip', risk: 'low', quality: 'strong', name: 'BNB', btcCorrelation: 0.7 },
+  'bgb': { category: 'exchange', subcategory: 'exchange_mid_tier', risk: 'medium', quality: 'medium', name: 'Bitget', btcCorrelation: 0.6 },
   
   // DEX / infrastructure — medium risk with subcategories
-  'uni': { category: 'dex', subcategory: 'dex_bluechip', risk: 'medium', name: 'Uniswap', btcCorrelation: 0.75 },
-  'gmx': { category: 'dex', subcategory: 'dex_bluechip', risk: 'medium', name: 'GMX', btcCorrelation: 0.65 },
-  '1inch': { category: 'dex', subcategory: 'dex_risky', risk: 'medium', name: '1inch', btcCorrelation: 0.6 },
+  'uni': { category: 'dex', subcategory: 'dex_bluechip', risk: 'medium', quality: 'strong', name: 'Uniswap', btcCorrelation: 0.75 },
+  'gmx': { category: 'dex', subcategory: 'dex_bluechip', risk: 'medium', quality: 'medium', name: 'GMX', btcCorrelation: 0.65 },
+  '1inch': { category: 'dex', subcategory: 'dex_risky', risk: 'medium', quality: 'medium', name: '1inch', btcCorrelation: 0.6 },
   
   // Modular / experimental — high risk with subcategories
-  'tia': { category: 'modular', subcategory: 'modular_early_stage', risk: 'high', name: 'Celestia', btcCorrelation: 0.55 },
-  'dym': { category: 'modular', subcategory: 'modular_early_stage', risk: 'high', name: 'Dymension', btcCorrelation: 0.5 },
-  'gram': { category: 'modular', subcategory: 'modular_mature', risk: 'high', name: 'TON', btcCorrelation: 0.4 },
+  'tia': { category: 'modular', subcategory: 'modular_early_stage', risk: 'high', quality: 'strong', name: 'Celestia', btcCorrelation: 0.55 },
+  'dym': { category: 'modular', subcategory: 'modular_early_stage', risk: 'high', quality: 'strong', name: 'Dymension', btcCorrelation: 0.5 },
+  'gram': { category: 'modular', subcategory: 'modular_mature', risk: 'high', quality: 'medium', name: 'TON', btcCorrelation: 0.4 },
   
   // Memecoins — high risk
-  'dogs': { category: 'meme', subcategory: 'meme_new', risk: 'high', name: 'Dogs', btcCorrelation: 0.3 },
-  'not': { category: 'meme', subcategory: 'meme_new', risk: 'high', name: 'Notcoin', btcCorrelation: 0.3 },
-  'doge': { category: 'meme', subcategory: 'meme_legacy', risk: 'high', name: 'Dogecoin', btcCorrelation: 0.5 },
-  'shib': { category: 'meme', subcategory: 'meme_legacy', risk: 'high', name: 'Shiba Inu', btcCorrelation: 0.45 },
+  'dogs': { category: 'meme', subcategory: 'meme_new', risk: 'high', quality: 'weak', name: 'Dogs', btcCorrelation: 0.3 },
+  'not': { category: 'meme', subcategory: 'meme_new', risk: 'high', quality: 'weak', name: 'Notcoin', btcCorrelation: 0.3 },
+  'doge': { category: 'meme', subcategory: 'meme_legacy', risk: 'high', quality: 'weak', name: 'Dogecoin', btcCorrelation: 0.5 },
+  'shib': { category: 'meme', subcategory: 'meme_legacy', risk: 'high', quality: 'weak', name: 'Shiba Inu', btcCorrelation: 0.45 },
   
   // Old / lottery — medium/high risk
-  'zec': { category: 'old_lottery', subcategory: 'old_privacy', risk: 'high', name: 'Zcash', btcCorrelation: 0.6 },
-  'dash': { category: 'old_lottery', subcategory: 'old_privacy', risk: 'high', name: 'Dash', btcCorrelation: 0.55 },
-  'ltc': { category: 'old_lottery', subcategory: 'old_legacy', risk: 'medium', name: 'Litecoin', btcCorrelation: 0.9 }
+  'zec': { category: 'old_lottery', subcategory: 'old_privacy', risk: 'high', quality: 'weak', name: 'Zcash', btcCorrelation: 0.6 },
+  'dash': { category: 'old_lottery', subcategory: 'old_privacy', risk: 'high', quality: 'weak', name: 'Dash', btcCorrelation: 0.55 },
+  'ltc': { category: 'old_lottery', subcategory: 'old_legacy', risk: 'medium', quality: 'weak', name: 'Litecoin', btcCorrelation: 0.9 },
+  
+  // Dead/dying projects - garbage quality
+  'osmo': { category: 'dead', subcategory: 'dead_defi', risk: 'high', quality: 'garbage', name: 'Osmosis', btcCorrelation: 0.5 },
+  'zen': { category: 'dead', subcategory: 'dead_privacy', risk: 'high', quality: 'garbage', name: 'Horizen', btcCorrelation: 0.4 },
+  'algo': { category: 'dead', subcategory: 'dead_l1', risk: 'high', quality: 'weak', name: 'Algorand', btcCorrelation: 0.6 },
+  'pengu': { category: 'meme', subcategory: 'meme_new', risk: 'high', quality: 'garbage', name: 'Pudgy Penguins', btcCorrelation: 0.3 }
 };
 
 function getCoinInfo(symbol) {
   const sym = symbol.toLowerCase();
-  return coinCategories[sym] || { category: 'other', subcategory: 'other', risk: 'medium', name: symbol, btcCorrelation: 0.5 };
+  return coinCategories[sym] || { category: 'other', subcategory: 'other', risk: 'medium', quality: 'medium', name: symbol, btcCorrelation: 0.5 };
 }
 
 // Calculate coin volatility based on price changes
@@ -1110,27 +1116,39 @@ function renderNewCoinSuggestions() {
   container.innerHTML = html;
 }
 
-function calculateDCAPercentage(dropPct, riskLevel) {
+function calculateDCAPercentage(dropPct, riskLevel, quality = 'medium') {
   const absDrop = Math.abs(dropPct);
   
-  // Base percentages by risk level
-  const riskMultipliers = {
-    'low': 0.8,      // Conservative for low-risk coins
-    'medium': 1.0,   // Standard for medium-risk
-    'high': 1.3      // Aggressive for high-risk (higher potential reward)
+  // Quality-based multipliers - restrict aggressive DCA for weak/garbage projects
+  const qualityMultipliers = {
+    'strong': 1.0,    // Full DCA for strong projects
+    'medium': 0.6,   // Reduced DCA for medium projects
+    'weak': 0.3,     // Minimal DCA for weak projects
+    'garbage': 0.0   // No DCA for garbage projects
   };
   
-  const multiplier = riskMultipliers[riskLevel] || 1.0;
+  const qualityMultiplier = qualityMultipliers[quality] || 0.6;
   
-  // Dynamic formula based on drop percentage
-  if (absDrop >= 90) return Math.min(0.9, 0.9 * multiplier); // Max 90% of portfolio position
-  if (absDrop >= 70) return Math.min(0.7, 0.7 * multiplier);
-  if (absDrop >= 50) return Math.min(0.5, 0.5 * multiplier);
-  if (absDrop >= 40) return Math.min(0.4, 0.4 * multiplier);
-  if (absDrop >= 30) return Math.min(0.3, 0.3 * multiplier);
-  if (absDrop >= 20) return Math.min(0.2, 0.2 * multiplier);
-  if (absDrop >= 10) return Math.min(0.1, 0.1 * multiplier);
-  return 0.05; // Small buy for minor drops
+  // Risk level adjustment (more conservative for high risk)
+  const riskMultipliers = {
+    'low': 1.2,      // Slightly more aggressive for low-risk
+    'medium': 1.0,   // Standard
+    'high': 0.7      // More conservative for high-risk
+  };
+  
+  const riskMultiplier = riskMultipliers[riskLevel] || 1.0;
+  
+  const totalMultiplier = qualityMultiplier * riskMultiplier;
+  
+  // Conservative DCA percentages - much lower than before
+  if (absDrop >= 90) return Math.min(0.25, 0.25 * totalMultiplier); // Max 25% instead of 90%
+  if (absDrop >= 70) return Math.min(0.20, 0.20 * totalMultiplier); // Max 20% instead of 70%
+  if (absDrop >= 50) return Math.min(0.15, 0.15 * totalMultiplier); // Max 15% instead of 50%
+  if (absDrop >= 40) return Math.min(0.12, 0.12 * totalMultiplier); // Max 12% instead of 40%
+  if (absDrop >= 30) return Math.min(0.10, 0.10 * totalMultiplier); // Max 10% instead of 30%
+  if (absDrop >= 20) return Math.min(0.08, 0.08 * totalMultiplier); // Max 8% instead of 20%
+  if (absDrop >= 10) return Math.min(0.05, 0.05 * totalMultiplier); // Max 5% instead of 10%
+  return 0.02; // Minimal buy for minor drops
 }
 
 let authMode = 'login'; // 'login' or 'signup'
@@ -2286,80 +2304,94 @@ function generateCoinAdvice(h, c) {
         '</div>' +
       '</div>';
   } else if (s.buyScore >= 40 && s.buyScore > s.sellScore) {
-    type = 'buy'; badge = 'buy';
-    const buyStrength = getSignalStrength(s.buyScore);
-    
-    // Weak BUY for scores 30-40
-    const isWeakBuy = s.buyScore >= 30 && s.buyScore < 40;
-    
-    // Dynamic DCA based on risk and drop percentage
-    const dcaPercentage = calculateDCAPercentage(pnl, riskLevel);
-    const buyPart = isWeakBuy ? Math.min(dcaPercentage * 0.5, 0.1) : dcaPercentage; // Smaller buy for weak signal
-
-    const suggestedAmount = +(Math.max(10, inv * buyPart)).toFixed(2);
-    const buyQty = suggestedAmount / c.current_price;
-    const newAvg = (h.amount * h.avgPrice + buyQty * c.current_price) / (h.amount + buyQty);
-    const breakEven = ((newAvg - c.current_price) / c.current_price) * 100;
-    
-    // Improved auto-alert based on risk level
-    let alertPrice;
-    const alertDrop = riskLevel === 'low' ? 0.05 : (riskLevel === 'medium' ? 0.10 : 0.15);
-    alertPrice = +(c.current_price * (1 - alertDrop)).toFixed(4);
-
-    // Improved signal text based on category, risk, and market phase
-    let buyReasonText = '';
-    if (isWeakBuy) {
-      buyReasonText = 'Слабый сигнал: небольшая докупка';
-    } else if (marketPhase === 'accumulation_downtrend') {
-      buyReasonText = 'Фаза накопления после падения: отличная точка входа';
-    } else if (marketPhase === 'pullback') {
-      buyReasonText = 'Откат в восходящем тренде: хороший момент для докупки';
-    } else if (marketPhase === 'consolidation') {
-      buyReasonText = 'Консолидация: можно усреднить позицию';
-    } else if (rsi < 30) {
-      buyReasonText = 'Перепроданность (RSI ' + rsi + '): сильный сигнал покупки';
-    } else if (emaTrend === 'uptrend') {
-      buyReasonText = 'Восходящий тренд (EMA): докупка в тренде';
-    } else if (category === 'fundamental_l1') {
-      buyReasonText = 'Фундаментальный L1: отличная возможность усреднить позицию';
-    } else if (category === 'meme') {
-      buyReasonText = 'Мем-монета: высокая волатильность, входите осторожно';
-    } else if (riskLevel === 'high') {
-      buyReasonText = 'Высокий риск: агрессивная докупка при глубокой просадке';
+    // Block BUY signals for garbage quality projects
+    if (coinInfo.quality === 'garbage') {
+      type = 'hold'; badge = 'hold';
+      text = '<strong>⚠️ ВНИМАНИЕ:</strong> ' + s.coinInfo.name + ' - проект низкого качества (мёртвый/умирающий). Не рекомендуется усреднять позицию даже при глубокой просадке. Рассмотрите возможность выхода при отскоке. P&L: ' + fmtPct(pnl) + ', от ATH: ' + (s.hasAth ? fmtPct(drawdown) : 'н/д') + '.';
+      actionHtml = '';
+      autoAlert = { enabled: false };
+    } else if (coinInfo.quality === 'weak') {
+      // Restrict BUY for weak projects
+      type = 'hold'; badge = 'hold';
+      text = '<strong>⚠️ Осторожно:</strong> ' + s.coinInfo.name + ' - слабый проект без сильного фундамента. Усреднение не рекомендуется. Лучше держать или продать при отскоке. P&L: ' + fmtPct(pnl) + ', от ATH: ' + (s.hasAth ? fmtPct(drawdown) : 'н/д') + '. Если всё равно хотите усреднить - делайте это минимальными суммами.';
+      actionHtml = '';
+      autoAlert = { enabled: false };
     } else {
-      buyReasonText = s.reasonsBuy.join(', ') || 'подходит для DCA';
+      type = 'buy'; badge = 'buy';
+      const buyStrength = getSignalStrength(s.buyScore);
+      
+      // Weak BUY for scores 30-40
+      const isWeakBuy = s.buyScore >= 30 && s.buyScore < 40;
+      
+      // Dynamic DCA based on risk, drop percentage, and project quality
+      const dcaPercentage = calculateDCAPercentage(pnl, riskLevel, coinInfo.quality);
+      const buyPart = isWeakBuy ? Math.min(dcaPercentage * 0.5, 0.1) : dcaPercentage; // Smaller buy for weak signal
+
+      const suggestedAmount = +(Math.max(10, inv * buyPart)).toFixed(2);
+      const buyQty = suggestedAmount / c.current_price;
+      const newAvg = (h.amount * h.avgPrice + buyQty * c.current_price) / (h.amount + buyQty);
+      const breakEven = ((newAvg - c.current_price) / c.current_price) * 100;
+      
+      // Improved auto-alert based on risk level
+      let alertPrice;
+      const alertDrop = riskLevel === 'low' ? 0.05 : (riskLevel === 'medium' ? 0.10 : 0.15);
+      alertPrice = +(c.current_price * (1 - alertDrop)).toFixed(4);
+
+      // Improved signal text based on category, risk, and market phase
+      let buyReasonText = '';
+      if (isWeakBuy) {
+        buyReasonText = 'Слабый сигнал: небольшая докупка';
+      } else if (marketPhase === 'accumulation_downtrend') {
+        buyReasonText = 'Фаза накопления после падения: отличная точка входа';
+      } else if (marketPhase === 'pullback') {
+        buyReasonText = 'Откат в восходящем тренде: хороший момент для докупки';
+      } else if (marketPhase === 'consolidation') {
+        buyReasonText = 'Консолидация: можно усреднить позицию';
+      } else if (rsi < 30) {
+        buyReasonText = 'Перепроданность (RSI ' + rsi + '): сильный сигнал покупки';
+      } else if (emaTrend === 'uptrend') {
+        buyReasonText = 'Восходящий тренд (EMA): докупка в тренде';
+      } else if (category === 'fundamental_l1') {
+        buyReasonText = 'Фундаментальный L1: отличная возможность усреднить позицию';
+      } else if (category === 'meme') {
+        buyReasonText = 'Мем-монета: высокая волатильность, входите осторожно';
+      } else if (riskLevel === 'high') {
+        buyReasonText = 'Высокий риск: умеренная докупка при глубокой просадке';
+      } else {
+        buyReasonText = s.reasonsBuy.join(', ') || 'подходит для DCA';
+      }
+
+      text = (isWeakBuy ? 'Слабый сигнал на покупку' : 'Сигнал на покупку') + ' <strong>' + s.coinInfo.name + '</strong> (' + categoryLabel + ', ' + riskLevel + ' риск, фаза: ' + phaseLabel + '). P&L <strong>' + fmtPct(pnl) + '</strong>, 24ч <strong>' + fmtPct(ch24) + '</strong>' + (s.hasAth ? (', от ATH <strong>' + fmtPct(drawdown) + '</strong>') : '') + '. Risk Score: <strong>' + Math.round(riskScore) + '/100</strong>. RSI: <strong>' + rsi + '</strong>. Причины: <strong>' + buyReasonText + '</strong>. Рекомендуемая докупка: <strong>' + Math.round(buyPart * 100) + '%</strong> от позиции.';
+
+      autoAlert = {
+        enabled: true,
+        type: 'below',
+        value: alertPrice,
+        suggestedAmount: suggestedAmount,
+        action: 'buy',
+        symbol: h.symbol
+      };
+
+      actionHtml =
+        '<div class="advice-action">' +
+          '<div class="advice-action-title">План докупки</div>' +
+          '<div class="advice-grid">' +
+            '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(suggestedAmount) + '</div><div class="advice-metric-label">докупить на</div></div>' +
+            '<div class="advice-metric"><div class="advice-metric-value">' + buyQty.toFixed(4) + '</div><div class="advice-metric-label">получите ' + h.symbol + '</div></div>' +
+            '<div class="advice-metric"><div class="advice-metric-value" style="font-size:14px;">$' + h.avgPrice + ' → $' + newAvg.toFixed(2) + '</div><div class="advice-metric-label">новая средняя</div></div>' +
+            '<div class="advice-metric"><div class="advice-metric-value">+' + breakEven.toFixed(1) + '%</div><div class="advice-metric-label">рост до окупа</div></div>' +
+          '</div>' +
+          '<div class="signal-row">' +
+            '<span class="signal-chip green">сила сигнала: ' + buyStrength + '</span>' +
+            '<span class="signal-chip green">buy score: ' + Math.round(s.buyScore) + '</span>' +
+            '<span class="signal-chip yellow">вес в портфеле: ' + s.weight.toFixed(1) + '%</span>' +
+            '<span class="signal-chip blue">' + categoryLabel + '</span>' +
+            '<span class="signal-chip purple">' + phaseLabel + '</span>' +
+            '<span class="signal-chip orange">RSI: ' + rsi + '</span>' +
+            '<span class="signal-chip yellow">' + riskLabel + '</span>' +
+          '</div>' +
+        '</div>';
     }
-
-    text = (isWeakBuy ? 'Слабый сигнал на покупку' : 'Сигнал на покупку') + ' <strong>' + s.coinInfo.name + '</strong> (' + categoryLabel + ', ' + riskLevel + ' риск, фаза: ' + phaseLabel + '). P&L <strong>' + fmtPct(pnl) + '</strong>, 24ч <strong>' + fmtPct(ch24) + '</strong>' + (s.hasAth ? (', от ATH <strong>' + fmtPct(drawdown) + '</strong>') : '') + '. Risk Score: <strong>' + Math.round(riskScore) + '/100</strong>. RSI: <strong>' + rsi + '</strong>. Причины: <strong>' + buyReasonText + '</strong>. Рекомендуемая докупка: <strong>' + Math.round(buyPart * 100) + '%</strong> от позиции.';
-
-    autoAlert = {
-      enabled: true,
-      type: 'below',
-      value: alertPrice,
-      suggestedAmount: suggestedAmount,
-      action: 'buy',
-      symbol: h.symbol
-    };
-
-    actionHtml =
-      '<div class="advice-action">' +
-        '<div class="advice-action-title">План докупки</div>' +
-        '<div class="advice-grid">' +
-          '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(suggestedAmount) + '</div><div class="advice-metric-label">докупить на</div></div>' +
-          '<div class="advice-metric"><div class="advice-metric-value">' + buyQty.toFixed(4) + '</div><div class="advice-metric-label">получите ' + h.symbol + '</div></div>' +
-          '<div class="advice-metric"><div class="advice-metric-value" style="font-size:14px;">$' + h.avgPrice + ' → $' + newAvg.toFixed(2) + '</div><div class="advice-metric-label">новая средняя</div></div>' +
-          '<div class="advice-metric"><div class="advice-metric-value">+' + breakEven.toFixed(1) + '%</div><div class="advice-metric-label">рост до окупа</div></div>' +
-        '</div>' +
-        '<div class="signal-row">' +
-          '<span class="signal-chip green">сила сигнала: ' + buyStrength + '</span>' +
-          '<span class="signal-chip green">buy score: ' + Math.round(s.buyScore) + '</span>' +
-          '<span class="signal-chip yellow">вес в портфеле: ' + s.weight.toFixed(1) + '%</span>' +
-          '<span class="signal-chip blue">' + categoryLabel + '</span>' +
-          '<span class="signal-chip purple">' + phaseLabel + '</span>' +
-          '<span class="signal-chip orange">RSI: ' + rsi + '</span>' +
-          '<span class="signal-chip yellow">' + riskLabel + '</span>' +
-        '</div>' +
-      '</div>';
   } else {
     type = 'hold'; badge = 'hold';
 
