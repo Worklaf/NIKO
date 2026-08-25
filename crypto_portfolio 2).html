@@ -267,7 +267,7 @@ canvas { width: 100%; height: 100%; }
       <div class="section-title" style="margin-bottom:12px;">распределение</div>
       <div style="display:flex;align-items:flex-start;gap:24px;flex-wrap:wrap;">
         <canvas class="pie-chart" id="pieCanvas" width="180" height="180" style="flex-shrink:0;"></canvas>
-        <div class="pie-legend" id="pieLegend" style="display:flex;flex-direction:column;gap:8px;flex:1;min-width:200px;"></div>
+        <div id="pieLegend" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px 16px;flex:1;align-content:start;"></div>
       </div>
     </div>
 
@@ -825,7 +825,7 @@ function drawPie(data, total) {
   });
   ctx.beginPath(); ctx.arc(90, 90, 40, 0, 2 * Math.PI);
   ctx.fillStyle = '#111827'; ctx.fill();
-  legend.innerHTML = filtered.map(d => '<div class="legend-row"><div class="legend-dot" style="background:' + d.color + '"></div><span>' + d.label + ' <span style="color:var(--text-3)">' + ((d.value/total)*100).toFixed(1) + '%</span></span></div>').join('');
+  legend.innerHTML = filtered.map(d => '<div class="legend-row" style="white-space:nowrap;"><div class="legend-dot" style="background:' + d.color + '"></div><span>' + d.label + ' <span style="color:var(--text-3)">' + ((d.value/total)*100).toFixed(1) + '%</span></span></div>').join('');
 }
 
 // ===================== MARKET with SORT =====================
