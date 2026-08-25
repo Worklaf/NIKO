@@ -669,7 +669,27 @@ async function fetchAll() {
       }
     } catch(e){ console.log('fear fetch error', e); }
 
-    localStorage.setItem(CACHE_KEY, JSON.stringify({ time: Date.now(), coins: allCoins, global: globalData, fear: fearData }));
+    // Cache only essential data to avoid localStorage quota exceeded
+    // Don't cache full allCoins array (too large), cache only portfolio-related data
+    const cacheData = {
+      time: Date.now(),
+      global: globalData,
+      fear: fearData,
+      // Cache only coins that are in portfolio
+      portfolioCoins: allCoins.filter(c => portfolio.some(p => p.coinId === c.id))
+    };
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+    } catch (e) {
+      console.warn('Failed to save cache (quota exceeded), using minimal cache');
+      // Save minimal data if quota exceeded
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        time: Date.now(),
+        global: globalData,
+        fear: fearData,
+        portfolioCoins: []
+      }));
+    }
     await refreshExtraCoins();
     syncAutoAlertsFromAdvisor();
     hideCorsWarning();
@@ -679,8 +699,9 @@ async function fetchAll() {
   } catch (e) {
     console.error('fetchAll error:', e);
     const cache = getCache();
-    if (cache && cache.coins && cache.coins.length) {
-      allCoins = cache.coins;
+    if (cache && (cache.portfolioCoins || cache.coins)) {
+      // Use cached portfolio coins if available
+      allCoins = cache.portfolioCoins || cache.coins || [];
       if (cache.global) globalData = cache.global;
       if (cache.fear) fearData = cache.fear;
       await refreshExtraCoins();
@@ -709,8 +730,15 @@ function hideCorsWarning() {
 }
 
 function getCache() {
-  try { return JSON.parse(localStorage.getItem(CACHE_KEY)); }
-  catch { return null; }
+  try {
+    const cache = JSON.parse(localStorage.getItem(CACHE_KEY));
+    if (!cache) return null;
+    // Handle old cache format (coins) and new format (portfolioCoins)
+    if (cache.coins && !cache.portfolioCoins) {
+      cache.portfolioCoins = cache.coins;
+    }
+    return cache;
+  } catch { return null; }
 }
 
 function renderAll() {
@@ -1973,4 +2001,3 @@ window.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
-
