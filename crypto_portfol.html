@@ -2003,9 +2003,9 @@ function toggleOthersList() {
   othersExpanded = !othersExpanded;
   // Re-render pie chart to show/hide the list
   const portfolioValue = getPortfolioValue();
-  const pieData = portfolio.map(h => {
+  const pieData = portfolio.map((h, idx) => {
     const c = findCoin(h.coinId || h.symbol.toLowerCase());
-    return { label: h.symbol, value: h.amount * (c ? c.current_price : 0), color: getColorForSymbol(h.symbol) };
+    return { label: h.symbol, value: h.amount * (c ? c.current_price : 0), color: getColor(idx) };
   });
   drawPie(pieData, portfolioValue);
 }
