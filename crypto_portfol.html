@@ -669,6 +669,169 @@ function getCoinInfo(symbol) {
   return coinCategories[sym] || { category: 'other', subcategory: 'other', risk: 'medium', quality: 'medium', name: symbol, btcCorrelation: 0.5 };
 }
 
+// Automatic classifier for new coins not in the predefined list
+function classifyNewCoin(c) {
+  const mcap = c.market_cap || 0;
+  const volume = c.total_volume || 0;
+  const categories = c.categories || [];
+  const symbol = c.symbol?.toLowerCase() || '';
+  const genesisDate = c.genesis_date || c.atl_date; // Use ATL date as proxy if genesis not available
+  
+  // 1. Market cap based classification
+  let qualityFromMcap = 'medium';
+  if (mcap > 5000000000) qualityFromMcap = 'strong'; // > $5B
+  else if (mcap > 500000000) qualityFromMcap = 'medium'; // $500M - $5B
+  else if (mcap > 50000000) qualityFromMcap = 'weak'; // $50M - $500M
+  else qualityFromMcap = 'garbage'; // < $50M
+  
+  // 2. Volume based classification
+  let qualityFromVolume = 'medium';
+  if (volume > 500000000) qualityFromVolume = 'strong'; // > $500M
+  else if (volume > 50000000) qualityFromVolume = 'medium'; // $50M - $500M
+  else if (volume > 5000000) qualityFromVolume = 'weak'; // $5M - $50M
+  else qualityFromVolume = 'garbage'; // < $5M
+  
+  // 3. Age based classification (if genesis date available)
+  let qualityFromAge = 'medium';
+  if (genesisDate) {
+    const ageInMonths = (Date.now() - new Date(genesisDate).getTime()) / (1000 * 60 * 60 * 24 * 30);
+    if (ageInMonths > 24) qualityFromAge = 'strong'; // > 2 years
+    else if (ageInMonths > 6) qualityFromAge = 'medium'; // 6-24 months
+    else qualityFromAge = 'weak'; // < 6 months
+  }
+  
+  // 4. Tokenomics analysis (supply concentration)
+  let qualityFromTokenomics = 'medium';
+  const circulatingSupply = c.circulating_supply || 0;
+  const totalSupply = c.total_supply || 0;
+  const maxSupply = c.max_supply || 0;
+  
+  if (maxSupply > 0 && circulatingSupply > 0) {
+    const circulationRatio = circulatingSupply / maxSupply;
+    // If too much already circulating (inflation risk) or too little (unlock risk)
+    if (circulationRatio > 0.9) qualityFromTokenomics = 'weak'; // High inflation risk
+    else if (circulationRatio < 0.2) qualityFromTokenomics = 'weak'; // High unlock risk
+    else qualityFromTokenomics = 'medium'; // Healthy circulation
+  }
+  
+  // 5. Category detection from CoinGecko categories
+  let detectedCategory = 'other';
+  let detectedSubcategory = 'other';
+  let categoryRisk = 'medium';
+  let categoryQuality = 'medium';
+  
+  const categoriesLower = categories.map(cat => cat.toLowerCase());
+  
+  // L1 / Layer 1
+  if (categoriesLower.some(cat => cat.includes('layer 1') || cat.includes('smart contract') || cat.includes('proof of stake') || cat.includes('proof of work'))) {
+    detectedCategory = 'fundamental_l1';
+    detectedSubcategory = 'l1_bluechip';
+    categoryRisk = 'low';
+    categoryQuality = 'medium';
+  }
+  // L2 / Layer 2
+  else if (categoriesLower.some(cat => cat.includes('layer 2') || cat.includes('scaling') || cat.includes('rollup'))) {
+    detectedCategory = 'fundamental_l2';
+    detectedSubcategory = 'l2_high_growth';
+    categoryRisk = 'medium';
+    categoryQuality = 'medium';
+  }
+  // DEX
+  else if (categoriesLower.some(cat => cat.includes('decentralized exchange') || cat.includes('dex') || cat.includes('amm'))) {
+    detectedCategory = 'dex';
+    detectedSubcategory = 'dex_bluechip';
+    categoryRisk = 'medium';
+    categoryQuality = 'medium';
+  }
+  // DeFi
+  else if (categoriesLower.some(cat => cat.includes('defi') || cat.includes('yield') || cat.includes('lending'))) {
+    detectedCategory = 'defi';
+    detectedSubcategory = 'defi_protocol';
+    categoryRisk = 'medium';
+    categoryQuality = 'medium';
+  }
+  // Meme
+  else if (categoriesLower.some(cat => cat.includes('meme') || cat.includes('dog') || cat.includes('frog') || cat.includes('pepe'))) {
+    detectedCategory = 'meme';
+    detectedSubcategory = 'meme_new';
+    categoryRisk = 'high';
+    categoryQuality = 'weak';
+  }
+  // Privacy
+  else if (categoriesLower.some(cat => cat.includes('privacy') || cat.includes('anonymous'))) {
+    detectedCategory = 'old_lottery';
+    detectedSubcategory = 'old_privacy';
+    categoryRisk = 'high';
+    categoryQuality = 'weak';
+  }
+  // Modular / Interoperability
+  else if (categoriesLower.some(cat => cat.includes('interoperability') || cat.includes('oracle') || cat.includes('modular'))) {
+    detectedCategory = 'modular';
+    detectedSubcategory = 'modular_early_stage';
+    categoryRisk = 'high';
+    categoryQuality = 'medium';
+  }
+  // Exchange token
+  else if (categoriesLower.some(cat => cat.includes('exchange') || cat.includes('cex'))) {
+    detectedCategory = 'exchange';
+    detectedSubcategory = 'exchange_mid_tier';
+    categoryRisk = 'medium';
+    categoryQuality = 'medium';
+  }
+  
+  // 6. Combine quality scores (weighted average)
+  const qualityScores = { strong: 3, medium: 2, weak: 1, garbage: 0 };
+  const totalScore = qualityScores[qualityFromMcap] + qualityScores[qualityFromVolume] + qualityScores[categoryQuality] + (genesisDate ? qualityScores[qualityFromAge] : 2) + qualityScores[qualityFromTokenomics];
+  const avgScore = totalScore / (genesisDate ? 5 : 4);
+  
+  let finalQuality = 'medium';
+  if (avgScore >= 2.5) finalQuality = 'strong';
+  else if (avgScore >= 1.5) finalQuality = 'medium';
+  else if (avgScore >= 0.5) finalQuality = 'weak';
+  else finalQuality = 'garbage';
+  
+  // 7. Risk level based on category and quality
+  let finalRisk = categoryRisk;
+  if (finalQuality === 'garbage') finalRisk = 'high';
+  else if (finalQuality === 'weak' && finalRisk === 'low') finalRisk = 'medium';
+  
+  // 8. BTC correlation estimation based on category
+  let btcCorrelation = 0.5;
+  if (detectedCategory === 'fundamental_l1') btcCorrelation = 0.75;
+  else if (detectedCategory === 'fundamental_l2') btcCorrelation = 0.8;
+  else if (detectedCategory === 'meme') btcCorrelation = 0.3;
+  else if (detectedCategory === 'old_lottery') btcCorrelation = 0.6;
+  else if (detectedCategory === 'modular') btcCorrelation = 0.5;
+  
+  return {
+    category: detectedCategory,
+    subcategory: detectedSubcategory,
+    risk: finalRisk,
+    quality: finalQuality,
+    name: c.name || symbol,
+    btcCorrelation: btcCorrelation,
+    autoClassified: true
+  };
+}
+
+// Enhanced getCoinInfo with automatic classification
+function getCoinInfo(symbol, coinData = null) {
+  const sym = symbol.toLowerCase();
+  
+  // If coin is in predefined list, use that
+  if (coinCategories[sym]) {
+    return coinCategories[sym];
+  }
+  
+  // If coin data is provided, classify automatically
+  if (coinData) {
+    return classifyNewCoin(coinData);
+  }
+  
+  // Fallback to default medium/other
+  return { category: 'other', subcategory: 'other', risk: 'medium', quality: 'medium', name: symbol, btcCorrelation: 0.5 };
+}
+
 // Calculate coin volatility based on price changes
 function calculateVolatility(c) {
   const ch24 = Math.abs(c.price_change_percentage_24h || 0);
@@ -968,7 +1131,7 @@ function calculateSeasonality(c) {
   
   // Adjust based on coin category (some coins perform better in certain seasons)
   let categoryAdjustment = 0;
-  const category = getCoinInfo(c.symbol).category;
+  const category = getCoinInfo(c.symbol, c).category;
   
   // Memecoins often perform better in Q4 (hype season)
   if (category === 'meme' && (currentMonth === 9 || currentMonth === 10 || currentMonth === 11)) {
@@ -1001,7 +1164,7 @@ function suggestNewCoins(limit = 5) {
     const symbol = c.symbol.toLowerCase();
     if (portfolioSymbols.has(symbol)) return;
     
-    const coinInfo = getCoinInfo(symbol);
+    const coinInfo = getCoinInfo(symbol, c);
     const ch24 = c.price_change_percentage_24h || 0;
     const ch7 = c.price_change_percentage_7d_in_currency || 0;
     const ch30 = c.price_change_percentage_30d_in_currency || 0;
@@ -2072,7 +2235,7 @@ function getAdviceScores(h, c) {
   const weight = portfolioValue > 0 ? (coinValue / portfolioValue) * 100 : 0;
 
   // Get coin category and risk info
-  const coinInfo = getCoinInfo(h.symbol);
+  const coinInfo = getCoinInfo(h.symbol, c);
   const riskLevel = coinInfo.risk;
   const category = coinInfo.category;
   const subcategory = coinInfo.subcategory;
