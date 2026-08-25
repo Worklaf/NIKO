@@ -613,6 +613,44 @@ let marketFilter = '';
 let advisorFilter = 'all';
 let autoAlertsEnabled = true;
 
+// Track recent user actions to prevent repeated recommendations
+const recentUserActions = new Map(); // holdingId -> { action: 'buy'|'sell', timestamp, price, amount }
+
+// Record user action (buy/sell) for cooldown tracking
+function recordUserAction(holdingId, action, price, amount) {
+  recentUserActions.set(holdingId, {
+    action,
+    timestamp: Date.now(),
+    price,
+    amount
+  });
+}
+
+// Check if recommendation should be skipped due to recent action
+function shouldSkipRecommendation(h, c, type) {
+  const lastAction = recentUserActions.get(h.id);
+  if (!lastAction) return false;
+  
+  const hoursSinceAction = (Date.now() - lastAction.timestamp) / (1000 * 60 * 60);
+  const coinInfo = getCoinInfo(h.symbol, c);
+  
+  // Cooldown: 24 hours for any action
+  if (hoursSinceAction < 24) return true;
+  
+  // For fundamental coins, don't recommend sell again after selling
+  if (type === 'sell' && lastAction.action === 'sell' && coinInfo.quality === 'strong') {
+    if (hoursSinceAction < 168) return true; // 7 days cooldown for strong coins after sell
+  }
+  
+  // For DCA, require at least 5% price change since last buy
+  if (type === 'buy' && lastAction.action === 'buy') {
+    const priceChange = Math.abs((c.current_price - lastAction.price) / lastAction.price) * 100;
+    if (priceChange < 5) return true; // Require 5% price change
+  }
+  
+  return false;
+}
+
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
 
 // Coin categories and risk levels with subcategories and project quality
@@ -2311,6 +2349,29 @@ function generateCoinAdvice(h, c) {
   let autoAlert = null;
 
   const riskLabel = getRiskLabel(s);
+  
+  // Check if recommendation should be skipped due to recent user action
+  if (shouldSkipRecommendation(h, c, 'sell')) {
+    // Skip sell recommendation if recent sell action
+    type = 'hold'; badge = 'hold';
+    text = '<strong>Недавно продавали:</strong> ' + s.coinInfo.name + ' - рекомендация отложена на 24 часа после последнего действия. Дайте рынку время для определения направления.';
+    actionHtml = '';
+    autoAlert = { enabled: false };
+    return { type, badge, text, actionHtml, autoAlert, s };
+  }
+  
+  // Check if buy recommendation should be skipped due to recent buy
+  if (shouldSkipRecommendation(h, c, 'buy')) {
+    const lastAction = recentUserActions.get(h.id);
+    const hoursSince = (Date.now() - lastAction.timestamp) / (1000 * 60 * 60);
+    const priceChange = Math.abs((c.current_price - lastAction.price) / lastAction.price) * 100;
+    type = 'hold'; badge = 'hold';
+    text = '<strong>Недавно покупали:</strong> ' + s.coinInfo.name + ' - рекомендация отложена. Цена изменилась только на ' + priceChange.toFixed(1) + '% с последней покупки. Подождите изменения цены минимум на 5% для новой рекомендации DCA.';
+    actionHtml = '';
+    autoAlert = { enabled: false };
+    return { type, badge, text, actionHtml, autoAlert, s };
+  }
+  
   const categoryLabel = {
     'fundamental_l1': 'L1 фундаментал',
     'fundamental_l2': 'L2 фундаментал',
@@ -3130,8 +3191,10 @@ function saveHolding() {
         const canSell = h.amount;
         if (amount > canSell) return alert('нельзя продать больше чем есть (' + canSell.toFixed(6) + ')');
         h.purchases.push({ id: uid(), date, amount, price, type: 'sell', realizedPnl: amount * (price - h.avgPrice) });
+        recordUserAction(h.id, 'sell', price, amount);
       } else {
         h.purchases.push({ id: uid(), date, amount, price, type: 'buy' });
+        recordUserAction(h.id, 'buy', price, amount);
       }
       recalcRealizedPnl(h);
       recomputeHolding(h);
@@ -3139,6 +3202,7 @@ function saveHolding() {
       if (txType === 'sell') return alert('нельзя продать монету которой нет в портфеле');
       h = { id: uid(), coinId, symbol, amount, avgPrice: price, purchases: [{ id: uid(), date, amount, price, type: 'buy' }], targetPrice: null, stopLoss: null, notes: '', realizedPnl: 0 };
       portfolio.push(h);
+      recordUserAction(h.id, 'buy', price, amount);
     }
   } else if (!h) {
     return alert('укажите количество и цену для новой монеты');
