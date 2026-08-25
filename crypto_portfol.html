@@ -2014,7 +2014,9 @@ function scoreSell(h, c, metrics) {
 
 // Calculate risk adjustments
 function scoreRisk(h, c, metrics) {
-  const { volumeRisk, pnl, buyScore, sellScore, category, emaTrend } = metrics;
+  const { volumeRisk, pnl, category, emaTrend } = metrics;
+  let buyScore = metrics.buyScore || 0;
+  let sellScore = metrics.sellScore || 0;
   const reasonsBuy = [];
   const reasonsSell = [];
   
