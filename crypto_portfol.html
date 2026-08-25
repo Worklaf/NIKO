@@ -19,17 +19,15 @@
 body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.5; min-height: 100vh; }
 .container { max-width: 1400px; margin: 0 auto; padding: 16px; }
 
-/* Header */
 .header { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
 .logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
 .logo span { color: var(--green); }
 .last-update { font-size: 12px; color: var(--text-3); }
 
-/* Notifications bell */
 .notif-bell { position: relative; cursor: pointer; padding: 8px; border-radius: var(--radius-sm); background: var(--surface); border: 1px solid var(--border); }
 .notif-bell:hover { background: var(--surface-2); }
 .notif-badge { position: absolute; top: -4px; right: -4px; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; }
-.notif-dropdown { position: absolute; right: 0; top: 44px; width: 340px; max-height: 400px; overflow-y: auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); z-index: 100; display: none; padding: 12px; }
+.notif-dropdown { position: absolute; right: 0; top: 44px; width: 360px; max-height: 430px; overflow-y: auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); z-index: 100; display: none; padding: 12px; }
 .notif-dropdown.active { display: block; }
 .notif-item { padding: 10px; border-radius: var(--radius-sm); margin-bottom: 6px; font-size: 13px; border-left: 3px solid var(--border); }
 .notif-item.buy { border-left-color: var(--green); background: var(--green-dim); }
@@ -42,7 +40,6 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); line
 .pending-alert-item button { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 14px; }
 .pending-alert-item button:hover { color: var(--red); }
 
-/* Stats */
 .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 24px; }
 .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; transition: transform 0.2s; }
 .stat-card:hover { transform: translateY(-2px); }
@@ -53,12 +50,10 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); line
 .neg { color: var(--red); }
 .neu { color: var(--text-2); }
 
-/* Gauge */
 .gauge-track { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 8px; }
 .gauge-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
 .gauge-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-3); margin-top: 4px; }
 
-/* Tabs */
 .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 24px; overflow-x: auto; scrollbar-width: none; }
 .tabs::-webkit-scrollbar { display: none; }
 .tab-btn { padding: 12px 18px; background: transparent; border: none; color: var(--text-2); cursor: pointer; font-size: 14px; font-weight: 600; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; transition: all 0.2s; font-family: inherit; }
@@ -68,12 +63,10 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); line
 .tab-panel.active { display: block; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Section */
 .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
 .section-sub { font-size: 13px; color: var(--text-2); margin-bottom: 16px; margin-top: -8px; }
 .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
 
-/* Buttons */
 .btn { padding: 10px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit; }
 .btn:hover { background: var(--border); }
 .btn-primary { background: var(--green); color: #000; border-color: var(--green); }
@@ -81,9 +74,9 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); line
 .btn-danger { background: var(--red-dim); color: var(--red); border-color: rgba(239,68,68,0.3); }
 .btn-danger:hover { background: rgba(239,68,68,0.2); }
 .btn-blue { background: var(--blue-dim); color: var(--blue); border-color: rgba(59,130,246,0.3); }
+.btn-yellow { background: var(--yellow-dim); color: var(--yellow); border-color: rgba(245,158,11,0.3); }
 .btn-sm { padding: 6px 12px; font-size: 12px; }
 
-/* Table */
 .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th { text-align: left; padding: 12px 14px; color: var(--text-3); font-weight: 600; border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; cursor: pointer; user-select: none; }
@@ -104,12 +97,10 @@ tr.expand-row td { white-space: normal; background: rgba(255,255,255,0.015); }
 .coin-name:hover { color: var(--green); text-decoration: underline; }
 .coin-symbol { font-size: 12px; color: var(--text-3); }
 
-/* P&L Big */
 .pnl-big { font-size: 16px; font-weight: 700; padding: 4px 10px; border-radius: 20px; display: inline-block; }
 .pnl-big.pos { background: var(--green-dim); color: var(--green); }
 .pnl-big.neg { background: var(--red-dim); color: var(--red); }
 
-/* Forms */
 .form-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
 .form-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 140px; }
 .form-group label { font-size: 12px; color: var(--text-2); font-weight: 600; }
@@ -120,7 +111,6 @@ tr.expand-row td { white-space: normal; background: rgba(255,255,255,0.015); }
 .form-group input:focus, .form-group select:focus { border-color: var(--green); }
 .form-hint { font-size: 11px; color: var(--text-3); margin-top: 2px; line-height: 1.4; }
 
-/* Search dropdown */
 .search-wrap { position: relative; }
 .search-results {
   position: absolute; top: 100%; left: 0; right: 0; max-height: 240px; overflow-y: auto;
@@ -134,10 +124,8 @@ tr.expand-row td { white-space: normal; background: rgba(255,255,255,0.015); }
 .search-item:last-child { border-bottom: none; }
 .search-loading { padding: 10px 12px; font-size: 12px; color: var(--text-3); }
 
-/* Cards */
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
 
-/* Advice cards */
 .advice-card {
   border-left: 3px solid var(--border); padding: 20px;
   background: var(--surface); border-radius: 0 var(--radius) var(--radius) 0;
@@ -147,7 +135,7 @@ tr.expand-row td { white-space: normal; background: rgba(255,255,255,0.015); }
 .advice-card.buy { border-left-color: var(--green); background: var(--green-dim); }
 .advice-card.sell { border-left-color: var(--red); background: var(--red-dim); }
 .advice-card.hold { border-left-color: var(--yellow); background: var(--yellow-dim); }
-.advice-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.advice-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px; flex-wrap: wrap; }
 .advice-title { font-weight: 700; font-size: 16px; }
 .advice-badge { font-size: 11px; padding: 4px 12px; border-radius: 20px; font-weight: 700; text-transform: uppercase; }
 .badge-buy { background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
@@ -161,14 +149,20 @@ tr.expand-row td { white-space: normal; background: rgba(255,255,255,0.015); }
 .advice-metric-value { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .advice-metric-label { font-size: 11px; color: var(--text-3); margin-top: 2px; }
 .advice-btn { margin-top: 12px; }
+.signal-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.signal-chip { font-size: 11px; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--border); background: rgba(255,255,255,0.04); color: var(--text-2); }
+.signal-chip.green { color: var(--green); border-color: rgba(34,197,94,0.35); background: rgba(34,197,94,0.08); }
+.signal-chip.red { color: var(--red); border-color: rgba(239,68,68,0.35); background: rgba(239,68,68,0.08); }
+.signal-chip.yellow { color: var(--yellow); border-color: rgba(245,158,11,0.35); background: rgba(245,158,11,0.08); }
+.signal-chip.blue { color: var(--blue); border-color: rgba(59,130,246,0.35); background: rgba(59,130,246,0.08); }
+.signal-chip.purple { color: #a855f7; border-color: rgba(168,85,247,0.35); background: rgba(168,85,247,0.08); }
+.signal-chip.orange { color: #f97316; border-color: rgba(249,115,22,0.35); background: rgba(249,115,22,0.08); }
 
-/* DCA Result */
 .dca-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-top: 16px; }
 .dca-metric { text-align: center; padding: 16px; background: var(--surface-2); border-radius: var(--radius-sm); }
 .dca-metric-value { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .dca-metric-label { font-size: 12px; color: var(--text-2); margin-top: 4px; }
 
-/* Heatmap */
 .heatmap { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 3px; }
 .heatmap-item { border-radius: var(--radius-sm); padding: 12px 8px; text-align: center; font-size: 12px; cursor: pointer; transition: all 0.2s; min-height: 75px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px solid transparent; }
 .heatmap-item:hover { transform: scale(1.05); border-color: rgba(255,255,255,0.1); z-index: 2; position: relative; }
@@ -176,7 +170,6 @@ tr.expand-row td { white-space: normal; background: rgba(255,255,255,0.015); }
 .hm-change { font-variant-numeric: tabular-nums; font-weight: 600; }
 .hm-cap { font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 3px; }
 
-/* Modal */
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; backdrop-filter: blur(4px); }
 .modal-overlay.active { display: flex; }
 #modal.modal-overlay { z-index: 1001; }
@@ -186,7 +179,6 @@ tr.expand-row td { white-space: normal; background: rgba(255,255,255,0.015); }
 .modal-title { font-size: 18px; font-weight: 700; }
 .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-2); line-height: 1; }
 
-/* Charts */
 .chart-container { width: 100%; height: 260px; position: relative; }
 canvas { width: 100%; height: 100%; }
 .pie-chart { width: 180px; height: 180px; }
@@ -194,23 +186,42 @@ canvas { width: 100%; height: 100%; }
 .legend-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
 .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
 
-/* Transactions */
-.tx-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.tx-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; flex-wrap: wrap; }
 .tx-row:last-child { border-bottom: none; }
 .tx-row span { flex: 1; }
 .tx-row .tx-actions { flex: 0; display: flex; gap: 6px; white-space: nowrap; }
 
-/* Flex */
 .flex-row { display: flex; gap: 20px; flex-wrap: wrap; }
 .flex-col { flex: 1; min-width: 300px; }
 
-/* Scrollbar */
+.advisor-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.summary-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+.summary-card .title {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 6px;
+}
+.summary-card .value {
+  font-size: 22px;
+  font-weight: 700;
+}
+
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
 
-/* Responsive */
 @media (max-width: 768px) {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .stat-value { font-size: 20px; }
@@ -226,15 +237,21 @@ canvas { width: 100%; height: 100%; }
 </head>
 <body>
 <div class="container">
-    <div id="corsWarning" style="display:none; background:var(--red-dim); border:1px solid rgba(239,68,68,0.4); border-radius:var(--radius); padding:14px 16px; margin-bottom:16px; font-size:13px; line-height:1.6;">
-      <strong style="color:var(--red)">⚠ CoinGecko временно недоступен</strong><br>
-      CORS-блокировка или лимит запросов (429). Данные вашего портфеля сохранены и отображаются из кэша.<br>
-      <strong>Решение:</strong> откройте страницу через VPN, или подождите 2–3 минуты и обновите. Если проблема повторяется — CoinGecko блокирует ваш IP/домен.
-    </div>
+  <div id="corsWarning" style="display:none; background:var(--red-dim); border:1px solid rgba(239,68,68,0.4); border-radius:var(--radius); padding:14px 16px; margin-bottom:16px; font-size:13px; line-height:1.6;">
+    <strong style="color:var(--red)">⚠ CoinGecko временно недоступен</strong><br>
+    CORS-блокировка или лимит запросов (429). Данные вашего портфеля сохранены и отображаются из кэша.<br>
+    <strong>Решение:</strong> откройте страницу через VPN, или подождите 2-3 минуты и обновите. Если проблема повторяется - CoinGecko блокирует ваш IP/домен.
+  </div>
+
   <div class="header">
     <div class="logo">Crypto<span>Tracker</span></div>
     <div style="display:flex;align-items:center;gap:12px;">
       <div class="last-update" id="lastUpdate">загрузка...</div>
+      <button class="btn btn-sm" id="authBtn" onclick="openAuthModal()" style="display:none;">войти</button>
+      <div id="userInfo" style="display:none;align-items:center;gap:8px;">
+        <span id="userEmail" style="font-size:13px;color:var(--text-2);"></span>
+        <button class="btn btn-sm btn-danger" onclick="signOutUser()">выйти</button>
+      </div>
       <div class="notif-bell" onclick="toggleNotif(event)">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
@@ -246,9 +263,9 @@ canvas { width: 100%; height: 100%; }
   <div class="stats-grid" id="statsGrid">
     <div class="stat-card"><div class="stat-label">портфель</div><div class="stat-value" id="stTotal">$0</div><div class="stat-sub" id="stPnl">0%</div></div>
     <div class="stat-card"><div class="stat-label">вложено</div><div class="stat-value" id="stInvested">$0</div><div class="stat-sub neu">всего инвестиций</div></div>
-    <div class="stat-card"><div class="stat-label">btc доминация</div><div class="stat-value" id="stBtcDom">—</div><div class="stat-sub neu" id="stEthDom">eth: —</div></div>
-    <div class="stat-card"><div class="stat-label">fear & greed</div><div class="stat-value" id="stFear">—</div><div class="gauge-track"><div class="gauge-fill" id="fearBar" style="width:0%;background:var(--yellow)"></div></div><div class="gauge-labels"><span>fear</span><span>neutral</span><span>greed</span></div></div>
-    <div class="stat-card"><div class="stat-label">капитализация</div><div class="stat-value" id="stCap">—</div><div class="stat-sub" id="stCapChange">—</div></div>
+    <div class="stat-card"><div class="stat-label">btc доминация</div><div class="stat-value" id="stBtcDom">-</div><div class="stat-sub neu" id="stEthDom">eth: -</div></div>
+    <div class="stat-card"><div class="stat-label">fear & greed</div><div class="stat-value" id="stFear">-</div><div class="gauge-track"><div class="gauge-fill" id="fearBar" style="width:0%;background:var(--yellow)"></div></div><div class="gauge-labels"><span>fear</span><span>neutral</span><span>greed</span></div></div>
+    <div class="stat-card"><div class="stat-label">капитализация</div><div class="stat-value" id="stCap">-</div><div class="stat-sub" id="stCapChange">-</div></div>
   </div>
 
   <div class="tabs">
@@ -260,9 +277,7 @@ canvas { width: 100%; height: 100%; }
     <button class="tab-btn" data-tab="feed">лента</button>
   </div>
 
-  <!-- PORTFOLIO -->
   <div class="tab-panel active" id="panel-portfolio">
-    <!-- Distribution block: pie + legend horizontally -->
     <div class="card" style="margin-bottom:20px;">
       <div class="section-title" style="margin-bottom:12px;">распределение</div>
       <div style="display:flex;align-items:flex-start;gap:24px;flex-wrap:wrap;">
@@ -296,7 +311,6 @@ canvas { width: 100%; height: 100%; }
     </div>
   </div>
 
-  <!-- MARKET -->
   <div class="tab-panel" id="panel-market">
     <div class="section-title">все монеты <span style="font-size:13px;color:var(--text-3);font-weight:400;">(топ-500, клик по заголовку для сортировки)</span></div>
     <div class="toolbar" style="margin-bottom:12px;">
@@ -323,17 +337,15 @@ canvas { width: 100%; height: 100%; }
     </div>
   </div>
 
-  <!-- HEATMAP -->
   <div class="tab-panel" id="panel-heatmap">
     <div class="section-title">тепловая карта</div>
     <div class="section-sub">размер = капитализация · цвет = изменение 24ч</div>
     <div class="heatmap" id="heatmapGrid"></div>
   </div>
 
-  <!-- DCA -->
   <div class="tab-panel" id="panel-dca">
     <div class="section-title">dca калькулятор</div>
-    <div class="section-sub">выберите монету — рекомендация появится сразу, сумму докупки можно скорректировать</div>
+    <div class="section-sub">выберите монету - рекомендация появится сразу, сумму докупки можно скорректировать</div>
     <div class="card">
       <div class="form-row">
         <div class="form-group"><label>монета из портфеля</label><select id="dcaCoin" onchange="updateDCA()"></select></div>
@@ -352,21 +364,38 @@ canvas { width: 100%; height: 100%; }
           <div class="dca-metric"><div class="dca-metric-value" id="dcaTotalInv">$0</div><div class="dca-metric-label">всего вложено</div></div>
           <div class="dca-metric"><div class="dca-metric-value pos" id="dcaBreakEven">0%</div><div class="dca-metric-label">нужен рост до окупа</div></div>
           <div class="dca-metric"><div class="dca-metric-value" id="dcaCurPnl">0%</div><div class="dca-metric-label">текущий p&l</div></div>
-          <div class="dca-metric"><div class="dca-metric-value" id="dcaRec" style="font-size:15px;">—</div><div class="dca-metric-label">рекомендация</div></div>
+          <div class="dca-metric"><div class="dca-metric-value" id="dcaRec" style="font-size:15px;">-</div><div class="dca-metric-label">рекомендация</div></div>
         </div>
         <div id="dcaAction" style="margin-top:16px; padding:14px; border-radius:var(--radius-sm); font-size:14px; line-height:1.6;"></div>
       </div>
     </div>
   </div>
 
-  <!-- ADVISOR -->
   <div class="tab-panel" id="panel-advisor">
     <div class="section-title">ai советник</div>
-    <div class="section-sub">конкретные рекомендации с цифрами: сколько купить/продать, по какой цене, до какой цели держать</div>
+    <div class="section-sub">авто-алерты создаются автоматически по логике советника, без ручного нажатия</div>
+
+    <div class="advisor-summary">
+      <div class="summary-card"><div class="title">сигналы купить</div><div class="value pos" id="sumBuy">0</div></div>
+      <div class="summary-card"><div class="title">сигналы продать</div><div class="value neg" id="sumSell">0</div></div>
+      <div class="summary-card"><div class="title">держать</div><div class="value neu" id="sumHold">0</div></div>
+      <div class="summary-card"><div class="title">авто-алерты</div><div class="value" id="sumAlerts">0</div></div>
+    </div>
+
+    <div class="toolbar" style="margin-bottom:16px;">
+      <button class="btn btn-sm" onclick="setAdvisorFilter('all')">все</button>
+      <button class="btn btn-sm btn-primary" onclick="setAdvisorFilter('buy')">купить</button>
+      <button class="btn btn-sm btn-danger" onclick="setAdvisorFilter('sell')">продать</button>
+      <button class="btn btn-sm btn-yellow" onclick="setAdvisorFilter('hold')">держать</button>
+      <button class="btn btn-sm btn-blue" onclick="toggleAutoAlerts()">
+        авто-алерты: <span id="autoAlertsState">on</span>
+      </button>
+    </div>
+
     <div id="advisorList"></div>
+    <div id="newCoinSuggestions" style="margin-top:24px"></div>
   </div>
 
-  <!-- FEED -->
   <div class="tab-panel" id="panel-feed">
     <div class="section-title">лента транзакций</div>
     <div class="section-sub">все покупки и продажи по всему портфелю в хронологическом порядке</div>
@@ -374,7 +403,6 @@ canvas { width: 100%; height: 100%; }
   </div>
 </div>
 
-<!-- ADD/PURCHASE MODAL -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <div class="modal-header"><div class="modal-title" id="modalTitle">добавить покупку</div><button class="modal-close" onclick="closeModal()">&times;</button></div>
@@ -387,7 +415,7 @@ canvas { width: 100%; height: 100%; }
           <input type="hidden" id="mCoinImg">
           <div class="search-results" id="searchResults"></div>
         </div>
-        <div class="form-hint">поиск идёт по топ-250 и по всей базе CoinGecko — можно выбрать любую монету</div>
+        <div class="form-hint">поиск идет по топ-250 и по всей базе CoinGecko - можно выбрать любую монету</div>
       </div>
       <div class="form-group"><label>количество</label><input type="number" id="mQty" step="any" placeholder="0.5"></div>
     </div>
@@ -429,7 +457,6 @@ canvas { width: 100%; height: 100%; }
   </div>
 </div>
 
-<!-- TRANSACTIONS MODAL -->
 <div class="modal-overlay" id="txModal">
   <div class="modal">
     <div class="modal-header"><div class="modal-title" id="txModalTitle">транзакции</div><button class="modal-close" onclick="closeTxModal()">&times;</button></div>
@@ -440,7 +467,6 @@ canvas { width: 100%; height: 100%; }
   </div>
 </div>
 
-<!-- CHART MODAL -->
 <div class="modal-overlay" id="chartModal">
   <div class="modal modal-wide">
     <div class="modal-header"><div class="modal-title" id="chartModalTitle">график</div><button class="modal-close" onclick="closeChartModal()">&times;</button></div>
@@ -455,98 +481,823 @@ canvas { width: 100%; height: 100%; }
   </div>
 </div>
 
+<div class="modal-overlay" id="authModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="authModalTitle">вход в аккаунт</div><button class="modal-close" onclick="closeAuthModal()">&times;</button></div>
+    <div id="authError" style="display:none;background:var(--red-dim);color:var(--red);padding:10px;border-radius:var(--radius-sm);margin-bottom:12px;font-size:13px;"></div>
+    
+    <div class="form-row">
+      <div class="form-group"><label>email</label><input type="email" id="authEmail" placeholder="your@email.com"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>пароль</label><input type="password" id="authPassword" placeholder="••••••••"></div>
+    </div>
+    
+    <div style="text-align:right;margin-top:8px;">
+      <button class="btn btn-sm" style="background:none;border:none;color:var(--text-2);padding:0;" onclick="resetPassword()">забыли пароль?</button>
+    </div>
+    
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+      <button class="btn" onclick="closeAuthModal()">отмена</button>
+      <button class="btn btn-primary" id="authSubmitBtn" onclick="handleAuth()">войти</button>
+    </div>
+    
+    <div style="text-align:center;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+      <button class="btn btn-blue" style="width:100%;" onclick="signInWithGoogle()">
+        <span style="display:flex;align-items:center;justify-content:center;gap:8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Войти через Google
+        </span>
+      </button>
+    </div>
+    
+    <div style="text-align:center;margin-top:12px;font-size:13px;color:var(--text-2);">
+      <span id="authToggleText">Нет аккаунта?</span>
+      <button class="btn btn-sm" style="background:none;border:none;color:var(--green);padding:0;" onclick="toggleAuthMode()" id="authToggleBtn">зарегистрироваться</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics-compat.js"></script>
+
 <script>
-const API_BASE = "/api/proxy";
-const FEAR_API = "/api/proxy?service=fear-greed";
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCGSkXMOy-Pi8rGsuz5gBrPvCUbf8gQaTs",
+  authDomain: "airdroplab-7060f.firebaseapp.com",
+  projectId: "airdroplab-7060f",
+  storageBucket: "airdroplab-7060f.firebasestorage.app",
+  messagingSenderId: "26186485963",
+  appId: "1:26186485963:web:c8ef632c30d213249f8b4e",
+  measurementId: "G-WRS0RP8FMW"
+};
 
-function cgUrl(path, params = {}) {
-  const query = new URLSearchParams({
-    service: "coingecko",
-    path
-  });
+// Initialize Firebase
+try {
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const auth = firebase.auth();
+  const googleProvider = new firebase.auth.GoogleAuthProvider();
 
-  for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined && value !== null) {
-      query.set(key, String(value));
-    }
+  // Global Firebase variables for use in other scripts
+  window.firebaseDB = db;
+  window.firebaseAuth = auth;
+  window.firebaseGoogleProvider = googleProvider;
+  window.firebaseReady = true;
+  console.log('Firebase initialized successfully');
+
+  // Analytics
+  if (firebase.analytics) {
+    firebase.analytics();
   }
 
-  return `${API_BASE}?${query.toString()}`;
+  // Auth state listener
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      console.log('User signed in:', user.email);
+      window.firebaseUser = user;
+      localStorage.setItem('ct_user_id', user.uid);
+      localStorage.setItem('userEmail', user.email);
+      localStorage.setItem('userDisplayName', user.displayName || '');
+      // Reload portfolio when user signs in
+      if (window.loadPortfolio) window.loadPortfolio();
+      if (window.loadNotifs) window.loadNotifs();
+      if (window.loadAlerts) window.loadAlerts();
+    } else {
+      console.log('User signed out');
+      window.firebaseUser = null;
+      localStorage.removeItem('ct_user_id');
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('userDisplayName');
+    }
+    // Update UI
+    if (window.updateAuthUI) window.updateAuthUI();
+  });
+} catch (e) {
+  console.error('Firebase initialization failed:', e);
+  window.firebaseDB = null;
+  window.firebaseAuth = null;
+  window.firebaseReady = false;
 }
+</script>
 
-const CACHE_COINS_KEY = 'ct_cache_coins_v5';
-const CACHE_GLOBAL_KEY = 'ct_cache_global_v5';
-const CACHE_FEAR_KEY = 'ct_cache_fear_v5';
-const PORTFOLIO_KEY = 'ct_portfolio_v4';
-const NOTIF_KEY = 'ct_notifs_v4';
-const ALERTS_KEY = 'ct_alerts_v4';
+<script>
+const API_BASE = 'https://api.coingecko.com/api/v3';
+const FEAR_API = 'https://api.alternative.me/fng/?limit=1';
+
+const CACHE_KEY = 'ct_cache_v5';
+const PORTFOLIO_KEY = 'ct_portfolio_v5';
+const NOTIF_KEY = 'ct_notifs_v5';
+const ALERTS_KEY = 'ct_alerts_v5';
+const AUTO_ALERTS_KEY = 'ct_auto_alerts_v1';
 const CACHE_TTL = 60 * 1000;
 
 let allCoins = [];
-let extraCoins = {}; // coins not in top250, found via /search, keyed by id
+let extraCoins = {};
 let globalData = null;
 let fearData = null;
 let portfolio = [];
 let notifications = [];
-let alertsList = []; // pending price alerts {id,coinId,symbol,type,value,suggestedAmount,fired}
+let alertsList = [];
 let marketSort = { col: 'market_cap_rank', dir: 'asc' };
 let portfolioSort = { col: null, dir: 'desc' };
-let expandedRows = {}; // holdingId -> bool
+let expandedRows = {};
 let currentTxHoldingId = null;
 let currentChartCoin = null;
 let searchDebounce = null;
 let currentEditTxId = null;
-let advisorFilter = 'all'; // 'all' | 'buy' | 'sell' | 'hold'
-let fetchInProgress = false;
+let marketFilter = '';
+let advisorFilter = 'all';
+let autoAlertsEnabled = true;
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
 
-function init() {
+// Coin categories and risk levels with subcategories
+const coinCategories = {
+  // Fundamental L1 — low/medium risk with subcategories
+  'btc': { category: 'fundamental_l1', subcategory: 'l1_bluechip', risk: 'low', name: 'Bitcoin', btcCorrelation: 1.0 },
+  'eth': { category: 'fundamental_l1', subcategory: 'l1_bluechip', risk: 'low', name: 'Ethereum', btcCorrelation: 0.85 },
+  'sol': { category: 'fundamental_l1', subcategory: 'l1_high_growth', risk: 'medium', name: 'Solana', btcCorrelation: 0.75 },
+  'near': { category: 'fundamental_l1', subcategory: 'l1_high_growth', risk: 'medium', name: 'NEAR', btcCorrelation: 0.7 },
+  'sei': { category: 'fundamental_l1', subcategory: 'l1_high_growth', risk: 'medium', name: 'Sei', btcCorrelation: 0.65 },
+  'ada': { category: 'fundamental_l1', subcategory: 'l1_slow_growth', risk: 'low', name: 'Cardano', btcCorrelation: 0.8 },
+  'dot': { category: 'fundamental_l1', subcategory: 'l1_slow_growth', risk: 'low', name: 'Polkadot', btcCorrelation: 0.75 },
+  'atom': { category: 'fundamental_l1', subcategory: 'l1_slow_growth', risk: 'low', name: 'Cosmos', btcCorrelation: 0.7 },
+  
+  // Fundamental L2 — low/medium risk with subcategories
+  'arb': { category: 'fundamental_l2', subcategory: 'l2_high_growth', risk: 'medium', name: 'Arbitrum', btcCorrelation: 0.8 },
+  'mnt': { category: 'fundamental_l2', subcategory: 'l2_high_growth', risk: 'medium', name: 'Mantle', btcCorrelation: 0.7 },
+  'pol': { category: 'fundamental_l2', subcategory: 'l2_slow_growth', risk: 'low', name: 'Polygon', btcCorrelation: 0.85 },
+  
+  // Exchange tokens — low/medium risk
+  'bnb': { category: 'exchange', subcategory: 'exchange_bluechip', risk: 'low', name: 'BNB', btcCorrelation: 0.7 },
+  'bgb': { category: 'exchange', subcategory: 'exchange_mid_tier', risk: 'medium', name: 'Bitget', btcCorrelation: 0.6 },
+  
+  // DEX / infrastructure — medium risk with subcategories
+  'uni': { category: 'dex', subcategory: 'dex_bluechip', risk: 'medium', name: 'Uniswap', btcCorrelation: 0.75 },
+  'gmx': { category: 'dex', subcategory: 'dex_bluechip', risk: 'medium', name: 'GMX', btcCorrelation: 0.65 },
+  '1inch': { category: 'dex', subcategory: 'dex_risky', risk: 'medium', name: '1inch', btcCorrelation: 0.6 },
+  
+  // Modular / experimental — high risk with subcategories
+  'tia': { category: 'modular', subcategory: 'modular_early_stage', risk: 'high', name: 'Celestia', btcCorrelation: 0.55 },
+  'dym': { category: 'modular', subcategory: 'modular_early_stage', risk: 'high', name: 'Dymension', btcCorrelation: 0.5 },
+  'gram': { category: 'modular', subcategory: 'modular_mature', risk: 'high', name: 'TON', btcCorrelation: 0.4 },
+  
+  // Memecoins — high risk
+  'dogs': { category: 'meme', subcategory: 'meme_new', risk: 'high', name: 'Dogs', btcCorrelation: 0.3 },
+  'not': { category: 'meme', subcategory: 'meme_new', risk: 'high', name: 'Notcoin', btcCorrelation: 0.3 },
+  'doge': { category: 'meme', subcategory: 'meme_legacy', risk: 'high', name: 'Dogecoin', btcCorrelation: 0.5 },
+  'shib': { category: 'meme', subcategory: 'meme_legacy', risk: 'high', name: 'Shiba Inu', btcCorrelation: 0.45 },
+  
+  // Old / lottery — medium/high risk
+  'zec': { category: 'old_lottery', subcategory: 'old_privacy', risk: 'high', name: 'Zcash', btcCorrelation: 0.6 },
+  'dash': { category: 'old_lottery', subcategory: 'old_privacy', risk: 'high', name: 'Dash', btcCorrelation: 0.55 },
+  'ltc': { category: 'old_lottery', subcategory: 'old_legacy', risk: 'medium', name: 'Litecoin', btcCorrelation: 0.9 }
+};
+
+function getCoinInfo(symbol) {
+  const sym = symbol.toLowerCase();
+  return coinCategories[sym] || { category: 'other', subcategory: 'other', risk: 'medium', name: symbol, btcCorrelation: 0.5 };
+}
+
+// Calculate coin volatility based on price changes
+function calculateVolatility(c) {
+  const ch24 = Math.abs(c.price_change_percentage_24h || 0);
+  const ch7 = Math.abs(c.price_change_percentage_7d_in_currency || 0);
+  const ch30 = Math.abs(c.price_change_percentage_30d_in_currency || 0);
+  
+  // Average daily volatility
+  const avgDailyVol = (ch24 + (ch7 / 7) + (ch30 / 30)) / 3;
+  return avgDailyVol;
+}
+
+// Calculate volume-based risk (exchange spread)
+function calculateVolumeRisk(c) {
+  const vol24 = c.total_volume || 0;
+  const mcap = c.market_cap || 1;
+  
+  // Volume to market cap ratio
+  const volRatio = vol24 / mcap;
+  
+  if (volRatio < 0.01) return 'very_low'; // Very low liquidity
+  if (volRatio < 0.05) return 'low';
+  if (volRatio < 0.15) return 'medium';
+  return 'high';
+}
+
+// Calculate RSI (Relative Strength Index) using real sparkline data
+function calculateRSI(c, period = 14) {
+  // Try to use sparkline data if available
+  const sparkline7d = c.sparkline_in_7d?.price;
+  const sparkline30d = c.sparkline_in_30d?.price;
+  
+  const prices = sparkline30d || sparkline7d;
+  
+  if (prices && prices.length >= period) {
+    // Calculate RSI using real price data
+    let gains = 0;
+    let losses = 0;
+    
+    for (let i = prices.length - period; i < prices.length; i++) {
+      const change = prices[i] - prices[i - 1];
+      if (change > 0) {
+        gains += change;
+      } else {
+        losses -= change;
+      }
+    }
+    
+    const avgGain = gains / period;
+    const avgLoss = losses / period;
+    
+    if (avgLoss === 0) return 100;
+    const rs = avgGain / avgLoss;
+    const rsi = 100 - (100 / (1 + rs));
+    
+    return Math.round(rsi);
+  }
+  
+  // Fallback to simplified RSI estimation based on price changes
+  const ch24 = c.price_change_percentage_24h || 0;
+  const ch7 = c.price_change_percentage_7d_in_currency || 0;
+  
+  if (ch24 > 10 && ch7 > 20) return 75; // Overbought
+  if (ch24 > 5 && ch7 > 10) return 65;
+  if (ch24 < -10 && ch7 < -20) return 25; // Oversold
+  if (ch24 < -5 && ch7 < -10) return 35;
+  
+  return 50; // Neutral
+}
+
+// Calculate EMA (Exponential Moving Average) using real sparkline data
+function calculateEMA(c, period = 7) {
+  const sparkline7d = c.sparkline_in_7d?.price;
+  const sparkline30d = c.sparkline_in_30d?.price;
+  
+  const prices = sparkline30d || sparkline7d;
+  
+  if (prices && prices.length >= period) {
+    // Calculate EMA using real price data
+    const multiplier = 2 / (period + 1);
+    let ema = prices[0];
+    
+    for (let i = 1; i < prices.length; i++) {
+      ema = (prices[i] * multiplier) + (ema * (1 - multiplier));
+    }
+    
+    return ema;
+  }
+  
+  // Fallback: return current price if no sparkline data
+  return c.current_price;
+}
+
+// Calculate EMA trend using real EMA values
+function calculateEMATrend(c) {
+  const ema7 = calculateEMA(c, 7);
+  const ema20 = calculateEMA(c, 20);
+  const currentPrice = c.current_price;
+  
+  if (!ema7 || !ema20) {
+    // Fallback to price change based trend
+    const ch7 = c.price_change_percentage_7d_in_currency || 0;
+    const ch30 = c.price_change_percentage_30d_in_currency || 0;
+    
+    if (ch7 > 0 && ch30 > 0 && ch7 > ch30) return 'strong_uptrend';
+    if (ch7 > 0 && ch30 > 0) return 'uptrend';
+    if (ch7 < 0 && ch30 < 0 && ch7 < ch30) return 'strong_downtrend';
+    if (ch7 < 0 && ch30 < 0) return 'downtrend';
+    if (Math.abs(ch7) < 5 && Math.abs(ch30) < 10) return 'sideways';
+    
+    return 'mixed';
+  }
+  
+  // Determine trend based on EMA values
+  const ema7AboveEma20 = ema7 > ema20;
+  const priceAboveEma7 = currentPrice > ema7;
+  
+  if (ema7AboveEma20 && priceAboveEma7) return 'strong_uptrend';
+  if (ema7AboveEma20) return 'uptrend';
+  if (!ema7AboveEma20 && !priceAboveEma7) return 'strong_downtrend';
+  if (!ema7AboveEma20) return 'downtrend';
+  
+  return 'sideways';
+}
+
+// Get BTC trend for macro analysis
+function getBTCTrend() {
+  const btc = allCoins.find(c => c.id === 'bitcoin' || c.symbol === 'BTC');
+  if (!btc) return 'neutral';
+  
+  const btcCh24 = btc.price_change_percentage_24h || 0;
+  const btcCh7 = btc.price_change_percentage_7d_in_currency || 0;
+  
+  if (btcCh24 > 3 && btcCh7 > 10) return 'macro_uptrend';
+  if (btcCh24 < -3 && btcCh7 < -10) return 'macro_downtrend';
+  if (Math.abs(btcCh24) < 2 && Math.abs(btcCh7) < 5) return 'macro_sideways';
+  
+  return 'neutral';
+}
+
+// Calculate comprehensive risk score (0-100) with BTC correlation
+function calculateRiskScore(c, coinInfo, volatility, volumeRisk, btcTrend) {
+  let score = 0;
+  
+  // Base risk from category
+  const categoryRisk = {
+    'fundamental_l1': 20,
+    'fundamental_l2': 30,
+    'exchange': 25,
+    'dex': 40,
+    'modular': 60,
+    'meme': 80,
+    'old_lottery': 50,
+    'other': 40
+  };
+  score += categoryRisk[coinInfo.category] || 40;
+  
+  // Volatility impact (higher volatility = higher risk)
+  score += Math.min(volatility * 2, 30);
+  
+  // Volume risk impact
+  const volumeRiskScore = {
+    'very_low': 20,
+    'low': 10,
+    'medium': 0,
+    'high': -5
+  };
+  score += volumeRiskScore[volumeRisk] || 0;
+  
+  // BTC correlation impact (lower correlation = higher risk)
+  const btcCorr = coinInfo.btcCorrelation || 0.5;
+  if (btcCorr < 0.4) score += 15; // Low correlation = higher risk
+  else if (btcCorr > 0.8) score -= 10; // High correlation = lower risk
+  
+  // ATH drawdown impact
+  const hasAth = typeof c.ath === 'number' && c.ath > 0;
+  if (hasAth) {
+    const drawdown = ((c.current_price - c.ath) / c.ath) * 100;
+    if (drawdown < -80) score += 15; // Near ATL - higher risk
+    else if (drawdown < -50) score += 10;
+    else if (drawdown < -30) score += 5;
+  }
+  
+  // Macro trend adjustment
+  if (btcTrend === 'macro_downtrend' && btcCorr > 0.7) score += 10; // High correlation in downtrend = higher risk
+  if (btcTrend === 'macro_uptrend' && btcCorr > 0.7) score -= 5; // High correlation in uptrend = lower risk
+  
+  return Math.min(Math.max(score, 0), 100);
+}
+
+// Determine market phase with macro trends (simplified)
+function determineMarketPhase(c, ch24, ch7, ch30, btcTrend) {
+  const isUptrend = ch24 > 0 && ch7 > 0 && ch30 > 0;
+  const isDowntrend = ch24 < 0 && ch7 < 0 && ch30 < 0;
+  const isSideways = Math.abs(ch24) < 2 && Math.abs(ch7) < 10 && Math.abs(ch30) < 20;
+  
+  // Macro trend integration (simplified)
+  if (btcTrend === 'macro_uptrend' && isUptrend) return 'macro_uptrend_coin_uptrend';
+  if (btcTrend === 'macro_downtrend' && isDowntrend) return 'macro_downtrend_coin_downtrend';
+  if (btcTrend === 'macro_uptrend' && isDowntrend) return 'rotation_phase';
+  if (btcTrend === 'macro_downtrend' && isUptrend) return 'rotation_phase';
+  
+  // Simplified phase detection
+  if (ch24 > 10) return 'distribution';
+  if (ch24 < -15) return 'panic_selling';
+  if (isUptrend) return 'accumulation_uptrend';
+  if (isDowntrend) return 'accumulation_downtrend';
+  if (isSideways) return 'consolidation';
+  
+  // Mixed signals
+  if (ch24 > 0 && ch7 < 0) return 'short_term_rally';
+  if (ch24 < 0 && ch7 > 0) return 'pullback';
+  
+  return 'uncertain';
+}
+
+// Calculate Support and Resistance levels from sparkline data
+function calculateSupportResistance(c) {
+  const sparkline7d = c.sparkline_in_7d?.price;
+  const sparkline30d = c.sparkline_in_30d?.price;
+  
+  const prices = sparkline30d || sparkline7d;
+  
+  if (!prices || prices.length < 10) {
+    return { support: null, resistance: null, current: c.current_price };
+  }
+  
+  const currentPrice = c.current_price;
+  const sortedPrices = [...prices].sort((a, b) => a - b);
+  
+  // Find local minima (support) and maxima (resistance)
+  const localMinima = [];
+  const localMaxima = [];
+  
+  for (let i = 2; i < prices.length - 2; i++) {
+    const prev2 = prices[i - 2];
+    const prev1 = prices[i - 1];
+    const current = prices[i];
+    const next1 = prices[i + 1];
+    const next2 = prices[i + 2];
+    
+    // Local minimum (support)
+    if (current < prev1 && current < prev2 && current < next1 && current < next2) {
+      localMinima.push(current);
+    }
+    
+    // Local maximum (resistance)
+    if (current > prev1 && current > prev2 && current > next1 && current > next2) {
+      localMaxima.push(current);
+    }
+  }
+  
+  // Find nearest support below current price
+  const supportsBelow = localMinima.filter(p => p < currentPrice).sort((a, b) => b - a);
+  const support = supportsBelow.length > 0 ? supportsBelow[0] : sortedPrices[0];
+  
+  // Find nearest resistance above current price
+  const resistancesAbove = localMaxima.filter(p => p > currentPrice).sort((a, b) => a - b);
+  const resistance = resistancesAbove.length > 0 ? resistancesAbove[0] : sortedPrices[sortedPrices.length - 1];
+  
+  // Calculate distance percentages
+  const supportDistance = support ? ((currentPrice - support) / currentPrice) * 100 : null;
+  const resistanceDistance = resistance ? ((resistance - currentPrice) / currentPrice) * 100 : null;
+  
+  return {
+    support,
+    resistance,
+    current: currentPrice,
+    supportDistance,
+    resistanceDistance,
+    nearSupport: supportDistance && supportDistance < 5,
+    nearResistance: resistanceDistance && resistanceDistance < 5
+  };
+}
+
+// Calculate Seasonality based on monthly patterns
+function calculateSeasonality(c) {
+  const currentMonth = new Date().getMonth(); // 0-11
+  
+  // Historical seasonality patterns for crypto (simplified)
+  // Based on historical data: Q1 (Jan-Mar) often bullish, Q4 (Oct-Dec) strong
+  const seasonalityPatterns = {
+    0: { name: 'Январь', trend: 'bullish', strength: 0.7, reason: 'January effect - new year optimism' },
+    1: { name: 'Февраль', trend: 'neutral', strength: 0.5, reason: 'Post-January correction typical' },
+    2: { name: 'Март', trend: 'bullish', strength: 0.6, reason: 'Q1 rally continuation' },
+    3: { name: 'Апрель', trend: 'neutral', strength: 0.4, reason: 'Tax season selling pressure' },
+    4: { name: 'Май', trend: 'bearish', strength: 0.6, reason: 'Sell in May and go away pattern' },
+    5: { name: 'Июнь', trend: 'neutral', strength: 0.5, reason: 'Summer lull begins' },
+    6: { name: 'Июль', trend: 'neutral', strength: 0.4, reason: 'Summer low volume' },
+    7: { name: 'Август', trend: 'neutral', strength: 0.4, reason: 'Summer doldrums' },
+    8: { name: 'Сентябрь', trend: 'bearish', strength: 0.7, reason: 'Historically worst month for crypto' },
+    9: { name: 'Октябрь', trend: 'bullish', strength: 0.6, reason: 'Uptober - Q4 rally starts' },
+    10: { name: 'Ноябрь', trend: 'bullish', strength: 0.8, reason: 'Pre-holiday rally' },
+    11: { name: 'Декабрь', trend: 'bullish', strength: 0.7, reason: 'Santa Claus rally' }
+  };
+  
+  const pattern = seasonalityPatterns[currentMonth] || { name: 'Unknown', trend: 'neutral', strength: 0.5, reason: 'No data' };
+  
+  // Adjust based on coin category (some coins perform better in certain seasons)
+  let categoryAdjustment = 0;
+  const category = getCoinInfo(c.symbol).category;
+  
+  // Memecoins often perform better in Q4 (hype season)
+  if (category === 'meme' && (currentMonth === 9 || currentMonth === 10 || currentMonth === 11)) {
+    categoryAdjustment = 0.2;
+  }
+  
+  // Fundamental coins more stable, less seasonal impact
+  if (category === 'fundamental_l1' || category === 'fundamental_l2') {
+    categoryAdjustment = -0.1;
+  }
+  
+  return {
+    month: currentMonth,
+    monthName: pattern.name,
+    trend: pattern.trend,
+    strength: Math.min(1, pattern.strength + categoryAdjustment),
+    reason: pattern.reason,
+    isBullish: pattern.trend === 'bullish',
+    isBearish: pattern.trend === 'bearish'
+  };
+}
+
+// Suggest new coins to buy based on growth signals
+function suggestNewCoins(limit = 5) {
+  const portfolioSymbols = new Set(portfolio.map(h => h.symbol.toLowerCase()));
+  const suggestions = [];
+  
+  // Filter coins not in portfolio and with good signals
+  allCoins.forEach(c => {
+    const symbol = c.symbol.toLowerCase();
+    if (portfolioSymbols.has(symbol)) return;
+    
+    const coinInfo = getCoinInfo(symbol);
+    const ch24 = c.price_change_percentage_24h || 0;
+    const ch7 = c.price_change_percentage_7d_in_currency || 0;
+    const ch30 = c.price_change_percentage_30d_in_currency || 0;
+    const rsi = calculateRSI(c);
+    const emaTrend = calculateEMATrend(c);
+    const seasonality = calculateSeasonality(c);
+    const sr = calculateSupportResistance(c);
+    
+    let score = 0;
+    const reasons = [];
+    
+    // Strong uptrend signals
+    if (emaTrend === 'strong_uptrend') { score += 20; reasons.push('сильный восходящий тренд'); }
+    if (emaTrend === 'uptrend') { score += 10; reasons.push('восходящий тренд'); }
+    
+    // Positive price action
+    if (ch24 > 5 && ch24 < 20) { score += 15; reasons.push('здоровый рост 24ч'); }
+    if (ch7 > 10 && ch7 < 30) { score += 15; reasons.push('рост за неделю'); }
+    if (ch30 > 20) { score += 10; reasons.push('рост за месяц'); }
+    
+    // RSI not overbought
+    if (rsi >= 40 && rsi <= 65) { score += 15; reasons.push('RSI в здоровой зоне'); }
+    if (rsi < 40) { score += 10; reasons.push('RSI показывает потенциал'); }
+    
+    // Near support (good entry point)
+    if (sr.nearSupport) { score += 15; reasons.push('уровень поддержки'); }
+    
+    // Seasonality bonus
+    if (seasonality.isBullish) { score += Math.round(seasonality.strength * 10); reasons.push('сезонность: ' + seasonality.monthName); }
+    
+    // Category preference
+    if (coinInfo.category === 'fundamental_l1' || coinInfo.category === 'fundamental_l2') {
+      score += 10; reasons.push('фундаментальный актив');
+    }
+    
+    // Volume and liquidity check
+    const vol24 = c.total_volume || 0;
+    const mcap = c.market_cap || 1;
+    const volRatio = vol24 / mcap;
+    if (volRatio > 0.05) { score += 5; reasons.push('хорошая ликвидность'); }
+    
+    // Minimum score threshold
+    if (score >= 30) {
+      suggestions.push({
+        coin: c,
+        coinInfo,
+        score,
+        reasons,
+        ch24,
+        ch7,
+        ch30,
+        rsi,
+        emaTrend,
+        seasonality,
+        supportResistance: sr
+      });
+    }
+  });
+  
+  // Sort by score and return top suggestions
+  return suggestions
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
+}
+
+// Render new coin suggestions
+function renderNewCoinSuggestions() {
+  const container = document.getElementById('newCoinSuggestions');
+  if (!container) return;
+  
+  const suggestions = suggestNewCoins(5);
+  
+  if (suggestions.length === 0) {
+    container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-3)">Нет предложений для новых монет</div>';
+    return;
+  }
+  
+  let html = '<div style="padding:16px"><h3 style="margin:0 0 16px 0;font-size:16px">💡 Предложения для покупки</h3>';
+  
+  suggestions.forEach(s => {
+    const c = s.coin;
+    const reasonsText = s.reasons.join(', ');
+    
+    html += `
+      <div style="background:var(--surface-2);border-radius:8px;padding:12px;margin-bottom:12px;border:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <img src="${c.image}" style="width:24px;height:24px;border-radius:50%">
+            <span style="font-weight:700">${c.symbol.toUpperCase()}</span>
+            <span style="font-size:12px;color:var(--text-3)">$${c.current_price?.toFixed(4) || 'N/A'}</span>
+          </div>
+          <div style="display:flex;gap:8px">
+            <span class="signal-chip green">score: ${s.score}</span>
+            <span class="signal-chip blue">${s.coinInfo.category}</span>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--text-2);margin-bottom:8px">
+          24ч: <span style="${s.ch24 >= 0 ? 'color:var(--green)' : 'color:var(--red)'}">${fmtPct(s.ch24)}</span> | 
+          7д: <span style="${s.ch7 >= 0 ? 'color:var(--green)' : 'color:var(--red)'}">${fmtPct(s.ch7)}</span> | 
+          RSI: <span class="signal-chip orange">${s.rsi}</span> | 
+          EMA: <span class="signal-chip yellow">${s.emaTrend}</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-3)">
+          <strong>Причины:</strong> ${reasonsText}
+          ${s.seasonality.isBullish ? `<br><span style="color:var(--green)">📅 Сезонность: ${s.seasonality.monthName} (${s.seasonality.reason})</span>` : ''}
+        </div>
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function calculateDCAPercentage(dropPct, riskLevel) {
+  const absDrop = Math.abs(dropPct);
+  
+  // Base percentages by risk level
+  const riskMultipliers = {
+    'low': 0.8,      // Conservative for low-risk coins
+    'medium': 1.0,   // Standard for medium-risk
+    'high': 1.3      // Aggressive for high-risk (higher potential reward)
+  };
+  
+  const multiplier = riskMultipliers[riskLevel] || 1.0;
+  
+  // Dynamic formula based on drop percentage
+  if (absDrop >= 90) return Math.min(0.9, 0.9 * multiplier); // Max 90% of portfolio position
+  if (absDrop >= 70) return Math.min(0.7, 0.7 * multiplier);
+  if (absDrop >= 50) return Math.min(0.5, 0.5 * multiplier);
+  if (absDrop >= 40) return Math.min(0.4, 0.4 * multiplier);
+  if (absDrop >= 30) return Math.min(0.3, 0.3 * multiplier);
+  if (absDrop >= 20) return Math.min(0.2, 0.2 * multiplier);
+  if (absDrop >= 10) return Math.min(0.1, 0.1 * multiplier);
+  return 0.05; // Small buy for minor drops
+}
+
+let authMode = 'login'; // 'login' or 'signup'
+
+function openAuthModal() {
+  document.getElementById('authModal').classList.add('active');
+  document.getElementById('authError').style.display = 'none';
+  document.getElementById('authEmail').value = '';
+  document.getElementById('authPassword').value = '';
+  updateAuthModalUI();
+}
+
+function closeAuthModal() {
+  document.getElementById('authModal').classList.remove('active');
+}
+
+function toggleAuthMode() {
+  authMode = authMode === 'login' ? 'signup' : 'login';
+  updateAuthModalUI();
+}
+
+function updateAuthModalUI() {
+  const title = document.getElementById('authModalTitle');
+  const submitBtn = document.getElementById('authSubmitBtn');
+  const toggleText = document.getElementById('authToggleText');
+  const toggleBtn = document.getElementById('authToggleBtn');
+  
+  if (authMode === 'login') {
+    title.textContent = 'вход в аккаунт';
+    submitBtn.textContent = 'войти';
+    toggleText.textContent = 'Нет аккаунта?';
+    toggleBtn.textContent = 'зарегистрироваться';
+  } else {
+    title.textContent = 'регистрация';
+    submitBtn.textContent = 'создать аккаунт';
+    toggleText.textContent = 'Уже есть аккаунт?';
+    toggleBtn.textContent = 'войти';
+  }
+}
+
+async function handleAuth() {
+  const email = document.getElementById('authEmail').value;
+  const password = document.getElementById('authPassword').value;
+  const errorEl = document.getElementById('authError');
+  
+  if (!email || !password) {
+    errorEl.textContent = 'Заполните все поля';
+    errorEl.style.display = 'block';
+    return;
+  }
+  
+  try {
+    if (authMode === 'login') {
+      await window.firebaseAuth.signInWithEmailAndPassword(email, password);
+    } else {
+      await window.firebaseAuth.createUserWithEmailAndPassword(email, password);
+    }
+    closeAuthModal();
+  } catch (e) {
+    console.error('Auth error:', e);
+    errorEl.textContent = getAuthErrorMessage(e.code);
+    errorEl.style.display = 'block';
+  }
+}
+
+async function signInWithGoogle() {
+  try {
+    await window.firebaseAuth.signInWithPopup(window.firebaseGoogleProvider);
+    closeAuthModal();
+  } catch (e) {
+    console.error('Google auth error:', e);
+    const errorEl = document.getElementById('authError');
+    errorEl.textContent = getAuthErrorMessage(e.code);
+    errorEl.style.display = 'block';
+  }
+}
+
+async function signOutUser() {
+  try {
+    await window.firebaseAuth.signOut();
+    localStorage.removeItem('ct_user_id');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userDisplayName');
+    // Load from localStorage after sign out
+    loadPortfolio();
+    loadNotifs();
+    loadAlerts();
+  } catch (e) {
+    console.error('Sign out error:', e);
+  }
+}
+
+async function resetPassword() {
+  const email = document.getElementById('authEmail').value;
+  const errorEl = document.getElementById('authError');
+  
+  if (!email) {
+    errorEl.textContent = 'Введите email для сброса пароля';
+    errorEl.style.display = 'block';
+    return;
+  }
+  
+  try {
+    await window.firebaseAuth.sendPasswordResetEmail(email);
+    errorEl.style.background = 'var(--green-dim)';
+    errorEl.style.color = 'var(--green)';
+    errorEl.textContent = 'Письмо для сброса пароля отправлено на ' + email;
+    errorEl.style.display = 'block';
+  } catch (e) {
+    console.error('Password reset error:', e);
+    errorEl.style.background = 'var(--red-dim)';
+    errorEl.style.color = 'var(--red)';
+    errorEl.textContent = getAuthErrorMessage(e.code);
+    errorEl.style.display = 'block';
+  }
+}
+
+function getAuthErrorMessage(code) {
+  const messages = {
+    'auth/email-already-in-use': 'Этот email уже зарегистрирован',
+    'auth/invalid-email': 'Неверный формат email',
+    'auth/weak-password': 'Пароль должен содержать минимум 6 символов',
+    'auth/user-not-found': 'Пользователь не найден',
+    'auth/wrong-password': 'Неверный пароль',
+    'auth/popup-closed-by-user': 'Окно авторизации закрыто',
+    'auth/cancelled-popup-request': 'Авторизация отменена',
+    'auth/popup-blocked': 'Пopup заблокирован браузером',
+    'default': 'Ошибка авторизации'
+  };
+  return messages[code] || messages['default'];
+}
+
+function updateAuthUI() {
+  const authBtn = document.getElementById('authBtn');
+  const userInfo = document.getElementById('userInfo');
+  const userEmail = document.getElementById('userEmail');
+  
+  if (window.firebaseUser) {
+    authBtn.style.display = 'none';
+    userInfo.style.display = 'flex';
+    userEmail.textContent = window.firebaseUser.email;
+  } else {
+    authBtn.style.display = 'block';
+    userInfo.style.display = 'none';
+  }
+}
+
+async function init() {
+  // Load data (Firebase if available, otherwise localStorage)
   loadPortfolio();
   loadNotifs();
   loadAlerts();
+  loadAutoAlertSettings();
+  
   setupTabs();
   setupSearchClose();
-
-  try {
-    Object.assign(
-      extraCoins,
-      JSON.parse(
-        localStorage.getItem("ct_extra_coins") || "{}"
-      )
-    );
-  } catch (error) {
-    console.warn("Extra-coins cache error:", error);
+  try { const cached = JSON.parse(localStorage.getItem('ct_extra_coins') || '{}'); Object.assign(extraCoins, cached); } catch(e){}
+  ensureNotificationPermission();
+  
+  // Show auth button if Firebase is ready
+  if (window.firebaseReady) {
+    updateAuthUI();
   }
-
-  try {
-    localStorage.removeItem("ct_cache_v4");
-  } catch {}
-
-  // Сразу показываем локально сохранённый портфель.
-  renderAll();
-
-  // Затем загружаем свежие цены.
+  
   fetchAll();
-
-  // Автоматическое обновление при открытой вкладке.
-  window.setInterval(() => {
-    if (!document.hidden && navigator.onLine) {
-      fetchAll();
-    }
-  }, 60 * 1000);
-
-  // Обновление после возвращения на вкладку.
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden && navigator.onLine) {
-      fetchAll();
-    }
-  });
-
-  // Обновление после восстановления интернета.
-  window.addEventListener("online", fetchAll);
+  setInterval(fetchAll, 60000);
 }
-
 
 function setupTabs() {
   document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -562,30 +1313,6 @@ function setupTabs() {
   });
 }
 
-function renderFeed() {
-  const list = document.getElementById('feedList');
-  let allTx = [];
-  portfolio.forEach(h => {
-    const c = findCoin(h.coinId || h.symbol.toLowerCase());
-    if (!c) return;
-    (h.purchases || []).forEach(p => {
-      allTx.push({ ...p, symbol: h.symbol, name: c.name, image: c.image });
-    });
-  });
-  allTx.sort((a, b) => new Date(b.date) - new Date(a.date));
-  if (!allTx.length) { list.innerHTML = '<div style="color:var(--text-3);padding:20px;">нет транзакций</div>'; return; }
-  let html2 = '<div class="table-wrap"><table><thead><tr><th>дата</th><th>монета</th><th>тип</th><th>кол-во</th><th>цена</th><th>сумма</th><th>реализ. p&l</th></tr></thead><tbody>';
-  allTx.forEach(tx => {
-    const isSell = tx.type === 'sell';
-    const typeClass = isSell ? 'neg' : 'pos';
-    const typeText = isSell ? 'ПРОДАЖА' : 'ПОКУПКА';
-    const pnlCell = (isSell && tx.realizedPnl) ? '<span class="' + (tx.realizedPnl >= 0 ? 'pos' : 'neg') + '">' + (tx.realizedPnl >= 0 ? '+' : '') + fmt$(tx.realizedPnl) + '</span>' : '—';
-    html2 += '<tr><td>' + tx.date + '</td><td><div class="coin-cell"><div class="coin-img"><img src="' + tx.image + '" alt="" onerror="this.style.display=\'none\';this.parentNode.textContent=\'' + tx.symbol[0] + '\'"></div><div><div style="font-weight:600">' + tx.name + '</div><div class="coin-symbol">' + tx.symbol + '</div></div></div></td><td><span class="' + typeClass + '" style="font-weight:700;font-size:12px;">' + typeText + '</span></td><td>' + tx.amount + '</td><td>' + fmt$(tx.price) + '</td><td>' + fmt$(tx.amount * tx.price) + '</td><td>' + pnlCell + '</td></tr>';
-  });
-  html2 += '</tbody></table></div>';
-  list.innerHTML = html2;
-}
-
 function setupSearchClose() {
   document.addEventListener('click', e => {
     if (!e.target.closest('.search-wrap')) {
@@ -597,334 +1324,196 @@ function setupSearchClose() {
   });
 }
 
-// ===================== API =====================
-async function apiFetch(
-  url,
-  {
-    attempts = 3,
-    timeout = 15000
-  } = {}
-) {
-  let lastError = null;
+async function ensureNotificationPermission() {
+  if (!('Notification' in window)) return false;
+  if (Notification.permission === 'granted') return true;
+  if (Notification.permission === 'denied') return false;
+  try {
+    const perm = await Notification.requestPermission();
+    return perm === 'granted';
+  } catch (e) {
+    return false;
+  }
+}
 
-  for (let attempt = 1; attempt <= attempts; attempt++) {
-    const controller = new AbortController();
-    const timer = setTimeout(
-      () => controller.abort(),
-      timeout
-    );
+function pushBrowserNotification(title, body) {
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
+  try {
+    new Notification(title, { body, icon: 'https://www.coingecko.com/favicon.ico' });
+  } catch (e) {}
+}
 
+async function apiFetch(url, attempts) {
+  attempts = attempts || 0;
+  
+  // Try direct fetch first
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 8000);
+    const res = await fetch(url, {
+      mode: 'cors',
+      referrerPolicy: 'no-referrer',
+      headers: { 'Accept': 'application/json' },
+      signal: ctrl.signal
+    });
+    clearTimeout(t);
+    if (res.ok) return res;
+  } catch (e) {
+    console.log('Direct fetch failed, trying proxy:', e.message);
+  }
+
+  // Use proxy servers for CORS issues
+  const proxies = [
+  'https://api.allorigins.win/raw?url=',
+  'https://api.codetabs.com/v1/proxy?quest=',
+  'https://thingproxy.freeboard.io/fetch/'
+  ];
+
+  let lastErr;
+  for (let p of proxies) {
     try {
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          Accept: "application/json"
-        },
-        cache: "no-store",
-        signal: controller.signal
-      });
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 12000);
+      const proxyUrl = p + encodeURIComponent(url);
+      const res = await fetch(proxyUrl, { signal: ctrl.signal });
+      clearTimeout(t);
+      if (res.ok) return res;
 
-      clearTimeout(timer);
-
-      if (response.ok) {
-        return response;
+      if (res.status === 429) {
+        lastErr = new Error('rate limit');
+        if (attempts < 2) {
+          await new Promise(r => setTimeout(r, 2000));
+          continue;
+        }
       }
 
-      if (
-        response.status !== 429 &&
-        response.status < 500
-      ) {
-        return response;
+      if (res.status === 403 || res.status === 503) {
+        lastErr = new Error('proxy blocked');
+        continue;
       }
 
-      lastError = new Error(
-        `Сервер вернул HTTP ${response.status}`
-      );
-    } catch (error) {
-      clearTimeout(timer);
-      lastError = error;
-    }
-
-    if (attempt < attempts) {
-      await new Promise(resolve => {
-        setTimeout(resolve, attempt * 1500);
-      });
+      return res;
+    } catch (e) {
+      lastErr = e;
     }
   }
 
-  throw lastError || new Error("Сетевой запрос не выполнен");
+  throw lastErr || new Error('fetch failed');
 }
 
 
 async function fetchAll() {
-  if (fetchInProgress) return;
-
-  fetchInProgress = true;
-
-  const lastUpdate =
-    document.getElementById("lastUpdate");
-
   try {
-    const cachedCoins = getCacheCoins();
-    const cachedGlobal = getCacheGlobal();
-    const cachedFear = getCacheFear();
-
-    if (!allCoins.length && cachedCoins.length) {
-      allCoins = cachedCoins;
-    }
-
-    if (!globalData && cachedGlobal) {
-      globalData = cachedGlobal;
-    }
-
-    if (!fearData && cachedFear) {
-      fearData = cachedFear;
-    }
-
-    if (allCoins.length || portfolio.length) {
+    const cache = getCache();
+    if (cache && cache.coins && cache.coins.length) {
+      allCoins = cache.coins;
+      if (cache.global) globalData = cache.global;
+      if (cache.fear) fearData = cache.fear;
+      syncAutoAlertsFromAdvisor();
       renderAll();
       checkNotifs();
     }
 
-    const cacheTime = Number(
-      localStorage.getItem("ct_cache_time") || 0
-    );
-
-    if (
-      allCoins.length &&
-      cacheTime > 0 &&
-      Date.now() - cacheTime < CACHE_TTL
-    ) {
+    if (cache && Date.now() - cache.time < CACHE_TTL) {
       await refreshExtraCoins();
-      syncPortfolioPrices();
-      renderAll();
-      checkNotifs();
+      syncAutoAlertsFromAdvisor();
       hideCorsWarning();
-
-      lastUpdate.textContent =
-        "кэш: " +
-        new Date(cacheTime).toLocaleTimeString("ru-RU");
-
+      document.getElementById('lastUpdate').textContent = 'кэш: ' + new Date(cache.time).toLocaleTimeString('ru-RU');
       return;
     }
 
-    const requests = [
-      apiFetch(
-        cgUrl("/coins/markets", {
-          vs_currency: "usd",
-          order: "market_cap_desc",
-          per_page: 250,
-          page: 1,
-          sparkline: true,
-          price_change_percentage: "24h,7d,30d"
-        })
-      ),
-      apiFetch(
-        cgUrl("/coins/markets", {
-          vs_currency: "usd",
-          order: "market_cap_desc",
-          per_page: 250,
-          page: 2,
-          sparkline: true,
-          price_change_percentage: "24h,7d,30d"
-        })
-      ),
-      apiFetch(cgUrl("/global")),
-      apiFetch(FEAR_API)
-    ];
+    const page1 = await apiFetch(API_BASE + '/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=true&price_change_percentage=24h,7d,30d');
+    if (!page1.ok) throw new Error('coins page 1 status ' + page1.status);
+    const data1 = await page1.json();
+    allCoins = data1;
 
-    const [
-      page1Result,
-      page2Result,
-      globalResult,
-      fearResult
-    ] = await Promise.allSettled(requests);
+    try {
+      const page2 = await apiFetch(API_BASE + '/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=2&sparkline=true&price_change_percentage=24h,7d,30d');
+      if (page2.ok) {
+        const data2 = await page2.json();
+        allCoins = [...data1, ...data2];
+      }
+    } catch (e2) { console.log('page 2 failed', e2); }
 
-    if (
-      page1Result.status !== "fulfilled" ||
-      !page1Result.value.ok
-    ) {
-      throw new Error(
-        "Не удалось загрузить список монет"
-      );
-    }
+    try {
+      const r = await apiFetch(API_BASE + '/global');
+      if (r.ok) {
+        const ct = r.headers.get('content-type') || '';
+        if (ct.includes('json')) {
+          globalData = await r.json();
+          renderHeader();
+        }
+      }
+    } catch(e){ console.log('global fetch error', e); }
 
-    const page1Data =
-      await page1Result.value.json();
+    try {
+      const r = await apiFetch(FEAR_API);
+      if (r.ok) {
+        const ct = r.headers.get('content-type') || '';
+        if (ct.includes('json')) {
+          fearData = await r.json();
+          renderHeader();
+        }
+      }
+    } catch(e){ console.log('fear fetch error', e); }
 
-    if (!Array.isArray(page1Data) || !page1Data.length) {
-      throw new Error(
-        "API вернул пустой список монет"
-      );
-    }
-
-    let freshCoins = page1Data;
-
-    if (
-      page2Result.status === "fulfilled" &&
-      page2Result.value.ok
-    ) {
-      const page2Data =
-        await page2Result.value.json();
-
-      if (Array.isArray(page2Data)) {
-        freshCoins = freshCoins.concat(page2Data);
+    // Cache only essential data to avoid localStorage quota exceeded
+    // Don't cache full allCoins array (too large), cache only portfolio-related data
+    const cacheData = {
+      time: Date.now(),
+      global: globalData,
+      fear: fearData,
+      // Cache only coins that are in portfolio
+      portfolioCoins: allCoins.filter(c => portfolio.some(p => p.coinId === c.id))
+    };
+    try {
+      // Clear old cache first to free space
+      localStorage.removeItem(CACHE_KEY);
+      localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+    } catch (e) {
+      console.warn('Failed to save cache (quota exceeded), using minimal cache');
+      // Try to clear all related caches to free space
+      try {
+ sessionStorage.clear();
+      } catch(se){}
+      // Save minimal data if quota exceeded
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+          time: Date.now(),
+          global: globalData,
+          fear: fearData,
+          portfolioCoins: []
+        }));
+      } catch (e2) {
+        console.error('Cannot save even minimal cache:', e2);
       }
     }
-
-    allCoins = freshCoins;
-
-    if (
-      globalResult.status === "fulfilled" &&
-      globalResult.value.ok
-    ) {
-      globalData = await globalResult.value.json();
-    }
-
-    if (
-      fearResult.status === "fulfilled" &&
-      fearResult.value.ok
-    ) {
-      fearData = await fearResult.value.json();
-    }
-
     await refreshExtraCoins();
-    syncPortfolioPrices();
-
-    const now = Date.now();
-
-    setStoredJson(CACHE_COINS_KEY, allCoins);
-    setStoredJson(CACHE_GLOBAL_KEY, globalData);
-    setStoredJson(CACHE_FEAR_KEY, fearData);
-    localStorage.setItem(
-      "ct_cache_time",
-      String(now)
-    );
-
-    renderAll();
-    checkNotifs();
+    syncAutoAlertsFromAdvisor();
     hideCorsWarning();
-
-    lastUpdate.textContent =
-      "обновлено: " +
-      new Date(now).toLocaleTimeString("ru-RU");
-  } catch (error) {
-    console.error("fetchAll error:", error);
-
-    const cachedCoins = getCacheCoins();
-    const cachedGlobal = getCacheGlobal();
-    const cachedFear = getCacheFear();
-
-    if (cachedCoins.length) {
-      allCoins = cachedCoins;
-    }
-
-    if (cachedGlobal) {
-      globalData = cachedGlobal;
-    }
-
-    if (cachedFear) {
-      fearData = cachedFear;
-    }
-
     renderAll();
     checkNotifs();
-    showApiWarning(error);
-
-    const cacheTime = Number(
-      localStorage.getItem("ct_cache_time") || 0
-    );
-
-    lastUpdate.textContent = cacheTime
-      ? "показан кэш от " +
-        new Date(cacheTime).toLocaleTimeString("ru-RU")
-      : "рыночные данные недоступны";
-  } finally {
-    fetchInProgress = false;
-  }
-}
-
-function showApiWarning(error) {
-  const element =
-    document.getElementById("corsWarning");
-
-  if (!element) return;
-
-  const message =
-    error && error.message
-      ? error.message
-      : "Сетевая ошибка";
-
-  element.style.display = "block";
-  element.innerHTML =
-    '<strong style="color:var(--red)">' +
-    "⚠ Рыночные данные временно недоступны" +
-    "</strong><br>" +
-    "Портфель сохранён локально. " +
-    "Повторная загрузка выполнится автоматически.<br>" +
-    '<span style="color:var(--text-3)">' +
-    escapeHtml(message) +
-    "</span>";
-}
-function getCoinView(holding) {
-  const liveCoin = findCoin(
-    holding.coinId ||
-    holding.symbol.toLowerCase()
-  );
-
-  if (liveCoin) {
-    return liveCoin;
-  }
-
-  return {
-    id:
-      holding.coinId ||
-      holding.symbol.toLowerCase(),
-    symbol: holding.symbol.toLowerCase(),
-    name: holding.symbol,
-    image: "",
-    current_price: Number(
-      holding.lastPrice ||
-      holding.avgPrice ||
-      0
-    ),
-    market_cap: 0,
-    total_volume: 0,
-    price_change_percentage_24h: 0,
-    price_change_percentage_7d_in_currency: 0,
-    ath: null,
-    sparkline_in_7d: {
-      price: []
-    },
-    isCachedFallback: true
-  };
-}
-
-function syncPortfolioPrices() {
-  let changed = false;
-
-  portfolio.forEach(holding => {
-    const coin = findCoin(
-      holding.coinId ||
-      holding.symbol.toLowerCase()
-    );
-
-    if (
-      coin &&
-      Number.isFinite(coin.current_price) &&
-      coin.current_price > 0
-    ) {
-      holding.lastPrice = coin.current_price;
-      holding.lastPriceAt = Date.now();
-      changed = true;
+    document.getElementById('lastUpdate').textContent = 'обновлено: ' + new Date().toLocaleTimeString('ru-RU');
+  } catch (e) {
+    console.error('fetchAll error:', e);
+    const cache = getCache();
+    if (cache && (cache.portfolioCoins || cache.coins)) {
+      // Use cached portfolio coins if available
+      allCoins = cache.portfolioCoins || cache.coins || [];
+      if (cache.global) globalData = cache.global;
+      if (cache.fear) fearData = cache.fear;
+      await refreshExtraCoins();
+      syncAutoAlertsFromAdvisor();
+      renderAll();
+      checkNotifs();
+      document.getElementById('lastUpdate').textContent = 'CoinGecko недоступен (CORS/429), показан кэш от ' + new Date(cache.time).toLocaleTimeString('ru-RU');
+    } else {
+      document.getElementById('lastUpdate').textContent = 'CoinGecko недоступен. Данные загрузятся позже.';
     }
-  });
-
-  if (changed) {
-    savePortfolio();
+    maybeShowCorsWarning(e);
   }
 }
-
 
 function maybeShowCorsWarning(e) {
   const isFileProtocol = location.protocol === 'file:';
@@ -939,62 +1528,43 @@ function hideCorsWarning() {
   if (el) el.style.display = 'none';
 }
 
-function getStoredJson(key, fallback = null) {
+function getCache() {
   try {
-    const value = localStorage.getItem(key);
-    return value ? JSON.parse(value) : fallback;
-  } catch (error) {
-    console.warn("Cache read error:", key, error);
-    return fallback;
-  }
+    const cache = JSON.parse(localStorage.getItem(CACHE_KEY));
+    if (!cache) return null;
+    // Handle old cache format (coins) and new format (portfolioCoins)
+    if (cache.coins && !cache.portfolioCoins) {
+      cache.portfolioCoins = cache.coins;
+    }
+    return cache;
+  } catch { return null; }
 }
-
-function setStoredJson(key, value) {
-  if (value === undefined || value === null) return;
-
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch (error) {
-    console.warn("Cache write error:", key, error);
-  }
-}
-
-function getCacheCoins() {
-  return getStoredJson(CACHE_COINS_KEY, []);
-}
-
-function getCacheGlobal() {
-  return getStoredJson(CACHE_GLOBAL_KEY, null);
-}
-
-function getCacheFear() {
-  return getStoredJson(CACHE_FEAR_KEY, null);
-}
-
 
 function renderAll() {
-  renderHeader(); renderPortfolio(); renderMarket(); renderHeatmap();
+  renderHeader();
+  renderPortfolio();
+  renderMarket();
+  renderHeatmap();
   initDCA();
   if (document.getElementById('panel-advisor').classList.contains('active')) renderAdvisor();
   updateNotifBadge();
-  document.getElementById('lastUpdate').textContent = 'обновлено: ' + new Date().toLocaleTimeString('ru-RU');
 }
 
-// ===================== HEADER =====================
 function renderHeader() {
-  let totalVal = 0, totalInv = 0, totalRealized = 0;
+  let totalVal = 0, totalInv = 0;
   portfolio.forEach(h => {
-    const c = getCoinView(h);
-
+    const c = findCoin(h.coinId || h.symbol.toLowerCase());
+    if (!c) return;
     totalVal += h.amount * c.current_price;
     totalInv += h.amount * h.avgPrice;
-    totalRealized += h.realizedPnl || 0;
   });
+
   const pnl = totalInv > 0 ? ((totalVal - totalInv) / totalInv) * 100 : 0;
   const pnlDollar = totalVal - totalInv;
   const btcCoin = findCoin('bitcoin');
   const btcPrice = btcCoin ? btcCoin.current_price : 0;
   const btcValue = btcPrice > 0 ? totalVal / btcPrice : 0;
+
   document.getElementById('stTotal').textContent = fmt$(totalVal);
   document.getElementById('stTotal').title = btcPrice > 0 ? ('≈ ' + btcValue.toFixed(4) + ' BTC') : '';
   const pnlEl = document.getElementById('stPnl');
@@ -1014,10 +1584,10 @@ function renderHeader() {
     document.getElementById('stBtcDom').textContent = btcDom.toFixed(1) + '%';
     document.getElementById('stEthDom').textContent = 'eth: ' + ethDom.toFixed(1) + '%';
   } else {
-    document.getElementById('stCap').textContent = '—';
-    document.getElementById('stCapChange').textContent = '—';
-    document.getElementById('stBtcDom').textContent = '—';
-    document.getElementById('stEthDom').textContent = 'eth: —';
+    document.getElementById('stCap').textContent = '-';
+    document.getElementById('stCapChange').textContent = '-';
+    document.getElementById('stBtcDom').textContent = '-';
+    document.getElementById('stEthDom').textContent = 'eth: -';
   }
 
   if (fearData && fearData.data && fearData.data[0]) {
@@ -1030,18 +1600,24 @@ function renderHeader() {
     bar.style.width = f + '%';
     bar.style.background = f < 30 ? 'var(--red)' : f > 70 ? 'var(--green)' : 'var(--yellow)';
   } else {
-    document.getElementById('stFear').textContent = '—';
+    document.getElementById('stFear').textContent = '-';
     document.getElementById('stFear').className = 'stat-value neu';
     document.getElementById('fearBar').style.width = '0%';
   }
 }
 
-// ===================== PORTFOLIO =====================
+function getPortfolioValue() {
+  return portfolio.reduce((sum, h) => {
+    const c = findCoin(h.coinId || h.symbol.toLowerCase());
+    return sum + (c ? h.amount * c.current_price : 0);
+  }, 0);
+}
+
 function getPortfolioRows() {
   const rows = [];
   portfolio.forEach(h => {
-    const c = getCoinView(h);
-
+    const c = findCoin(h.coinId || h.symbol.toLowerCase());
+    if (!c) return;
     const value = h.amount * c.current_price;
     const inv = h.amount * h.avgPrice;
     const pnl = h.avgPrice > 0 ? ((c.current_price - h.avgPrice) / h.avgPrice) * 100 : 0;
@@ -1072,32 +1648,36 @@ function renderPortfolio() {
   const rows = getPortfolioRows();
 
   rows.forEach((r, idx) => {
-    const { h, c, value, pnl, pnlDollar } = r;
+    const { h, c, value, pnl, pnlDollar, realized } = r;
     totalVal += value;
     pieData.push({ label: h.symbol, value: value, color: getColor(idx) });
 
     const tr = document.createElement('tr');
-    tr.innerHTML = '<td><div class="coin-cell"><div class="coin-img"><img src="' + c.image + '" alt="" onerror="this.style.display=\'none\';this.parentNode.textContent=\'' + h.symbol[0] + '\'"></div><div><div class="coin-name" onclick="openChartModal(\'' + h.coinId + '\',\'' + h.symbol + '\')">' + c.name + '</div><div class="coin-symbol">' + h.symbol + '</div></div></div></td>' +
+    tr.innerHTML =
+      '<td><div class="coin-cell"><div class="coin-img"><img src="' + c.image + '" alt="" onerror="this.style.display=\'none\';this.parentNode.textContent=\'' + h.symbol[0] + '\'"></div><div><div class="coin-name" onclick="openChartModal(\'' + h.coinId + '\',\'' + h.symbol + '\')">' + c.name + '</div><div class="coin-symbol">' + h.symbol + '</div></div></div></td>' +
       '<td>' + h.amount.toLocaleString() + '</td>' +
       '<td>$' + h.avgPrice.toLocaleString() + '</td>' +
       '<td>' + fmt$(c.current_price) + '</td>' +
       '<td>' + fmt$(value) + '</td>' +
       '<td><span class="pnl-big ' + (pnl >= 0 ? 'pos' : 'neg') + '">' + fmtPct(pnl) + '</span></td>' +
       '<td><span class="' + (pnlDollar >= 0 ? 'pos' : 'neg') + '" style="font-weight:700;">' + (pnlDollar >= 0 ? '+' : '') + fmt$(pnlDollar) + '</span></td>' +
+      '<td><span class="' + (realized >= 0 ? 'pos' : 'neg') + '" style="font-weight:700;">' + (realized >= 0 ? '+' : '') + fmt$(realized) + '</span></td>' +
       '<td><button class="btn btn-sm" onclick="toggleAdviceRow(\'' + h.id + '\')">рек ' + (expandedRows[h.id] ? '▲' : '▼') + '</button> <button class="btn btn-sm btn-blue" onclick="openTxModal(\'' + h.id + '\')">транз.</button> <button class="btn btn-sm btn-danger" onclick="delHolding(\'' + h.id + '\')">удл</button></td>';
     tbody.appendChild(tr);
 
     if (expandedRows[h.id]) {
       const adv = generateCoinAdvice(h, c);
+      const autoInfo = adv.autoAlert
+        ? '<div style="margin-top:10px;font-size:12px;color:var(--text-3)">Авто-алерт: ' + (adv.autoAlert.type === 'below' ? 'ниже ' : 'выше ') + fmt$(adv.autoAlert.value) + (adv.autoAlert.suggestedAmount ? (' · сумма ~' + fmt$(adv.autoAlert.suggestedAmount)) : '') + '</div>'
+        : '';
       const exTr = document.createElement('tr');
       exTr.className = 'expand-row';
-      exTr.innerHTML = '<td colspan="8"><div class="advice-card ' + adv.type + '" style="margin-bottom:0;"><div class="advice-header"><div class="advice-title">Рекомендация</div><span class="advice-badge badge-' + adv.badge + '">' + (adv.badge==='buy'?'КУПИТЬ':adv.badge==='sell'?'ПРОДАТЬ':'ДЕРЖАТЬ') + '</span></div><div class="advice-text">' + adv.text + '</div>' + adv.actionHtml + '</div></td>';
+      exTr.innerHTML = '<td colspan="9"><div class="advice-card ' + adv.type + '" style="margin-bottom:0;"><div class="advice-header"><div class="advice-title">Рекомендация</div><span class="advice-badge badge-' + adv.badge + '">' + (adv.badge==='buy'?'КУПИТЬ':adv.badge==='sell'?'ПРОДАТЬ':'ДЕРЖАТЬ') + '</span></div><div class="advice-text">' + adv.text + '</div>' + adv.actionHtml + autoInfo + '</div></td>';
       tbody.appendChild(exTr);
     }
   });
 
   drawPie(pieData, totalVal);
-  drawPortChart();
 }
 
 function toggleAdviceRow(id) {
@@ -1112,20 +1692,14 @@ function drawPie(data, total) {
   ctx.clearRect(0, 0, 180, 180);
   legend.innerHTML = '';
   if (!data.length) return;
-  // Filter: only >1% individually, rest -> "Остальные"
   let filtered = [];
   let othersValue = 0;
   data.forEach(d => {
     const pct = total > 0 ? (d.value / total) * 100 : 0;
-    if (pct >= 1) {
-      filtered.push(d);
-    } else {
-      othersValue += d.value;
-    }
+    if (pct >= 1) filtered.push(d);
+    else othersValue += d.value;
   });
-  if (othersValue > 0) {
-    filtered.push({ label: 'Остальные', value: othersValue, color: '#64748b' });
-  }
+  if (othersValue > 0) filtered.push({ label: 'Остальные', value: othersValue, color: '#64748b' });
   let start = 0;
   filtered.forEach(d => {
     const slice = (d.value / total) * 2 * Math.PI;
@@ -1138,9 +1712,6 @@ function drawPie(data, total) {
   legend.innerHTML = filtered.map(d => '<div class="legend-row" style="white-space:nowrap;"><div class="legend-dot" style="background:' + d.color + '"></div><span>' + d.label + ' <span style="color:var(--text-3)">' + ((d.value/total)*100).toFixed(1) + '%</span></span></div>').join('');
 }
 
-// ===================== MARKET with SORT =====================
-let marketFilter = '';
-
 function filterMarket(query) {
   marketFilter = query.toLowerCase().trim();
   renderMarket();
@@ -1150,7 +1721,6 @@ function renderMarket() {
   const tbody = document.querySelector('#marketTable tbody');
   tbody.innerHTML = '';
   let sorted = [...allCoins];
-  // Apply filter
   if (marketFilter) {
     sorted = sorted.filter(c => c.name.toLowerCase().includes(marketFilter) || c.symbol.toLowerCase().includes(marketFilter));
   }
@@ -1169,10 +1739,11 @@ function renderMarket() {
     const fromAth = hasAth ? ((c.current_price - c.ath) / c.ath) * 100 : null;
     const spark = c.sparkline_in_7d ? c.sparkline_in_7d.price : [];
     const tr = document.createElement('tr');
-    tr.innerHTML = '<td>' + (c.market_cap_rank || i+1) + '</td>' +
+    tr.innerHTML =
+      '<td>' + (c.market_cap_rank || i + 1) + '</td>' +
       '<td><div class="coin-cell"><div class="coin-img"><img src="' + c.image + '" alt="" onerror="this.style.display=\'none\';this.parentNode.textContent=\'' + c.symbol[0].toUpperCase() + '\'"></div><div><div class="coin-name" onclick="openChartModal(\'' + c.id + '\',\'' + c.symbol.toUpperCase() + '\')">' + c.name + '</div><div class="coin-symbol">' + c.symbol.toUpperCase() + '</div></div></div></td>' +
       '<td>' + fmt$(c.current_price) + '</td>' +
-      '<td class="' + (c.price_change_percentage_24h >= 0 ? 'pos' : 'neg') + '">' + fmtPct(c.price_change_percentage_24h || 0) + '</td>' +
+      '<td class="' + ((c.price_change_percentage_24h || 0) >= 0 ? 'pos' : 'neg') + '">' + fmtPct(c.price_change_percentage_24h || 0) + '</td>' +
       '<td class="' + ((c.price_change_percentage_7d_in_currency || 0) >= 0 ? 'pos' : 'neg') + '">' + fmtPct(c.price_change_percentage_7d_in_currency || 0) + '</td>' +
       '<td>' + fmtLarge(c.market_cap) + '</td>' +
       '<td>' + fmtLarge(c.total_volume) + '</td>' +
@@ -1198,11 +1769,10 @@ function drawSparkline(prices) {
   const min = Math.min(...prices), max = Math.max(...prices);
   const range = max - min || 1;
   const pts = prices.map((p, i) => (i / (prices.length - 1)) * w + ',' + (h - ((p - min) / range) * h)).join(' ');
-  const color = prices[prices.length-1] >= prices[0] ? '#22c55e' : '#ef4444';
+  const color = prices[prices.length - 1] >= prices[0] ? '#22c55e' : '#ef4444';
   return '<svg width="' + w + '" height="' + h + '" style="vertical-align:middle"><polyline points="' + pts + '" fill="none" stroke="' + color + '" stroke-width="1.5"/></svg>';
 }
 
-// ===================== HEATMAP =====================
 function renderHeatmap() {
   const grid = document.getElementById('heatmapGrid');
   grid.innerHTML = '';
@@ -1217,12 +1787,11 @@ function renderHeatmap() {
     el.style.gridColumn = 'span ' + Math.min(Math.ceil(size), 4);
     el.style.gridRow = 'span ' + Math.min(Math.ceil(size), 4);
     el.onclick = () => openChartModal(c.id, c.symbol.toUpperCase());
-    el.innerHTML = '<div class="hm-symbol">' + c.symbol.toUpperCase() + '</div><div class="hm-change ' + (isUp?'pos':'neg') + '">' + fmtPct(ch) + '</div><div class="hm-cap">' + fmtLarge(c.market_cap) + '</div>';
+    el.innerHTML = '<div class="hm-symbol">' + c.symbol.toUpperCase() + '</div><div class="hm-change ' + (isUp ? 'pos' : 'neg') + '">' + fmtPct(ch) + '</div><div class="hm-cap">' + fmtLarge(c.market_cap) + '</div>';
     grid.appendChild(el);
   });
 }
 
-// ===================== DCA =====================
 function initDCA() {
   const sel = document.getElementById('dcaCoin');
   const prev = sel.value;
@@ -1239,10 +1808,11 @@ function updateDCA() {
   if (!h) { document.getElementById('dcaResult').style.display = 'none'; return; }
   const c = findCoin(h.coinId || h.symbol.toLowerCase());
   if (!c) return;
+
   document.getElementById('dcaAvg').value = h.avgPrice;
   document.getElementById('dcaQty').value = h.amount;
   document.getElementById('dcaPrice').value = c.current_price;
-  // auto-fill a sensible default investment so recommendation shows immediately
+
   const inv = h.amount * h.avgPrice;
   const defaultInvest = Math.max(10, Math.round((inv * 0.2) * 100) / 100);
   document.getElementById('dcaInvest').value = defaultInvest;
@@ -1256,10 +1826,18 @@ function calcDCA(fromInvest) {
   if (!h) return;
   const c = findCoin(h.coinId || h.symbol.toLowerCase());
   if (!c) return;
+
   let invest = parseFloat(document.getElementById('dcaInvest').value) || 0;
   let addQty = parseFloat(document.getElementById('dcaAddQty').value) || 0;
-  if (fromInvest === true) { addQty = invest > 0 ? invest / c.current_price : 0; document.getElementById('dcaAddQty').value = addQty ? addQty.toFixed(6) : ''; }
-  else if (fromInvest === false) { invest = addQty * c.current_price; document.getElementById('dcaInvest').value = invest ? invest.toFixed(2) : ''; }
+
+  if (fromInvest === true) {
+    addQty = invest > 0 ? invest / c.current_price : 0;
+    document.getElementById('dcaAddQty').value = addQty ? addQty.toFixed(6) : '';
+  } else if (fromInvest === false) {
+    invest = addQty * c.current_price;
+    document.getElementById('dcaInvest').value = invest ? invest.toFixed(2) : '';
+  }
+
   const qty = addQty;
   if (qty <= 0) { document.getElementById('dcaResult').style.display = 'none'; return; }
 
@@ -1273,35 +1851,16 @@ function calcDCA(fromInvest) {
 
   if (curPnl < -50) {
     recText = 'СИЛЬНАЯ ДОКУПКА'; recClass = 'pos';
-    actionHtml = '<div style="background:var(--green-dim);border-left:3px solid var(--green);padding:12px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;">' +
-      '<strong style="color:var(--green)">Просадка &gt;50% — хороший момент для усреднения.</strong> С выбранной суммой:<br>' +
-      'Докупить на <strong>' + fmt$(invest || qty * c.current_price) + '</strong> → получите <strong>' + qty.toFixed(4) + ' ' + h.symbol + '</strong><br>' +
-      'Средняя цена изменится с <strong>$' + h.avgPrice + '</strong> → <strong>$' + newAvg.toFixed(2) + '</strong><br>' +
-      'Для окупаемости нужен рост всего <strong>+' + breakEven.toFixed(1) + '%</strong> (сейчас ' + fmtPct(curPnl) + ')' +
-      '</div>';
+    actionHtml = '<div style="background:var(--green-dim);border-left:3px solid var(--green);padding:12px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;"><strong style="color:var(--green)">Просадка &gt;50% — хороший момент для усреднения.</strong><br>Докупить на <strong>' + fmt$(invest || qty * c.current_price) + '</strong> → получите <strong>' + qty.toFixed(4) + ' ' + h.symbol + '</strong><br>Средняя цена изменится с <strong>$' + h.avgPrice + '</strong> → <strong>$' + newAvg.toFixed(2) + '</strong><br>Для окупаемости нужен рост всего <strong>+' + breakEven.toFixed(1) + '%</strong> (сейчас ' + fmtPct(curPnl) + ')</div>';
   } else if (curPnl < -20) {
     recText = 'УМЕРЕННАЯ ДОКУПКА'; recClass = 'pos';
-    actionHtml = '<div style="background:var(--green-dim);border-left:3px solid var(--green);padding:12px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;">' +
-      '<strong style="color:var(--green)">Просадка -20..-50%: докупайте частями на каждые -10%.</strong><br>' +
-      'Докупить на <strong>' + fmt$(invest || qty * c.current_price) + '</strong> → получите <strong>' + qty.toFixed(4) + ' ' + h.symbol + '</strong><br>' +
-      'Средняя цена изменится с <strong>$' + h.avgPrice + '</strong> → <strong>$' + newAvg.toFixed(2) + '</strong>' +
-      '</div>';
+    actionHtml = '<div style="background:var(--green-dim);border-left:3px solid var(--green);padding:12px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;"><strong style="color:var(--green)">Просадка -20..-50%: докупайте частями на каждые -10%.</strong><br>Докупить на <strong>' + fmt$(invest || qty * c.current_price) + '</strong> → получите <strong>' + qty.toFixed(4) + ' ' + h.symbol + '</strong><br>Средняя цена изменится с <strong>$' + h.avgPrice + '</strong> → <strong>$' + newAvg.toFixed(2) + '</strong></div>';
   } else if (curPnl > 30) {
     recText = 'ДОКУПКА НЕ РЕКОМЕНДУЕТСЯ'; recClass = 'neg';
-    actionHtml = '<div style="background:var(--red-dim);border-left:3px solid var(--red);padding:12px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;">' +
-      '<strong style="color:var(--red)">Почему не докупать:</strong><br>' +
-      'Монета уже в плюсе на <strong>' + fmtPct(curPnl) + '</strong>. Докупка поднимет среднюю с <strong>$' + h.avgPrice + '</strong> → <strong>$' + newAvg.toFixed(2) + '</strong><br>' +
-      'Это увеличит риск: для окупа нужен рост <strong>+' + breakEven.toFixed(1) + '%</strong> вместо текущих ' + fmtPct(curPnl) + '<br>' +
-      '<em style="color:var(--text-3)">Лучше зафиксировать часть прибыли или ждать отката</em>' +
-      '</div>';
+    actionHtml = '<div style="background:var(--red-dim);border-left:3px solid var(--red);padding:12px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;"><strong style="color:var(--red)">Почему не докупать:</strong><br>Монета уже в плюсе на <strong>' + fmtPct(curPnl) + '</strong>. Докупка поднимет среднюю с <strong>$' + h.avgPrice + '</strong> → <strong>$' + newAvg.toFixed(2) + '</strong><br>Это увеличит риск: для окупа нужен рост <strong>+' + breakEven.toFixed(1) + '%</strong><br><em style="color:var(--text-3)">Лучше зафиксировать часть прибыли или ждать отката</em></div>';
   } else {
     recText = 'НЕЙТРАЛЬНО'; recClass = 'neu';
-    actionHtml = '<div style="background:rgba(245,158,11,0.08);border-left:3px solid var(--yellow);padding:12px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;">' +
-      '<strong style="color:var(--yellow)">Анализ:</strong><br>' +
-      'Текущий p&l: <strong>' + fmtPct(curPnl) + '</strong>. Докупка на <strong>' + fmt$(invest || qty * c.current_price) + '</strong> изменит среднюю с <strong>$' + h.avgPrice + '</strong> → <strong>$' + newAvg.toFixed(2) + '</strong><br>' +
-      'Для окупа после докупки нужен рост <strong>+' + breakEven.toFixed(1) + '%</strong><br>' +
-      '<em style="color:var(--text-3)">Решение зависит от вашей стратегии. Если верите в рост — докупайте. Если нет — подождите.</em>' +
-      '</div>';
+    actionHtml = '<div style="background:rgba(245,158,11,0.08);border-left:3px solid var(--yellow);padding:12px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;"><strong style="color:var(--yellow)">Анализ:</strong><br>Текущий p&amp;l: <strong>' + fmtPct(curPnl) + '</strong>. Докупка на <strong>' + fmt$(invest || qty * c.current_price) + '</strong> изменит среднюю с <strong>$' + h.avgPrice + '</strong> → <strong>$' + newAvg.toFixed(2) + '</strong><br>Для окупа после докупки нужен рост <strong>+' + breakEven.toFixed(1) + '%</strong><br><em style="color:var(--text-3)">Решение зависит от вашей стратегии.</em></div>';
   }
 
   document.getElementById('dcaNewAvg').textContent = '$' + newAvg.toFixed(2);
@@ -1316,143 +1875,621 @@ function calcDCA(fromInvest) {
   document.getElementById('dcaResult').style.display = 'block';
 }
 
-// ===================== SHARED ADVICE GENERATOR (used by Advisor tab AND Portfolio expand row) =====================
-function generateCoinAdvice(h, c) {
-  const pnl = h.avgPrice > 0 ? ((c.current_price - h.avgPrice) / h.avgPrice) * 100 : 0;
-  const hasAth = typeof c.ath === 'number' && c.ath > 0;
-  const drawdown = hasAth ? ((c.current_price - c.ath) / c.ath) * 100 : null;
-  const val = h.amount * c.current_price;
-  const inv = h.amount * h.avgPrice;
-  const ch24 = c.price_change_percentage_24h || 0;
-  let type = 'hold', badge = 'hold', text = '', actionHtml = '';
+// Modular scoring functions for better code organization
 
-  if (pnl > 100) {
-    type = 'sell'; badge = 'sell';
-    const sellQty = h.amount * 0.5;
-    const sellValue = sellQty * c.current_price;
-    const remaining = h.amount - sellQty;
-    const remainingValue = remaining * c.current_price;
-    text = 'Прибыль <strong>+' + pnl.toFixed(0) + '%</strong>! Позиция сильно переросла.';
-    actionHtml = '<div class="advice-action"><div class="advice-action-title">Конкретный план действий:</div><div class="advice-grid">' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + sellQty.toFixed(4) + '</div><div class="advice-metric-label">продать ' + h.symbol + '</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(sellValue) + '</div><div class="advice-metric-label">получите</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(inv) + '</div><div class="advice-metric-label">вложенное возвращено</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + remaining.toFixed(4) + '</div><div class="advice-metric-label">остаётся (бесплатно)</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(remainingValue) + '</div><div class="advice-metric-label">стоимость остатка</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value" style="color:var(--green)">0 риск</div><div class="advice-metric-label">дальнейший риск</div></div>' +
-      '</div><div class="advice-btn">' + alertBtn(h, 'below', c.current_price * 0.9, 0, 'защитить прибыль') + '</div></div>';
-  } else if (pnl > 50) {
-    type = 'sell'; badge = 'sell';
-    const sellQty = inv / c.current_price;
-    const remaining = h.amount - sellQty;
-    text = 'Прибыль <strong>+' + pnl.toFixed(0) + '%</strong>. Хороший момент забрать вложенное.';
-    actionHtml = '<div class="advice-action"><div class="advice-action-title">Конкретный план действий:</div><div class="advice-grid">' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + sellQty.toFixed(4) + '</div><div class="advice-metric-label">продать ' + h.symbol + '</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(inv) + '</div><div class="advice-metric-label">возвращаете вложенное</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + remaining.toFixed(4) + '</div><div class="advice-metric-label">остаётся (бесплатно)</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(remaining * c.current_price) + '</div><div class="advice-metric-label">стоимость остатка</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value" style="color:var(--green)">+' + ((remaining * c.current_price) / inv * 100).toFixed(0) + '%</div><div class="advice-metric-label">чистая прибыль</div></div>' +
-      '</div><div class="advice-btn">' + alertBtn(h, 'below', c.current_price * 0.85, 0, 'защитить прибыль') + '</div></div>';
-  } else if (pnl < -60 && ch24 > 0) {
-    type = 'buy'; badge = 'buy';
-    const docupInv = inv * 0.5;
-    const docupQty = docupInv / c.current_price;
-    const newAvg2 = (h.amount * h.avgPrice + docupQty * c.current_price) / (h.amount + docupQty);
-    const be2 = ((newAvg2 - c.current_price) / c.current_price) * 100;
-    text = 'Убыток <strong>' + pnl.toFixed(0) + '%</strong>, но сегодня <strong>+' + ch24.toFixed(1) + '%</strong>. Сильная просадка с признаками отскока.';
-    actionHtml = '<div class="advice-action"><div class="advice-action-title">Конкретный план докупки:</div><div class="advice-grid">' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(docupInv) + '</div><div class="advice-metric-label">инвестируйте</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + docupQty.toFixed(4) + '</div><div class="advice-metric-label">получите ' + h.symbol + '</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">$' + h.avgPrice + ' → $' + newAvg2.toFixed(2) + '</div><div class="advice-metric-label">средняя цена</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value" style="color:var(--green)">+' + be2.toFixed(1) + '%</div><div class="advice-metric-label">нужен рост до окупа</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + (h.amount + docupQty).toFixed(4) + '</div><div class="advice-metric-label">итого монет</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(inv + docupInv) + '</div><div class="advice-metric-label">всего вложено</div></div>' +
-      '</div><div class="advice-btn">' + alertBtn(h, 'below', c.current_price * 0.95, docupInv, 'докупить') + '</div></div>';
-  } else if (pnl < -40) {
-    type = 'buy'; badge = 'buy';
-    const docupInv = inv * 0.3;
-    const docupQty = docupInv / c.current_price;
-    const newAvg2 = (h.amount * h.avgPrice + docupQty * c.current_price) / (h.amount + docupQty);
-    text = 'Убыток <strong>' + pnl.toFixed(0) + '%</strong>.' + (hasAth ? (' Просадка от ATH <strong>' + drawdown.toFixed(0) + '%</strong>.') : ' <span style="color:var(--text-3)">(данные ATH недоступны для этой монеты)</span>');
-    const nextInv = inv * 0.3;
-    actionHtml = '<div class="advice-action"><div class="advice-action-title">Конкретный план докупки:</div><div class="advice-grid">' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(docupInv) + '</div><div class="advice-metric-label">инвестируйте сейчас</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + docupQty.toFixed(4) + '</div><div class="advice-metric-label">получите ' + h.symbol + '</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">$' + h.avgPrice + ' → $' + newAvg2.toFixed(2) + '</div><div class="advice-metric-label">средняя цена</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + (h.amount + docupQty).toFixed(4) + '</div><div class="advice-metric-label">итого монет</div></div>' +
-      '</div><div style="margin-top:8px;font-size:12px;color:var(--text-3)">DCA-стратегия: докупайте на каждые -10% просадки. Следующая докупка на ' + fmt$(nextInv) + ' при цене ниже ' + fmt$(c.current_price * 0.9) + '</div>' +
-      '<div class="advice-btn">' + alertBtn(h, 'below', c.current_price * 0.9, nextInv, 'докупить') + '</div></div>';
-  } else if (h.stopLoss && c.current_price <= h.stopLoss) {
-    type = 'sell'; badge = 'sell';
-    const loss = inv - val;
-    text = '<strong style="color:var(--red)">СТОП-ЛОСС СРАБОТАЛ!</strong> Цена $' + c.current_price + ' достигла стопа $' + h.stopLoss + '.';
-    actionHtml = '<div class="advice-action"><div class="advice-action-title">Действие:</div><div class="advice-grid">' +
-      '<div class="advice-metric"><div class="advice-metric-value" style="color:var(--red)">' + fmt$(loss) + '</div><div class="advice-metric-label">фиксированный убыток</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + fmtPct(pnl) + '</div><div class="advice-metric-label">убыток в %</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + h.amount.toFixed(4) + '</div><div class="advice-metric-label">продать всё</div></div>' +
-      '</div><div style="margin-top:8px;font-size:13px;color:var(--red)"><strong>Рекомендуется полный выход из позиции</strong> чтобы избежать дальнейших потерь.</div></div>';
-  } else if (h.targetPrice && c.current_price >= h.targetPrice) {
-    type = 'sell'; badge = 'sell';
-    text = '<strong style="color:var(--green)">ЦЕЛЬ ДОСТИГНУТА!</strong> Цель $' + h.targetPrice + ' достигнута, текущая $' + c.current_price + '.';
-    const sellQty = h.amount * 0.5;
-    actionHtml = '<div class="advice-action"><div class="advice-action-title">Конкретный план:</div><div class="advice-grid">' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + sellQty.toFixed(4) + '</div><div class="advice-metric-label">продать 50%</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(sellQty * c.current_price) + '</div><div class="advice-metric-label">получите</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + (h.amount - sellQty).toFixed(4) + '</div><div class="advice-metric-label">держать остаток</div></div>' +
-      '</div><div style="margin-top:8px;font-size:13px;">Зафиксируйте часть прибыли. Остаток можно держать до следующей цели (например, x2 от цели = $' + (h.targetPrice * 2) + ')</div></div>';
-  } else if (ch24 > 20) {
-    type = 'sell'; badge = 'sell';
-    const sellQty = h.amount * 0.3;
-    text = 'Взрывной рост <strong>+' + ch24.toFixed(1) + '%</strong> за 24ч! Возможен откат.';
-    actionHtml = '<div class="advice-action"><div class="advice-action-title">Конкретный план:</div><div class="advice-grid">' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + sellQty.toFixed(4) + '</div><div class="advice-metric-label">продать 30%</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(sellQty * c.current_price) + '</div><div class="advice-metric-label">фиксируете прибыль</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + (h.amount - sellQty).toFixed(4) + '</div><div class="advice-metric-label">держать 70%</div></div>' +
-      '</div><div style="margin-top:8px;font-size:13px;">Резкий рост часто сопровождается коррекцией. Частичная фиксация защищает прибыль.</div></div>';
-  } else if (hasAth && drawdown < -80 && ch24 > 5) {
-    type = 'buy'; badge = 'buy';
-    const docupInv = inv * 0.2;
-    const docupQty = docupInv / c.current_price;
-    text = 'Монета упала на <strong>' + drawdown.toFixed(0) + '%</strong> от ATH, но сегодня растёт <strong>+' + ch24.toFixed(1) + '%</strong>. Возможно дно.';
-    actionHtml = '<div class="advice-action"><div class="advice-action-title">Конкретный план:</div><div class="advice-grid">' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(docupInv) + '</div><div class="advice-metric-label">небольшая докупка</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + docupQty.toFixed(4) + '</div><div class="advice-metric-label">получите ' + h.symbol + '</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(docupInv * 3) + '</div><div class="advice-metric-label">потенциал x3 к ATH</div></div>' +
-      '</div><div style="margin-top:8px;font-size:13px;">Глубокая просадка + первые признаки роста = потенциальное дно. Но рискованно, инвестируйте небольшую часть.</div></div>';
-  } else {
-    text = 'P&L <strong>' + fmtPct(pnl) + '</strong>' + (hasAth ? (', от ATH <strong>' + fmtPct(drawdown) + '</strong>') : ', от ATH <strong>н/д</strong>') + ', 24ч <strong>' + fmtPct(ch24) + '</strong>.';
-    actionHtml = '<div class="advice-action"><div class="advice-action-title">Текущая ситуация:</div><div class="advice-grid">' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(val) + '</div><div class="advice-metric-label">текущая стоимость</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(inv) + '</div><div class="advice-metric-label">вложено</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + fmtPct(pnl) + '</div><div class="advice-metric-label">p&l</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(h.targetPrice || 0) + '</div><div class="advice-metric-label">цель</div></div>' +
-      '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(h.stopLoss || 0) + '</div><div class="advice-metric-label">стоп</div></div>' +
-      '</div><div style="margin-top:8px;font-size:13px;color:var(--text-3)">Позиция в норме. Действий не требуется. Ждите цели или стопа.</div></div>';
+// Calculate BUY signals score
+function scoreBuy(h, c, metrics) {
+  const { pnl, drawdown, hasAth, ch24, ch7, fear, weight, riskLevel, category, subcategory, marketPhase, rsi, emaTrend } = metrics;
+  let buyScore = 0;
+  const reasonsBuy = [];
+  
+  const dropMultiplier = riskLevel === 'high' ? 1.3 : (riskLevel === 'low' ? 0.8 : 1.0);
+  
+  // Drop-based signals
+  if (pnl < -40) { buyScore += Math.round(30 * dropMultiplier); reasonsBuy.push('глубокая просадка ' + fmtPct(pnl)); }
+  if (pnl < -60) { buyScore += Math.round(20 * dropMultiplier); reasonsBuy.push('экстремальный убыток'); }
+  if (hasAth && drawdown < -70) { buyScore += Math.round(20 * dropMultiplier); reasonsBuy.push('от ATH ' + fmtPct(drawdown)); }
+  if (hasAth && drawdown < -85) { buyScore += Math.round(15 * dropMultiplier); reasonsBuy.push('цена у исторического дна'); }
+  if (pnl < -40 && ch24 > 3) { buyScore += 15; reasonsBuy.push('появился отскок +' + ch24.toFixed(1) + '% за 24ч'); }
+  
+  // Capitulation
+  if (ch24 < -15) { buyScore += 10; reasonsBuy.push('капитуляция -15% за 24ч'); }
+  
+  // RSI signals
+  if (rsi < 30) { buyScore += 15; reasonsBuy.push('перепроданность (RSI ' + rsi + ')'); }
+  if (rsi < 35) { buyScore += 8; reasonsBuy.push('низкий RSI (' + rsi + ')'); }
+  
+  // EMA trend signals
+  if (emaTrend === 'strong_uptrend') { buyScore += 12; reasonsBuy.push('сильный восходящий тренд (EMA)'); }
+  if (emaTrend === 'uptrend') { buyScore += 8; reasonsBuy.push('восходящий тренд (EMA)'); }
+  
+  // Market phase signals
+  if (marketPhase === 'accumulation_downtrend') { buyScore += 15; reasonsBuy.push('фаза накопления после падения'); }
+  if (marketPhase === 'pullback') { buyScore += 10; reasonsBuy.push('откат в восходящем тренде'); }
+  if (marketPhase === 'consolidation' && pnl < -10) { buyScore += 8; reasonsBuy.push('консолидация с просадкой'); }
+  if (marketPhase === 'macro_uptrend_coin_uptrend' && category === 'fundamental_l1') { 
+    buyScore += 10; 
+    reasonsBuy.push('макро-тренд вверх: BUY фундаментальные'); 
+  }
+  if (marketPhase === 'rotation_phase' && category === 'fundamental_l1') {
+    buyScore += 8;
+    reasonsBuy.push('ротация капитала: фундаментальные недооценены');
+  }
+  
+  // Market sentiment
+  if (ch7 < -15) { buyScore += 5; reasonsBuy.push('слабая неделя'); }
+  if (fear < 30) { buyScore += 10; reasonsBuy.push('рынок в страхе (' + fear + ')'); }
+
+  // Category-specific adjustments
+  if (category === 'fundamental_l1' && drawdown < -50) {
+    buyScore += 10;
+    reasonsBuy.push('фундаментальный L1 с глубокой просадкой');
+  }
+  if (category === 'fundamental_l2' && drawdown < -40) {
+    buyScore += 8;
+    reasonsBuy.push('фундаментальный L2 с просадкой');
+  }
+  if (subcategory === 'l1_high_growth' && drawdown < -30) {
+    buyScore += 8;
+    reasonsBuy.push('L1 high-growth с просадкой');
   }
 
-  if (h.notes) text += '<div style="margin-top:8px;padding:8px;background:rgba(59,130,246,0.08);border-radius:6px;font-size:12px;color:var(--text-3);border-left:2px solid var(--blue)">Ваша заметка: ' + h.notes + '</div>';
+  // Weight-based restrictions
+  if (weight > 35) { buyScore -= 20; reasonsBuy.push('позиция уже ' + weight.toFixed(0) + '% портфеля — докупать осторожно'); }
+  else if (weight > 25) { buyScore -= 10; }
+  else if (weight < 1 && category !== 'meme') { buyScore += 5; reasonsBuy.push('малый вес в портфеле — можно увеличить'); }
 
-  return { type, badge, text, actionHtml };
+  return { buyScore, reasonsBuy };
 }
 
-function alertBtn(h, dir, priceVal, suggestedAmount, actionWord) {
-  priceVal = Math.round(priceVal * 10000) / 10000;
-  const label = actionWord + (suggestedAmount > 0 ? (' на ~' + fmt$(suggestedAmount)) : '') + ' если ' + (dir === 'below' ? 'ниже ' : 'выше ') + fmt$(priceVal);
-  return '<button class="btn btn-sm ' + (dir==='below'?'btn-primary':'') + '" id="albtn_' + h.id + '_' + dir + '" onclick="createAlertFromAdvisor(\'' + h.id + '\',\'' + dir + '\',' + priceVal + ',' + (suggestedAmount||0) + ',\'' + h.symbol + '\',this)">Алерт: ' + label + '</button>';
+// Calculate SELL signals score
+function scoreSell(h, c, metrics) {
+  const { pnl, ch24, weight, riskLevel, category, subcategory, marketPhase, rsi, emaTrend, volumeRisk } = metrics;
+  let sellScore = 0;
+  const reasonsSell = [];
+  
+  // Profit-based signals
+  if (pnl > 50) { sellScore += 25; reasonsSell.push('прибыль ' + fmtPct(pnl)); }
+  if (pnl > 100) { sellScore += 25; reasonsSell.push('прибыль больше x2'); }
+  if (pnl > 200) { sellScore += 20; reasonsSell.push('экстремальная прибыль >200%'); }
+  
+  // RSI signals
+  if (rsi > 70) { sellScore += 15; reasonsSell.push('перекупленность (RSI ' + rsi + ')'); }
+  if (rsi > 65) { sellScore += 8; reasonsSell.push('высокий RSI (' + rsi + ')'); }
+  
+  // EMA trend signals
+  if (emaTrend === 'strong_downtrend') { sellScore += 12; reasonsSell.push('смена тренда вниз (EMA)'); }
+  if (emaTrend === 'downtrend') { sellScore += 8; reasonsSell.push('нисходящий тренд (EMA)'); }
+  
+  // Market phase signals
+  if (marketPhase === 'distribution') { sellScore += 15; reasonsSell.push('фаза распределения (памп)'); }
+  if (marketPhase === 'short_term_rally') { sellScore += 10; reasonsSell.push('краткосрочный памп без фундамента'); }
+  if (marketPhase === 'macro_downtrend_coin_uptrend' && riskLevel === 'high') {
+    sellScore += 15;
+    reasonsSell.push('макро-тренд вниз: SELL high-risk');
+  }
+  
+  // Momentum signals
+  if (ch24 > 15) { sellScore += 15; reasonsSell.push('резкий рост +' + ch24.toFixed(1) + '% за 24ч'); }
+  if (ch24 > 25) { sellScore += 10; reasonsSell.push('экстремальный памп'); }
+  
+  // Volume drop signals
+  if (ch24 > 10 && volumeRisk === 'low') { sellScore += 10; reasonsSell.push('памп при падении объёмов'); }
+  
+  // Category-specific adjustments
+  if (category === 'meme' && ch24 > 20) {
+    sellScore += 20;
+    reasonsSell.push('мем-монета: фиксируйте памп');
+  }
+  if (category === 'meme' && pnl > 50) {
+    sellScore += 15;
+    reasonsSell.push('мем-монета в прибыли: фиксируйте gains');
+  }
+  if (category === 'old_lottery' && pnl > 30) {
+    sellScore += 15;
+    reasonsSell.push('старая монета: разумно зафиксировать');
+  }
+  if (category === 'modular' && pnl > 100) {
+    sellScore += 10;
+    reasonsSell.push('экспериментальная монета: частичная фиксация');
+  }
+  if (subcategory === 'dex_risky' && pnl > 40) {
+    sellScore += 10;
+    reasonsSell.push('рисковый DEX: фиксация');
+  }
+
+  // Target and stop signals
+  if (h.targetPrice && c.current_price >= h.targetPrice) { sellScore += 40; reasonsSell.push('достигнута цель ' + fmt$(h.targetPrice)); }
+  if (h.stopLoss && c.current_price <= h.stopLoss) { sellScore += 50; reasonsSell.push('сработал стоп-лосс ' + fmt$(h.stopLoss)); }
+  
+  // Market sentiment
+  if (metrics.fear > 75) { sellScore += 10; reasonsSell.push('рынок в жадности (' + metrics.fear + ')'); }
+
+  // Weight-based signals
+  if (weight > 20) { sellScore += 15; reasonsSell.push('перевес позиции (' + weight.toFixed(0) + '%) — ребалансировка'); }
+  if (weight > 35) { sellScore += 20; reasonsSell.push('чрезмерный вес (' + weight.toFixed(0) + '%) — продать часть'); }
+
+  return { sellScore, reasonsSell };
 }
 
-// ===================== ADVISOR =====================
+// Calculate risk adjustments
+function scoreRisk(h, c, metrics) {
+  const { volumeRisk, pnl, buyScore, sellScore, category, emaTrend } = metrics;
+  const reasonsBuy = [];
+  const reasonsSell = [];
+  
+  // Volume risk impact
+  if (volumeRisk === 'very_low') { 
+    buyScore -= 10; 
+    reasonsBuy.push('очень низкая ликвидность'); 
+  }
+  if (volumeRisk === 'very_low' && pnl > 20) { 
+    sellScore += 15; 
+    reasonsSell.push('низкая ликвидность с прибылью'); 
+  }
+
+  // Strong HOLD logic for fundamental coins in uptrend
+  if (category === 'fundamental_l1' && emaTrend === 'uptrend' && pnl > 0 && pnl < 100) {
+    sellScore -= 15;
+    reasonsBuy.push('фундаментальный L1 в тренде: HOLD');
+  }
+
+  return { buyScore, sellScore, reasonsBuy, reasonsSell };
+}
+
+function getAdviceScores(h, c) {
+  const pnl = h.avgPrice > 0 ? ((c.current_price - h.avgPrice) / h.avgPrice) * 100 : 0;
+  const hasAth = typeof c.ath === 'number' && c.ath > 0;
+  const drawdown = hasAth ? ((c.current_price - c.ath) / c.ath) * 100 : 0;
+  const ch24 = c.price_change_percentage_24h || 0;
+  const ch7 = c.price_change_percentage_7d_in_currency || 0;
+  const ch30 = c.price_change_percentage_30d_in_currency || 0;
+  const fear = fearData && fearData.data && fearData.data[0] ? parseInt(fearData.data[0].value) : 50;
+
+  const portfolioValue = getPortfolioValue();
+  const coinValue = h.amount * c.current_price;
+  const weight = portfolioValue > 0 ? (coinValue / portfolioValue) * 100 : 0;
+
+  // Get coin category and risk info
+  const coinInfo = getCoinInfo(h.symbol);
+  const riskLevel = coinInfo.risk;
+  const category = coinInfo.category;
+  const subcategory = coinInfo.subcategory;
+
+  // Calculate advanced metrics
+  const volatility = calculateVolatility(c);
+  const volumeRisk = calculateVolumeRisk(c);
+  const rsi = calculateRSI(c);
+  const emaTrend = calculateEMATrend(c);
+  const btcTrend = getBTCTrend();
+  const riskScore = calculateRiskScore(c, coinInfo, volatility, volumeRisk, btcTrend);
+  const marketPhase = determineMarketPhase(c, ch24, ch7, ch30, btcTrend);
+
+  // Bundle metrics for modular scoring
+  const metrics = {
+    pnl, drawdown, hasAth, ch24, ch7, ch30, fear, weight,
+    riskLevel, category, subcategory, marketPhase, rsi, emaTrend,
+    volumeRisk, volatility, riskScore, btcTrend, coinInfo
+  };
+
+  // Calculate scores using modular functions
+  const buyResult = scoreBuy(h, c, metrics);
+  const sellResult = scoreSell(h, c, metrics);
+  const riskResult = scoreRisk(h, c, { ...metrics, buyScore: buyResult.buyScore, sellScore: sellResult.sellScore });
+
+  // Combine results
+  const buyScore = buyResult.buyScore + riskResult.buyScore;
+  const sellScore = sellResult.sellScore + riskResult.sellScore;
+  const reasonsBuy = [...buyResult.reasonsBuy, ...riskResult.reasonsBuy];
+  const reasonsSell = [...sellResult.reasonsSell, ...riskResult.reasonsSell];
+
+  return { 
+    buyScore, sellScore, pnl, drawdown, hasAth, ch24, ch7, ch30, fear, weight, 
+    reasonsBuy, reasonsSell, coinInfo, riskLevel, category, subcategory, 
+    volatility, volumeRisk, riskScore, marketPhase, rsi, emaTrend, btcTrend 
+  };
+}
+
+function getSignalStrength(score) {
+  if (score >= 70) return 'strong';
+  if (score >= 45) return 'medium';
+  return 'weak';
+}
+
+function getRiskLabel(s) {
+  if (s.weight > 35 || Math.abs(s.ch24) > 15) return 'высокий риск';
+  if (s.weight > 20 || Math.abs(s.ch24) > 8) return 'средний риск';
+  return 'низкий риск';
+}
+
+function generateCoinAdvice(h, c) {
+  const s = getAdviceScores(h, c);
+  const pnl = s.pnl;
+  const drawdown = s.drawdown;
+  const ch24 = s.ch24;
+  const ch7 = s.ch7;
+  const val = h.amount * c.current_price;
+  const inv = h.amount * h.avgPrice;
+  const riskLevel = s.riskLevel;
+  const category = s.category;
+  const subcategory = s.subcategory;
+  const marketPhase = s.marketPhase;
+  const riskScore = s.riskScore;
+  const rsi = s.rsi;
+  const emaTrend = s.emaTrend;
+  const btcTrend = s.btcTrend;
+
+  let type = 'hold';
+  let badge = 'hold';
+  let text = '';
+  let actionHtml = '';
+  let autoAlert = null;
+
+  const riskLabel = getRiskLabel(s);
+  const categoryLabel = {
+    'fundamental_l1': 'L1 фундаментал',
+    'fundamental_l2': 'L2 фундаментал',
+    'exchange': 'биржевой токен',
+    'dex': 'DEX/инфраструктура',
+    'modular': 'модульный/экспериментальный',
+    'meme': 'мем-монета',
+    'old_lottery': 'старая/лотерейная',
+    'other': 'другое'
+  }[category] || category;
+
+  const subcategoryLabel = {
+    'l1_bluechip': 'bluechip',
+    'l1_high_growth': 'high-growth',
+    'l1_slow_growth': 'slow-growth',
+    'l2_high_growth': 'high-growth',
+    'l2_slow_growth': 'slow-growth',
+    'exchange_bluechip': 'bluechip',
+    'exchange_mid_tier': 'mid-tier',
+    'dex_bluechip': 'bluechip',
+    'dex_risky': 'рисковый',
+    'modular_early_stage': 'early-stage',
+    'modular_mature': 'mature',
+    'meme_new': 'новая',
+    'meme_legacy': 'legacy',
+    'old_privacy': 'privacy',
+    'old_legacy': 'legacy',
+    'other': 'другое'
+  }[subcategory] || subcategory;
+
+  const phaseLabel = {
+    'accumulation_uptrend': 'накопление (рост)',
+    'accumulation_downtrend': 'накопление (падение)',
+    'distribution': 'распределение (памп)',
+    'panic_selling': 'панические продажи',
+    'consolidation': 'консолидация',
+    'short_term_rally': 'краткосрочный памп',
+    'pullback': 'откат',
+    'uncertain': 'неопределенность',
+    'macro_uptrend_coin_uptrend': 'макро-рост + рост монеты',
+    'macro_downtrend_coin_downtrend': 'макро-падение + падение монеты',
+    'rotation_phase': 'ротация капитала'
+  }[marketPhase] || marketPhase;
+
+  // Neutral zone: if both scores < 30, HOLD
+  if (s.buyScore < 30 && s.sellScore < 30) {
+    type = 'hold'; badge = 'hold';
+    
+    let holdReasonText = 'Нейтральная зона: нет выраженных сигналов';
+    if (marketPhase === 'consolidation') holdReasonText = 'Консолидация: ждите определения направления';
+    if (marketPhase === 'uncertain') holdReasonText = 'Неопределенность на рынке: лучше подождать';
+    
+    if (h.targetPrice) {
+      autoAlert = { enabled: true, type: 'above', value: h.targetPrice, suggestedAmount: +(h.amount * c.current_price * 0.5).toFixed(2), action: 'sell', symbol: h.symbol };
+    } else if (h.stopLoss) {
+      autoAlert = { enabled: true, type: 'below', value: h.stopLoss, suggestedAmount: 0, action: 'sell', symbol: h.symbol };
+    }
+
+    text = 'Нейтральная зона для <strong>' + s.coinInfo.name + '</strong> (' + categoryLabel + ', ' + riskLevel + ' риск). P&L <strong>' + fmtPct(pnl) + '</strong>, 24ч <strong>' + fmtPct(ch24) + '</strong>. Risk Score: <strong>' + Math.round(riskScore) + '/100</strong>. ' + holdReasonText + '.';
+
+    actionHtml =
+      '<div class="advice-action">' +
+        '<div class="advice-action-title">Текущая ситуация</div>' +
+        '<div class="advice-grid">' +
+          '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(val) + '</div><div class="advice-metric-label">текущая стоимость</div></div>' +
+          '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(inv) + '</div><div class="advice-metric-label">вложено</div></div>' +
+          '<div class="advice-metric"><div class="advice-metric-value">' + s.weight.toFixed(1) + '%</div><div class="advice-metric-label">вес в портфеле</div></div>' +
+          '<div class="advice-metric"><div class="advice-metric-value" style="font-size:14px;">' + riskLabel + '</div><div class="advice-metric-label">риск</div></div>' +
+        '</div>' +
+        '<div class="signal-row">' +
+          '<span class="signal-chip yellow">buy score: ' + Math.round(s.buyScore) + '</span>' +
+          '<span class="signal-chip yellow">sell score: ' + Math.round(s.sellScore) + '</span>' +
+          '<span class="signal-chip blue">' + categoryLabel + '</span>' +
+          '<span class="signal-chip purple">' + phaseLabel + '</span>' +
+          (h.targetPrice ? '<span class="signal-chip green">цель: ' + fmt$(h.targetPrice) + '</span>' : '') +
+          (h.stopLoss ? '<span class="signal-chip red">стоп: ' + fmt$(h.stopLoss) + '</span>' : '') +
+        '</div>' +
+      '</div>';
+  } else if (s.sellScore >= 40 && s.sellScore >= s.buyScore) {
+    type = 'sell'; badge = 'sell';
+    const sellStrength = getSignalStrength(s.sellScore);
+    let sellPart = 0.3;
+    if (s.sellScore >= 70) sellPart = 0.5;
+    const stopHit = h.stopLoss && c.current_price <= h.stopLoss;
+    const targetReached = h.targetPrice && c.current_price >= h.targetPrice;
+    if (stopHit) sellPart = 1;
+    const sellQty = h.amount * sellPart;
+    const sellValue = sellQty * c.current_price;
+
+    // Improved signal text based on category and market phase
+    let sellReasonText = '';
+    if (marketPhase === 'distribution') {
+      sellReasonText = 'Фаза распределения: фиксируйте прибыль на пампе';
+    } else if (marketPhase === 'short_term_rally') {
+      sellReasonText = 'Краткосрочный памп без фундамента: разумно зафиксировать';
+    } else if (rsi > 70) {
+      sellReasonText = 'Перекупленность по RSI (' + rsi + '): возможна коррекция';
+    } else if (emaTrend === 'downtrend') {
+      sellReasonText = 'Смена тренда вниз (EMA): выход из позиции';
+    } else if (category === 'meme') {
+      sellReasonText = 'Мем-монета: фиксируйте прибыль на пампе, чтобы не потерять gains';
+    } else if (category === 'old_lottery') {
+      sellReasonText = 'Старая монета: разумно зафиксировать часть прибыли';
+    } else if (category === 'fundamental_l1') {
+      sellReasonText = 'Фундаментальный актив: можно оставить часть на долгосрок';
+    } else {
+      sellReasonText = s.reasonsSell.join(', ') || 'фиксация прибыли';
+    }
+
+    text = 'Сигнал на продажу <strong>' + s.coinInfo.name + '</strong> (' + categoryLabel + ', ' + riskLevel + ' риск, фаза: ' + phaseLabel + '). P&L <strong>' + fmtPct(pnl) + '</strong>, 24ч <strong>' + fmtPct(ch24) + '</strong>. Risk Score: <strong>' + Math.round(riskScore) + '/100</strong>. RSI: <strong>' + rsi + '</strong>. Причины: <strong>' + sellReasonText + '</strong>.';
+
+    // Improved auto-alert based on trend and risk
+    let alertPrice;
+    if (targetReached) {
+      alertPrice = h.targetPrice;
+    } else if (stopHit) {
+      alertPrice = h.stopLoss;
+    } else {
+      // Dynamic alert based on trend
+      if (emaTrend === 'uptrend') {
+        alertPrice = +(c.current_price * 1.15).toFixed(4); // Higher alert in uptrend
+      } else if (emaTrend === 'downtrend') {
+        alertPrice = +(c.current_price * 0.90).toFixed(4); // Lower alert in downtrend
+      } else {
+        alertPrice = +(c.current_price * 0.85).toFixed(4);
+      }
+    }
+
+    autoAlert = {
+      enabled: true,
+      type: targetReached ? 'above' : (stopHit ? 'below' : 'above'),
+      value: alertPrice,
+      suggestedAmount: 0,
+      action: 'sell',
+      symbol: h.symbol
+    };
+
+    actionHtml =
+      '<div class="advice-action">' +
+        '<div class="advice-action-title">План действий</div>' +
+        '<div class="advice-grid">' +
+          '<div class="advice-metric"><div class="advice-metric-value">' + sellQty.toFixed(4) + '</div><div class="advice-metric-label">продать ' + h.symbol + (sellPart < 1 ? ' (' + Math.round(sellPart*100) + '%)' : ' (всё)') + '</div></div>' +
+          '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(sellValue) + '</div><div class="advice-metric-label">получите</div></div>' +
+          '<div class="advice-metric"><div class="advice-metric-value">' + Math.round(s.sellScore) + '</div><div class="advice-metric-label">sell score</div></div>' +
+          '<div class="advice-metric"><div class="advice-metric-value" style="font-size:14px;">' + riskLabel + '</div><div class="advice-metric-label">риск</div></div>' +
+        '</div>' +
+        '<div class="signal-row">' +
+          '<span class="signal-chip red">сила сигнала: ' + sellStrength + '</span>' +
+          '<span class="signal-chip yellow">вес в портфеле: ' + s.weight.toFixed(1) + '%</span>' +
+          '<span class="signal-chip blue">' + categoryLabel + '</span>' +
+          '<span class="signal-chip purple">' + phaseLabel + '</span>' +
+          '<span class="signal-chip orange">RSI: ' + rsi + '</span>' +
+          (h.targetPrice ? '<span class="signal-chip green">цель: ' + fmt$(h.targetPrice) + '</span>' : '') +
+          (h.stopLoss ? '<span class="signal-chip red">стоп: ' + fmt$(h.stopLoss) + '</span>' : '') +
+        '</div>' +
+      '</div>';
+  } else if (s.buyScore >= 40 && s.buyScore > s.sellScore) {
+    type = 'buy'; badge = 'buy';
+    const buyStrength = getSignalStrength(s.buyScore);
+    
+    // Weak BUY for scores 30-40
+    const isWeakBuy = s.buyScore >= 30 && s.buyScore < 40;
+    
+    // Dynamic DCA based on risk and drop percentage
+    const dcaPercentage = calculateDCAPercentage(pnl, riskLevel);
+    const buyPart = isWeakBuy ? Math.min(dcaPercentage * 0.5, 0.1) : dcaPercentage; // Smaller buy for weak signal
+
+    const suggestedAmount = +(Math.max(10, inv * buyPart)).toFixed(2);
+    const buyQty = suggestedAmount / c.current_price;
+    const newAvg = (h.amount * h.avgPrice + buyQty * c.current_price) / (h.amount + buyQty);
+    const breakEven = ((newAvg - c.current_price) / c.current_price) * 100;
+    
+    // Improved auto-alert based on risk level
+    let alertPrice;
+    const alertDrop = riskLevel === 'low' ? 0.05 : (riskLevel === 'medium' ? 0.10 : 0.15);
+    alertPrice = +(c.current_price * (1 - alertDrop)).toFixed(4);
+
+    // Improved signal text based on category, risk, and market phase
+    let buyReasonText = '';
+    if (isWeakBuy) {
+      buyReasonText = 'Слабый сигнал: небольшая докупка';
+    } else if (marketPhase === 'accumulation_downtrend') {
+      buyReasonText = 'Фаза накопления после падения: отличная точка входа';
+    } else if (marketPhase === 'pullback') {
+      buyReasonText = 'Откат в восходящем тренде: хороший момент для докупки';
+    } else if (marketPhase === 'consolidation') {
+      buyReasonText = 'Консолидация: можно усреднить позицию';
+    } else if (rsi < 30) {
+      buyReasonText = 'Перепроданность (RSI ' + rsi + '): сильный сигнал покупки';
+    } else if (emaTrend === 'uptrend') {
+      buyReasonText = 'Восходящий тренд (EMA): докупка в тренде';
+    } else if (category === 'fundamental_l1') {
+      buyReasonText = 'Фундаментальный L1: отличная возможность усреднить позицию';
+    } else if (category === 'meme') {
+      buyReasonText = 'Мем-монета: высокая волатильность, входите осторожно';
+    } else if (riskLevel === 'high') {
+      buyReasonText = 'Высокий риск: агрессивная докупка при глубокой просадке';
+    } else {
+      buyReasonText = s.reasonsBuy.join(', ') || 'подходит для DCA';
+    }
+
+    text = (isWeakBuy ? 'Слабый сигнал на покупку' : 'Сигнал на покупку') + ' <strong>' + s.coinInfo.name + '</strong> (' + categoryLabel + ', ' + riskLevel + ' риск, фаза: ' + phaseLabel + '). P&L <strong>' + fmtPct(pnl) + '</strong>, 24ч <strong>' + fmtPct(ch24) + '</strong>' + (s.hasAth ? (', от ATH <strong>' + fmtPct(drawdown) + '</strong>') : '') + '. Risk Score: <strong>' + Math.round(riskScore) + '/100</strong>. RSI: <strong>' + rsi + '</strong>. Причины: <strong>' + buyReasonText + '</strong>. Рекомендуемая докупка: <strong>' + Math.round(buyPart * 100) + '%</strong> от позиции.';
+
+    autoAlert = {
+      enabled: true,
+      type: 'below',
+      value: alertPrice,
+      suggestedAmount: suggestedAmount,
+      action: 'buy',
+      symbol: h.symbol
+    };
+
+    actionHtml =
+      '<div class="advice-action">' +
+        '<div class="advice-action-title">План докупки</div>' +
+        '<div class="advice-grid">' +
+          '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(suggestedAmount) + '</div><div class="advice-metric-label">докупить на</div></div>' +
+          '<div class="advice-metric"><div class="advice-metric-value">' + buyQty.toFixed(4) + '</div><div class="advice-metric-label">получите ' + h.symbol + '</div></div>' +
+          '<div class="advice-metric"><div class="advice-metric-value" style="font-size:14px;">$' + h.avgPrice + ' → $' + newAvg.toFixed(2) + '</div><div class="advice-metric-label">новая средняя</div></div>' +
+          '<div class="advice-metric"><div class="advice-metric-value">+' + breakEven.toFixed(1) + '%</div><div class="advice-metric-label">рост до окупа</div></div>' +
+        '</div>' +
+        '<div class="signal-row">' +
+          '<span class="signal-chip green">сила сигнала: ' + buyStrength + '</span>' +
+          '<span class="signal-chip green">buy score: ' + Math.round(s.buyScore) + '</span>' +
+          '<span class="signal-chip yellow">вес в портфеле: ' + s.weight.toFixed(1) + '%</span>' +
+          '<span class="signal-chip blue">' + categoryLabel + '</span>' +
+          '<span class="signal-chip purple">' + phaseLabel + '</span>' +
+          '<span class="signal-chip orange">RSI: ' + rsi + '</span>' +
+          '<span class="signal-chip yellow">' + riskLabel + '</span>' +
+        '</div>' +
+      '</div>';
+  } else {
+    type = 'hold'; badge = 'hold';
+
+    // Smart HOLD logic with market phase
+    let holdReasonText = '';
+    if (marketPhase === 'accumulation_uptrend') {
+      holdReasonText = 'Фаза накопления в восходящем тренде: держите для роста';
+    } else if (marketPhase === 'consolidation') {
+      holdReasonText = 'Консолидация: ждите определения направления';
+    } else if (marketPhase === 'uncertain') {
+      holdReasonText = 'Неопределенность на рынке: лучше подождать';
+    } else if (category === 'fundamental_l1' && pnl > -20) {
+      holdReasonText = 'Фундаментальный L1: долгосрочная перспектива';
+    } else if (riskLevel === 'low') {
+      holdReasonText = 'Низкий риск: можно держать';
+    } else if (s.weight < 1) {
+      holdReasonText = 'Малый вес в портфеле: не SELL';
+    } else {
+      holdReasonText = 'Выраженного сигнала нет';
+    }
+
+    if (h.targetPrice) {
+      autoAlert = { enabled: true, type: 'above', value: h.targetPrice, suggestedAmount: +(h.amount * c.current_price * 0.5).toFixed(2), action: 'sell', symbol: h.symbol };
+    } else if (h.stopLoss) {
+      autoAlert = { enabled: true, type: 'below', value: h.stopLoss, suggestedAmount: 0, action: 'sell', symbol: h.symbol };
+    }
+
+    text = 'Рекомендация: держать <strong>' + s.coinInfo.name + '</strong> (' + categoryLabel + ', ' + riskLevel + ' риск, фаза: ' + phaseLabel + '). P&L <strong>' + fmtPct(pnl) + '</strong>, 24ч <strong>' + fmtPct(ch24) + '</strong>' + (s.hasAth ? (', от ATH <strong>' + fmtPct(drawdown) + '</strong>') : '') + '. Risk Score: <strong>' + Math.round(riskScore) + '/100</strong>. RSI: <strong>' + rsi + '</strong>. ' + holdReasonText + '.';
+
+    actionHtml =
+      '<div class="advice-action">' +
+        '<div class="advice-action-title">Текущая ситуация</div>' +
+        '<div class="advice-grid">' +
+          '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(val) + '</div><div class="advice-metric-label">текущая стоимость</div></div>' +
+          '<div class="advice-metric"><div class="advice-metric-value">' + fmt$(inv) + '</div><div class="advice-metric-label">вложено</div></div>' +
+          '<div class="advice-metric"><div class="advice-metric-value">' + s.weight.toFixed(1) + '%</div><div class="advice-metric-label">вес в портфеле</div></div>' +
+          '<div class="advice-metric"><div class="advice-metric-value" style="font-size:14px;">' + riskLabel + '</div><div class="advice-metric-label">риск</div></div>' +
+        '</div>' +
+        '<div class="signal-row">' +
+          '<span class="signal-chip yellow">buy score: ' + Math.round(s.buyScore) + '</span>' +
+          '<span class="signal-chip yellow">sell score: ' + Math.round(s.sellScore) + '</span>' +
+          '<span class="signal-chip blue">' + categoryLabel + '</span>' +
+          '<span class="signal-chip purple">' + phaseLabel + '</span>' +
+          '<span class="signal-chip orange">RSI: ' + rsi + '</span>' +
+          (h.targetPrice ? '<span class="signal-chip green">цель: ' + fmt$(h.targetPrice) + '</span>' : '') +
+          (h.stopLoss ? '<span class="signal-chip red">стоп: ' + fmt$(h.stopLoss) + '</span>' : '') +
+        '</div>' +
+      '</div>';
+  }
+
+  if (h.notes) {
+    text += '<div style="margin-top:8px;padding:8px;background:rgba(59,130,246,0.08);border-radius:6px;font-size:12px;color:var(--text-3);border-left:2px solid var(--blue)">Ваша заметка: ' + h.notes + '</div>';
+  }
+
+  return { type, badge, text, actionHtml, autoAlert };
+}
+
+function makeAlertSignature(a) {
+  return [a.coinId_h, a.type, Number(a.value).toFixed(4), Number(a.suggestedAmount || 0).toFixed(2), a.action || ''].join('|');
+}
+
+function syncAutoAlertsFromAdvisor() {
+  if (!autoAlertsEnabled) return;
+
+  const nextAlerts = [];
+  portfolio.forEach(h => {
+    const c = findCoin(h.coinId || h.symbol.toLowerCase());
+    if (!c) return;
+    const adv = generateCoinAdvice(h, c);
+    if (!adv.autoAlert || !adv.autoAlert.enabled) return;
+    nextAlerts.push({
+      coinId: h.coinId,
+      coinId_h: h.id,
+      symbol: h.symbol,
+      type: adv.autoAlert.type,
+      value: adv.autoAlert.value,
+      suggestedAmount: adv.autoAlert.suggestedAmount || 0,
+      action: adv.autoAlert.action || adv.badge
+    });
+  });
+
+  const manualAlerts = alertsList.filter(a => !a.autoGenerated);
+  const oldAuto = alertsList.filter(a => a.autoGenerated);
+  const oldMap = new Map(oldAuto.map(a => [makeAlertSignature(a), a]));
+
+  const autoAlerts = nextAlerts.map(a => {
+    const signature = makeAlertSignature(a);
+    const existing = oldMap.get(signature);
+    return {
+      id: existing ? existing.id : uid(),
+      coinId: a.coinId,
+      coinId_h: a.coinId_h,
+      symbol: a.symbol,
+      type: a.type,
+      value: a.value,
+      suggestedAmount: a.suggestedAmount,
+      fired: existing ? existing.fired : false,
+      created: existing ? existing.created : Date.now(),
+      autoGenerated: true,
+      action: a.action,
+      signature: signature
+    };
+  });
+
+  alertsList = [...manualAlerts, ...autoAlerts];
+  saveAlerts();
+}
+
+function setAdvisorFilter(filter) {
+  advisorFilter = filter;
+  renderAdvisor();
+}
+
+function toggleAutoAlerts() {
+  autoAlertsEnabled = !autoAlertsEnabled;
+  saveAutoAlertSettings();
+  const stateEl = document.getElementById('autoAlertsState');
+  if (stateEl) stateEl.textContent = autoAlertsEnabled ? 'on' : 'off';
+  if (autoAlertsEnabled) {
+    syncAutoAlertsFromAdvisor();
+  } else {
+    alertsList = alertsList.filter(a => !a.autoGenerated);
+    saveAlerts();
+  }
+  renderAdvisor();
+}
+
 function renderAdvisor() {
   const list = document.getElementById('advisorList');
-  list.innerHTML = '';
+  const stateEl = document.getElementById('autoAlertsState');
+  if (stateEl) stateEl.textContent = autoAlertsEnabled ? 'on' : 'off';
 
-  // Filter buttons
-  list.innerHTML += '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">' +
-    '<button class="btn btn-sm ' + (advisorFilter==='all'?'btn-primary':'') + '" onclick="setAdvisorFilter(\'all\')">Все</button>' +
-    '<button class="btn btn-sm ' + (advisorFilter==='buy'?'btn-primary':'') + '" onclick="setAdvisorFilter(\'buy\')">Купить</button>' +
-    '<button class="btn btn-sm ' + (advisorFilter==='sell'?'btn-primary':'') + '" onclick="setAdvisorFilter(\'sell\')">Продать</button>' +
-    '<button class="btn btn-sm ' + (advisorFilter==='hold'?'btn-primary':'') + '" onclick="setAdvisorFilter(\'hold\')">Держать</button>' +
-    '</div>';
+  list.innerHTML = '';
 
   let marketTxt = 'Рынок нейтрален. ';
   if (fearData && fearData.data && fearData.data[0]) {
@@ -1466,67 +2503,69 @@ function renderAdvisor() {
     const g = globalData.data;
     marketTxt += 'BTC доминация <strong>' + g.market_cap_percentage.btc.toFixed(1) + '%</strong>. ';
     if (g.market_cap_percentage.btc > 55) marketTxt += 'Высокая доминация BTC — альты могут отставать, фокус на BTC. ';
-    else if (g.market_cap_percentage.btc < 45) marketTxt += 'Низкая доминация BTC — возможен <strong>сезон альтов</strong>, рассмотрите альты. ';
+    else if (g.market_cap_percentage.btc < 45) marketTxt += 'Низкая доминация BTC — возможен <strong>сезон альтов</strong>. ';
   }
+
   list.innerHTML += '<div class="advice-card hold"><div class="advice-header"><div class="advice-title">Общий рыночный контекст</div><span class="advice-badge badge-hold">анализ</span></div><div class="advice-text">' + marketTxt + '</div></div>';
 
-  let shown = 0;
+  let items = [];
+  let buyCount = 0, sellCount = 0, holdCount = 0;
+
   portfolio.forEach(h => {
     const c = findCoin(h.coinId || h.symbol.toLowerCase());
     if (!c) return;
     const adv = generateCoinAdvice(h, c);
-    // Apply filter
-    if (advisorFilter !== 'all' && adv.badge !== advisorFilter) return;
-    shown++;
-
-    // Auto-create alert for actionable recommendations
-    if (adv.badge === 'buy' || adv.badge === 'sell') {
-      const pnl = h.avgPrice > 0 ? ((c.current_price - h.avgPrice) / h.avgPrice) * 100 : 0;
-      const ch24 = c.price_change_percentage_24h || 0;
-      const hasAth = typeof c.ath === 'number' && c.ath > 0;
-      const drawdown = hasAth ? ((c.current_price - c.ath) / c.ath) * 100 : null;
-      const inv = h.amount * h.avgPrice;
-      let alertType, alertValue, alertAmount = 0;
-
-      if (pnl > 100) { alertType = 'below'; alertValue = c.current_price * 0.9; }
-      else if (pnl > 50) { alertType = 'below'; alertValue = c.current_price * 0.85; }
-      else if (pnl < -60 && ch24 > 0) { alertType = 'below'; alertValue = c.current_price * 0.95; alertAmount = inv * 0.5; }
-      else if (pnl < -40) { alertType = 'below'; alertValue = c.current_price * 0.9; alertAmount = inv * 0.3; }
-      else if (h.stopLoss && c.current_price <= h.stopLoss) { alertType = 'below'; alertValue = h.stopLoss; }
-      else if (h.targetPrice && c.current_price >= h.targetPrice) { alertType = 'above'; alertValue = h.targetPrice; }
-      else if (ch24 > 20) { alertType = 'below'; alertValue = c.current_price * 0.8; }
-      else if (hasAth && drawdown < -80 && ch24 > 5) { alertType = 'below'; alertValue = c.current_price * 0.95; alertAmount = inv * 0.2; }
-
-      if (alertType) {
-        createAlertFromAdvisor(h.id, alertType, alertValue, alertAmount, h.symbol, null);
-      }
-    }
-
-    list.innerHTML += '<div class="advice-card ' + adv.type + '"><div class="advice-header"><div class="advice-title">' + c.name + ' (' + h.symbol + ')</div><span class="advice-badge badge-' + adv.badge + '">' + (adv.badge==='buy'?'КУПИТЬ':adv.badge==='sell'?'ПРОДАТЬ':'ДЕРЖАТЬ') + '</span></div><div class="advice-text">' + adv.text + '</div>' + adv.actionHtml + '</div>';
+    if (adv.badge === 'buy') buyCount++;
+    else if (adv.badge === 'sell') sellCount++;
+    else holdCount++;
+    items.push({ h, c, adv });
   });
-  if (shown === 0) {
-    list.innerHTML += '<div style="color:var(--text-3);padding:20px;text-align:center;">Нет рекомендаций типа «' + (advisorFilter==='buy'?'КУПИТЬ':advisorFilter==='sell'?'ПРОДАТЬ':'ДЕРЖАТЬ') + '»</div>';
-  }
-}
 
-function setAdvisorFilter(filter) {
-  advisorFilter = filter;
-  renderAdvisor();
+  const sb = document.getElementById('sumBuy'); if (sb) sb.textContent = buyCount;
+  const ss = document.getElementById('sumSell'); if (ss) ss.textContent = sellCount;
+  const sh = document.getElementById('sumHold'); if (sh) sh.textContent = holdCount;
+  const sa = document.getElementById('sumAlerts'); if (sa) sa.textContent = alertsList.filter(a => !a.fired).length;
+
+  if (advisorFilter !== 'all') {
+    items = items.filter(x => x.adv.badge === advisorFilter);
+  }
+
+  if (!items.length) {
+    list.innerHTML += '<div class="card" style="color:var(--text-3)">Нет монет по выбранному фильтру</div>';
+    return;
+  }
+
+  items.forEach(({ h, c, adv }) => {
+    const autoInfo = adv.autoAlert
+      ? '<div style="margin-top:10px;font-size:12px;color:var(--text-3)">Авто-алерт: ' + (adv.autoAlert.action === 'buy' ? 'докупить' : 'продать') + ' при цене ' + (adv.autoAlert.type === 'below' ? 'ниже ' : 'возле ') + fmt$(adv.autoAlert.value) + (adv.autoAlert.suggestedAmount ? (' · сумма ~' + fmt$(adv.autoAlert.suggestedAmount)) : '') + ' — уведомление придёт автоматически</div>'
+      : '';
+
+    list.innerHTML +=
+      '<div class="advice-card ' + adv.type + '">' +
+        '<div class="advice-header">' +
+          '<div class="advice-title">' + c.name + ' (' + h.symbol + ')</div>' +
+          '<span class="advice-badge badge-' + adv.badge + '">' + (adv.badge === 'buy' ? 'КУПИТЬ' : adv.badge === 'sell' ? 'ПРОДАТЬ' : 'ДЕРЖАТЬ') + '</span>' +
+        '</div>' +
+        '<div class="advice-text">' + adv.text + '</div>' +
+        adv.actionHtml +
+        autoInfo +
+      '</div>';
+  });
+
+  // Render new coin suggestions
+  renderNewCoinSuggestions();
 }
 
 function createAlertFromAdvisor(holdingId, type, value, suggestedAmount, symbol, btnEl) {
-  value = Math.round(value * 10000) / 10000;
   const already = alertsList.find(a => a.coinId_h === holdingId && a.type === type && Math.abs(a.value - value) < 0.0001 && !a.fired);
   if (already) { if (btnEl) { btnEl.textContent = '✓ уже создан'; btnEl.disabled = true; } return; }
   const h = portfolio.find(x => x.id === holdingId);
   if (!h) return;
-  alertsList.push({ id: uid(), coinId: h.coinId, coinId_h: holdingId, symbol: symbol, type, value, suggestedAmount: suggestedAmount || 0, fired: false, created: Date.now() });
+  alertsList.push({ id: uid(), coinId: h.coinId, coinId_h: holdingId, symbol: symbol, type, value, suggestedAmount: suggestedAmount || 0, fired: false, created: Date.now(), autoGenerated: false });
   saveAlerts();
   if (btnEl) { btnEl.textContent = '✓ алерт создан (сработает при достижении цены)'; btnEl.disabled = true; }
-  updateNotifBadge();
 }
 
-// ===================== NOTIFICATIONS / ALERTS =====================
 function checkNotifs() {
   let changed = false;
   alertsList.forEach(a => {
@@ -1538,10 +2577,17 @@ function checkNotifs() {
     if (triggered) {
       a.fired = true;
       changed = true;
-      const dirTxt = a.type === 'below' ? 'упала ниже' : 'выросла выше';
-      let txt = 'Цена ' + a.symbol + ' ' + dirTxt + ' ' + fmt$(a.value) + '.';
-      if (a.suggestedAmount > 0) txt += ' Рекомендуется докупить на ~' + fmt$(a.suggestedAmount) + '.';
-      addNotification(txt, a.type === 'below' ? 'buy' : 'sell');
+      let txt = '';
+      let notifType = 'info';
+      if (a.action === 'buy' || (a.type === 'below' && a.action !== 'sell')) {
+        txt = a.symbol + ': достигнута цена для докупки ' + fmt$(a.value) + '.';
+        if (a.suggestedAmount > 0) txt += ' Рекомендуемая сумма ~' + fmt$(a.suggestedAmount) + '.';
+        notifType = 'buy';
+      } else {
+        txt = a.symbol + ': достигнута цена для продажи ' + fmt$(a.value) + '.';
+        notifType = 'sell';
+      }
+      addNotification(txt, notifType);
     }
   });
   if (changed) saveAlerts();
@@ -1553,7 +2599,6 @@ function toggleNotif(e) {
   dd.classList.toggle('active');
   if (dd.classList.contains('active')) {
     renderNotifList();
-    // opening the dropdown clears unread state
     notifications.forEach(n => n.read = true);
     saveNotifs();
     updateNotifBadge();
@@ -1568,14 +2613,22 @@ function renderNotifList() {
   } else {
     html += notifications.slice().reverse().slice(0, 30).map(n => {
       const time = new Date(n.time).toLocaleString('ru-RU');
-      return '<div class="notif-item ' + (n.type==='buy'?'buy':n.type==='sell'?'sell':'info') + '"><div>' + n.text + '</div><div class="notif-time">' + time + '</div></div>';
+      return '<div class="notif-item ' + (n.type === 'buy' ? 'buy' : n.type === 'sell' ? 'sell' : 'info') + '"><div>' + n.text + '</div><div class="notif-time">' + time + '</div></div>';
     }).join('');
   }
-  const pending = alertsList.filter(a => !a.fired);
-  if (pending.length) {
-    html += '<div class="notif-section-title">Активные алерты (' + pending.length + ')</div>';
-    html += pending.map(a => '<div class="pending-alert-item"><span>' + a.symbol + ' ' + (a.type==='below'?'ниже':'выше') + ' ' + fmt$(a.value) + (a.suggestedAmount>0 ? (' · ~' + fmt$(a.suggestedAmount)) : '') + '</span><button onclick="removeAlert(\'' + a.id + '\')" title="удалить">&times;</button></div>').join('');
+
+  const pendingAuto = alertsList.filter(a => !a.fired && a.autoGenerated);
+  const pendingManual = alertsList.filter(a => !a.fired && !a.autoGenerated);
+
+  if (pendingAuto.length) {
+    html += '<div class="notif-section-title">AI авто-алерты (' + pendingAuto.length + ')</div>';
+    html += pendingAuto.map(a => '<div class="pending-alert-item"><span>' + a.symbol + ' ' + (a.type === 'below' ? 'ниже' : 'выше') + ' ' + fmt$(a.value) + (a.suggestedAmount > 0 ? (' · ~' + fmt$(a.suggestedAmount)) : '') + '</span><button onclick="removeAlert(\'' + a.id + '\')" title="удалить">&times;</button></div>').join('');
   }
+  if (pendingManual.length) {
+    html += '<div class="notif-section-title">Ручные алерты (' + pendingManual.length + ')</div>';
+    html += pendingManual.map(a => '<div class="pending-alert-item"><span>' + a.symbol + ' ' + (a.type === 'below' ? 'ниже' : 'выше') + ' ' + fmt$(a.value) + (a.suggestedAmount > 0 ? (' · ~' + fmt$(a.suggestedAmount)) : '') + '</span><button onclick="removeAlert(\'' + a.id + '\')" title="удалить">&times;</button></div>').join('');
+  }
+
   dd.innerHTML = html;
 }
 
@@ -1596,14 +2649,74 @@ function addNotification(text, type) {
   notifications.push({ id: uid(), text, type, time: Date.now(), read: false });
   saveNotifs();
   updateNotifBadge();
+  const title = type === 'buy' ? 'Сигнал на покупку' : type === 'sell' ? 'Сигнал на продажу' : 'Уведомление';
+  pushBrowserNotification(title, text);
 }
 
-function loadNotifs() { try { const d = localStorage.getItem(NOTIF_KEY); if (d) notifications = JSON.parse(d); } catch {} }
-function saveNotifs() { localStorage.setItem(NOTIF_KEY, JSON.stringify(notifications)); }
-function loadAlerts() { try { const d = localStorage.getItem(ALERTS_KEY); if (d) alertsList = JSON.parse(d); } catch {} }
-function saveAlerts() { localStorage.setItem(ALERTS_KEY, JSON.stringify(alertsList)); }
+async function loadNotifs() {
+  try {
+    if (window.firebaseDB && window.firebaseUser) {
+      const userId = window.firebaseUser.uid;
+      const docRef = window.firebaseDB.collection('portfolios').doc(userId);
+      const docSnap = await docRef.get();
+      if (docSnap.exists) {
+        const data = docSnap.data();
+        if (data.notifications) notifications = data.notifications;
+      }
+    }
+  } catch (e) { console.error('Error loading notifications from Firebase:', e); }
+  // Fallback to localStorage
+  try { const d = localStorage.getItem(NOTIF_KEY); if (d) notifications = JSON.parse(d); } catch {}
+}
 
-// ===================== SEARCH COINS (top250 + full CoinGecko search) =====================
+async function saveNotifs() {
+  localStorage.setItem(NOTIF_KEY, JSON.stringify(notifications));
+  try {
+    if (window.firebaseDB && window.firebaseUser) {
+      const userId = window.firebaseUser.uid;
+      const docRef = window.firebaseDB.collection('portfolios').doc(userId);
+      await docRef.update({ notifications: notifications });
+    }
+  } catch (e) { console.error('Error saving notifications to Firebase:', e); }
+}
+async function loadAlerts() {
+  try {
+    if (window.firebaseDB && window.firebaseUser) {
+      const userId = window.firebaseUser.uid;
+      const docRef = window.firebaseDB.collection('portfolios').doc(userId);
+      const docSnap = await docRef.get();
+      if (docSnap.exists) {
+        const data = docSnap.data();
+        if (data.alerts) alertsList = data.alerts;
+      }
+    }
+  } catch (e) { console.error('Error loading alerts from Firebase:', e); }
+  // Fallback to localStorage
+  try { const d = localStorage.getItem(ALERTS_KEY); if (d) alertsList = JSON.parse(d); } catch {}
+}
+
+async function saveAlerts() {
+  localStorage.setItem(ALERTS_KEY, JSON.stringify(alertsList));
+  try {
+    if (window.firebaseDB && window.firebaseUser) {
+      const userId = window.firebaseUser.uid;
+      const docRef = window.firebaseDB.collection('portfolios').doc(userId);
+      await docRef.update({ alerts: alertsList });
+    }
+  } catch (e) { console.error('Error saving alerts to Firebase:', e); }
+}
+
+function loadAutoAlertSettings() {
+  try {
+    const v = localStorage.getItem(AUTO_ALERTS_KEY);
+    if (v !== null) autoAlertsEnabled = JSON.parse(v);
+  } catch {}
+}
+
+function saveAutoAlertSettings() {
+  localStorage.setItem(AUTO_ALERTS_KEY, JSON.stringify(autoAlertsEnabled));
+}
+
 function searchCoins(query) {
   const results = document.getElementById('searchResults');
   const q = query.toLowerCase().trim();
@@ -1615,18 +2728,14 @@ function searchCoins(query) {
   clearTimeout(searchDebounce);
   searchDebounce = setTimeout(async () => {
     try {
-      const res = await apiFetch(
-  cgUrl("/search", {
-    query: q
-  })
-);
+      const res = await apiFetch(API_BASE + '/search?query=' + encodeURIComponent(q));
       if (!res.ok) return;
       const data = await res.json();
       const remote = (data.coins || []).slice(0, 12).map(c => ({ id: c.id, name: c.name, symbol: c.symbol, image: c.thumb }));
       const localIds = new Set(local.map(c => c.id));
       const merged = local.concat(remote.filter(c => !localIds.has(c.id)));
       renderSearchResults(merged.slice(0, 12), false);
-    } catch (e) { /* ignore network errors, keep local results */ }
+    } catch (e) {}
   }, 350);
 }
 
@@ -1661,130 +2770,54 @@ async function selectCoin(id, symbol, image) {
   }
 }
 
-// Fetches full CoinGecko market data (same shape as top-250 list, incl. ATH) for a coin
-// that isn't in the top-250, so it behaves identically everywhere (ATH, drawdown, charts...).
-async function fetchExtraCoinFull(
-  id,
-  symbol,
-  image
-) {
-  const cached = getStoredJson(
-    "ct_extra_coins",
-    {}
-  );
-
-  if (cached[id]) {
-    extraCoins[id] = cached[id];
-  }
-
+async function fetchExtraCoinFull(id, symbol, image) {
+  try { const cached = JSON.parse(localStorage.getItem('ct_extra_coins') || '{}'); if (cached[id]) { extraCoins[id] = cached[id]; return true; } } catch(e){}
   try {
-    const response = await apiFetch(
-      cgUrl("/coins/markets", {
-        vs_currency: "usd",
-        ids: id,
-        sparkline: false,
-        price_change_percentage: "24h,7d"
-      })
-    );
-
-    if (response.ok) {
-      const data = await response.json();
-
-      if (Array.isArray(data) && data[0]) {
+    const res = await apiFetch(API_BASE + '/coins/markets?vs_currency=usd&ids=' + id + '&sparkline=false&price_change_percentage=24h,7d');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data[0]) {
         extraCoins[id] = data[0];
-        setStoredJson(
-          "ct_extra_coins",
-          extraCoins
-        );
+        try { const all = JSON.parse(localStorage.getItem('ct_extra_coins') || '{}'); all[id] = data[0]; localStorage.setItem('ct_extra_coins', JSON.stringify(all)); } catch(e){}
         return true;
       }
     }
-  } catch (error) {
-    console.warn(
-      "Full coin fetch failed:",
-      error
-    );
-  }
-
+  } catch (e) {}
   try {
-    const response = await apiFetch(
-      cgUrl("/simple/price", {
-        ids: id,
-        vs_currencies: "usd",
-        include_market_cap: true,
-        include_24hr_change: true
-      })
-    );
-
-    if (!response.ok) return false;
-
-    const data = await response.json();
-    const priceData = data[id];
-
-    if (!priceData) return false;
-
-    extraCoins[id] = {
-      id,
-      symbol: (symbol || id).toLowerCase(),
-      name: symbol || id,
-      image: image || "",
-      current_price: Number(priceData.usd) || 0,
-      market_cap:
-        Number(priceData.usd_market_cap) || 0,
-      price_change_percentage_24h:
-        Number(priceData.usd_24h_change) || 0,
-      ath: null
-    };
-
-    setStoredJson(
-      "ct_extra_coins",
-      extraCoins
-    );
-
-    return true;
-  } catch (error) {
-    console.warn(
-      "Simple coin fetch failed:",
-      error
-    );
-    return false;
-  }
+    const res2 = await apiFetch(API_BASE + '/simple/price?ids=' + id + '&vs_currencies=usd&include_market_cap=true&include_24hr_change=true');
+    const data2 = await res2.json();
+    if (data2[id]) {
+      extraCoins[id] = {
+        id, symbol: (symbol || id).toLowerCase(), name: symbol || id, image: image || '',
+        current_price: data2[id].usd, market_cap: data2[id].usd_market_cap || 0,
+        price_change_percentage_24h: data2[id].usd_24h_change || 0, ath: null
+      };
+      try { const all = JSON.parse(localStorage.getItem('ct_extra_coins') || '{}'); all[id] = extraCoins[id]; localStorage.setItem('ct_extra_coins', JSON.stringify(all)); } catch(e){}
+      return true;
+    }
+  } catch (e) {}
+  return false;
 }
 
-
-// Keeps extraCoins (portfolio coins outside top-250) fresh on every refresh cycle,
-// same as the top-250 list, so price/ATH/24h change stay current.
 async function refreshExtraCoins() {
   const neededIds = [...new Set(portfolio.map(h => h.coinId).filter(id => id && !allCoins.find(c => c.id === id)))];
   if (!neededIds.length) return;
-  // Load cached extra coins first for instant display
   try { const cached = JSON.parse(localStorage.getItem('ct_extra_coins') || '{}'); Object.assign(extraCoins, cached); } catch(e){}
   const chunkSize = 20;
   for (let i = 0; i < neededIds.length; i += chunkSize) {
     const chunk = neededIds.slice(i, i + chunkSize);
     try {
-      const res = await apiFetch(
-  cgUrl("/coins/markets", {
-    vs_currency: "usd",
-    ids: chunk.join(","),
-    sparkline: false,
-    price_change_percentage: "24h,7d"
-  })
-);
-
+      const res = await apiFetch(API_BASE + '/coins/markets?vs_currency=usd&ids=' + chunk.join(',') + '&sparkline=false&price_change_percentage=24h,7d');
       if (res.ok) {
         const data = await res.json();
         data.forEach(c => { extraCoins[c.id] = c; });
       }
-    } catch (e) { /* keep previous cached extraCoins values on failure */ }
-    // Small delay between chunks to avoid rate limit
+    } catch (e) {}
     if (i + chunkSize < neededIds.length) await new Promise(r => setTimeout(r, 300));
   }
-  // Save extra coins cache
   try { localStorage.setItem('ct_extra_coins', JSON.stringify(extraCoins)); } catch(e){}
 }
 
-// ===================== MODAL / ADD PURCHASE =====================
 function openModal() {
   document.getElementById('modalTitle').textContent = 'добавить покупку';
   document.getElementById('mCoinId').value = '';
@@ -1803,13 +2836,11 @@ function openModal() {
   document.getElementById('modal').classList.add('active');
 }
 
-function closeModal() { 
-  document.getElementById('modal').classList.remove('active'); 
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
   document.getElementById('mCoinSearch').disabled = false;
   currentEditTxId = null;
 }
-
-
 
 function openAddPurchaseModal() {
   const h = portfolio.find(x => x.id === currentTxHoldingId);
@@ -1871,7 +2902,6 @@ function saveHolding() {
 
   let h = portfolio.find(x => x.coinId === coinId);
 
-  // Редактирование существующей транзакции
   if (currentEditTxId && h) {
     const p = h.purchases.find(x => x.id === currentEditTxId);
     if (p) {
@@ -1888,6 +2918,7 @@ function saveHolding() {
     currentEditTxId = null;
     savePortfolio();
     closeModal();
+    syncAutoAlertsFromAdvisor();
     renderAll();
     if (currentTxHoldingId) renderTxList();
     return;
@@ -1914,12 +2945,13 @@ function saveHolding() {
     return alert('укажите количество и цену для новой монеты');
   }
 
-  if (target) h.targetPrice = target; else if (document.getElementById('mTarget').value === '') { /* keep existing */ }
+  if (target) h.targetPrice = target;
   if (stop) h.stopLoss = stop;
   if (notes) h.notes = notes;
 
   savePortfolio();
   closeModal();
+  syncAutoAlertsFromAdvisor();
   renderAll();
   if (currentTxHoldingId) renderTxList();
 }
@@ -1927,8 +2959,10 @@ function saveHolding() {
 function delHolding(id) {
   if (confirm('удалить позицию целиком (все транзакции)?')) {
     portfolio = portfolio.filter(h => h.id !== id);
+    alertsList = alertsList.filter(a => a.coinId_h !== id);
     delete expandedRows[id];
     savePortfolio();
+    saveAlerts();
     renderAll();
   }
 }
@@ -1943,7 +2977,6 @@ function recomputeHolding(h) {
 }
 
 function recalcRealizedPnl(h) {
-  // Sort by date to process chronologically
   const sorted = [...h.purchases].sort((a, b) => new Date(a.date) - new Date(b.date));
   let runningAvg = 0;
   let runningQty = 0;
@@ -1963,7 +2996,6 @@ function recalcRealizedPnl(h) {
   h.realizedPnl = realized;
 }
 
-// ===================== TRANSACTIONS MODAL =====================
 function openTxModal(holdingId) {
   currentTxHoldingId = holdingId;
   const h = portfolio.find(x => x.id === holdingId);
@@ -1979,12 +3011,8 @@ function renderTxList() {
   const h = portfolio.find(x => x.id === currentTxHoldingId);
   const list = document.getElementById('txList');
   if (!h || !h.purchases || !h.purchases.length) { list.innerHTML = '<div style="color:var(--text-3);font-size:13px;">нет транзакций</div>'; return; }
-  list.innerHTML = h.purchases.map(p => '<div class="tx-row"><span>' + p.date + '</span><span>' + p.amount + ' ' + h.symbol + '</span><span>$' + p.price + '</span><span>' + fmt$(p.amount*p.price) + '</span><div class="tx-actions"><button class="btn btn-sm" onclick="openEditPurchaseModal(\'' + p.id + '\')">изм</button><button class="btn btn-sm btn-danger" onclick="delTx(\'' + p.id + '\')">удл</button></div></div>').join('');
+  list.innerHTML = h.purchases.map(p => '<div class="tx-row"><span>' + p.date + '</span><span>' + (p.type === 'sell' ? '<span class="neg" style="font-weight:700;">−</span> ' : '<span class="pos" style="font-weight:700;">+</span> ') + p.amount + ' ' + h.symbol + '</span><span>$' + p.price + '</span><span>' + fmt$(p.amount*p.price) + '</span><div class="tx-actions"><button class="btn btn-sm" onclick="openEditPurchaseModal(\'' + p.id + '\')">изм</button><button class="btn btn-sm btn-danger" onclick="delTx(\'' + p.id + '\')">удл</button></div></div>').join('');
 }
-
-
-
-
 
 function delTx(txId) {
   const h = portfolio.find(x => x.id === currentTxHoldingId);
@@ -1992,13 +3020,37 @@ function delTx(txId) {
   if (h.purchases.length <= 1) { if (!confirm('это последняя транзакция, удаление удалит всю позицию. продолжить?')) return; delHolding(h.id); closeTxModal(); return; }
   if (!confirm('удалить транзакцию?')) return;
   h.purchases = h.purchases.filter(x => x.id !== txId);
+  recalcRealizedPnl(h);
   recomputeHolding(h);
   savePortfolio();
   renderTxList();
   renderHeader();
 }
 
-// ===================== REAL PRICE CHART MODAL =====================
+function renderFeed() {
+  const list = document.getElementById('feedList');
+  let allTx = [];
+  portfolio.forEach(h => {
+    const c = findCoin(h.coinId || h.symbol.toLowerCase());
+    if (!c) return;
+    (h.purchases || []).forEach(p => {
+      allTx.push({ ...p, symbol: h.symbol, name: c.name, image: c.image });
+    });
+  });
+  allTx.sort((a, b) => new Date(b.date) - new Date(a.date));
+  if (!allTx.length) { list.innerHTML = '<div style="color:var(--text-3);padding:20px;">нет транзакций</div>'; return; }
+  let html2 = '<div class="table-wrap"><table><thead><tr><th class="no-sort">дата</th><th class="no-sort">монета</th><th class="no-sort">тип</th><th class="no-sort">кол-во</th><th class="no-sort">цена</th><th class="no-sort">сумма</th><th class="no-sort">реализ. p&l</th></tr></thead><tbody>';
+  allTx.forEach(tx => {
+    const isSell = tx.type === 'sell';
+    const typeClass = isSell ? 'neg' : 'pos';
+    const typeText = isSell ? 'ПРОДАЖА' : 'ПОКУПКА';
+    const pnlCell = (isSell && tx.realizedPnl) ? '<span class="' + (tx.realizedPnl >= 0 ? 'pos' : 'neg') + '">' + (tx.realizedPnl >= 0 ? '+' : '') + fmt$(tx.realizedPnl) + '</span>' : '—';
+    html2 += '<tr><td>' + tx.date + '</td><td><div class="coin-cell"><div class="coin-img"><img src="' + tx.image + '" alt="" onerror="this.style.display=\'none\';this.parentNode.textContent=\'' + tx.symbol[0] + '\'"></div><div><div style="font-weight:600">' + tx.name + '</div><div class="coin-symbol">' + tx.symbol + '</div></div></div></td><td><span class="' + typeClass + '" style="font-weight:700;font-size:12px;">' + typeText + '</span></td><td>' + tx.amount + '</td><td>' + fmt$(tx.price) + '</td><td>' + fmt$(tx.amount * tx.price) + '</td><td>' + pnlCell + '</td></tr>';
+  });
+  html2 += '</tbody></table></div>';
+  list.innerHTML = html2;
+}
+
 function openChartModal(coinId, symbol) {
   currentChartCoin = coinId;
   document.getElementById('chartModalTitle').textContent = 'график — ' + symbol;
@@ -2014,13 +3066,7 @@ async function loadCoinChart(coinId, days, attempt) {
   const loading = document.getElementById('chartLoading');
   loading.textContent = 'загрузка графика' + (attempt > 1 ? ' (попытка ' + attempt + ')' : '') + '...';
   try {
-    const res = await apiFetch(
-  cgUrl(`/coins/${coinId}/market_chart`, {
-    vs_currency: "usd",
-    days
-  })
-);
-
+    const res = await apiFetch(API_BASE + '/coins/' + coinId + '/market_chart?vs_currency=usd&days=' + days);
     if (res.status === 429) {
       if (attempt < 3) { await new Promise(r => setTimeout(r, 1500 * attempt)); return loadCoinChart(coinId, days, attempt + 1); }
       loading.textContent = 'CoinGecko временно ограничил запросы (429). Подождите минуту и нажмите период графика снова.';
@@ -2043,14 +3089,6 @@ async function loadCoinChart(coinId, days, attempt) {
     if (attempt < 3) { await new Promise(r => setTimeout(r, 1000 * attempt)); return loadCoinChart(coinId, days, attempt + 1); }
     loading.textContent = 'не удалось загрузить график: ' + (e.message || 'сетевая ошибка') + '. Попробуйте другой период или повторите позже.';
   }
-}
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
 }
 
 function drawRealChart(prices) {
@@ -2077,13 +3115,39 @@ function drawRealChart(prices) {
   ctx.fillText('$' + min.toLocaleString(undefined,{maximumFractionDigits:2}), 8, h-4);
 }
 
-// ===================== STORAGE / IMPORT-EXPORT =====================
-function loadPortfolio() {
+async function loadPortfolio() {
+  // Try to load from Firebase first
   try {
-    const d = localStorage.getItem(PORTFOLIO_KEY);
-    if (d) portfolio = JSON.parse(d);
-  } catch {}
-  // migration: ensure ids, types and purchases exist
+    if (window.firebaseDB && window.firebaseUser) {
+      const userId = window.firebaseUser.uid;
+      const docRef = window.firebaseDB.collection('portfolios').doc(userId);
+      const docSnap = await docRef.get();
+      
+      if (docSnap.exists) {
+        const data = docSnap.data();
+        if (data.portfolio) {
+          portfolio = data.portfolio;
+          console.log('Portfolio loaded from Firebase');
+        }
+      } else {
+        // Fallback to localStorage if Firebase is empty
+        const d = localStorage.getItem(PORTFOLIO_KEY);
+        if (d) portfolio = JSON.parse(d);
+      }
+    } else {
+      // Fallback to localStorage if Firebase not initialized or user not signed in
+      const d = localStorage.getItem(PORTFOLIO_KEY);
+      if (d) portfolio = JSON.parse(d);
+    }
+  } catch (e) {
+    console.error('Error loading portfolio from Firebase:', e);
+    // Fallback to localStorage
+    try {
+      const d = localStorage.getItem(PORTFOLIO_KEY);
+      if (d) portfolio = JSON.parse(d);
+    } catch {}
+  }
+  
   portfolio.forEach(h => {
     if (!h.id) h.id = uid();
     if (!h.purchases || !h.purchases.length) {
@@ -2094,13 +3158,31 @@ function loadPortfolio() {
         if (!p.type) p.type = 'buy';
       });
     }
-    // Recalculate realized P&L from sell transactions
     recalcRealizedPnl(h);
     recomputeHolding(h);
   });
   savePortfolio();
 }
-function savePortfolio() { localStorage.setItem(PORTFOLIO_KEY, JSON.stringify(portfolio)); }
+
+async function savePortfolio() {
+  // Save to localStorage as backup
+  localStorage.setItem(PORTFOLIO_KEY, JSON.stringify(portfolio));
+  
+  // Save to Firebase
+  try {
+    if (window.firebaseDB && window.firebaseUser) {
+      const userId = window.firebaseUser.uid;
+      const docRef = window.firebaseDB.collection('portfolios').doc(userId);
+      await docRef.set({
+        portfolio: portfolio,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+      console.log('Portfolio saved to Firebase');
+    }
+  } catch (e) {
+    console.error('Error saving portfolio to Firebase:', e);
+  }
+}
 
 function exportData() {
   const data = { portfolio, notifications, alerts: alertsList, exported: new Date().toISOString() };
@@ -2115,21 +3197,33 @@ function importData(e) {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = ev => {
+  reader.onload = async ev => {
     try {
       const data = JSON.parse(ev.target.result);
-      if (data.portfolio) { portfolio = data.portfolio; loadPortfolio(); }
-      if (data.notifications) { notifications = data.notifications; saveNotifs(); }
-      if (data.alerts) { alertsList = data.alerts; saveAlerts(); }
+      if (data.portfolio) { 
+        portfolio = data.portfolio; 
+        await savePortfolio();
+      }
+      if (data.notifications) { 
+        notifications = data.notifications; 
+        await saveNotifs();
+      }
+      if (data.alerts) { 
+        alertsList = data.alerts; 
+        await saveAlerts();
+      }
+      syncAutoAlertsFromAdvisor();
       renderAll();
-      alert('данные импортированы');
-    } catch { alert('ошибка импорта'); }
+      alert('данные импортированы и сохранены в Firebase');
+    } catch (err) { 
+      console.error('Import error:', err);
+      alert('ошибка импорта: ' + err.message); 
+    }
   };
   reader.readAsText(file);
   e.target.value = '';
 }
 
-// ===================== UTILS =====================
 function findCoin(id) {
   if (!id) return null;
   const byIdOrSymbol = allCoins.find(c => c.id === id || c.symbol.toLowerCase() === id);
