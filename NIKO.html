@@ -7079,11 +7079,20 @@ if (feedbackSubmitBtn) {
     }
   }
 
-  function renderFeedbackHistory(messages, isAdmin) {
+ function renderFeedbackHistory(messages, isAdmin) {
   if (messages.length === 0) {
-    feedbackHistoryList.innerHTML = '<div style="color:#bfc3d6;padding:20px;text-align:center" data-i18n="noFeedback">Нет сообщений</div>';
-    return;
-  }
+  const noMsg = document.createElement('div');
+  noMsg.style.color = '#bfc3d6';
+  noMsg.style.padding = '20px';
+  noMsg.style.textAlign = 'center';
+  noMsg.setAttribute('data-i18n', 'noFeedback');
+
+  feedbackHistoryList.innerHTML = '';
+  feedbackHistoryList.appendChild(noMsg);
+
+  applyTranslations();
+  return;
+}
 
   var typeLabels = {
     suggestion: t('feedbackSuggestion'),
