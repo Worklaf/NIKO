@@ -79,7 +79,7 @@ h1{margin:0;font-size:24px;color:#fff}
 .track{
   background:linear-gradient(145deg, rgba(20,20,35,0.9), rgba(15,15,25,0.95));
   border-radius:var(--radius);
-  padding:12px;
+  padding:10px;
   display:flex;
   gap:12px;
   align-items:stretch;
@@ -101,8 +101,8 @@ h1{margin:0;font-size:24px;color:#fff}
   border-color: rgba(39, 182, 70, 0.4);
 }
 .thumb{width:120px;height:200px;object-fit:cover;border-radius:8px;flex:0 0 120px;align-self:flex-start}
-.info{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
-.title{font-weight:700;color:#fff;margin:0;font-size:18px;line-height:1.3;word-break:break-word;overflow-wrap:break-word}
+.info{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.title{font-weight:700;color:#fff;margin:0;font-size:16px;line-height:1.2;word-break:break-word;overflow-wrap:break-word}
 /* название трека — ссылка на страницу трека, но выглядит как обычный белый текст */
 .title a.track-title-link,
 .title a.track-title-link:link,
@@ -112,10 +112,44 @@ h1{margin:0;font-size:24px;color:#fff}
 .title a.track-title-link:focus{color:#fff;font:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent;cursor:pointer}
 .meta{color:var(--muted);font-size:13px}
 
-.play-row{display:flex;align-items:center;gap:10px;margin-top:auto;padding-top:6px;flex-wrap:wrap}
+.play-row{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}
+
+.track .play-row .btn.icon,
+.track .play-row .btn.play-btn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
+  color: #eaeaf2;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+.track .play-row .btn.icon:hover,
+.track .play-row .btn.play-btn:hover {
+  background: rgba(255,255,255,0.14);
+  border-color: rgba(255,255,255,0.12);
+}
+.track .play-row .btn.play-btn {
+  background: linear-gradient(90deg, #27b646, #ff7a4d);
+  border: none;
+  color: #fff;
+}
+.track .play-row .btn.play-btn.playing {
+  background: linear-gradient(90deg, #ff7a4d, #ff4da6);
+}
+.track .play-row .btn.icon svg {
+  display: block;
+  margin: auto;
+}
 
 .btn.play-btn {
-  background: linear-gradient(90deg,#27b646,#ff7a4d);
+  background: linear-gradient(90deg, #27b646, #ff7a4d);
   color:#fff;
   border:none;
   padding:8px 10px;
@@ -126,9 +160,13 @@ h1{margin:0;font-size:24px;color:#fff}
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: filter 0.2s;
+}
+.btn.play-btn:hover {
+  filter: brightness(1.1);
 }
 .btn.play-btn.playing {
-  background: linear-gradient(90deg,#ff7a4d,#ff4da6);
+  background: linear-gradient(90deg, #ff7a4d, #ff4da6);
 }
 .btn.play-btn svg {
   width: 16px;
@@ -3150,29 +3188,13 @@ stroke: #eaeaf2;
     grid-template-columns: 1fr;
   }
 }
-/* ---------- counts row (plays / likes / dislikes / comments) ---------- */
-.counts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 8px 0 12px;
-}
+/* ---------- counts row (plays / likes / dislikes / comments) ---------- */ 
 
-.counts > div {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 30px;
-  padding: 0 12px;
+.counts > div { 
+  background: rgba(0,0,255,0.05);
+  border: 1px solid rgba(0,209,255,0.10);  
+  height: 25px; 
   font-size: 13px;
-  font-weight: 600;
-  color: #bfc3d6;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  user-select: none;
 }
 
 .counts .num {
@@ -3182,8 +3204,8 @@ stroke: #eaeaf2;
 
 /* hover / active */
 .counts > div:hover {
-  border-color: rgba(255,255,255,0.25);
-  color: #000;
+  border-color: rgba(77,255,111,0.5);
+  color: #ff0000;
 }
  
 .counts .comments-count:hover {
@@ -3198,44 +3220,7 @@ stroke: #eaeaf2;
   background: rgba(77,255,138,0.10);
 }
 /* ---------- play-row: unified icon buttons ---------- */
-.play-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-  margin-top: 4px;
-}
-
-.play-row .btn.icon {
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.10);
-  color: #eaeaf2;
-  transition: all 0.2s ease;
-}
-
-.play-row .btn.icon svg {
-  display: block;
-  stroke: currentColor;
-}
-
-.play-row .btn.icon:hover {
-  border-color: var(--accent);
-  color: #fff;
-  background: rgba(255,77,166,0.12);
-}
-
-/* play button — green accent */
-.play-row .btn.icon.play-btn:hover {
-  border-color: rgba(77,255,138,0.5);
-  color: #4dff8a;
-}
+ 
 /* ---------- comment button with badge ---------- */
 .play-row .btn.icon.comment-btn {
   position: relative;
@@ -3260,4 +3245,45 @@ stroke: #eaeaf2;
   justify-content: center;
   pointer-events: none;
   box-shadow: 0 2px 6px rgba(255, 77, 166, 0.4);
+}
+@keyframes lockPulse {
+  0% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(48,190,112,0.4)); }
+  50% { transform: scale(1.1); filter: drop-shadow(0 0 12px rgba(48,190,112,0.7)); }
+  100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(48,190,112,0.4)); }
+}
+.thinking-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  color: #6366f1;
+  font-size: 48px;
+  animation: chatGlow 3s ease-in-out infinite;
+}
+
+.chat-dots {
+  display: flex;
+  font-size: 22px;
+  color: #6366f1;
+  margin-top: 10px;
+}
+
+.dot {
+  opacity: 0.2;
+  animation: dotBlink 1.8s infinite;
+}
+
+.dot1 { animation-delay: 0s; }
+.dot2 { animation-delay: 0.3s; }
+.dot3 { animation-delay: 0.6s; }
+
+@keyframes dotBlink {
+  0%, 80%, 100% { opacity: 0.2; transform: scale(1); }
+  40% { opacity: 1; transform: scale(1.3); }
+}
+
+@keyframes chatGlow {
+  0% { filter: drop-shadow(0 0 5px rgba(99,102,241,0.4)); }
+  50% { filter: drop-shadow(0 0 14px rgba(99,102,241,0.8)); }
+  100% { filter: drop-shadow(0 0 5px rgba(99,102,241,0.4)); }
 }
