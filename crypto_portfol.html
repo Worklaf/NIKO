@@ -304,6 +304,8 @@ canvas { width: 100%; height: 100%; }
           <th onclick="sortPortfolio('pnl')">p&l % <span class="sort-arrow">↕</span></th>
           <th onclick="sortPortfolio('pnlDollar')">p&l $ <span class="sort-arrow">↕</span></th>
           <th onclick="sortPortfolio('realized')">реализ. $ <span class="sort-arrow">↕</span></th>
+          <th onclick="sortPortfolio('currentX')">текущий x <span class="sort-arrow">↕</span></th>
+          <th onclick="sortPortfolio('xNeeded')">x до окупа <span class="sort-arrow">↕</span></th>
           <th class="no-sort"></th>
         </tr></thead>
         <tbody></tbody>
@@ -1879,7 +1881,9 @@ function getPortfolioRows() {
     const pnl = h.avgPrice > 0 ? ((c.current_price - h.avgPrice) / h.avgPrice) * 100 : 0;
     const pnlDollar = value - inv;
     const realized = h.realizedPnl || 0;
-    rows.push({ h, c, value, inv, pnl, pnlDollar, realized, price: c.current_price, amount: h.amount, avgPrice: h.avgPrice });
+    const currentX = h.avgPrice > 0 ? c.current_price / h.avgPrice : 0;
+    const xNeeded = c.current_price > 0 ? h.avgPrice / c.current_price : 0;
+    rows.push({ h, c, value, inv, pnl, pnlDollar, realized, price: c.current_price, amount: h.amount, avgPrice: h.avgPrice, currentX, xNeeded });
   });
   if (portfolioSort.col) {
     rows.sort((a, b) => {
@@ -1904,7 +1908,7 @@ function renderPortfolio() {
   const rows = getPortfolioRows();
 
   rows.forEach((r, idx) => {
-    const { h, c, value, pnl, pnlDollar, realized } = r;
+    const { h, c, value, pnl, pnlDollar, realized, currentX, xNeeded } = r;
     totalVal += value;
     pieData.push({ label: h.symbol, value: value, color: getColor(idx) });
 
@@ -1918,7 +1922,9 @@ function renderPortfolio() {
       '<td><span class="pnl-big ' + (pnl >= 0 ? 'pos' : 'neg') + '">' + fmtPct(pnl) + '</span></td>' +
       '<td><span class="' + (pnlDollar >= 0 ? 'pos' : 'neg') + '" style="font-weight:700;">' + (pnlDollar >= 0 ? '+' : '') + fmt$(pnlDollar) + '</span></td>' +
       '<td><span class="' + (realized >= 0 ? 'pos' : 'neg') + '" style="font-weight:700;">' + (realized >= 0 ? '+' : '') + fmt$(realized) + '</span></td>' +
-      '<td><button class="btn btn-sm" onclick="toggleAdviceRow(\'' + h.id + '\')">рек ' + (expandedRows[h.id] ? '▲' : '▼') + '</button> <button class="btn btn-sm btn-blue" onclick="openTxModal(\'' + h.id + '\')">транз.</button> <button class="btn btn-sm btn-danger" onclick="delHolding(\'' + h.id + '\')">удл</button></td>';
+      '<td><span class="' + (currentX >= 1 ? 'pos' : 'neg') + '" style="font-weight:700;">' + currentX.toFixed(2) + 'x</span></td>' +
+      '<td><span class="' + (xNeeded <= 1 ? 'pos' : 'neg') + '" style="font-weight:700;">' + xNeeded.toFixed(2) + 'x</span></td>' +
+      '<td><button class="btn btn-sm" onclick="toggleAdviceRow(\'' + h.id + '\')">рек ' + (expandedRows[h.id] ? '▲' : '▼') + '</button> <button class="btn btn-sm btn-blue" onclick="toggleDcaCalculator(\'' + h.id + '\')">DCA</button> <button class="btn btn-sm btn-blue" onclick="openTxModal(\'' + h.id + '\')">транз.</button> <button class="btn btn-sm btn-danger" onclick="delHolding(\'' + h.id + '\')">удл</button></td>';
     tbody.appendChild(tr);
 
     if (expandedRows[h.id]) {
@@ -1926,9 +1932,96 @@ function renderPortfolio() {
       const autoInfo = adv.autoAlert
         ? '<div style="margin-top:10px;font-size:12px;color:var(--text-3)">Авто-алерт: ' + (adv.autoAlert.type === 'below' ? 'ниже ' : 'выше ') + fmt$(adv.autoAlert.value) + (adv.autoAlert.suggestedAmount ? (' · сумма ~' + fmt$(adv.autoAlert.suggestedAmount)) : '') + '</div>'
         : '';
+      
+      const dcaState = dcaCalculatorState.get(h.id) || { showCalculator: false, buyAmount: 10, buyQuantity: 0, buyPrice: c.current_price };
+      // Initialize buyPrice to current price if it's 0
+      if (dcaState.buyPrice === 0) {
+        dcaState.buyPrice = c.current_price;
+        dcaCalculatorState.set(h.id, dcaState);
+      }
+      const dcaResults = dcaState.showCalculator ? calculateDCAResults(h, c, dcaState.buyAmount, dcaState.buyQuantity, dcaState.buyPrice) : null;
+      
+      let dcaHtml = '';
+      if (dcaState.showCalculator && dcaResults) {
+        const recColor = dcaResults.recommendation === 'recommended' ? 'var(--green)' : (dcaResults.recommendation === 'not_recommended' ? 'var(--red)' : 'var(--yellow)');
+        const recBadge = dcaResults.recommendation === 'recommended' ? 'РЕКОМЕНДУЕТСЯ' : (dcaResults.recommendation === 'not_recommended' ? 'НЕ РЕКОМЕНДУЕТСЯ' : 'НЕЙТРАЛЬНО');
+        
+        dcaHtml = `
+          <div style="margin-top:16px;padding:16px;background:rgba(59,130,246,0.1);border-radius:8px;border:1px solid rgba(59,130,246,0.3);">
+            <div style="font-weight:700;margin-bottom:12px;color:var(--blue);">DCA Калькулятор - ${h.symbol}</div>
+            
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px;">
+              <div>
+                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Текущая средняя ($)</div>
+                <div style="font-weight:600;">${dcaResults.currentAvg.toFixed(2)}</div>
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Текущее количество монет</div>
+                <div style="font-weight:600;">${dcaResults.currentAmount.toFixed(4)}</div>
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Текущая цена ($)</div>
+                <div style="font-weight:600;">${dcaResults.currentPrice.toFixed(2)}</div>
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Текущие вложения ($)</div>
+                <div style="font-weight:600;">${(dcaResults.currentAmount * dcaResults.currentAvg).toFixed(2)}</div>
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Текущий P&L</div>
+                <div style="font-weight:600;color:${dcaResults.currentPnl >= 0 ? 'var(--green)' : 'var(--red)'};">${dcaResults.currentPnl >= 0 ? '+' : ''}${dcaResults.currentPnl.toFixed(2)}%</div>
+              </div>
+            </div>
+            
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px;">
+              <div>
+                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Сумма докупки ($)</div>
+                <input type="number" id="dca-buy-amount-${h.id}" value="${dcaState.buyAmount}" oninput="updateDcaAmount('${h.id}', this.value)" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;">
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Или количество</div>
+                <input type="number" id="dca-buy-quantity-${h.id}" value="${dcaState.buyQuantity}" oninput="updateDcaQuantity('${h.id}', this.value)" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;">
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Цена покупки ($)</div>
+                <input type="number" id="dca-buy-price-${h.id}" value="${dcaState.buyPrice || c.current_price}" oninput="updateDcaPrice('${h.id}', this.value)" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;">
+              </div>
+            </div>
+            
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px;padding:12px;background:rgba(0,0,0,0.2);border-radius:4px;">
+              <div>
+                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Новая средняя</div>
+                <div style="font-weight:600;color:var(--blue);" id="dca-new-avg-${h.id}">$${dcaResults.newAvg.toFixed(2)}</div>
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Итого монет</div>
+                <div style="font-weight:600;" id="dca-new-amount-${h.id}">${dcaResults.newAmount.toFixed(4)}</div>
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Всего вложено</div>
+                <div style="font-weight:600;" id="dca-total-invested-${h.id}">$${dcaResults.totalInvested.toFixed(2)}</div>
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Нужен рост до окупа</div>
+                <div style="font-weight:600;color:${dcaResults.growthNeeded >= 0 ? 'var(--red)' : 'var(--green)'};" id="dca-growth-needed-${h.id}">${dcaResults.growthNeeded >= 0 ? '+' : ''}${dcaResults.growthNeeded.toFixed(1)}%</div>
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Нужно иксов</div>
+                <div style="font-weight:600;color:${dcaResults.growthNeeded >= 0 ? 'var(--red)' : 'var(--green)'};" id="dca-x-needed-${h.id}">${(dcaResults.newAvg / dcaResults.currentPrice).toFixed(2)}x</div>
+              </div>
+            </div>
+            
+            <div style="padding:12px;background:${dcaResults.recommendation === 'recommended' ? 'rgba(34,197,94,0.1)' : (dcaResults.recommendation === 'not_recommended' ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.1)')};border-radius:4px;border-left:3px solid ${recColor};">
+              <div style="font-weight:700;color:${recColor};margin-bottom:4px;" id="dca-rec-badge-${h.id}">${recBadge}</div>
+              <div style="font-size:12px;color:var(--text-2);" id="dca-rec-text-${h.id}">${dcaResults.recommendationText}</div>
+            </div>
+          </div>
+        `;
+      }
+      
       const exTr = document.createElement('tr');
       exTr.className = 'expand-row';
-      exTr.innerHTML = '<td colspan="9"><div class="advice-card ' + adv.type + '" style="margin-bottom:0;"><div class="advice-header"><div class="advice-title">Рекомендация</div><span class="advice-badge badge-' + adv.badge + '">' + (adv.badge==='buy'?'КУПИТЬ':adv.badge==='sell'?'ПРОДАТЬ':'ДЕРЖАТЬ') + '</span></div><div class="advice-text">' + adv.text + '</div>' + adv.actionHtml + autoInfo + '</div></td>';
+      exTr.innerHTML = '<td colspan="9"><div class="advice-card ' + adv.type + '" style="margin-bottom:0;"><div class="advice-header"><div class="advice-title">Рекомендация</div><span class="advice-badge badge-' + adv.badge + '">' + (adv.badge==='buy'?'КУПИТЬ':adv.badge==='sell'?'ПРОДАТЬ':'ДЕРЖАТЬ') + '</span></div><div class="advice-text">' + adv.text + '</div>' + adv.actionHtml + autoInfo + dcaHtml + '</div></td>';
       tbody.appendChild(exTr);
     }
   });
@@ -1945,6 +2038,195 @@ function toggleAdviceRow(id) {
 let othersExpanded = false;
 let othersCoins = []; // Store coins in "Others" category
 
+// Track DCA calculator state for each holding
+let dcaCalculatorState = new Map(); // holdingId -> { buyAmount, buyQuantity, buyPrice, showCalculator }
+
+// Calculate DCA results
+function calculateDCAResults(h, c, buyAmount, buyQuantity, buyPrice) {
+  const currentAmount = h.amount;
+  const currentAvg = h.avgPrice;
+  const currentPrice = c.current_price;
+  
+  // Ensure buyPrice is valid
+  const validBuyPrice = buyPrice > 0 ? buyPrice : currentPrice;
+  
+  // Calculate based on buyAmount or buyQuantity
+  let actualBuyAmount = buyAmount;
+  let actualBuyQuantity = buyQuantity;
+  
+  if (buyAmount > 0 && buyQuantity === 0) {
+    actualBuyQuantity = buyAmount / validBuyPrice;
+  } else if (buyQuantity > 0 && buyAmount === 0) {
+    actualBuyAmount = buyQuantity * validBuyPrice;
+  } else if (buyAmount === 0 && buyQuantity === 0) {
+    // Both zero - return default values
+    return {
+      currentAvg,
+      currentAmount,
+      currentPrice,
+      buyAmount: 0,
+      buyQuantity: 0,
+      buyPrice: validBuyPrice,
+      newAvg: currentAvg,
+      newAmount: currentAmount,
+      totalInvested: currentAmount * currentAvg,
+      currentValue: currentAmount * currentPrice,
+      growthNeeded: ((currentAvg - currentPrice) / currentPrice) * 100,
+      currentPnl: ((currentPrice - currentAvg) / currentAvg) * 100,
+      recommendation: 'neutral',
+      recommendationText: 'Введите сумму или количество докупки для расчета.'
+    };
+  }
+  
+  const newAmount = currentAmount + actualBuyQuantity;
+  const newAvg = (currentAmount * currentAvg + actualBuyQuantity * validBuyPrice) / newAmount;
+  const totalInvested = currentAmount * currentAvg + actualBuyAmount;
+  const currentValue = newAmount * currentPrice;
+  const breakEvenPrice = newAvg;
+  const growthNeeded = ((breakEvenPrice - currentPrice) / currentPrice) * 100;
+  const currentPnl = ((currentPrice - currentAvg) / currentAvg) * 100;
+  
+  // Recommendation logic
+  let recommendation = 'neutral';
+  let recommendationText = '';
+  
+  if (currentPnl > 100) {
+    recommendation = 'not_recommended';
+    recommendationText = 'Монета уже в значительном плюсе на ' + currentPnl.toFixed(1) + '%. Докупка поднимет среднюю с $' + currentAvg.toFixed(2) + ' → $' + newAvg.toFixed(2) + '. Это увеличит риск: для окупа нужен рост ' + growthNeeded.toFixed(1) + '%. Лучше зафиксировать часть прибыли или ждать отката.';
+  } else if (currentPnl < -30 && growthNeeded < 20) {
+    recommendation = 'recommended';
+    recommendationText = 'Монета в глубокой просадке на ' + currentPnl.toFixed(1) + '%. Докупка значительно снизит среднюю цену с $' + currentAvg.toFixed(2) + ' → $' + newAvg.toFixed(2) + '. Для окупа нужен рост только ' + growthNeeded.toFixed(1) + '%. Хорошая точка для усреднения.';
+  } else if (currentPnl < -50) {
+    recommendation = 'recommended';
+    recommendationText = 'Глубокая просадка на ' + currentPnl.toFixed(1) + '%. Докупка снизит среднюю и уменьшит точку безубыточности.';
+  } else {
+    recommendation = 'neutral';
+    recommendationText = 'Текущая ситуация нейтральная. Докупка возможна, но не критически важна.';
+  }
+  
+  return {
+    currentAvg,
+    currentAmount,
+    currentPrice,
+    buyAmount: actualBuyAmount,
+    buyQuantity: actualBuyQuantity,
+    buyPrice: validBuyPrice,
+    newAvg,
+    newAmount,
+    totalInvested,
+    currentValue,
+    growthNeeded,
+    currentPnl,
+    recommendation,
+    recommendationText
+  };
+}
+
+function toggleDcaCalculator(holdingId) {
+  const state = dcaCalculatorState.get(holdingId) || { showCalculator: false, buyAmount: 10, buyQuantity: 0, buyPrice: 0 };
+  state.showCalculator = !state.showCalculator;
+  dcaCalculatorState.set(holdingId, state);
+  renderPortfolio();
+}
+
+function updateDcaAmount(holdingId, value) {
+  const state = dcaCalculatorState.get(holdingId) || { showCalculator: true, buyAmount: 10, buyQuantity: 0, buyPrice: 0 };
+  state.buyAmount = parseFloat(value) || 0;
+  // Calculate quantity based on amount and price
+  if (state.buyPrice > 0) {
+    state.buyQuantity = state.buyAmount / state.buyPrice;
+  } else {
+    state.buyQuantity = 0;
+  }
+  dcaCalculatorState.set(holdingId, state);
+  updateDcaResultsUI(holdingId);
+}
+
+function updateDcaQuantity(holdingId, value) {
+  const state = dcaCalculatorState.get(holdingId) || { showCalculator: true, buyAmount: 0, buyQuantity: 0, buyPrice: 0 };
+  state.buyQuantity = parseFloat(value) || 0;
+  // Calculate amount based on quantity and price
+  if (state.buyPrice > 0) {
+    state.buyAmount = state.buyQuantity * state.buyPrice;
+  } else {
+    state.buyAmount = 0;
+  }
+  dcaCalculatorState.set(holdingId, state);
+  updateDcaResultsUI(holdingId);
+}
+
+function updateDcaPrice(holdingId, value) {
+  const state = dcaCalculatorState.get(holdingId) || { showCalculator: true, buyAmount: 10, buyQuantity: 0, buyPrice: 0 };
+  state.buyPrice = parseFloat(value) || 0;
+  // Recalculate amount or quantity based on which one was set
+  if (state.buyAmount > 0) {
+    state.buyQuantity = state.buyAmount / state.buyPrice;
+  } else if (state.buyQuantity > 0) {
+    state.buyAmount = state.buyQuantity * state.buyPrice;
+  }
+  dcaCalculatorState.set(holdingId, state);
+  updateDcaResultsUI(holdingId);
+}
+
+function updateDcaResultsUI(holdingId) {
+  const h = portfolio.find(p => p.id === holdingId);
+  if (!h) return;
+  const c = findCoin(h.coinId || h.symbol.toLowerCase());
+  if (!c) return;
+  
+  const state = dcaCalculatorState.get(holdingId);
+  if (!state) return;
+  
+  const results = calculateDCAResults(h, c, state.buyAmount, state.buyQuantity, state.buyPrice);
+  
+  // Update result fields directly without re-rendering
+  const newAvgEl = document.getElementById('dca-new-avg-' + holdingId);
+  const newAmountEl = document.getElementById('dca-new-amount-' + holdingId);
+  const totalInvestedEl = document.getElementById('dca-total-invested-' + holdingId);
+  const growthNeededEl = document.getElementById('dca-growth-needed-' + holdingId);
+  const xNeededEl = document.getElementById('dca-x-needed-' + holdingId);
+  const recBadgeEl = document.getElementById('dca-rec-badge-' + holdingId);
+  const recTextEl = document.getElementById('dca-rec-text-' + holdingId);
+  
+  // Update input fields for linked calculations
+  const buyAmountEl = document.getElementById('dca-buy-amount-' + holdingId);
+  const buyQuantityEl = document.getElementById('dca-buy-quantity-' + holdingId);
+  const buyPriceEl = document.getElementById('dca-buy-price-' + holdingId);
+  
+  if (newAvgEl) newAvgEl.textContent = '$' + results.newAvg.toFixed(2);
+  if (newAmountEl) newAmountEl.textContent = results.newAmount.toFixed(4);
+  if (totalInvestedEl) totalInvestedEl.textContent = '$' + results.totalInvested.toFixed(2);
+  if (growthNeededEl) {
+    growthNeededEl.textContent = (results.growthNeeded >= 0 ? '+' : '') + results.growthNeeded.toFixed(1) + '%';
+    growthNeededEl.style.color = results.growthNeeded >= 0 ? 'var(--red)' : 'var(--green)';
+  }
+  if (xNeededEl) {
+    const xNeeded = results.newAvg / results.currentPrice;
+    xNeededEl.textContent = xNeeded.toFixed(2) + 'x';
+    xNeededEl.style.color = results.growthNeeded >= 0 ? 'var(--red)' : 'var(--green)';
+  }
+  if (recBadgeEl) {
+    const recColor = results.recommendation === 'recommended' ? 'var(--green)' : (results.recommendation === 'not_recommended' ? 'var(--red)' : 'var(--yellow)');
+    const recBadge = results.recommendation === 'recommended' ? 'РЕКОМЕНДУЕТСЯ' : (results.recommendation === 'not_recommended' ? 'НЕ РЕКОМЕНДУЕТСЯ' : 'НЕЙТРАЛЬНО');
+    recBadgeEl.textContent = recBadge;
+    recBadgeEl.style.color = recColor;
+  }
+  if (recTextEl) {
+    recTextEl.textContent = results.recommendationText;
+  }
+  
+  // Update linked input fields without losing focus
+  if (buyAmountEl && document.activeElement !== buyAmountEl) {
+    buyAmountEl.value = results.buyAmount;
+  }
+  if (buyQuantityEl && document.activeElement !== buyQuantityEl) {
+    buyQuantityEl.value = results.buyQuantity;
+  }
+  if (buyPriceEl && document.activeElement !== buyPriceEl) {
+    buyPriceEl.value = results.buyPrice;
+  }
+}
+
 function drawPie(data, total) {
   const canvas = document.getElementById('pieCanvas');
   const ctx = canvas.getContext('2d');
@@ -1952,11 +2234,15 @@ function drawPie(data, total) {
   ctx.clearRect(0, 0, 180, 180);
   legend.innerHTML = '';
   if (!data.length) return;
+  
+  // Sort data by value (percentage) descending for pie chart legend
+  const sortedData = [...data].sort((a, b) => b.value - a.value);
+  
   let filtered = [];
   let othersValue = 0;
   othersCoins = []; // Reset others coins
   
-  data.forEach(d => {
+  sortedData.forEach(d => {
     const pct = total > 0 ? (d.value / total) * 100 : 0;
     if (pct >= 1) filtered.push(d);
     else {
