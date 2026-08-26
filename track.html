@@ -659,8 +659,8 @@ async function openPlaylistPickerLocal() {
 
 /* ---------- поделиться (модалка один в один с главной) ---------- */
 function trackShareUrl() {
-  const base = location.origin + location.pathname.replace(/[^/]*$/, '');
-  return base + 'track.html?id=' + encodeURIComponent(TP.id);
+  // Используем Edge Function для SSR метатегов (Facebook скрапер)
+  return 'https://niko-vert.vercel.app/api/track-meta?id=' + encodeURIComponent(TP.id);
 }
 
 $('#tp-share').addEventListener('click', () => {
