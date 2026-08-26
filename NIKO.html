@@ -3805,7 +3805,18 @@ if (e.target.closest('.track-date-editable')) {
     }
 	    
   });
-
+// [NEW] Обработчик копирования ссылки — используем Edge Function для Facebook
+document.getElementById('share-copy-link')?.addEventListener('click', () => {
+  const tid = window.currentTrackId || currentTrackId;
+  if (!tid) return;
+  
+  // Используем Edge Function для правильных метатегов (Facebook, Telegram, etc.)
+  const shareUrl = 'https://niko-vert.vercel.app/api/track-meta?id=' + encodeURIComponent(tid);
+  
+  navigator.clipboard.writeText(shareUrl).then(() => {
+    showCopyFeedback('Copied!');
+  });
+});
   document.getElementById('mini-open-text')?.addEventListener('click', () => {
     const trackEl = document.querySelector(`.track[data-src="${currentTrackSrc}"]`);
     if (trackEl) openText(trackEl);
@@ -7079,7 +7090,7 @@ if (feedbackSubmitBtn) {
     }
   }
 
- function renderFeedbackHistory(messages, isAdmin) {
+  function renderFeedbackHistory(messages, isAdmin) {
   if (messages.length === 0) {
   const noMsg = document.createElement('div');
   noMsg.style.color = '#bfc3d6';
@@ -7093,6 +7104,7 @@ if (feedbackSubmitBtn) {
   applyTranslations();
   return;
 }
+
 
   var typeLabels = {
     suggestion: t('feedbackSuggestion'),
