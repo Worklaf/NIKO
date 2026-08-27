@@ -3248,7 +3248,12 @@ function updateShareMetaTags(data) {
 
 // === ОБРАБОТЧИКИ КНОПОК СОЦСЕТЕЙ (единые для главной) ===
 document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
-  btn.addEventListener('click', async () => {
+  btn.addEventListener('click', async (event) => {
+
+    // Отключаем перехват кликов SPA
+    event.stopPropagation();
+    event.preventDefault();
+
     const data = window._shareData || getShareData();
     const u = encodeURIComponent(data.url);
     const tx = encodeURIComponent(data.title);
@@ -3259,16 +3264,33 @@ document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
 
     if (p === 'twitter')   link = 'https://twitter.com/intent/tweet?text=' + tx + '&url=' + u;
     if (p === 'facebook')  link = 'https://www.facebook.com/sharer/sharer.php?u=' + u;
-    if (p === 'messenger') link = isMobile ? 'fb-messenger://share?link=' + u : 'https://www.facebook.com/dialog/send?app_id=YOUR_APP_ID&link=' + u + '&redirect_uri=' + u;
+    if (p === 'messenger') link = isMobile ? 'fb-messenger://share?link=' + u : 'https://www.facebook.com/dialog/send?app_id=966242223397117&link=' + u + '&redirect_uri=' + u;
     if (p === 'telegram')  link = 'https://t.me/share/url?url=' + u + '&text=' + tx;
     if (p === 'viber')     link = 'viber://forward?text=' + encodeURIComponent(shareText);
     if (p === 'whatsapp')  link = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(shareText);
-    if (p === 'tiktok')    { copyToClipboard(data.url, btn); showCopyFeedback('Link copied — paste in TikTok'); return; }
-    if (p === 'native')    { if (navigator.share) { try { await navigator.share({ title: data.title, text: data.description, url: data.url }); } catch (e) {} } else { copyToClipboard(data.url, btn); showCopyFeedback('Copied!'); } return; }
-    
-    if (link) window.open(link, '_blank', 'noopener,width=600,height=600');
+
+    if (p === 'tiktok') {
+      copyToClipboard(data.url, btn);
+      showCopyFeedback('Link copied — paste in TikTok');
+      return;
+    }
+
+    if (p === 'native') {
+      if (navigator.share) {
+        try { await navigator.share({ title: data.title, text: data.description, url: data.url }); } catch (e) {}
+      } else {
+        copyToClipboard(data.url, btn);
+        showCopyFeedback('Copied!');
+      }
+      return;
+    }
+
+    if (link) {
+      window.open(link, '_blank'); // теперь работает правильно
+    }
   });
 });
+
 
 // === КОПИРОВАНИЕ ССЫЛКИ ===
 document.getElementById('share-copy-link')?.addEventListener('click', () => {
