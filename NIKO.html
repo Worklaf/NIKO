@@ -3212,7 +3212,7 @@ function getShareData() {
       image: track.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png',
       audio: track.audio || '',
       duration: track.duration || '',
-      url: location.origin + '/api/track-meta?id=' + encodeURIComponent(track.id)
+      url: location.origin + '/track.html?id=' + encodeURIComponent(track.id)
     };
   }
   
@@ -3842,7 +3842,7 @@ if (e.target.closest('.track-date-editable')) {
       image: track.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png',
       audio: track.audio || '',
       duration: track.duration || '',
-      url: location.origin + '/api/track-meta?id=' + encodeURIComponent(track.id)
+      url: location.origin + '/track.html?id=' + encodeURIComponent(track.id)
     };
     
     // Обновляем метатеги
