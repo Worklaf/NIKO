@@ -3287,14 +3287,12 @@ document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
     }
     
     if (p === 'messenger') {
-      if (isMobile) {
-        // ✅ Просто меняем location — iOS сам спросит "Открыть в Messenger?"
-        window.location.href = 'fb-messenger://share?link=' + u;
-      } else {
-        window.open('https://www.facebook.com/dialog/send?app_id=966242223397117&link=' + u + '&redirect_uri=' + encodeURIComponent(location.origin), '_blank');
-      }
-      return;
-    }
+  // Facebook Send Dialog — работает стабильно везде
+  const appId = '966242223397117'; // Facebook App ID (можно любой публичный)
+  const sendUrl = `https://www.facebook.com/dialog/send?app_id=${appId}&link=${u}&redirect_uri=${encodeURIComponent(location.origin)}`;
+  window.open(sendUrl, '_blank', 'noopener,width=600,height=600');
+  return;
+}
     
     else if (p === 'telegram') {
       if (isMobile) {
@@ -3731,6 +3729,93 @@ document.getElementById('site-logo')?.addEventListener('click', (e) => {
 }
 
 await loadSavedLanguage();
+// ==================== АВТОВОСПРОИЗВЕДЕНИЕ ПО ?track=ID ====================
+  (async function handleTrackParam() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const trackId = urlParams.get('track');
+    
+    if (!trackId) return;
+    
+    console.log('[TRACK PARAM] Auto-play track:', trackId);
+    
+    // Ждём загрузки треков из Firebase
+    const waitForTracks = () => new Promise(resolve => {
+      const check = () => {
+        if (window.globalTracks && window.globalTracks.length > 0) {
+          resolve();
+        } else {
+          setTimeout(check, 200);
+        }
+      };
+      check();
+    });
+    
+    await waitForTracks();
+    
+    const track = window.globalTracks.find(t => t.id === trackId);
+    if (!track) {
+      console.warn('[TRACK PARAM] Track not found:', trackId);
+      return;
+    }
+    
+    // Находим DOM-элемент трека
+    let trackEl = document.querySelector(`.track[data-id="${trackId}"]`);
+    
+    // Если трек не виден (на другой странице пагинации) — переключаемся
+    if (!trackEl && window.homeState && window.homeState.filteredIds) {
+      const idx = window.homeState.filteredIds.indexOf(trackId);
+      if (idx !== -1) {
+        const page = Math.floor(idx / window.homeState.perPage) + 1;
+        if (page !== window.homeState.currentPage && typeof window.changeHomePage === 'function') {
+          window.changeHomePage(page);
+        }
+      }
+    }
+    
+    // Ждём рендера страницы
+    setTimeout(() => {
+      const refreshedEl = document.querySelector(`.track[data-id="${trackId}"]`);
+      if (!refreshedEl) {
+        console.warn('[TRACK PARAM] Track element not in DOM after pagination');
+        return;
+      }
+      
+      // Скроллим к треку
+      refreshedEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Подсвечиваем
+      refreshedEl.style.animation = 'pulseReady 1s ease 2';
+      setTimeout(() => { refreshedEl.style.animation = ''; }, 2000);
+      
+      // Автовоспроизведение через 800ms
+      setTimeout(() => {
+        window.currentTrackId = trackId;
+        currentTrackId = trackId;
+        
+        // Контекст плеера — все видимые треки
+        const ctxTracks = window.homeState.filteredIds
+          .map(id => window.globalTracks.find(t => t.id === id))
+          .filter(Boolean);
+        
+        playTrack(refreshedEl, {tracks: ctxTracks, source: 'home'});
+        
+        // Сохраняем прослушивание
+        saveListenToFirebase(trackId);
+        updateNewTracksBadge();
+        refreshedEl.classList.remove('new-track');
+        
+        window.updateTrackPlayIcons();
+        
+        console.log('[TRACK PARAM] Auto-play started:', track.title);
+      }, 800);
+    }, 400);
+    
+    // Убираем ?track= из URL (чистый вид)
+    if (window.history.replaceState) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  })();
+  // ==================== КОНЕЦ АВТОВОСПРОИЗВЕДЕНИЯ ====================
 
   const searchInput = document.getElementById('siteSearch');
   const genreSelect = document.getElementById('siteGenre');
@@ -6255,31 +6340,32 @@ window.addEventListener('message', function(e) {
 // DYNAMIC OPEN GRAPH FOR SHARING
 // ===============================
 
+// === В NIKO.html — функция updateMetaTags уже есть, но проверьте ===
 function updateMetaTags(track) {
     if (!track) return;
     
     const title = track.artist ? `${track.artist} - ${track.title}` : track.title;
     
-    // Обновляем title страницы
     document.title = `${title} | N1K∅ Music`;
     
-    // Обновляем OG-теги
-    setMeta('og:title', title);
-    setMeta('og:description', track.lyrics ? track.lyrics.substring(0, 200) + '...' : 'Listen on N1K∅ Music');
-    setMeta('og:image', track.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png');
-    setMeta('og:url', `${window.location.origin}/track.html?id=${track.id}`);
+    const setMeta = (id, content) => {
+        const el = document.getElementById(id);
+        if (el && content) el.setAttribute('content', content);
+    };
     
-    // [NEW] Для inline player в Facebook Messenger
-    setMeta('og:audio', track.audio);
-    setMeta('og:audio:type', 'audio/mpeg');
-    setMeta('music:duration', track.duration || '');
+    const description = track.lyrics ? track.lyrics.substring(0, 200) + '...' : 'Listen on N1K∅ Music';
+    const pageUrl = `${window.location.origin}/NIKO.html?track=${track.id}`;
     
-    // Twitter
-    setMeta('twitter:title', title);
-    setMeta('twitter:description', track.lyrics ? track.lyrics.substring(0, 200) + '...' : 'Discover amazing music tracks');
-    setMeta('twitter:image', track.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png');
+    setMeta('og-title', title);
+    setMeta('og-desc', description);
+    setMeta('og-image', track.cover || DEFAULT_COVER);
+    setMeta('og-url', pageUrl); // ВАЖНО: используем NIKO.html?track= для главной
+    setMeta('og-audio', track.audio);
+    setMeta('music-duration', track.duration);
+    setMeta('tw-title', title);
+    setMeta('tw-desc', description);
+    setMeta('tw-image', track.cover || DEFAULT_COVER);
 }
-
 function setMeta(property, content) {
     if (!content) return;
     let meta = document.querySelector(`meta[property="${property}"]`) || 
