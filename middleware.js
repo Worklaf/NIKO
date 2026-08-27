@@ -98,7 +98,7 @@ export default async function middleware(request) {
     const response = new Response(fallback, {
       headers: {
         'content-type': 'text/html; charset=utf-8',
-        'Cache-Control': 'public, max-age=300',
+        'Cache-Control': 'public, max-age=3600', // Кешируем на 1 час чтобы избежать лимитов Firebase
       },
     });
     await cache.put(cacheKey, response.clone());
@@ -125,7 +125,7 @@ export default async function middleware(request) {
       const response = new Response(fallback, {
         headers: {
           'content-type': 'text/html; charset=utf-8',
-          'Cache-Control': 'public, max-age=300',
+          'Cache-Control': 'public, max-age=3600', // Кешируем на 1 час чтобы избежать лимитов Firebase
         },
       });
       await cache.put(cacheKey, response.clone());
@@ -176,7 +176,7 @@ export default async function middleware(request) {
     const response = new Response(fallback, {
       headers: {
         'content-type': 'text/html; charset=utf-8',
-        'Cache-Control': 'public, max-age=300',
+        'Cache-Control': 'public, max-age=3600', // Кешируем на 1 час чтобы избежать лимитов Firebase
       },
     });
     const cacheKey = `track:${trackId}`;
