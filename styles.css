@@ -140,7 +140,7 @@ h1 {
   border-radius: 16px;
   padding: 10px;
   min-width: 160px;
-  z-index: 100;
+  z-index: 100022;
   box-shadow: 0 20px 50px rgba(0, 0, 0, .8);
 }
 .lang-menu.open { display: block; }
@@ -2733,18 +2733,23 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar { display: none; }
 
   .list { grid-template-columns: 1fr; }
 
-  .search-wrap {
+   .search-wrap {
     width: 100%;
     margin-left: 0;
-    flex-direction: column;
+    flex-direction: row;
     gap: 8px;
   }
-  .search-input, .search-select {
+    .search-input, .search-select {
     width: 100%;
-    min-width: auto;
+    min-width: 0;
     padding: 8px 10px;
+    box-sizing: border-box;
   }
-  .search-main, .search-lyrics { flex: 1; width: auto; }
+    .search-main, .search-lyrics {
+    flex: 1 1 0;
+    min-width: 0;
+    width: 50%;
+  }
 
   .track {
     flex-direction: row;
@@ -2870,5 +2875,4 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar { display: none; }
 header,
 .top-actions-row  {
   overflow: visible !important;
-}
- 
+} 
