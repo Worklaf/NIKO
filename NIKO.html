@@ -3245,6 +3245,29 @@ function updateShareMetaTags(data) {
   setMeta('tw-image', data.image);
 }
 
+// === ФУНКЦИЯ ДЛЯ DEEP LINK СХЕМ ===
+function openAppOrWeb(appUrl, webUrl) {
+  // Сначала пробуем открыть приложение
+  const start = Date.now();
+  const timeout = 2500;
+
+  const iframe = document.createElement('iframe');
+  iframe.style.display = 'none';
+  iframe.src = appUrl;
+  document.body.appendChild(iframe);
+
+  // Если приложение не открылось, открываем веб-версию
+  setTimeout(() => {
+    if (Date.now() - start < timeout) {
+      // Приложение открылось
+    } else {
+      // Приложение не открылось, открываем веб
+      window.location.href = webUrl;
+    }
+    if (iframe.parentNode) document.body.removeChild(iframe);
+  }, 100);
+}
+
 // === ОБРАБОТЧИКИ КНОПОК СОЦСЕТЕЙ ===
 document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
   btn.addEventListener('click', async () => {
@@ -3252,12 +3275,12 @@ document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
     const u = encodeURIComponent(data.url);
     const tx = encodeURIComponent(data.title);
     const p = btn.dataset.platform;
-    
+
     // Определяем, мобильное ли устройство
     const isMobile = /Android|iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
     const isAndroid = /Android/i.test(navigator.userAgent);
-    
+
     let link = '';
     const shareText = data.title + '\n\n' + data.url;
 
@@ -3265,7 +3288,7 @@ document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
     if (p === 'twitter' || p === 'x') {
       if (isMobile) {
         // Пробуем открыть приложение Twitter/X
-        const appUrl = isIOS 
+        const appUrl = isIOS
           ? `twitter://post?message=${tx}%20${u}`
           : `twitter://post?message=${tx}%20${u}`;
         const webUrl = `https://twitter.com/intent/tweet?text=${tx}&url=${u}`;
@@ -3274,7 +3297,7 @@ document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
       }
       link = `https://twitter.com/intent/tweet?text=${tx}&url=${u}`;
     }
-    
+
     else if (p === 'facebook') {
       if (isMobile) {
         // Facebook deep link
