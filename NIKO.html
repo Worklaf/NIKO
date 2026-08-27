@@ -24,17 +24,28 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="N1K∅">
   
-  <!-- В <head> NIKO.html замени статичные OG метатеги на эти (с id для обновления): -->
+ <!-- === Open Graph / Twitter (fallback + для JS-обновления) === -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="N1K∅ Music">
+
 <meta id="og-title" property="og:title" content="N1K∅ — Music Tracks">
 <meta id="og-desc" property="og:description" content="Discover amazing music">
-<meta id="og-image" property="og:image" content="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png">
-<meta id="og-url" property="og:url" content="">
+
+<!-- НОВАЯ ОБЛОЖКА 1200×630 (замени URL после загрузки на свой CDN) -->
+<meta id="og-image" property="og:image" content="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/og-cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<meta id="og-url" property="og:url" content="https://niko-vert.vercel.app/">
+
 <meta id="og-audio" property="og:audio" content="">
 <meta id="og-audio-type" property="og:audio:type" content="audio/mpeg">
 <meta id="music-duration" property="music:duration" content="">
+
+<meta name="twitter:card" content="summary_large_image">
 <meta id="tw-title" name="twitter:title" content="N1K∅ — Music Tracks">
 <meta id="tw-desc" name="twitter:description" content="Discover amazing music tracks">
-<meta id="tw-image" name="twitter:image" content="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png">
+<meta id="tw-image" name="twitter:image" content="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/og-cover.png">
   <style>
     .track.ready-to-play {
   animation: pulseReady 1s ease 2;
