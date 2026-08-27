@@ -3245,43 +3245,183 @@ function updateShareMetaTags(data) {
   setMeta('tw-image', data.image);
 }
 
-// === ОБРАБОТЧИКИ КНОПОК СОЦСЕТЕЙ (единые для главной) ===
+// === ОБРАБОТЧИКИ КНОПОК СОЦСЕТЕЙ ===
 document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
   btn.addEventListener('click', async () => {
     const data = window._shareData || getShareData();
     const u = encodeURIComponent(data.url);
     const tx = encodeURIComponent(data.title);
     const p = btn.dataset.platform;
+    
+    // Определяем, мобильное ли устройство
     const isMobile = /Android|iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    
     let link = '';
     const shareText = data.title + '\n\n' + data.url;
 
-    if (p === 'twitter')   link = 'https://twitter.com/intent/tweet?text=' + tx + '&url=' + u;
-    if (p === 'facebook')  link = 'https://www.facebook.com/sharer/sharer.php?u=' + u;
-    if (p === 'messenger') link = isMobile ? 'fb-messenger://share?link=' + u : 'https://www.facebook.com/dialog/send?app_id=966242223397117&link=' + u + '&redirect_uri=' + u;
-    if (p === 'telegram')  link = 'https://t.me/share/url?url=' + u + '&text=' + tx;
-    if (p === 'viber')     link = 'viber://forward?text=' + encodeURIComponent(shareText);
-    if (p === 'whatsapp')  link = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(shareText);
-
-    if (p === 'tiktok') {
+    // === DEEP LINKS для мобильных приложений ===
+    if (p === 'twitter' || p === 'x') {
+      if (isMobile) {
+        // Пробуем открыть приложение Twitter/X
+        const appUrl = isIOS 
+          ? `twitter://post?message=${tx}%20${u}`
+          : `twitter://post?message=${tx}%20${u}`;
+        const webUrl = `https://twitter.com/intent/tweet?text=${tx}&url=${u}`;
+        openAppOrWeb(appUrl, webUrl);
+        return;
+      }
+      link = `https://twitter.com/intent/tweet?text=${tx}&url=${u}`;
+    }
+    
+    else if (p === 'facebook') {
+      if (isMobile) {
+        // Facebook deep link
+        const appUrl = `fb://share/?link=${u}`;
+        const webUrl = `https://www.facebook.com/sharer/sharer.php?u=${u}`;
+        openAppOrWeb(appUrl, webUrl);
+        return;
+      }
+      link = `https://www.facebook.com/sharer/sharer.php?u=${u}`;
+    }
+    
+    else if (p === 'messenger') {
+      if (isMobile) {
+        // Messenger deep links
+        const appUrl = isIOS
+          ? `fb-messenger://share/?link=${u}`
+          : `fb-messenger://share?link=${u}`;
+        const webUrl = `https://www.facebook.com/dialog/send?app_id=966242223397117&link=${u}&redirect_uri=${u}`;
+        openAppOrWeb(appUrl, webUrl);
+        return;
+      }
+      link = `https://www.facebook.com/dialog/send?app_id=966242223397117&link=${u}&redirect_uri=${u}`;
+    }
+    
+    else if (p === 'telegram') {
+      if (isMobile) {
+        // Telegram deep link — самый надёжный
+        const appUrl = `tg://msg_url?url=${u}&text=${tx}`;
+        const webUrl = `https://t.me/share/url?url=${u}&text=${tx}`;
+        openAppOrWeb(appUrl, webUrl);
+        return;
+      }
+      link = `https://t.me/share/url?url=${u}&text=${tx}`;
+    }
+    
+    else if (p === 'viber') {
+      if (isMobile) {
+        // Viber deep link
+        const appUrl = isIOS
+          ? `viber://forward?text=${encodeURIComponent(shareText)}`
+          : `viber://forward?text=${encodeURIComponent(shareText)}`;
+        const webUrl = `viber://forward?text=${encodeURIComponent(shareText)}`;
+        openAppOrWeb(appUrl, webUrl);
+        return;
+      }
+      link = `viber://forward?text=${encodeURIComponent(shareText)}`;
+    }
+    
+    else if (p === 'whatsapp') {
+      if (isMobile) {
+        // WhatsApp deep link — работает отлично
+        const appUrl = `whatsapp://send?text=${encodeURIComponent(shareText)}`;
+        const webUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+        openAppOrWeb(appUrl, webUrl);
+        return;
+      }
+      link = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+    }
+    
+    else if (p === 'tiktok') {
+      // TikTok не поддерживает шаринг через deep link
       copyToClipboard(data.url, btn);
-      showCopyFeedback('Link copied — paste in TikTok');
+      showCopyFeedback('Ссылка скопирована — вставьте в TikTok');
       return;
     }
 
-    if (p === 'native') {
+    else if (p === 'native') {
+      // Нативный шаринг (Web Share API)
       if (navigator.share) {
-        try { await navigator.share({ title: data.title, text: data.description, url: data.url }); } catch (e) {}
+        try {
+          await navigator.share({
+            title: data.title,
+            text: data.description,
+            url: data.url
+          });
+        } catch (e) {
+          // Пользователь отменил
+        }
+        return;
       } else {
         copyToClipboard(data.url, btn);
-        showCopyFeedback('Copied!');
+        showCopyFeedback('Скопировано!');
+        return;
       }
-      return;
     }
 
-    if (link) window.open(link, '_blank', 'noopener,width=600,height=600');
+    // Десктоп — открываем в новой вкладке
+    if (link) {
+      window.open(link, '_blank', 'noopener,noreferrer');
+    }
   });
 });
+
+// === ФУНКЦИЯ: Попытка открыть приложение, иначе веб ===
+function openAppOrWeb(appUrl, webUrl) {
+  // Создаём невидимый iframe для попытки открыть приложение
+  // (это работает надёжнее чем window.location на iOS)
+  const iframe = document.createElement('iframe');
+  iframe.style.display = 'none';
+  document.body.appendChild(iframe);
+  
+  let appOpened = false;
+  
+  // Пробуем открыть приложение
+  iframe.src = appUrl;
+  
+  // Также пробуем через window.location (для Android)
+  const startTime = Date.now();
+  
+  // Для iOS используем window.location
+  if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+    window.location.href = appUrl;
+  } else {
+    // Для Android пробуем через intent
+    window.location.href = appUrl;
+  }
+  
+  // Проверяем, открылось ли приложение
+  setTimeout(() => {
+    document.body.removeChild(iframe);
+    
+    // Если приложение не открылось (пользователь всё ещё на странице),
+    // открываем веб-версию
+    if (Date.now() - startTime < 1500) {
+      // Пользователь всё ещё здесь — приложение не установлено
+      if (webUrl && webUrl !== appUrl) {
+        window.location.href = webUrl;
+      }
+    }
+  }, 1000);
+}
+
+// === Альтернативный вариант для iOS (более надёжный) ===
+function openIOSApp(scheme, webFallback) {
+  // Используем универсальные ссылки где возможно
+  const now = Date.now();
+  
+  // Пробуем открыть приложение
+  window.location.href = scheme;
+  
+  // Если через 1.5 секунды мы всё ещё на странице — открываем веб
+  setTimeout(() => {
+    if (Date.now() - now < 2000) {
+      window.location.href = webFallback;
+    }
+  }, 1500);
+}
 
 
 // === КОПИРОВАНИЕ ССЫЛКИ ===
