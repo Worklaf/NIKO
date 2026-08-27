@@ -1,6 +1,7 @@
 // middleware.js — Vercel Edge Middleware
+
 export const config = {
-  matcher: '/track.html',
+  matcher: ['/track.html', '/track.html*'],
 };
 
 const FIREBASE_PROJECT_ID = 'niko-music-1d585';
@@ -9,14 +10,14 @@ const DEFAULT_COVER = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_
 
 const BOT_UA = /facebookexternalhit|Facebot|Twitterbot|TelegramBot|WhatsApp|Slackbot|LinkedInBot|Discordbot|Pinterest|SkypeUriPreview|vkShare|Applebot/i;
 
-// ВАЖНО: именованный export, не default
 export async function middleware(request) {
   const url = new URL(request.url);
   const ua = request.headers.get('user-agent') || '';
   const trackId = url.searchParams.get('id');
 
+  // Только боты + только если есть id
   if (!BOT_UA.test(ua) || !trackId) {
-    return; // пропускаем как есть
+    return;
   }
 
   try {
@@ -25,7 +26,10 @@ export async function middleware(request) {
 
     if (!res.ok) {
       return new Response(fallbackHtml(url), {
-        headers: { 'content-type': 'text/html; charset=utf-8' },
+        headers: {
+          'content-type': 'text/html; charset=utf-8',
+          'cache-control': 'public, max-age=0, must-revalidate'
+        },
       });
     }
 
@@ -52,11 +56,17 @@ export async function middleware(request) {
     });
 
     return new Response(html, {
-      headers: { 'content-type': 'text/html; charset=utf-8' },
+      headers: {
+        'content-type': 'text/html; charset=utf-8',
+        'cache-control': 'public, max-age=0, must-revalidate'
+      },
     });
   } catch (e) {
     return new Response(fallbackHtml(url), {
-      headers: { 'content-type': 'text/html; charset=utf-8' },
+      headers: {
+        'content-type': 'text/html; charset=utf-8',
+        'cache-control': 'public, max-age=0, must-revalidate'
+      },
     });
   }
 }
@@ -75,25 +85,27 @@ function renderHtml({ title, description, image, audio, pageUrl }) {
 <head>
 <meta charset="utf-8">
 <title>${esc(title)} | N1K∅ Music</title>
+
 <meta property="og:type" content="music.song">
 <meta property="og:site_name" content="N1K∅ Music">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:image" content="${esc(image)}">
+<meta property="og:image:secure_url" content="${esc(image)}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="1200">
 <meta property="og:url" content="${esc(pageUrl)}">
+
 ${audio ? `<meta property="og:audio" content="${esc(audio)}">
 <meta property="og:audio:type" content="audio/mpeg">` : ''}
+
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(description)}">
 <meta name="twitter:image" content="${esc(image)}">
-<meta http-equiv="refresh" content="0; url=${esc(pageUrl)}">
+
 </head>
-<body>
-<script>location.replace(${JSON.stringify(pageUrl)});</script>
-</body>
+<body></body>
 </html>`;
 }
 
