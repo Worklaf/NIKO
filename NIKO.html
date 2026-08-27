@@ -3858,9 +3858,29 @@ if (e.target.closest('.track-date-editable')) {
   e.stopPropagation();
 
   const tid = trackEl.dataset.id;
-  // Открываем track.html этого трека для шаринга
-  window.location.href = location.origin + '/track.html?id=' + encodeURIComponent(tid);
-  return;
+  const track = window.globalTracks.find(t => t.id === tid);
+
+  if (track) {
+    // Устанавливаем данные для шаринга
+    window._shareData = {
+      title: (track.artist ? track.artist + ' — ' : '') + (track.title || 'Track'),
+      description: track.lyrics ? track.lyrics.substring(0, 200) + '...' : 'Listen on N1K∅ Music',
+      image: track.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png',
+      audio: track.audio || '',
+      duration: track.duration || '',
+      url: location.origin + '/track.html?id=' + encodeURIComponent(track.id)
+    };
+
+    // Обновляем метатеги
+    updateShareMetaTags(window._shareData);
+  }
+
+  window.currentTrackId = tid;
+  currentTrackId = tid;
+  currentTrackSrc = trackEl.dataset.src;
+
+  const modal = document.getElementById('share-modal');
+  if (modal) modal.classList.add('open');
 }
     if (e.target.closest('.delete-track-btn')) {
       e.preventDefault();
