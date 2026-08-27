@@ -3260,7 +3260,7 @@ document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
     if (p === 'twitter')   link = 'https://twitter.com/intent/tweet?text=' + tx + '&url=' + u;
     if (p === 'facebook')  link = 'https://www.facebook.com/sharer/sharer.php?u=' + u;
     if (p === 'messenger') link = isMobile ? 'fb-messenger://share?link=' + u
-                                          : 'https://www.facebook.com/sharer/sharer.php?u=' + u;
+                                          : 'https://www.facebook.com/dialog/send?link=' + u + '&app_id=386876435316966&redirect_uri=' + u;
     if (p === 'telegram')  link = 'https://t.me/share/url?url=' + u + '&text=' + tx;
     if (p === 'viber')     link = 'viber://forward?text=' + encodeURIComponent(shareText);
     if (p === 'whatsapp')  link = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(shareText);
