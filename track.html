@@ -734,7 +734,7 @@ document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
     const title = (TP.track.artist ? TP.track.artist + ' — ' : '') + (TP.track.title || '');
     const u = encodeURIComponent(url), tx = encodeURIComponent(title);
     const p = btn.dataset.platform;
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
     let link = '';
 
     if (p === 'twitter')   link = 'https://twitter.com/intent/tweet?text=' + tx + '&url=' + u;
