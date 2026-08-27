@@ -3,20 +3,6 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- Добавь в <head> track.html -->
-<meta property="og:type" content="music.song">
-<meta property="og:site_name" content="N1K∅ Music">
-<meta id="og-title" property="og:title" content="">
-<meta id="og-desc" property="og:description" content="">
-<meta id="og-image" property="og:image" content="">
-<meta id="og-url" property="og:url" content="">
-<meta id="og-audio" property="og:audio" content="">
-<meta id="og-audio-type" property="og:audio:type" content="audio/mpeg">
-<meta id="music-duration" property="music:duration" content="">
-<meta name="twitter:card" content="summary_large_image">
-<meta id="tw-title" name="twitter:title" content="">
-<meta id="tw-desc" name="twitter:description" content="">
-<meta id="tw-image" name="twitter:image" content="">
 <title>N1K∅ — Track</title>
 <link rel="preconnect" href="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev">
 <link rel="stylesheet" href="styles.css">
@@ -304,85 +290,7 @@ function toParent(msg) { if (IS_EMBED) { try { parent.postMessage(msg, '*'); } c
     $('#tp-state').textContent = 'Błąd ładowania: ' + e.message;
   }
 })();
-// === ЕДИНАЯ ФУНКЦИЯ ПОЛУЧЕНИЯ ДАННЫХ ДЛЯ ШАРИНГА ===
-function getShareData() {
-  // На track.html — используем TP.track
-  if (typeof TP !== 'undefined' && TP.track) {
-    return {
-      title: (TP.track.artist ? TP.track.artist + ' — ' : '') + (TP.track.title || 'Track'),
-      description: TP.track.lyrics ? TP.track.lyrics.substring(0, 200) + '...' : 'Listen on N1K∅ Music',
-      image: TP.track.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png',
-      audio: TP.track.audio || '',
-      duration: TP.track.duration || '',
-      url: location.origin + location.pathname.replace(/[^/]*$/, '') + 'share.html?id=' + encodeURIComponent(track.id)
-    };
-  }
-  
-  // На главной — ищем по currentTrackId или currentTrackSrc
-  let track = null;
-  if (window.currentTrackId) {
-    track = window.globalTracks.find(t => t.id === window.currentTrackId);
-  }
-  if (!track && currentTrackSrc) {
-    track = window.globalTracks.find(t => t.audio === currentTrackSrc);
-  }
-  // Fallback: первый видимый трек
-  if (!track) {
-    const firstVisible = document.querySelector('.track[style*="flex"]');
-    if (firstVisible) {
-      track = window.globalTracks.find(t => t.id === firstVisible.dataset.id);
-    }
-  }
-  
-  if (track) {
-    return {
-      title: (track.artist ? track.artist + ' — ' : '') + (track.title || 'Track'),
-      description: track.lyrics ? track.lyrics.substring(0, 200) + '...' : 'Listen on N1K∅ Music',
-      image: track.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png',
-      audio: track.audio || '',
-      duration: track.duration || '',
-      url: location.origin + location.pathname.replace(/[^/]*$/, '') + 'share.html?id=' + encodeURIComponent(track.id)
-    };
-  }
-  
-  // Абсолютный fallback
-  return {
-    title: 'N1K∅ Music',
-    description: 'Discover amazing music',
-    image: 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png',
-    audio: '',
-    duration: '',
-    url: location.href
-  };
-}
-// === ОБНОВЛЕНИЕ OG/TWITTER МЕТАТЕГОВ ===
-function updateShareMetaTags(data) {
-  // Обновляем title страницы
-  document.title = data.title + ' | N1K∅ Music';
-  
-  // OG
-  const setMeta = (id, content) => {
-    const el = document.getElementById(id);
-    if (el && content) el.setAttribute('content', content);
-  };
-  
-  setMeta('og-title', data.title);
-  setMeta('og-desc', data.description);
-  setMeta('og-image', data.image);
-  setMeta('og-url', data.url);
-  setMeta('og-audio', data.audio);
-  setMeta('music-duration', data.duration);
-  
-  // Twitter
-  setMeta('tw-title', data.title);
-  setMeta('tw-desc', data.description);
-  setMeta('tw-image', data.image);
-  
-  // Для Facebook/Messenger важно обновить URL
-  if (window.history.replaceState) {
-    window.history.replaceState({}, document.title, data.url);
-  }
-}
+
 /* ---------- отрисовка ---------- */
 function render() {
   const t = TP.track;
@@ -752,33 +660,10 @@ async function openPlaylistPickerLocal() {
 /* ---------- поделиться (модалка один в один с главной) ---------- */
 function trackShareUrl() {
   const base = location.origin + location.pathname.replace(/[^/]*$/, '');
-  return base + 'share.html?id=' + encodeURIComponent(TP.id);
+  return base + 'track.html?id=' + encodeURIComponent(TP.id);
 }
 
 $('#tp-share').addEventListener('click', () => {
-  const data = {
-    title: (TP.track.artist ? TP.track.artist + ' — ' : '') + (TP.track.title || 'Track'),
-    description: TP.track.lyrics ? TP.track.lyrics.substring(0, 200) + '...' : 'Listen on N1K∅ Music',
-    image: TP.track.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png',
-    audio: TP.track.audio || '',
-    duration: TP.track.duration || '',
-    url: location.origin + location.pathname.replace(/[^/]*$/, '') + 'share.html?id=' + encodeURIComponent(track.id)
-  };
-  
-  // Обновляем метатеги
-  document.title = data.title + ' | N1K∅ Music';
-  const setMeta = (sel, content) => { const el = document.querySelector(sel); if (el && content) el.setAttribute('content', content); };
-  setMeta('meta[property="og:title"]', data.title);
-  setMeta('meta[property="og:description"]', data.description);
-  setMeta('meta[property="og:image"]', data.image);
-  setMeta('meta[property="og:url"]', data.url);
-  setMeta('meta[property="og:audio"]', data.audio);
-  setMeta('meta[property="music:duration"]', data.duration);
-  setMeta('meta[name="twitter:title"]', data.title);
-  setMeta('meta[name="twitter:description"]', data.description);
-  setMeta('meta[name="twitter:image"]', data.image);
-  
-  window._shareData = data;
   const modal = document.getElementById('share-modal');
   if (modal) modal.classList.add('open');
 });
@@ -789,10 +674,10 @@ document.getElementById('share-modal')?.addEventListener('click', (e) => {
 });
 
 document.getElementById('share-copy-link')?.addEventListener('click', () => {
-  const data = window._shareData || getShareData();
-  copyToClipboard(data.url, document.getElementById('share-copy-link'));
+  copyToClipboard(trackShareUrl(), document.getElementById('share-copy-link'));
   showCopyFeedback('Copied!');
 });
+
 function showCopyFeedback(text) {
   const btn = document.getElementById('share-copy-link');
   if (!btn) return;
@@ -806,31 +691,48 @@ function showCopyFeedback(text) {
 
 document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
   btn.addEventListener('click', async () => {
-    const data = window._shareData || {
-      title: (TP.track.artist ? TP.track.artist + ' — ' : '') + (TP.track.title || ''),
-      description: TP.track.lyrics ? TP.track.lyrics.substring(0, 200) + '...' : 'Listen on N1K∅ Music',
-      image: TP.track.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png',
-      audio: TP.track.audio || '',
-      duration: TP.track.duration || '',
-      url: trackShareUrl()
-    };
-    const u = encodeURIComponent(data.url);
-    const tx = encodeURIComponent(data.title);
+    const url = trackShareUrl();
+    const title = (TP.track.artist ? TP.track.artist + ' — ' : '') + (TP.track.title || '');
+    const u = encodeURIComponent(url), tx = encodeURIComponent(title);
     const p = btn.dataset.platform;
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     let link = '';
-    const shareText = data.title + '\n\n' + data.url;
 
     if (p === 'twitter')   link = 'https://twitter.com/intent/tweet?text=' + tx + '&url=' + u;
     if (p === 'facebook')  link = 'https://www.facebook.com/sharer/sharer.php?u=' + u;
-    if (p === 'messenger') link = isMobile ? 'fb-messenger://share?link=' + u : 'https://www.facebook.com/dialog/send?app_id=YOUR_APP_ID&link=' + u + '&redirect_uri=' + u;
+    if (p === 'messenger') link = isMobile ? 'fb-messenger://share?link=' + u
+                                          : 'https://www.facebook.com/sharer/sharer.php?u=' + u;
     if (p === 'telegram')  link = 'https://t.me/share/url?url=' + u + '&text=' + tx;
-    if (p === 'viber')     link = 'viber://forward?text=' + encodeURIComponent(shareText);
-    if (p === 'whatsapp')  link = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(shareText);
-    if (p === 'tiktok')    { copyToClipboard(data.url, btn); showCopyFeedback('Link copied — paste in TikTok'); return; }
-    if (p === 'native')    { if (navigator.share) { try { await navigator.share({ title: data.title, text: data.description, url: data.url }); } catch (e) {} } else { copyToClipboard(data.url, btn); showCopyFeedback('Copied!'); } return; }
-    
+    if (p === 'viber')     link = 'viber://forward?text=' + encodeURIComponent(title + ' ' + url);
+    if (p === 'whatsapp')  link = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(title + ' ' + url);
+
+    if (p === 'tiktok') {                     // TikTok не умеет share-ссылки — копируем
+      copyToClipboard(url, btn);
+      showCopyFeedback('Link copied — wklej w TikTok');
+      return;
+    }
+    if (p === 'native') {
+      if (navigator.share) { try { await navigator.share({ title: title, url: url }); } catch (e) {} }
+      else { copyToClipboard(url, btn); showCopyFeedback('Copied!'); }
+      return;
+    }
     if (link) window.open(link, '_blank', 'noopener,width=600,height=600');
+  });
+});
+
+/* ---------- админ: правка стиля и текста ---------- */
+$('#tp-edit-genre').addEventListener('click', () => {
+  openEditor('Styl / prompt', TP.track.genre || '', async (val) => {
+    await db.collection('tracks').doc(TP.id).update({ genre: val });
+    TP.track.genre = val;
+    render();
+  });
+});
+$('#tp-edit-lyrics').addEventListener('click', () => {
+  openEditor('Tekst', TP.track.lyrics || '', async (val) => {
+    await db.collection('tracks').doc(TP.id).update({ lyrics: val });
+    TP.track.lyrics = val;
+    render();
   });
 });
 
