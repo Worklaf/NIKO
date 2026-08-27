@@ -3211,7 +3211,7 @@ function getShareData() {
       image: track.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png',
       audio: track.audio || '',
       duration: track.duration || '',
-      url: location.origin + '/track.html?id=' + encodeURIComponent(track.id)
+      url: location.origin + '/NIKO.html?track=' + encodeURIComponent(track.id)
     };
   }
   
@@ -3287,36 +3287,26 @@ document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
     }
     
     if (p === 'messenger') {
-  // Преобразуем URL в "правильный" формат для Messenger
-  const trackUrl = data.url.replace('/NIKO.html?track=', '/track.html?id=');
-  
   if (isMobile) {
-    // Пробуем открыть Messenger приложение
-    // Формат: fb-messenger://share с правильным URL
-    const messengerLink = 'fb-messenger://share?link=' + encodeURIComponent(trackUrl);
+    // fb-messenger:// лучше работает с закодированной ссылкой напрямую
+    const messengerLink = 'fb-messenger://share?link=' + encodeURIComponent(data.url);
     
-    // Создаём невидимый iframe для попытки открытия приложения
     const iframe = document.createElement('iframe');
     iframe.style.display = 'none';
     iframe.src = messengerLink;
     document.body.appendChild(iframe);
     
-    // Через 1 секунду убираем iframe
     setTimeout(() => {
-      document.body.removeChild(iframe);
+      if (iframe.parentNode) document.body.removeChild(iframe);
     }, 1000);
     
-    // Также пробуем window.location как fallback
     setTimeout(() => {
       window.location.href = messengerLink;
     }, 100);
-    
   } else {
     // Desktop: открываем messenger.com с предзаполненной ссылкой
-    // Или просто web-версию Facebook Messenger
-    const shareText = encodeURIComponent(data.title + '\n\n' + trackUrl);
     window.open(
-      `https://www.messenger.com/new?link=${encodeURIComponent(trackUrl)}`,
+      `https://www.messenger.com/new?link=${encodeURIComponent(data.url)}`,
       '_blank',
       'noopener,width=800,height=600'
     );
