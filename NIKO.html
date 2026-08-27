@@ -3287,17 +3287,29 @@ document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
     }
     
     if (p === 'messenger') {
-  // Для preview Messenger берёт OG с исходного URL,
-  // но deep link иногда стабильнее работает с "прямой" страницей трека
-  const messengerUrl = data.url.includes('/NIKO.html?track=')
-    ? data.url.replace('/NIKO.html?track=', '/track.html?id=')
-    : data.url;
-
   if (isMobile) {
-    const link = 'fb-messenger://share?link=' + encodeURIComponent(messengerUrl);
-    // ... iframe + window.location.href как выше ...
+    // fb-messenger:// лучше работает с закодированной ссылкой напрямую
+    const messengerLink = 'fb-messenger://share?link=' + encodeURIComponent(data.url);
+    
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = messengerLink;
+    document.body.appendChild(iframe);
+    
+    setTimeout(() => {
+      if (iframe.parentNode) document.body.removeChild(iframe);
+    }, 1000);
+    
+    setTimeout(() => {
+      window.location.href = messengerLink;
+    }, 100);
   } else {
-    window.open(`https://www.messenger.com/new?link=${encodeURIComponent(messengerUrl)}`, '_blank', 'noopener,width=800,height=600');
+    // Desktop: открываем messenger.com с предзаполненной ссылкой
+    window.open(
+      `https://www.messenger.com/new?link=${encodeURIComponent(data.url)}`,
+      '_blank',
+      'noopener,width=800,height=600'
+    );
   }
   return;
 }
