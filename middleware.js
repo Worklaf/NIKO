@@ -1,8 +1,4 @@
 // middleware.js — Vercel Edge Middleware
-// Отдаёт ботам (Facebook/Telegram/WhatsApp/Twitter) статичный HTML
-// с правильными OG-тегами под конкретный трек.
-// Обычным пользователям пропускает track.html как есть.
-
 export const config = {
   matcher: '/track.html',
 };
@@ -13,14 +9,14 @@ const DEFAULT_COVER = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_
 
 const BOT_UA = /facebookexternalhit|Facebot|Twitterbot|TelegramBot|WhatsApp|Slackbot|LinkedInBot|Discordbot|Pinterest|SkypeUriPreview|vkShare|Applebot/i;
 
-export default async function middleware(request) {
+// ВАЖНО: именованный export, не default
+export async function middleware(request) {
   const url = new URL(request.url);
   const ua = request.headers.get('user-agent') || '';
   const trackId = url.searchParams.get('id');
 
-  // Пропускаем обычных пользователей и запросы без ID — как есть
   if (!BOT_UA.test(ua) || !trackId) {
-    return; // Vercel продолжит стандартную обработку (отдаст статический track.html)
+    return; // пропускаем как есть
   }
 
   try {
