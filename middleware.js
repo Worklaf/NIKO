@@ -98,9 +98,10 @@ function esc(s) {
 
 function renderHtml({ title, description, image, audio, pageUrl }) {
   return `<!doctype html>
-<html lang="en">
+<html lang="pl">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>${esc(title)} | N1K∅ Music</title>
 <meta property="og:type" content="music.song">
 <meta property="og:site_name" content="N1K∅ Music">
