@@ -1,29 +1,32 @@
-// middleware.js — с поддержкой OG для главной страницы
+// middleware.js — ИСПРАВЛЕННЫЙ
 export const config = {
   matcher: ['/', '/track.html', '/NIKO.html'],
 };
 
 const FIREBASE_PROJECT_ID = 'niko-music-1d585';
 const FIREBASE_API_KEY = 'AIzaSyBzCiSmy714eAS_sDQffBHHhN3HkPniIKk';
-const DEFAULT_COVER = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/niko-og-cover.png';
 
-const BOT_UA = /facebookexternalhit|Facebot|Twitterbot|TelegramBot|WhatsApp|Slackbot|LinkedInBot|Discordbot|Pinterest|SkypeUriPreview|vkShare|Applebot/i;
+// СТАРЫЙ дефолт — для треков, у которых нет своей обложки
+const TRACK_FALLBACK_COVER = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
+
+// НОВЫЙ логотип — ТОЛЬКО для главной страницы (когда шарите просто сайт)
+const HOME_OG_COVER = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/niko-og-cover.png';
+
+// РАСШИРЕННЫЙ список ботов (добавлены Messenger, Groups, In-App Browser)
+const BOT_UA = /facebookexternalhit|Facebot|Twitterbot|TelegramBot|WhatsApp|Slackbot|LinkedInBot|Discordbot|Pinterest|SkypeUriPreview|vkShare|Applebot|MessengerBot|FB_IAB|FBAV|FBAN|Instagram|Snapchat/i;
 
 export default async function middleware(request) {
   const url = new URL(request.url);
   const ua = request.headers.get('user-agent') || '';
   const pathname = url.pathname;
 
-  console.log('[MIDDLEWARE] Request:', pathname, 'UA:', ua.substring(0, 50));
-
-  // === 1. Корень сайта "/" — редирект для людей, OG для ботов ===
+  // === 1. Корень сайта "/" ===
   if (pathname === '/') {
     if (BOT_UA.test(ua)) {
       return new Response(renderHomeHtml(url), {
         headers: { 'content-type': 'text/html; charset=utf-8' },
       });
     }
-    // Обычных юзеров редиректим на NIKO.html
     url.pathname = '/NIKO.html';
     return Response.redirect(url, 302);
   }
@@ -40,7 +43,7 @@ export default async function middleware(request) {
     pageType = 'home';
   }
 
-  // Не боты — пропускаем, Vercel отдаст обычный HTML/JS
+  // Не боты — пропускаем, Vercel отдаёт обычный HTML/JS
   if (!BOT_UA.test(ua)) {
     return;
   }
@@ -52,7 +55,7 @@ export default async function middleware(request) {
     });
   }
 
-  // === 4. Бот без ID на track.html — fallback ===
+  // === 4. Бот без ID — fallback ===
   if (!trackId) {
     return new Response(fallbackHtml(url, pageType), {
       headers: { 'content-type': 'text/html; charset=utf-8' },
@@ -75,7 +78,8 @@ export default async function middleware(request) {
 
     const title = f.title?.stringValue || '';
     const artist = f.artist?.stringValue || '';
-    const cover = f.cover?.stringValue || DEFAULT_COVER;
+    // ВАЖНО: если у трека нет cover — используем СТАРЫЙ дефолт, не логотип
+    const cover = f.cover?.stringValue || TRACK_FALLBACK_COVER;
     const audio = f.audio?.stringValue || '';
     const lyrics = f.lyrics?.stringValue || '';
 
@@ -103,7 +107,6 @@ export default async function middleware(request) {
       headers: { 'content-type': 'text/html; charset=utf-8' },
     });
   } catch (e) {
-    console.error('[MIDDLEWARE] Error:', e);
     return new Response(fallbackHtml(url, pageType), {
       headers: { 'content-type': 'text/html; charset=utf-8' },
     });
@@ -114,7 +117,7 @@ export default async function middleware(request) {
 function renderHomeHtml(url) {
   const title = 'N1K∅ — Music Tracks';
   const description = 'Discover amazing music. Listen, share and enjoy your favorite tracks on N1K∅.';
-  const image = DEFAULT_COVER; // ← сюда можно подставить прямую ссылку на логотип, если он отличается от обложки
+  const image = HOME_OG_COVER; // НОВЫЙ логотип
   const pageUrl = `${url.origin}/`;
 
   return `<!doctype html>
@@ -128,11 +131,11 @@ function renderHomeHtml(url) {
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:image" content="${esc(image)}">
+<meta property="og:image:secure_url" content="${esc(image)}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:url" content="${esc(pageUrl)}">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@niko_music">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(description)}">
 <meta name="twitter:image" content="${esc(image)}">
@@ -157,13 +160,13 @@ function renderTrackHtml({ title, description, image, audio, pageUrl, redirectUr
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:image" content="${esc(image)}">
+<meta property="og:image:secure_url" content="${esc(image)}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:url" content="${esc(pageUrl)}">
 ${audio ? `<meta property="og:audio" content="${esc(audio)}">
 <meta property="og:audio:type" content="audio/mpeg">` : ''}
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@niko_music">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(description)}">
 <meta name="twitter:image" content="${esc(image)}">
@@ -197,7 +200,7 @@ function fallbackHtml(url, pageType) {
   return renderTrackHtml({
     title: 'N1K∅ Music',
     description: 'Discover amazing music',
-    image: DEFAULT_COVER,
+    image: TRACK_FALLBACK_COVER, // СТАРЫЙ дефолт для треков
     audio: '',
     pageUrl: url.href,
     redirectUrl,
