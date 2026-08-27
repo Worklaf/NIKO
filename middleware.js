@@ -1,8 +1,4 @@
-// middleware.js — Vercel Edge Middleware
-// Отдаёт ботам (Facebook/Telegram/WhatsApp/Twitter) статичный HTML
-// с правильными OG-тегами под конкретный трек.
-// Обычным пользователям пропускает track.html как есть.
-
+// middleware.js — ИСПРАВЛЕННЫЙ
 export const config = {
   matcher: ['/track.html', '/NIKO.html'],
 };
@@ -20,15 +16,19 @@ export default async function middleware(request) {
   
   console.log('[MIDDLEWARE] Request:', pathname, 'UA:', ua.substring(0, 50));
   
-  // Определяем ID трека в зависимости от страницы
+  // === ИСПРАВЛЕНО: поддержка обоих форматов ===
   let trackId = null;
+  let pageType = null; // 'track' или 'home'
+  
   if (pathname.includes('track.html')) {
     trackId = url.searchParams.get('id');
+    pageType = 'track';
   } else if (pathname.includes('NIKO.html')) {
     trackId = url.searchParams.get('track');
+    pageType = 'home';
   }
   
-  console.log('[MIDDLEWARE] Track ID:', trackId, 'Is bot:', BOT_UA.test(ua));
+  console.log('[MIDDLEWARE] Track ID:', trackId, 'Page type:', pageType, 'Is bot:', BOT_UA.test(ua));
 
   // Пропускаем обычных пользователей и запросы без ID — как есть
   if (!BOT_UA.test(ua) || !trackId) {
@@ -44,7 +44,7 @@ export default async function middleware(request) {
 
     if (!res.ok) {
       console.log('[MIDDLEWARE] Firebase failed, using fallback');
-      return new Response(fallbackHtml(url), {
+      return new Response(fallbackHtml(url, pageType), {
         headers: { 'content-type': 'text/html; charset=utf-8' },
       });
     }
@@ -69,20 +69,29 @@ export default async function middleware(request) {
       ? lyrics.substring(0, 200).replace(/\n/g, ' ') + '...'
       : 'Listen on N1K∅ Music';
 
+    // === ИСПРАВЛЕНО: правильный canonical URL в зависимости от типа страницы ===
+    const canonicalUrl = pageType === 'track' 
+      ? `${url.origin}/track.html?id=${trackId}`
+      : `${url.origin}/NIKO.html?track=${trackId}`;
+
     const html = renderHtml({
       title: fullTitle || 'N1K∅ Music',
       description,
       image: cover,
       audio,
-      pageUrl: url.href,
+      pageUrl: canonicalUrl,
+      redirectUrl: pageType === 'home' 
+        ? `${url.origin}/NIKO.html?track=${trackId}`  // редирект на главную с треком
+        : `${url.origin}/track.html?id=${trackId}`,   // редирект на страницу трека
     });
 
-    console.log('[MIDDLEWARE] Returning HTML with OG tags');
+    console.log('[MIDDLEWARE] Returning HTML with OG tags for', pageType);
     return new Response(html, {
       headers: { 'content-type': 'text/html; charset=utf-8' },
     });
   } catch (e) {
-    return new Response(fallbackHtml(url), {
+    console.error('[MIDDLEWARE] Error:', e);
+    return new Response(fallbackHtml(url, pageType), {
       headers: { 'content-type': 'text/html; charset=utf-8' },
     });
   }
@@ -96,7 +105,7 @@ function esc(s) {
     .replace(/"/g, '&quot;');
 }
 
-function renderHtml({ title, description, image, audio, pageUrl }) {
+function renderHtml({ title, description, image, audio, pageUrl, redirectUrl }) {
   return `<!doctype html>
 <html lang="pl">
 <head>
@@ -118,20 +127,26 @@ ${audio ? `<meta property="og:audio" content="${esc(audio)}">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(description)}">
 <meta name="twitter:image" content="${esc(image)}">
-<meta http-equiv="refresh" content="0; url=${esc(pageUrl)}">
+<meta http-equiv="refresh" content="0; url=${esc(redirectUrl)}">
 </head>
 <body>
-<script>location.replace(${JSON.stringify(pageUrl)});</script>
+<script>location.replace(${JSON.stringify(redirectUrl)});</script>
 </body>
 </html>`;
 }
 
-function fallbackHtml(url) {
+function fallbackHtml(url, pageType) {
+  const trackId = url.searchParams.get('id') || url.searchParams.get('track');
+  const redirectUrl = pageType === 'home' && trackId
+    ? `${url.origin}/NIKO.html?track=${trackId}`
+    : url.href;
+
   return renderHtml({
     title: 'N1K∅ Music',
     description: 'Discover amazing music',
     image: DEFAULT_COVER,
     audio: '',
     pageUrl: url.href,
+    redirectUrl: redirectUrl,
   });
 }
