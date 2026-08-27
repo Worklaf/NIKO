@@ -31,10 +31,26 @@ export default async function middleware(request) {
   console.log('[MIDDLEWARE] Track ID:', trackId, 'Is bot:', BOT_UA.test(ua));
 
   // Пропускаем обычных пользователей и запросы без ID — как есть
-  if (!BOT_UA.test(ua) || !trackId) {
-    console.log('[MIDDLEWARE] Skipping - not bot or no track ID');
-    return; // Vercel продолжит стандартную обработку
+if (!BOT_UA.test(ua) || !trackId) {
+
+  // Если это NIKO.html — всё равно отдаём OG-теги
+  if (pathname.includes('NIKO.html') && trackId) {
+    const html = renderHtml({
+      title: 'N1K∅ Music',
+      description: 'Listen on N1K∅ Music',
+      image: DEFAULT_COVER,
+      audio: '',
+      pageUrl: url.href,
+    });
+
+    return new Response(html, {
+      headers: { 'content-type': 'text/html; charset=utf-8' },
+    });
   }
+
+  return;
+}
+
 
   try {
     const fsUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/tracks/${trackId}?key=${FIREBASE_API_KEY}`;
