@@ -1,39 +1,25 @@
-// middleware.js
+// middleware.js — ИСПРАВЛЕННЫЙ
 export const config = {
-  matcher: ['/', '/track.html', '/NIKO.html'],
+  matcher: ['/track.html', '/NIKO.html'],
 };
 
 const FIREBASE_PROJECT_ID = 'niko-music-1d585';
 const FIREBASE_API_KEY = 'AIzaSyBzCiSmy714eAS_sDQffBHHhN3HkPniIKk';
+const DEFAULT_COVER = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
 
-// Старый дефолт — для треков без обложки
-const TRACK_FALLBACK_COVER = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
-// Новый логотип — ТОЛЬКО для главной страницы
-const HOME_OG_COVER = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/niko-og-cover.png';
-
-// Расширенный список ботов (Facebook, Messenger, Instagram, etc.)
-const BOT_UA = /facebookexternalhit|Facebot|Twitterbot|TelegramBot|WhatsApp|Slackbot|LinkedInBot|Discordbot|Pinterest|SkypeUriPreview|vkShare|Applebot|MessengerBot|FB_IAB|FBAV|FBAN|Instagram|Snapchat/i;
+const BOT_UA = /facebookexternalhit|Facebot|Twitterbot|TelegramBot|WhatsApp|Slackbot|LinkedInBot|Discordbot|Pinterest|SkypeUriPreview|vkShare|Applebot/i;
 
 export default async function middleware(request) {
   const url = new URL(request.url);
   const ua = request.headers.get('user-agent') || '';
   const pathname = url.pathname;
-
-  // === 1. Корень "/" → редирект для людей, OG для ботов ===
-  if (pathname === '/') {
-    if (BOT_UA.test(ua)) {
-      return new Response(renderHomeHtml(url), {
-        headers: { 'content-type': 'text/html; charset=utf-8' },
-      });
-    }
-    url.pathname = '/NIKO.html';
-    return Response.redirect(url, 302);
-  }
-
-  // === 2. Определяем страницу и ID трека ===
+  
+  console.log('[MIDDLEWARE] Request:', pathname, 'UA:', ua.substring(0, 50));
+  
+  // === ИСПРАВЛЕНО: поддержка обоих форматов ===
   let trackId = null;
-  let pageType = null;
-
+  let pageType = null; // 'track' или 'home'
+  
   if (pathname.includes('track.html')) {
     trackId = url.searchParams.get('id');
     pageType = 'track';
@@ -41,33 +27,23 @@ export default async function middleware(request) {
     trackId = url.searchParams.get('track');
     pageType = 'home';
   }
+  
+  console.log('[MIDDLEWARE] Track ID:', trackId, 'Page type:', pageType, 'Is bot:', BOT_UA.test(ua));
 
-  // Не боты — пропускаем, Vercel отдаёт обычный HTML
-  if (!BOT_UA.test(ua)) {
-    return;
+  // Пропускаем обычных пользователей и запросы без ID — как есть
+  if (!BOT_UA.test(ua) || !trackId) {
+    console.log('[MIDDLEWARE] Skipping - not bot or no track ID');
+    return; // Vercel продолжит стандартную обработку
   }
 
-  // === 3. Бот на NIKO.html без трека = главная ===
-  if (!trackId && pathname.includes('NIKO.html')) {
-    return new Response(renderHomeHtml(url), {
-      headers: { 'content-type': 'text/html; charset=utf-8' },
-    });
-  }
-
-  // === 4. Бот без ID на track.html — fallback ===
-  if (!trackId) {
-    return new Response(fallbackHtml(url, pageType), {
-      headers: { 'content-type': 'text/html; charset=utf-8' },
-    });
-  }
-
-  // === 5. Бот с ID трека — тащим из Firebase ===
   try {
     const fsUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/tracks/${trackId}?key=${FIREBASE_API_KEY}`;
+    console.log('[MIDDLEWARE] Fetching Firebase:', fsUrl);
     const res = await fetch(fsUrl);
+    console.log('[MIDDLEWARE] Firebase response:', res.status);
 
     if (!res.ok) {
-      console.log('[MIDDLEWARE] Firebase 404 for track:', trackId);
+      console.log('[MIDDLEWARE] Firebase failed, using fallback');
       return new Response(fallbackHtml(url, pageType), {
         headers: { 'content-type': 'text/html; charset=utf-8' },
       });
@@ -75,11 +51,16 @@ export default async function middleware(request) {
 
     const doc = await res.json();
     const f = doc.fields || {};
+    
+    console.log('[MIDDLEWARE] Track data:', {
+      title: f.title?.stringValue,
+      artist: f.artist?.stringValue,
+      cover: f.cover?.stringValue?.substring(0, 50)
+    });
 
     const title = f.title?.stringValue || '';
     const artist = f.artist?.stringValue || '';
-    // ВАЖНО: если у трека нет cover → используем СТАРЫЙ дефолт, не логотип
-    const cover = f.cover?.stringValue || TRACK_FALLBACK_COVER;
+    const cover = f.cover?.stringValue || DEFAULT_COVER;
     const audio = f.audio?.stringValue || '';
     const lyrics = f.lyrics?.stringValue || '';
 
@@ -88,21 +69,23 @@ export default async function middleware(request) {
       ? lyrics.substring(0, 200).replace(/\n/g, ' ') + '...'
       : 'Listen on N1K∅ Music';
 
-    const canonicalUrl = pageType === 'track'
+    // === ИСПРАВЛЕНО: правильный canonical URL в зависимости от типа страницы ===
+    const canonicalUrl = pageType === 'track' 
       ? `${url.origin}/track.html?id=${trackId}`
       : `${url.origin}/NIKO.html?track=${trackId}`;
 
-    const html = renderTrackHtml({
+    const html = renderHtml({
       title: fullTitle || 'N1K∅ Music',
       description,
       image: cover,
       audio,
       pageUrl: canonicalUrl,
-      redirectUrl: pageType === 'home'
-        ? `${url.origin}/NIKO.html?track=${trackId}`
-        : `${url.origin}/track.html?id=${trackId}`,
+      redirectUrl: pageType === 'home' 
+        ? `${url.origin}/NIKO.html?track=${trackId}`  // редирект на главную с треком
+        : `${url.origin}/track.html?id=${trackId}`,   // редирект на страницу трека
     });
 
+    console.log('[MIDDLEWARE] Returning HTML with OG tags for', pageType);
     return new Response(html, {
       headers: { 'content-type': 'text/html; charset=utf-8' },
     });
@@ -114,58 +97,33 @@ export default async function middleware(request) {
   }
 }
 
-// ==================== ГЛАВНАЯ СТРАНИЦА ====================
-function renderHomeHtml(url) {
-  const title = 'N1K∅ — Music Tracks';
-  const description = 'Discover amazing music. Listen, share and enjoy your favorite tracks on N1K∅.';
-  const image = HOME_OG_COVER;
-  const pageUrl = `${url.origin}/`;
-
-  return `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<title>${esc(title)}</title>
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="N1K∅ Music">
-<meta property="og:title" content="${esc(title)}">
-<meta property="og:description" content="${esc(description)}">
-<meta property="og:image" content="${esc(image)}">
-<meta property="og:image:secure_url" content="${esc(image)}">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:url" content="${esc(pageUrl)}">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="${esc(title)}">
-<meta name="twitter:description" content="${esc(description)}">
-<meta name="twitter:image" content="${esc(image)}">
-<meta http-equiv="refresh" content="0; url=${esc(pageUrl)}NIKO.html">
-</head>
-<body>
-<script>location.replace(${JSON.stringify(pageUrl + 'NIKO.html')});</script>
-</body>
-</html>`;
+function esc(s) {
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
-// ==================== СТРАНИЦА ТРЕКА ====================
-function renderTrackHtml({ title, description, image, audio, pageUrl, redirectUrl }) {
+function renderHtml({ title, description, image, audio, pageUrl, redirectUrl }) {
   return `<!doctype html>
 <html lang="pl">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>${esc(title)} | N1K∅ Music</title>
 <meta property="og:type" content="music.song">
 <meta property="og:site_name" content="N1K∅ Music">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:image" content="${esc(image)}">
-<meta property="og:image:secure_url" content="${esc(image)}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:url" content="${esc(pageUrl)}">
 ${audio ? `<meta property="og:audio" content="${esc(audio)}">
 <meta property="og:audio:type" content="audio/mpeg">` : ''}
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@niko_music">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(description)}">
 <meta name="twitter:image" content="${esc(image)}">
@@ -177,30 +135,18 @@ ${audio ? `<meta property="og:audio" content="${esc(audio)}">
 </html>`;
 }
 
-function esc(s) {
-  return String(s || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
 function fallbackHtml(url, pageType) {
   const trackId = url.searchParams.get('id') || url.searchParams.get('track');
   const redirectUrl = pageType === 'home' && trackId
     ? `${url.origin}/NIKO.html?track=${trackId}`
-    : `${url.origin}/NIKO.html`;
+    : url.href;
 
-  if (pageType === 'home' && !trackId) {
-    return renderHomeHtml(url);
-  }
-
-  return renderTrackHtml({
+  return renderHtml({
     title: 'N1K∅ Music',
     description: 'Discover amazing music',
-    image: TRACK_FALLBACK_COVER,
+    image: DEFAULT_COVER,
     audio: '',
     pageUrl: url.href,
-    redirectUrl,
+    redirectUrl: redirectUrl,
   });
 }
