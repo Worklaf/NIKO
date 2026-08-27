@@ -10,8 +10,7 @@ export default async function handler(request) {
   }
 
   // Firebase REST API — публичный endpoint, не требует авторизации
-  // ЗАМЕНИТЕ: niko-music-app на ваш реальный Project ID
-  const FIREBASE_PROJECT_ID = 'niko-music-app'; // <-- ВАШ PROJECT ID ЗДЕСЬ
+  const FIREBASE_PROJECT_ID = 'niko-music-1d585';
   
   try {
     const fbUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/tracks/${trackId}`;
@@ -19,7 +18,8 @@ export default async function handler(request) {
     
     if (!fbRes.ok) {
       // Трек не найден — редирект на обычную страницу
-      return Response.redirect(`https://niko-vert.vercel.app/track.html?id=${trackId}`, 302);
+      const baseUrl = url.origin;
+      return Response.redirect(`${baseUrl}/track.html?id=${trackId}`, 302);
     }
     
     const data = await fbRes.json();
@@ -37,7 +37,8 @@ export default async function handler(request) {
     };
     
     const displayTitle = track.artist ? `${track.artist} — ${track.title}` : track.title;
-    const shareUrl = `https://niko-vert.vercel.app/track.html?id=${trackId}`;
+    const baseUrl = url.origin;
+    const shareUrl = `${baseUrl}/track.html?id=${trackId}`;
     const description = track.lyrics 
       ? track.lyrics.substring(0, 200).replace(/"/g, '&quot;') + '...' 
       : 'Listen on N1K∅ Music';
@@ -125,6 +126,7 @@ export default async function handler(request) {
     
   } catch (e) {
     console.error('Error:', e);
-    return Response.redirect(`https://niko-vert.vercel.app/track.html?id=${trackId}`, 302);
+    const baseUrl = url.origin;
+    return Response.redirect(`${baseUrl}/track.html?id=${trackId}`, 302);
   }
 }
