@@ -105,7 +105,7 @@ function esc(s) {
     .replace(/"/g, '&quot;');
 }
 
-function renderHtml({ title, description, image, audio, pageUrl, redirectUrl }) {
+function renderHtml({ title, description, image, audio, pageUrl }) {
   return `<!doctype html>
 <html lang="pl">
 <head>
@@ -127,17 +127,17 @@ ${audio ? `<meta property="og:audio" content="${esc(audio)}">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(description)}">
 <meta name="twitter:image" content="${esc(image)}">
-<meta http-equiv="refresh" content="0; url=${esc(redirectUrl)}">
+<link rel="canonical" href="${esc(pageUrl)}">
 </head>
 <body>
-<script>location.replace(${JSON.stringify(redirectUrl)});</script>
+<p>${esc(title)}</p>
+<p><a href="${esc(pageUrl)}">Otwórz utwór</a></p>
 </body>
 </html>`;
 }
-
 function fallbackHtml(url, pageType) {
   const trackId = url.searchParams.get('id') || url.searchParams.get('track');
-  const redirectUrl = pageType === 'home' && trackId
+  const pageUrl = pageType === 'home' && trackId
     ? `${url.origin}/NIKO.html?track=${trackId}`
     : url.href;
 
@@ -146,7 +146,6 @@ function fallbackHtml(url, pageType) {
     description: 'Discover amazing music',
     image: DEFAULT_COVER,
     audio: '',
-    pageUrl: url.href,
-    redirectUrl: redirectUrl,
+    pageUrl: pageUrl,
   });
 }
