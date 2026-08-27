@@ -699,7 +699,7 @@ async function openPlaylistPickerLocal() {
 
 /* ---------- поделиться (модалка один в один с главной) ---------- */
 function trackShareUrl() {
-  return location.origin + '/api/track-meta?id=' + encodeURIComponent(TP.id);
+  return location.origin + '/track.html?id=' + encodeURIComponent(TP.id);
 }
 
 $('#tp-share').addEventListener('click', () => {
