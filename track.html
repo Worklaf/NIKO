@@ -314,7 +314,7 @@ function getShareData() {
       image: TP.track.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png',
       audio: TP.track.audio || '',
       duration: TP.track.duration || '',
-      url: location.origin + location.pathname.replace(/[^/]*$/, '') + 'player.html?id=' + encodeURIComponent(track.id)
+      url: location.origin + location.pathname.replace(/[^/]*$/, '') + 'share.html?id=' + encodeURIComponent(track.id)
     };
   }
   
@@ -341,7 +341,7 @@ function getShareData() {
       image: track.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png',
       audio: track.audio || '',
       duration: track.duration || '',
-      url: location.origin + location.pathname.replace(/[^/]*$/, '') + 'track.html?id=' + encodeURIComponent(track.id)
+      url: location.origin + location.pathname.replace(/[^/]*$/, '') + 'share.html?id=' + encodeURIComponent(track.id)
     };
   }
   
@@ -752,7 +752,7 @@ async function openPlaylistPickerLocal() {
 /* ---------- поделиться (модалка один в один с главной) ---------- */
 function trackShareUrl() {
   const base = location.origin + location.pathname.replace(/[^/]*$/, '');
-  return base + 'track.html?id=' + encodeURIComponent(TP.id);
+  return base + 'share.html?id=' + encodeURIComponent(TP.id);
 }
 
 $('#tp-share').addEventListener('click', () => {
@@ -762,7 +762,7 @@ $('#tp-share').addEventListener('click', () => {
     image: TP.track.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png',
     audio: TP.track.audio || '',
     duration: TP.track.duration || '',
-    url: location.origin + location.pathname.replace(/[^/]*$/, '') + 'track.html?id=' + encodeURIComponent(TP.track.id)
+    url: location.origin + location.pathname.replace(/[^/]*$/, '') + 'share.html?id=' + encodeURIComponent(track.id)
   };
   
   // Обновляем метатеги
