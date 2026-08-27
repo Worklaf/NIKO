@@ -3286,17 +3286,14 @@ document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
       link = `https://www.facebook.com/sharer/sharer.php?u=${u}`;
     }
     
-    else if (p === 'messenger') {
+    if (p === 'messenger') {
       if (isMobile) {
-        // Messenger deep links
-        const appUrl = isIOS
-          ? `fb-messenger://share/?link=${u}`
-          : `fb-messenger://share?link=${u}`;
-        const webUrl = `https://www.facebook.com/dialog/send?app_id=966242223397117&link=${u}&redirect_uri=${u}`;
-        openAppOrWeb(appUrl, webUrl);
-        return;
+        // ✅ Просто меняем location — iOS сам спросит "Открыть в Messenger?"
+        window.location.href = 'fb-messenger://share?link=' + u;
+      } else {
+        window.open('https://www.facebook.com/dialog/send?app_id=966242223397117&link=' + u + '&redirect_uri=' + encodeURIComponent(location.origin), '_blank');
       }
-      link = `https://www.facebook.com/dialog/send?app_id=966242223397117&link=${u}&redirect_uri=${u}`;
+      return;
     }
     
     else if (p === 'telegram') {
