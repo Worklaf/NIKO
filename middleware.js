@@ -4,7 +4,7 @@
 // Обычным пользователям пропускает track.html как есть.
 
 export const config = {
-  matcher: ['/track.html'],
+  matcher: ['/track.html', '/NIKO.html'],
 };
 
 const FIREBASE_PROJECT_ID = 'niko-music-1d585';
@@ -16,18 +16,34 @@ const BOT_UA = /facebookexternalhit|Facebot|Twitterbot|TelegramBot|WhatsApp|Slac
 export default async function middleware(request) {
   const url = new URL(request.url);
   const ua = request.headers.get('user-agent') || '';
-  const trackId = url.searchParams.get('id');
+  const pathname = url.pathname;
+  
+  console.log('[MIDDLEWARE] Request:', pathname, 'UA:', ua.substring(0, 50));
+  
+  // Определяем ID трека в зависимости от страницы
+  let trackId = null;
+  if (pathname.includes('track.html')) {
+    trackId = url.searchParams.get('id');
+  } else if (pathname.includes('NIKO.html')) {
+    trackId = url.searchParams.get('track');
+  }
+  
+  console.log('[MIDDLEWARE] Track ID:', trackId, 'Is bot:', BOT_UA.test(ua));
 
   // Пропускаем обычных пользователей и запросы без ID — как есть
   if (!BOT_UA.test(ua) || !trackId) {
-    return; // Vercel продолжит стандартную обработку (отдаст статический track.html)
+    console.log('[MIDDLEWARE] Skipping - not bot or no track ID');
+    return; // Vercel продолжит стандартную обработку
   }
 
   try {
     const fsUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/tracks/${trackId}?key=${FIREBASE_API_KEY}`;
+    console.log('[MIDDLEWARE] Fetching Firebase:', fsUrl);
     const res = await fetch(fsUrl);
+    console.log('[MIDDLEWARE] Firebase response:', res.status);
 
     if (!res.ok) {
+      console.log('[MIDDLEWARE] Firebase failed, using fallback');
       return new Response(fallbackHtml(url), {
         headers: { 'content-type': 'text/html; charset=utf-8' },
       });
@@ -35,6 +51,12 @@ export default async function middleware(request) {
 
     const doc = await res.json();
     const f = doc.fields || {};
+    
+    console.log('[MIDDLEWARE] Track data:', {
+      title: f.title?.stringValue,
+      artist: f.artist?.stringValue,
+      cover: f.cover?.stringValue?.substring(0, 50)
+    });
 
     const title = f.title?.stringValue || '';
     const artist = f.artist?.stringValue || '';
@@ -55,6 +77,7 @@ export default async function middleware(request) {
       pageUrl: url.href,
     });
 
+    console.log('[MIDDLEWARE] Returning HTML with OG tags');
     return new Response(html, {
       headers: { 'content-type': 'text/html; charset=utf-8' },
     });
