@@ -4,6 +4,26 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>N1K∅ — Track</title>
+
+<!-- Open Graph / Facebook / Twitter -->
+<meta id="tp-og-type" property="og:type" content="music.song">
+<meta id="tp-og-site" property="og:site_name" content="N1K∅ Music">
+<meta id="tp-og-title" property="og:title" content="N1K∅ — Track">
+<meta id="tp-og-desc" property="og:description" content="Listen on N1K∅ Music">
+<meta id="tp-og-image" property="og:image" content="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png">
+<meta id="tp-og-image-width" property="og:image:width" content="1200">
+<meta id="tp-og-image-height" property="og:image:height" content="1200">
+<meta id="tp-og-url" property="og:url" content="">
+<meta id="tp-og-audio" property="og:audio" content="">
+<meta id="tp-og-audio-type" property="og:audio:type" content="audio/mpeg">
+<meta id="tp-music-duration" property="music:duration" content="">
+
+<!-- Twitter -->
+<meta id="tp-tw-card" name="twitter:card" content="summary_large_image">
+<meta id="tp-tw-title" name="twitter:title" content="N1K∅ — Track">
+<meta id="tp-tw-desc" name="twitter:description" content="Listen on N1K∅ Music">
+<meta id="tp-tw-image" name="twitter:image" content="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png">
+
 <link rel="preconnect" href="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="track.css">
@@ -294,7 +314,27 @@ function toParent(msg) { if (IS_EMBED) { try { parent.postMessage(msg, '*'); } c
 /* ---------- отрисовка ---------- */
 function render() {
   const t = TP.track;
-  document.title = (t.artist ? t.artist + ' — ' : '') + (t.title || 'Track') + ' | N1K∅';
+  const fullTitle = (t.artist ? t.artist + ' — ' : '') + (t.title || 'Track');
+  document.title = fullTitle + ' | N1K∅';
+
+  // Обновляем OG-теги для шаринга
+  const setMeta = (id, content) => {
+    const el = document.getElementById(id);
+    if (el && content) el.setAttribute('content', content);
+  };
+  
+  const description = t.lyrics ? t.lyrics.substring(0, 200).replace(/\n/g, ' ') + '...' : 'Listen on N1K∅ Music';
+  const pageUrl = location.origin + location.pathname + '?id=' + encodeURIComponent(t.id);
+  
+  setMeta('tp-og-title', fullTitle);
+  setMeta('tp-og-desc', description);
+  setMeta('tp-og-image', t.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png');
+  setMeta('tp-og-url', pageUrl);
+  setMeta('tp-og-audio', t.audio || '');
+  setMeta('tp-music-duration', t.duration || '');
+  setMeta('tp-tw-title', fullTitle);
+  setMeta('tp-tw-desc', description);
+  setMeta('tp-tw-image', t.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png');
 
   $('#tp-cover').src = t.cover || '';
   $('#tp-cover').alt = t.title || '';
@@ -701,7 +741,7 @@ document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
     if (p === 'twitter')   link = 'https://twitter.com/intent/tweet?text=' + tx + '&url=' + u;
     if (p === 'facebook')  link = 'https://www.facebook.com/sharer/sharer.php?u=' + u;
     if (p === 'messenger') link = isMobile ? 'fb-messenger://share?link=' + u
-                                          : 'https://www.facebook.com/sharer/sharer.php?u=' + u;
+                                          : 'https://www.facebook.com/dialog/send?link=' + u + '&app_id=386876435316966&redirect_uri=' + u;
     if (p === 'telegram')  link = 'https://t.me/share/url?url=' + u + '&text=' + tx;
     if (p === 'viber')     link = 'viber://forward?text=' + encodeURIComponent(title + ' ' + url);
     if (p === 'whatsapp')  link = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(title + ' ' + url);
