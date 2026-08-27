@@ -75,15 +75,12 @@ export default async function middleware(request) {
       : `${url.origin}/NIKO.html?track=${trackId}`;
 
     const html = renderHtml({
-      title: fullTitle || 'N1K∅ Music',
-      description,
-      image: cover,
-      audio,
-      pageUrl: canonicalUrl,
-      redirectUrl: pageType === 'home' 
-        ? `${url.origin}/NIKO.html?track=${trackId}`  // редирект на главную с треком
-        : `${url.origin}/track.html?id=${trackId}`,   // редирект на страницу трека
-    });
+  title: fullTitle || 'N1K∅ Music',
+  description,
+  image: cover,
+  audio,
+  pageUrl: canonicalUrl,
+});
 
     console.log('[MIDDLEWARE] Returning HTML with OG tags for', pageType);
     return new Response(html, {
