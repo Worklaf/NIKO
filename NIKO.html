@@ -3244,69 +3244,30 @@ function updateShareMetaTags(data) {
   setMeta('tw-title', data.title);
   setMeta('tw-desc', data.description);
   setMeta('tw-image', data.image);
-}// === ОБРАБОТЧИКИ КНОПОК СОЦСЕТЕЙ (единые для главной) ===
+}
+
+// === ОБРАБОТЧИКИ КНОПОК СОЦСЕТЕЙ (единые для главной) ===
 document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
   btn.addEventListener('click', async () => {
-
-    const track = TP.track;
-
-    // ✔ Правильная ссылка для всех соцсетей и Messenger
-    const url = `${window.location.origin}/track.html?id=${track.id}`;
-
-    const title = (track.artist ? track.artist + ' — ' : '') + (track.title || '');
-    const u = encodeURIComponent(url);
-    const tx = encodeURIComponent(title);
+    const data = window._shareData || getShareData();
+    const u = encodeURIComponent(data.url);
+    const tx = encodeURIComponent(data.title);
     const p = btn.dataset.platform;
-
     const isMobile = /Android|iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
-
     let link = '';
-    const shareText = encodeURIComponent(title + ' ' + url);
+    const shareText = data.title + '\n\n' + data.url;
 
-    // === ПЛАТФОРМЫ ===
-
-    if (p === 'twitter')
-      link = 'https://twitter.com/intent/tweet?text=' + tx + '&url=' + u;
-
-    if (p === 'facebook')
-      link = 'https://www.facebook.com/sharer/sharer.php?u=' + u;
-
-    if (p === 'messenger') {
-      link = isMobile
-        ? 'fb-messenger://share?link=' + u
-        : 'https://www.facebook.com/dialog/send?link=' + u +
-          '&app_id=966242223397117&redirect_uri=' + encodeURIComponent(location.origin);
-    }
-
-    if (p === 'telegram')
-      link = 'https://t.me/share/url?url=' + u + '&text=' + tx;
-
-    if (p === 'viber')
-      link = 'viber://forward?text=' + shareText;
-
-    if (p === 'whatsapp')
-      link = 'https://api.whatsapp.com/send?text=' + shareText;
-
-    if (p === 'tiktok') {
-      copyToClipboard(url, btn);
-      showCopyFeedback('Link copied — paste in TikTok');
-      return;
-    }
-
-    if (p === 'native') {
-      if (navigator.share) {
-        try {
-          await navigator.share({ title: title, url: url });
-        } catch (e) {}
-      } else {
-        copyToClipboard(url, btn);
-        showCopyFeedback('Copied!');
-      }
-      return;
-    }
-
-    if (link)
-      window.open(link, '_blank', 'noopener,width=600,height=600');
+    if (p === 'twitter')   link = 'https://twitter.com/intent/tweet?text=' + tx + '&url=' + u;
+    if (p === 'facebook')  link = 'https://www.facebook.com/sharer/sharer.php?u=' + u;
+    if (p === 'messenger') link = isMobile ? 'fb-messenger://share?link=' + u
+                                          : 'https://www.facebook.com/dialog/send?link=' + u + '&app_id=966242223397117&redirect_uri=' + encodeURIComponent(location.origin);
+    if (p === 'telegram')  link = 'https://t.me/share/url?url=' + u + '&text=' + tx;
+    if (p === 'viber')     link = 'viber://forward?text=' + encodeURIComponent(shareText);
+    if (p === 'whatsapp')  link = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(shareText);
+    if (p === 'tiktok')    { copyToClipboard(data.url, btn); showCopyFeedback('Link copied — paste in TikTok'); return; }
+    if (p === 'native')    { if (navigator.share) { try { await navigator.share({ title: data.title, text: data.description, url: data.url }); } catch (e) {} } else { copyToClipboard(data.url, btn); showCopyFeedback('Copied!'); } return; }
+    
+    if (link) window.open(link, '_blank', 'noopener,width=600,height=600');
   });
 });
 
@@ -3886,6 +3847,11 @@ if (e.target.closest('.track-date-editable')) {
     
     // Обновляем метатеги
     updateShareMetaTags(window._shareData);
+    
+    // Обновляем URL
+    if (window.history.replaceState) {
+      window.history.replaceState({}, document.title, '?track=' + tid);
+    }
   }
   
   window.currentTrackId = tid;
@@ -6195,7 +6161,7 @@ function updateMetaTags(track) {
     setMeta('og:title', title);
     setMeta('og:description', track.lyrics ? track.lyrics.substring(0, 200) + '...' : 'Listen on N1K∅ Music');
     setMeta('og:image', track.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png');
-    setMeta('og:url', `${window.location.origin}/track.html?id=${track.id}`);
+    setMeta('og:url', `${window.location.origin}${window.location.pathname}?track=${track.id}`);
     
     // [NEW] Для inline player в Facebook Messenger
     setMeta('og:audio', track.audio);
