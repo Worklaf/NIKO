@@ -2733,23 +2733,18 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar { display: none; }
 
   .list { grid-template-columns: 1fr; }
 
-   .search-wrap {
+  .search-wrap {
     width: 100%;
     margin-left: 0;
-    flex-direction: row;
+    flex-direction: column;
     gap: 8px;
   }
-    .search-input, .search-select {
+  .search-input, .search-select {
     width: 100%;
-    min-width: 0;
+    min-width: auto;
     padding: 8px 10px;
-    box-sizing: border-box;
   }
-    .search-main, .search-lyrics {
-    flex: 1 1 0;
-    min-width: 0;
-    width: 50%;
-  }
+  .search-main, .search-lyrics { flex: 1; width: auto; }
 
   .track {
     flex-direction: row;
@@ -2875,4 +2870,25 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar { display: none; }
 header,
 .top-actions-row  {
   overflow: visible !important;
-} 
+}
+ /* === ФИКС: поисковые поля на телефоне в одной строке пополам === */
+@media (max-width: 880px) {
+  .search-wrap {
+    flex-direction: row !important;
+    gap: 8px;
+  }
+  .search-main,
+  .search-lyrics {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    width: 50% !important;
+  }
+  .search-main .search-input,
+  .search-lyrics .search-input,
+  .search-main input,
+  .search-lyrics input {
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
+  }
+}
