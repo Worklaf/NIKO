@@ -109,11 +109,12 @@ function renderHtml({ title, description, image, audio, pageUrl }) {
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:image" content="${esc(image)}">
 <meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="1200">
+<meta property="og:image:height" content="630">
 <meta property="og:url" content="${esc(pageUrl)}">
 ${audio ? `<meta property="og:audio" content="${esc(audio)}">
 <meta property="og:audio:type" content="audio/mpeg">` : ''}
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@niko_music">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(description)}">
 <meta name="twitter:image" content="${esc(image)}">
