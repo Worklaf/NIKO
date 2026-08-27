@@ -35,7 +35,6 @@
 <meta id="tw-title" name="twitter:title" content="N1K∅ — Music Tracks">
 <meta id="tw-desc" name="twitter:description" content="Discover amazing music tracks">
 <meta id="tw-image" name="twitter:image" content="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png">
-   <base target="_blank">
   <style>
     .track.ready-to-play {
   animation: pulseReady 1s ease 2;
@@ -3291,6 +3290,13 @@ document.getElementById('share-copy-link')?.addEventListener('click', () => {
   copyToClipboard(data.url, document.getElementById('share-copy-link'));
   showCopyFeedback('Copied!');
 });
+
+// === ЗАКРЫТИЕ МОДАЛКИ ШАРИНГА ===
+document.getElementById('share-modal-close')?.addEventListener('click', () =>
+  document.getElementById('share-modal').classList.remove('open'));
+document.getElementById('share-modal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'share-modal') e.target.classList.remove('open');
+});
   updateShuffleButton();
   if (typeof applyTranslations === 'function') applyTranslations();
   // Перевод placeholder'ов поиска
@@ -3469,6 +3475,9 @@ document.addEventListener('touchmove', (e) => {
 // ===============================
 
 document.addEventListener('click', async (e) => {
+  // Не перехватываем клики по кнопкам шаринга
+  if (e.target.closest('.social-btn') || e.target.closest('#share-copy-link')) return;
+
   const downloadBtn = e.target.closest('.download-btn');
   if (!downloadBtn) return;
   e.preventDefault();
@@ -3733,6 +3742,9 @@ await loadSavedLanguage();
   document.addEventListener('click', async (e) => {
     const trackEl = e.target.closest('.track');
     if (!trackEl) return;
+
+    // Не перехватываем клики по кнопкам шаринга
+    if (e.target.closest('.social-btn') || e.target.closest('#share-copy-link')) return;
 
     const isPlayBtn = e.target.closest('.play-btn');
     const isOtherInteractive = e.target.closest('button:not(.play-btn), a, .likes-count, .dislikes-count, .play-count, .playlist-badge, .order-btn');
@@ -5936,6 +5948,9 @@ window.onPlayerTrackChanged = function(trackId) {
 
   // клик по названию трека на главной — открываем overlay
   document.addEventListener('click', function(e) {
+    // Не перехватываем клики по кнопкам шаринга
+    if (e.target.closest('.social-btn') || e.target.closest('#share-copy-link')) return;
+
     const link = e.target.closest('.track-title-link');
     if (!link) return;
     e.preventDefault();
