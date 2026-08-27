@@ -3287,10 +3287,24 @@ document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
     }
     
     if (p === 'messenger') {
-  // Facebook Send Dialog — работает стабильно везде
-  const appId = '966242223397117'; // Facebook App ID (можно любой публичный)
-  const sendUrl = `https://www.facebook.com/dialog/send?app_id=${appId}&link=${u}&redirect_uri=${encodeURIComponent(location.origin)}`;
-  window.open(sendUrl, '_blank', 'noopener,width=600,height=600');
+  // === КЛЮЧЕВОЙ ФИКС: заменяем NIKO.html?track= на track.html?id= для Messenger ===
+  // Messenger не понимает ?track=, ему нужна "реальная" страница трека
+  const messengerUrl = data.url.replace('/NIKO.html?track=', '/track.html?id=');
+  const messengerEncoded = encodeURIComponent(messengerUrl);
+  
+  // Пробуем открыть Messenger с правильным URL
+  if (isMobile) {
+    // iOS: fb-messenger://share?link= работает если URL "чистый" (без track=)
+    window.location.href = 'fb-messenger://share?link=' + messengerEncoded;
+  } else {
+    // Desktop: Facebook Send Dialog с track.html?id= (более вероятно сработает)
+    const appId = '966242223397117';
+    window.open(
+      `https://www.facebook.com/dialog/send?app_id=${appId}&link=${messengerEncoded}&redirect_uri=${encodeURIComponent(location.origin)}`,
+      '_blank',
+      'noopener,width=600,height=600'
+    );
+  }
   return;
 }
     
