@@ -23,25 +23,18 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="N1K∅">
-  <!-- Open Graph / Facebook -->
-<!-- Open Graph — базовые, обновляются динамически при шаринге -->
-<meta property="og:type" content="music.song">
-<meta property="og:site_name" content="N1K∅ Music">
-<meta property="og:title" content="N1K∅ — Music Tracks">
-<meta property="og:description" content="Discover amazing music">
-<meta property="og:image" content="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png">
-<meta property="og:url" content="">
-
-<!-- Для inline player в Messenger -->
-<meta property="og:audio" content="">
-<meta property="og:audio:type" content="audio/mpeg">
-<meta property="music:duration" content="">
-
-<!-- Twitter -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="N1K∅ — Music Tracks">
-<meta name="twitter:description" content="Discover amazing music tracks">
-<meta name="twitter:image" content="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png">
+  
+  <!-- В <head> NIKO.html замени статичные OG метатеги на эти (с id для обновления): -->
+<meta id="og-title" property="og:title" content="N1K∅ — Music Tracks">
+<meta id="og-desc" property="og:description" content="Discover amazing music">
+<meta id="og-image" property="og:image" content="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png">
+<meta id="og-url" property="og:url" content="">
+<meta id="og-audio" property="og:audio" content="">
+<meta id="og-audio-type" property="og:audio:type" content="audio/mpeg">
+<meta id="music-duration" property="music:duration" content="">
+<meta id="tw-title" name="twitter:title" content="N1K∅ — Music Tracks">
+<meta id="tw-desc" name="twitter:description" content="Discover amazing music tracks">
+<meta id="tw-image" name="twitter:image" content="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png">
   <base target="_blank">
   <style>
     .track.ready-to-play {
@@ -2955,7 +2948,6 @@ function initEmojiSystem() {
     btn.addEventListener('click', () => { insertEmoji(btn.dataset.emoji); });
   });
 }
-
 function insertEmoji(emoji) {
   const input = document.getElementById('comment-input');
   const start = input.selectionStart;
@@ -3189,6 +3181,101 @@ document.addEventListener('DOMContentLoaded', async () => {
   subscribeTracks();
   initWavesurfer();
   initEmojiSystem();
+  // === ЕДИНЫЙ ОБРАБОТЧИК ШАРИНГА ===
+// Сохраняем данные текущего трека для шаринга
+window._shareData = null;
+
+function getShareData() {
+  // Если уже установлены данные — используем их
+  if (window._shareData) return window._shareData;
+  
+  // Ищем трек по currentTrackId
+  let track = null;
+  if (window.currentTrackId) {
+    track = window.globalTracks.find(t => t.id === window.currentTrackId);
+  }
+  if (!track && currentTrackSrc) {
+    track = window.globalTracks.find(t => t.audio === currentTrackSrc);
+  }
+  // Fallback: первый видимый трек
+  if (!track) {
+    const firstVisible = document.querySelector('.track[style*="flex"]');
+    if (firstVisible) {
+      track = window.globalTracks.find(t => t.id === firstVisible.dataset.id);
+    }
+  }
+  
+  if (track) {
+    return {
+      title: (track.artist ? track.artist + ' — ' : '') + (track.title || 'Track'),
+      description: track.lyrics ? track.lyrics.substring(0, 200) + '...' : 'Listen on N1K∅ Music',
+      image: track.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png',
+      audio: track.audio || '',
+      duration: track.duration || '',
+      url: location.origin + location.pathname.replace(/[^/]*$/, '') + 'track.html?id=' + encodeURIComponent(track.id)
+    };
+  }
+  
+  return {
+    title: 'N1K∅ Music',
+    description: 'Discover amazing music',
+    image: 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png',
+    audio: '',
+    duration: '',
+    url: location.href
+  };
+}
+
+// Обновляем метатеги перед шарингом
+function updateShareMetaTags(data) {
+  document.title = data.title + ' | N1K∅ Music';
+  
+  const setMeta = (id, content) => {
+    const el = document.getElementById(id);
+    if (el && content) el.setAttribute('content', content);
+  };
+  
+  setMeta('og-title', data.title);
+  setMeta('og-desc', data.description);
+  setMeta('og-image', data.image);
+  setMeta('og-url', data.url);
+  setMeta('og-audio', data.audio);
+  setMeta('music-duration', data.duration);
+  setMeta('tw-title', data.title);
+  setMeta('tw-desc', data.description);
+  setMeta('tw-image', data.image);
+}
+
+// === ОБРАБОТЧИКИ КНОПОК СОЦСЕТЕЙ (единые для главной) ===
+document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const data = window._shareData || getShareData();
+    const u = encodeURIComponent(data.url);
+    const tx = encodeURIComponent(data.title);
+    const p = btn.dataset.platform;
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    let link = '';
+    const shareText = data.title + '\n\n' + data.url;
+
+    if (p === 'twitter')   link = 'https://twitter.com/intent/tweet?text=' + tx + '&url=' + u;
+    if (p === 'facebook')  link = 'https://www.facebook.com/sharer/sharer.php?u=' + u;
+    if (p === 'messenger') link = isMobile ? 'fb-messenger://share?link=' + u : 'https://www.facebook.com/dialog/send?app_id=YOUR_APP_ID&link=' + u + '&redirect_uri=' + u;
+    if (p === 'telegram')  link = 'https://t.me/share/url?url=' + u + '&text=' + tx;
+    if (p === 'viber')     link = 'viber://forward?text=' + encodeURIComponent(shareText);
+    if (p === 'whatsapp')  link = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(shareText);
+    if (p === 'tiktok')    { copyToClipboard(data.url, btn); showCopyFeedback('Link copied — paste in TikTok'); return; }
+    if (p === 'native')    { if (navigator.share) { try { await navigator.share({ title: data.title, text: data.description, url: data.url }); } catch (e) {} } else { copyToClipboard(data.url, btn); showCopyFeedback('Copied!'); } return; }
+    
+    if (link) window.open(link, '_blank', 'noopener,width=600,height=600');
+  });
+});
+
+// === КОПИРОВАНИЕ ССЫЛКИ ===
+document.getElementById('share-copy-link')?.addEventListener('click', () => {
+  const data = window._shareData || getShareData();
+  copyToClipboard(data.url, document.getElementById('share-copy-link'));
+  showCopyFeedback('Copied!');
+});
   updateShuffleButton();
   if (typeof applyTranslations === 'function') applyTranslations();
   // Перевод placeholder'ов поиска
@@ -3739,32 +3826,39 @@ if (e.target.closest('.track-date-editable')) {
       e.preventDefault();
       openComments(trackEl.dataset.id);
     }
-       if (e.target.closest('.share-btn')) {
+      if (e.target.closest('.share-btn')) {
   e.preventDefault();
   e.stopPropagation();
   
   const tid = trackEl.dataset.id;
   const track = window.globalTracks.find(t => t.id === tid);
   
-  // [NEW] Обновляем метатеги под конкретный трек
   if (track) {
-    updateMetaTags(track);
+    // Устанавливаем данные для шаринга
+    window._shareData = {
+      title: (track.artist ? track.artist + ' — ' : '') + (track.title || 'Track'),
+      description: track.lyrics ? track.lyrics.substring(0, 200) + '...' : 'Listen on N1K∅ Music',
+      image: track.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png',
+      audio: track.audio || '',
+      duration: track.duration || '',
+      url: location.origin + location.pathname.replace(/[^/]*$/, '') + 'track.html?id=' + encodeURIComponent(track.id)
+    };
+    
+    // Обновляем метатеги
+    updateShareMetaTags(window._shareData);
+    
+    // Обновляем URL
+    if (window.history.replaceState) {
+      window.history.replaceState({}, document.title, '?track=' + tid);
+    }
   }
   
   window.currentTrackId = tid;
   currentTrackId = tid;
   currentTrackSrc = trackEl.dataset.src;
   
-  // [NEW] Обновляем URL для шаринга
-  const shareUrl = `${window.location.origin}${window.location.pathname}?track=${tid}`;
-  if (window.history.replaceState) {
-    window.history.replaceState({}, document.title, `?track=${tid}`);
-  }
-  
   const modal = document.getElementById('share-modal');
-  if (modal) {
-    modal.classList.add('open');
-  }
+  if (modal) modal.classList.add('open');
 }
     if (e.target.closest('.delete-track-btn')) {
       e.preventDefault();
