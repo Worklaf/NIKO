@@ -23,7 +23,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="N1K∅">
-
+  
   <!-- В <head> NIKO.html замени статичные OG метатеги на эти (с id для обновления): -->
 <meta id="og-title" property="og:title" content="N1K∅ — Music Tracks">
 <meta id="og-desc" property="og:description" content="Discover amazing music">
@@ -3212,7 +3212,7 @@ function getShareData() {
       image: track.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png',
       audio: track.audio || '',
       duration: track.duration || '',
-      url: location.origin + location.pathname.replace(/[^/]*$/, '') + 'share.html?id=' + encodeURIComponent(track.id)
+      url: location.origin + location.pathname.replace(/[^/]*$/, '') + 'track.html?id=' + encodeURIComponent(track.id)
     };
   }
   
@@ -3258,15 +3258,7 @@ document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
     const shareText = data.title + '\n\n' + data.url;
 
     if (p === 'twitter')   link = 'https://twitter.com/intent/tweet?text=' + tx + '&url=' + u;
-    if (p === 'messenger') {
-  if (isMobile) {
-    link = 'fb-messenger://share?link=' + u;
-  } else {
-    // Для десктопа Messenger работает только через Facebook Send Dialog
-    // Нужен Facebook App ID. Если нет — fallback на обычный Facebook sharer
-    link = 'https://www.facebook.com/sharer/sharer.php?u=' + u;
-  }
-}
+    if (p === 'facebook')  link = 'https://www.facebook.com/sharer/sharer.php?u=' + u;
     if (p === 'messenger') link = isMobile ? 'fb-messenger://share?link=' + u : 'https://www.facebook.com/dialog/send?app_id=YOUR_APP_ID&link=' + u + '&redirect_uri=' + u;
     if (p === 'telegram')  link = 'https://t.me/share/url?url=' + u + '&text=' + tx;
     if (p === 'viber')     link = 'viber://forward?text=' + encodeURIComponent(shareText);
@@ -3849,7 +3841,7 @@ if (e.target.closest('.track-date-editable')) {
       image: track.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png',
       audio: track.audio || '',
       duration: track.duration || '',
-      url: location.origin + location.pathname.replace(/[^/]*$/, '') + 'share.html?id=' + encodeURIComponent(track.id)
+      url: location.origin + location.pathname.replace(/[^/]*$/, '') + 'track.html?id=' + encodeURIComponent(track.id)
     };
     
     // Обновляем метатеги
