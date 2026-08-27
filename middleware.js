@@ -75,12 +75,15 @@ export default async function middleware(request) {
       : `${url.origin}/NIKO.html?track=${trackId}`;
 
     const html = renderHtml({
-  title: fullTitle || 'N1K∅ Music',
-  description,
-  image: cover,
-  audio,
-  pageUrl: canonicalUrl,
-});
+      title: fullTitle || 'N1K∅ Music',
+      description,
+      image: cover,
+      audio,
+      pageUrl: canonicalUrl,
+      redirectUrl: pageType === 'home' 
+        ? `${url.origin}/NIKO.html?track=${trackId}`  // редирект на главную с треком
+        : `${url.origin}/track.html?id=${trackId}`,   // редирект на страницу трека
+    });
 
     console.log('[MIDDLEWARE] Returning HTML with OG tags for', pageType);
     return new Response(html, {
@@ -102,7 +105,7 @@ function esc(s) {
     .replace(/"/g, '&quot;');
 }
 
-function renderHtml({ title, description, image, audio, pageUrl }) {
+function renderHtml({ title, description, image, audio, pageUrl, redirectUrl }) {
   return `<!doctype html>
 <html lang="pl">
 <head>
@@ -124,17 +127,17 @@ ${audio ? `<meta property="og:audio" content="${esc(audio)}">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(description)}">
 <meta name="twitter:image" content="${esc(image)}">
-<link rel="canonical" href="${esc(pageUrl)}">
+<meta http-equiv="refresh" content="0; url=${esc(redirectUrl)}">
 </head>
 <body>
-<p>${esc(title)}</p>
-<p><a href="${esc(pageUrl)}">Otwórz utwór</a></p>
+<script>location.replace(${JSON.stringify(redirectUrl)});</script>
 </body>
 </html>`;
 }
+
 function fallbackHtml(url, pageType) {
   const trackId = url.searchParams.get('id') || url.searchParams.get('track');
-  const pageUrl = pageType === 'home' && trackId
+  const redirectUrl = pageType === 'home' && trackId
     ? `${url.origin}/NIKO.html?track=${trackId}`
     : url.href;
 
@@ -143,6 +146,7 @@ function fallbackHtml(url, pageType) {
     description: 'Discover amazing music',
     image: DEFAULT_COVER,
     audio: '',
-    pageUrl: pageUrl,
+    pageUrl: url.href,
+    redirectUrl: redirectUrl,
   });
 }
