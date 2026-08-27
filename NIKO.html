@@ -3253,7 +3253,7 @@ document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
     const u = encodeURIComponent(data.url);
     const tx = encodeURIComponent(data.title);
     const p = btn.dataset.platform;
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
     let link = '';
     const shareText = data.title + '\n\n' + data.url;
 
