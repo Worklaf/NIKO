@@ -3275,15 +3275,17 @@ document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
       link = 'https://www.facebook.com/sharer/sharer.php?u=' + u;
 
 if (p === 'messenger') {
-  const link =
-    'https://www.facebook.com/dialog/send?' +
-    'app_id=966242223397117' +
-    '&href=' + u +
-    '&redirect_uri=' + encodeURIComponent(location.origin);
+  const shareUrl = `${window.location.origin}/NIKO.html?track=${TP.track.id}`;
+  const u = encodeURIComponent(shareUrl);
+
+  const link = isMobile
+    ? 'fb-messenger://share?link=' + u
+    : 'https://www.facebook.com/dialog/send?href=' + u + '&app_id=966242223397117&redirect_uri=' + encodeURIComponent(location.origin);
 
   window.open(link, '_blank', 'noopener,width=600,height=600');
   return;
 }
+
 
     if (p === 'telegram')
       link = 'https://t.me/share/url?url=' + u + '&text=' + tx;
