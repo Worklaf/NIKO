@@ -3287,27 +3287,42 @@ document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
     }
     
     if (p === 'messenger') {
-  // === КЛЮЧЕВОЙ ФИКС: заменяем NIKO.html?track= на track.html?id= для Messenger ===
-  // Messenger не понимает ?track=, ему нужна "реальная" страница трека
-  const messengerUrl = data.url.replace('/NIKO.html?track=', '/track.html?id=');
-  const messengerEncoded = encodeURIComponent(messengerUrl);
+  // Преобразуем URL в "правильный" формат для Messenger
+  const trackUrl = data.url.replace('/NIKO.html?track=', '/track.html?id=');
   
-  // Пробуем открыть Messenger с правильным URL
   if (isMobile) {
-    // iOS: fb-messenger://share?link= работает если URL "чистый" (без track=)
-    window.location.href = 'fb-messenger://share?link=' + messengerEncoded;
+    // Пробуем открыть Messenger приложение
+    // Формат: fb-messenger://share с правильным URL
+    const messengerLink = 'fb-messenger://share?link=' + encodeURIComponent(trackUrl);
+    
+    // Создаём невидимый iframe для попытки открытия приложения
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = messengerLink;
+    document.body.appendChild(iframe);
+    
+    // Через 1 секунду убираем iframe
+    setTimeout(() => {
+      document.body.removeChild(iframe);
+    }, 1000);
+    
+    // Также пробуем window.location как fallback
+    setTimeout(() => {
+      window.location.href = messengerLink;
+    }, 100);
+    
   } else {
-    // Desktop: Facebook Send Dialog с track.html?id= (более вероятно сработает)
-    const appId = '966242223397117';
+    // Desktop: открываем messenger.com с предзаполненной ссылкой
+    // Или просто web-версию Facebook Messenger
+    const shareText = encodeURIComponent(data.title + '\n\n' + trackUrl);
     window.open(
-      `https://www.facebook.com/dialog/send?app_id=${appId}&link=${messengerEncoded}&redirect_uri=${encodeURIComponent(location.origin)}`,
+      `https://www.messenger.com/new?link=${encodeURIComponent(trackUrl)}`,
       '_blank',
-      'noopener,width=600,height=600'
+      'noopener,width=800,height=600'
     );
   }
   return;
 }
-    
     else if (p === 'telegram') {
       if (isMobile) {
         // Telegram deep link — самый надёжный
