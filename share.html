@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- OG метатеги — будут обновлены через JS до загрузки страницы соцсетью -->
+  <meta property="og:type" content="music.song">
+  <meta property="og:site_name" content="N1K∅ Music">
+  <meta id="og-title" property="og:title" content="N1K∅ Music">
+  <meta id="og-desc" property="og:description" content="Discover amazing music">
+  <meta id="og-image" property="og:image" content="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png">
+  <meta id="og-url" property="og:url" content="">
+  <meta id="og-audio" property="og:audio" content="">
+  <meta property="og:audio:type" content="audio/mpeg">
+  <meta id="music-duration" property="music:duration" content="">
+  
+  <meta name="twitter:card" content="summary_large_image">
+  <meta id="tw-title" name="twitter:title" content="N1K∅ Music">
+  <meta id="tw-desc" name="twitter:description" content="Discover amazing music">
+  <meta id="tw-image" name="twitter:image" content="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png">
+  
+  <title>N1K∅ Music</title>
+  
+  <style>
+    body { 
+      margin: 0; 
+      background: #0a0a0f; 
+      color: #eaeaf2; 
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      min-height: 100vh;
+    }
+    .loader { 
+      width: 40px; 
+      height: 40px; 
+      border: 3px solid rgba(255,77,166,0.3); 
+      border-top-color: #ff4da6; 
+      border-radius: 50%; 
+      animation: spin 1s linear infinite; 
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .track-info { 
+      text-align: center; 
+      padding: 20px; 
+      display: none; 
+    }
+    .track-info img { 
+      width: 300px; 
+      height: 300px; 
+      object-fit: cover; 
+      border-radius: 12px; 
+      box-shadow: 0 8px 32px rgba(255,77,166,0.3); 
+    }
+    .track-info h1 { 
+      margin: 16px 0 8px; 
+      font-size: 24px; 
+    }
+    .track-info p { 
+      color: #bfc3d6; 
+      margin: 0 0 20px; 
+    }
+    .play-btn {
+      background: linear-gradient(90deg, #ff4da6, #ff7a4d);
+      border: none;
+      color: white;
+      padding: 14px 32px;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    audio { 
+      width: 300px; 
+      margin-top: 16px; 
+    }
+  </style>
+  
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+</head>
+<body>
+  <div id="loader" class="loader"></div>
+  
+  <div id="track-info" class="track-info">
+    <img id="cover" src="" alt="">
+    <h1 id="title"></h1>
+    <p id="artist"></p>
+    <audio id="audio" controls></audio>
+    <br><br>
+    <a id="open-app" href="#" class="play-btn">▶ Otwórz w aplikacji</a>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const trackId = params.get('id');
+    
+    if (!trackId || !db) {
+      // Нет ID или нет Firebase — редиректим на главную
+      location.href = 'NIKO.html';
+    }
+    
+    // Загружаем трек из Firebase
+    db.collection('tracks').doc(trackId).get().then(doc => {
+      if (!doc.exists) {
+        location.href = 'NIKO.html';
+        return;
+      }
+      
+      const track = doc.data();
+      const title = (track.artist ? track.artist + ' — ' : '') + (track.title || 'Track');
+      const cover = track.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
+      const audio = track.audio || '';
+      
+      // === КЛЮЧЕВОЕ: Обновляем метатеги ДО показа страницы ===
+      document.getElementById('og-title').setAttribute('content', title);
+      document.getElementById('og-desc').setAttribute('content', track.lyrics ? track.lyrics.substring(0, 200) + '...' : 'Listen on N1K∅ Music');
+      document.getElementById('og-image').setAttribute('content', cover);
+      document.getElementById('og-url').setAttribute('content', location.href);
+      document.getElementById('og-audio').setAttribute('content', audio);
+      document.getElementById('music-duration').setAttribute('content', track.duration || '');
+      
+      document.getElementById('tw-title').setAttribute('content', title);
+      document.getElementById('tw-desc').setAttribute('content', track.lyrics ? track.lyrics.substring(0, 200) + '...' : 'Discover amazing music');
+      document.getElementById('tw-image').setAttribute('content', cover);
+      
+      document.title = title + ' | N1K∅ Music';
+      
+      // Показываем красивую страницу с плеером
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('track-info').style.display = 'block';
+      
+      document.getElementById('cover').src = cover;
+      document.getElementById('title').textContent = track.title || 'Unknown';
+      document.getElementById('artist').textContent = track.artist || '';
+      document.getElementById('audio').src = audio;
+      document.getElementById('open-app').href = 'track.html?id=' + encodeURIComponent(trackId);
+      
+      // Для Facebook/Messenger — добавляем небольшую задержку перед редиректом
+      // Но лучше оставить страницу с плеером — так круче!
+      
+    }).catch(err => {
+      console.error(err);
+      location.href = 'NIKO.html';
+    });
+  </script>
+</body>
+</html>
