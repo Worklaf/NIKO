@@ -3212,7 +3212,7 @@ function getShareData() {
       image: track.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png',
       audio: track.audio || '',
       duration: track.duration || '',
-      url: location.origin + location.pathname.replace(/[^/]*$/, '') + 'track.html?id=' + encodeURIComponent(track.id)
+      url: location.origin + '/api/track-meta?id=' + encodeURIComponent(track.id)
     };
   }
   
@@ -3260,7 +3260,7 @@ document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
     if (p === 'twitter')   link = 'https://twitter.com/intent/tweet?text=' + tx + '&url=' + u;
     if (p === 'facebook')  link = 'https://www.facebook.com/sharer/sharer.php?u=' + u;
     if (p === 'messenger') link = isMobile ? 'fb-messenger://share?link=' + u
-                                          : 'https://www.facebook.com/dialog/send?link=' + u + '&app_id=386876435316966&redirect_uri=' + u;
+                                          : 'https://www.facebook.com/dialog/send?link=' + u + '&app_id=966242223397117&redirect_uri=' + encodeURIComponent(location.origin);
     if (p === 'telegram')  link = 'https://t.me/share/url?url=' + u + '&text=' + tx;
     if (p === 'viber')     link = 'viber://forward?text=' + encodeURIComponent(shareText);
     if (p === 'whatsapp')  link = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(shareText);
@@ -3842,7 +3842,7 @@ if (e.target.closest('.track-date-editable')) {
       image: track.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png',
       audio: track.audio || '',
       duration: track.duration || '',
-      url: location.origin + location.pathname.replace(/[^/]*$/, '') + 'track.html?id=' + encodeURIComponent(track.id)
+      url: location.origin + '/api/track-meta?id=' + encodeURIComponent(track.id)
     };
     
     // Обновляем метатеги
