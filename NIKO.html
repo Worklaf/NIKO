@@ -3275,19 +3275,28 @@ document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
       link = 'https://www.facebook.com/sharer/sharer.php?u=' + u;
 
     if (p === 'messenger') {
-      // Мобильный Messenger — deep-link (идеальный вариант)
-      if (isMobile) {
-        link = 'fb-messenger://share?link=' + u;
-      } else {
-        // Desktop fallback — Facebook dialog (иначе ошибка)
-        link =
-          'https://www.facebook.com/dialog/send?link=' +
-          u +
-          '&app_id=966242223397117' +
-          '&redirect_uri=' +
-          encodeURIComponent(location.origin);
-      }
+
+  const messengerDeepLink = 'fb-messenger://share?link=' + u;
+  const messengerFallback =
+    'https://www.facebook.com/dialog/send?link=' +
+    u +
+    '&app_id=966242223397117' +
+    '&redirect_uri=' +
+    encodeURIComponent(location.origin);
+
+  // Попытка открыть Messenger напрямую
+  const win = window.open(messengerDeepLink, '_blank');
+
+  // Если браузер заблокировал deep-link → откроется fallback
+  setTimeout(() => {
+    if (!win || win.closed || typeof win.closed === 'undefined') {
+      window.open(messengerFallback, '_blank', 'noopener,width=600,height=600');
     }
+  }, 500);
+
+  return;
+}
+
 
     if (p === 'telegram')
       link = 'https://t.me/share/url?url=' + u + '&text=' + tx;
