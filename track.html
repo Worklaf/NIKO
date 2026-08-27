@@ -699,8 +699,7 @@ async function openPlaylistPickerLocal() {
 
 /* ---------- поделиться (модалка один в один с главной) ---------- */
 function trackShareUrl() {
-  const base = location.origin + location.pathname.replace(/[^/]*$/, '');
-  return base + 'track.html?id=' + encodeURIComponent(TP.id);
+  return location.origin + '/api/track-meta?id=' + encodeURIComponent(TP.id);
 }
 
 $('#tp-share').addEventListener('click', () => {
@@ -741,7 +740,7 @@ document.querySelectorAll('#share-socials .social-btn').forEach(btn => {
     if (p === 'twitter')   link = 'https://twitter.com/intent/tweet?text=' + tx + '&url=' + u;
     if (p === 'facebook')  link = 'https://www.facebook.com/sharer/sharer.php?u=' + u;
     if (p === 'messenger') link = isMobile ? 'fb-messenger://share?link=' + u
-                                          : 'https://www.facebook.com/dialog/send?link=' + u + '&app_id=386876435316966&redirect_uri=' + u;
+                                          : 'https://www.facebook.com/dialog/send?link=' + u + '&app_id=966242223397117&redirect_uri=' + encodeURIComponent(location.origin);
     if (p === 'telegram')  link = 'https://t.me/share/url?url=' + u + '&text=' + tx;
     if (p === 'viber')     link = 'viber://forward?text=' + encodeURIComponent(title + ' ' + url);
     if (p === 'whatsapp')  link = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(title + ' ' + url);
