@@ -234,17 +234,18 @@ function renderHomeHtml(url) {
 <meta property="og:image:secure_url" content="${esc(image)}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="N1K∅ Music logo">
 <meta property="og:url" content="${esc(pageUrl)}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(description)}">
-<meta name="twitter:image" content="${esc(image)}"> 
+<meta name="twitter:image" content="${esc(image)}">
+<meta http-equiv="refresh" content="2; url=${esc(pageUrl + 'NIKO.html')}">
 </head>
-<body>
-<script>location.replace(${JSON.stringify(pageUrl + 'NIKO.html')});</script>
-</body>
+<body></body>
 </html>`;
 }
+
 
 // ==================== СТРАНИЦА ТРЕКА ====================
 function renderTrackHtml({ title, description, image, audio, pageUrl, redirectUrl }) {
