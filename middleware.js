@@ -85,23 +85,13 @@ export default async function middleware(request) {
 
   // === 4. Бот без ID на track.html — fallback ===
   if (!trackId) {
-    const cacheKey = 'fallback:track';
-    const cache = caches.default;
-    const cachedResponse = await cache.match(cacheKey);
-
-    if (cachedResponse) {
-      console.log('[MIDDLEWARE] Cache hit for fallback');
-      return cachedResponse;
-    }
-
     const fallback = fallbackHtml(url, pageType);
     const response = new Response(fallback, {
       headers: {
         'content-type': 'text/html; charset=utf-8',
-        'Cache-Control': 'public, max-age=3600', // Кешируем на 1 час чтобы избежать лимитов Firebase
+        'Cache-Control': 'public, max-age=300', // Кешируем на 5 минут для теста
       },
     });
-    await cache.put(cacheKey, response.clone());
     return response;
   }
 
@@ -119,13 +109,15 @@ export default async function middleware(request) {
     const fsUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/tracks/${trackId}?key=${FIREBASE_API_KEY}`;
     const res = await fetch(fsUrl);
 
+    console.log('[MIDDLEWARE] Firebase response status:', res.status, 'for track:', trackId);
+
     if (!res.ok) {
-      console.log('[MIDDLEWARE] Firebase 404 for track:', trackId);
+      console.log('[MIDDLEWARE] Firebase error for track:', trackId, 'status:', res.status);
       const fallback = fallbackHtml(url, pageType);
       const response = new Response(fallback, {
         headers: {
           'content-type': 'text/html; charset=utf-8',
-          'Cache-Control': 'public, max-age=3600', // Кешируем на 1 час чтобы избежать лимитов Firebase
+          'Cache-Control': 'public, max-age=300', // Кешируем на 5 минут для теста
         },
       });
       await cache.put(cacheKey, response.clone());
@@ -165,7 +157,7 @@ export default async function middleware(request) {
     const response = new Response(html, {
       headers: {
         'content-type': 'text/html; charset=utf-8',
-        'Cache-Control': 'public, max-age=3600',
+        'Cache-Control': 'public, max-age=300', // Кешируем на 5 минут для теста
       },
     });
     await cache.put(cacheKey, response.clone());
@@ -176,7 +168,7 @@ export default async function middleware(request) {
     const response = new Response(fallback, {
       headers: {
         'content-type': 'text/html; charset=utf-8',
-        'Cache-Control': 'public, max-age=3600', // Кешируем на 1 час чтобы избежать лимитов Firebase
+        'Cache-Control': 'public, max-age=300', // Кешируем на 5 минут для теста
       },
     });
     const cacheKey = `track:${trackId}`;
