@@ -4,51 +4,48 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>N1K∅ — Tracks</title>
+  
   <link rel="stylesheet" href="https://unpkg.com/modern-normalize/modern-normalize.css">
-<link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css">
   
   <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="icons/favicon.ico?v=2">  
-  <!-- Apple Touch Icon -->
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=2">  
-  <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json?v=2">
-  <!-- Theme Color -->
-  <meta name="theme-color" content="#ff4da6">
   
-  <!-- Apple PWA Meta -->
+  <meta name="theme-color" content="#ff4da6">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="N1K∅">
-  <!-- Static OG tags for Facebook / Messenger preview -->
-<meta property="fb:app_id" content="854560431074113">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="N1K∅ Music">
-<meta property="og:title" content="N1K∅ — Music Tracks">
-<meta property="og:description" content="Discover amazing music. Listen, share and enjoy your favorite tracks on N1K∅.">
-<meta property="og:image" content="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/niko-og-cover.png">
-<meta property="og:image:secure_url" content="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/niko-og-cover.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="N1K∅ Music logo">
-<meta property="og:url" content="https://niko-vert.vercel.app/">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="N1K∅ — Music Tracks">
-<meta name="twitter:description" content="Discover amazing music. Listen, share and enjoy your favorite tracks on N1K∅.">
-<meta name="twitter:image" content="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/niko-og-cover.png">
-
-  <!-- В <head> NIKO.html замени статичные OG метатеги на эти (с id для обновления): -->
-	
-<meta id="og-title" property="og:title" content="N1K∅ — Music Tracks">
-<meta id="og-desc" property="og:description" content="Discover amazing music">
-<meta id="og-image" property="og:image" content="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png">
-<meta id="og-url" property="og:url" content="">
-<meta id="og-audio" property="og:audio" content="">
-<meta id="og-audio-type" property="og:audio:type" content="audio/mpeg">
-<meta id="music-duration" property="music:duration" content="">
-<meta id="tw-title" name="twitter:title" content="N1K∅ — Music Tracks">
-<meta id="tw-desc" name="twitter:description" content="Discover amazing music tracks">
-<meta id="tw-image" name="twitter:image" content="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png">
+  
+  <!-- OG / Twitter — ЕДИНСТВЕННЫЙ блок -->
+  <meta property="fb:app_id" content="854560431074113">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="N1K∅ Music">
+  <meta property="og:title" content="N1K∅ — Music Tracks">
+  <meta property="og:description" content="Discover amazing music. Listen, share and enjoy your favorite tracks on N1K∅.">
+  <meta property="og:image" content="https://niko-vert.vercel.app/og-cover-from-logo.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="N1K∅ Music logo">
+  <meta property="og:url" content="https://niko-vert.vercel.app/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="N1K∅ — Music Tracks">
+  <meta name="twitter:description" content="Discover amazing music. Listen, share and enjoy your favorite tracks on N1K∅.">
+  <meta name="twitter:image" content="https://niko-vert.vercel.app/og-cover-from-logo.png">
+  
+  <!-- Динамические теги для треков (оставьте, но без og:image!) -->
+  <meta id="og-title" property="og:title" content="">
+  <meta id="og-desc" property="og:description" content="">
+  <meta id="og-url" property="og:url" content="">
+  <meta id="og-audio" property="og:audio" content="">
+  <meta id="og-audio-type" property="og:audio:type" content="audio/mpeg">
+  <meta id="music-duration" property="music:duration" content="">
+  <meta id="tw-title" name="twitter:title" content="">
+  <meta id="tw-desc" name="twitter:description" content="">
+  <meta id="tw-image" name="twitter:image" content="">
+  
+</head>
   <style>
     .track.ready-to-play {
   animation: pulseReady 1s ease 2;
