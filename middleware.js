@@ -213,8 +213,6 @@ export default async function middleware(request) {
     return response;
   }
 }
-
-// ==================== ГЛАВНАЯ СТРАНИЦА ====================
 function renderHomeHtml(url) {
   const title = 'N1K∅ — Music Tracks';
   const description = 'Discover amazing music. Listen, share and enjoy your favorite tracks on N1K∅.';
@@ -226,6 +224,7 @@ function renderHomeHtml(url) {
 <head>
 <meta charset="utf-8">
 <title>${esc(title)}</title>
+
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="N1K∅ Music">
 <meta property="og:title" content="${esc(title)}">
@@ -236,14 +235,22 @@ function renderHomeHtml(url) {
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="N1K∅ Music logo">
 <meta property="og:url" content="${esc(pageUrl)}">
+
+<meta property="fb:app_id" content="966242223397117">
+
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(description)}">
-<meta name="twitter:image" content="${esc(image)}"> 
+<meta name="twitter:image" content="${esc(image)}">
+
 </head>
-<body></body>
+<body>
+  <h1>N1K∅ Music</h1>
+  <p>Discover amazing music</p>
+</body>
 </html>`;
 }
+
 
 
 // ==================== СТРАНИЦА ТРЕКА ====================
@@ -268,9 +275,9 @@ ${audio ? `<meta property="og:audio" content="${esc(audio)}">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(description)}">
 <meta name="twitter:image" content="${esc(image)}"> 
+<meta property="fb:app_id" content="966242223397117">
 </head>
-<body>
-<script>location.replace(${JSON.stringify(redirectUrl)});</script>
+<body> 
 </body>
 </html>`;
 }
