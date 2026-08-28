@@ -21,24 +21,35 @@ export default async function middleware(request) {
   // === 1. Корень "/" → редирект для людей, OG для ботов ===
   if (pathname === '/') {
     if (BOT_UA.test(ua)) {
-      const cacheKey = 'home:root';
-      const cache = caches.default;
-      const cachedResponse = await cache.match(cacheKey);
+      try {
+        const cacheKey = 'home:root';
+        const cache = caches.default;
+        const cachedResponse = await cache.match(cacheKey);
 
-      if (cachedResponse) {
-        console.log('[MIDDLEWARE] Cache hit for home root');
-        return cachedResponse;
+        if (cachedResponse) {
+          console.log('[MIDDLEWARE] Cache hit for home root');
+          return cachedResponse;
+        }
+
+        const html = renderHomeHtml(url);
+        const response = new Response(html, {
+          headers: {
+            'content-type': 'text/html; charset=utf-8',
+            'Cache-Control': 'public, max-age=3600',
+          },
+        });
+        await cache.put(cacheKey, response.clone());
+        return response;
+      } catch (e) {
+        console.error('[MIDDLEWARE] Cache error for home:', e);
+        const html = renderHomeHtml(url);
+        return new Response(html, {
+          headers: {
+            'content-type': 'text/html; charset=utf-8',
+            'Cache-Control': 'public, max-age=3600',
+          },
+        });
       }
-
-      const html = renderHomeHtml(url);
-      const response = new Response(html, {
-        headers: {
-          'content-type': 'text/html; charset=utf-8',
-          'Cache-Control': 'public, max-age=3600',
-        },
-      });
-      await cache.put(cacheKey, response.clone());
-      return response;
     }
     url.pathname = '/NIKO.html';
     return Response.redirect(url, 302);
@@ -63,24 +74,35 @@ export default async function middleware(request) {
 
   // === 3. Бот на NIKO.html без трека = главная ===
   if (!trackId && pathname.includes('NIKO.html')) {
-    const cacheKey = 'home:niko';
-    const cache = caches.default;
-    const cachedResponse = await cache.match(cacheKey);
+    try {
+      const cacheKey = 'home:niko';
+      const cache = caches.default;
+      const cachedResponse = await cache.match(cacheKey);
 
-    if (cachedResponse) {
-      console.log('[MIDDLEWARE] Cache hit for home niko');
-      return cachedResponse;
+      if (cachedResponse) {
+        console.log('[MIDDLEWARE] Cache hit for home niko');
+        return cachedResponse;
+      }
+
+      const html = renderHomeHtml(url);
+      const response = new Response(html, {
+        headers: {
+          'content-type': 'text/html; charset=utf-8',
+          'Cache-Control': 'public, max-age=3600',
+        },
+      });
+      await cache.put(cacheKey, response.clone());
+      return response;
+    } catch (e) {
+      console.error('[MIDDLEWARE] Cache error for home niko:', e);
+      const html = renderHomeHtml(url);
+      return new Response(html, {
+        headers: {
+          'content-type': 'text/html; charset=utf-8',
+          'Cache-Control': 'public, max-age=3600',
+        },
+      });
     }
-
-    const html = renderHomeHtml(url);
-    const response = new Response(html, {
-      headers: {
-        'content-type': 'text/html; charset=utf-8',
-        'Cache-Control': 'public, max-age=3600',
-      },
-    });
-    await cache.put(cacheKey, response.clone());
-    return response;
   }
 
   // === 4. Бот без ID на track.html — fallback ===
@@ -98,15 +120,24 @@ export default async function middleware(request) {
   // === 5. Бот с ID трека — тащим из Firebase ===
   try {
     const cacheKey = `track:${trackId}`;
-    const cache = caches.default;
-    const cachedResponse = await cache.match(cacheKey);
+    let cache;
+    let cachedResponse;
 
-    if (cachedResponse) {
-      console.log('[MIDDLEWARE] Cache hit for track', trackId);
-      return cachedResponse;
+    try {
+      cache = caches.default;
+      cachedResponse = await cache.match(cacheKey);
+
+      if (cachedResponse) {
+        console.log('[MIDDLEWARE] Cache hit for track', trackId);
+        return cachedResponse;
+      }
+    } catch (e) {
+      console.error('[MIDDLEWARE] Cache read error:', e);
+      // Продолжаем без кеша если чтение не удалось
     }
 
     const fsUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/tracks/${trackId}?key=${FIREBASE_API_KEY}`;
+    console.log('[MIDDLEWARE] Fetching Firebase:', fsUrl);
     const res = await fetch(fsUrl);
 
     console.log('[MIDDLEWARE] Firebase response status:', res.status, 'for track:', trackId);
@@ -117,10 +148,14 @@ export default async function middleware(request) {
       const response = new Response(fallback, {
         headers: {
           'content-type': 'text/html; charset=utf-8',
-          'Cache-Control': 'public, max-age=300', // Кешируем на 5 минут для теста
+          'Cache-Control': 'public, max-age=300',
         },
       });
-      await cache.put(cacheKey, response.clone());
+      try {
+        if (cache) await cache.put(cacheKey, response.clone());
+      } catch (e) {
+        console.error('[MIDDLEWARE] Cache write error on fallback:', e);
+      }
       return response;
     }
 
@@ -157,10 +192,14 @@ export default async function middleware(request) {
     const response = new Response(html, {
       headers: {
         'content-type': 'text/html; charset=utf-8',
-        'Cache-Control': 'public, max-age=300', // Кешируем на 5 минут для теста
+        'Cache-Control': 'public, max-age=300',
       },
     });
-    await cache.put(cacheKey, response.clone());
+    try {
+      if (cache) await cache.put(cacheKey, response.clone());
+    } catch (e) {
+      console.error('[MIDDLEWARE] Cache write error on success:', e);
+    }
     return response;
   } catch (e) {
     console.error('[MIDDLEWARE] Error:', e);
@@ -168,12 +207,9 @@ export default async function middleware(request) {
     const response = new Response(fallback, {
       headers: {
         'content-type': 'text/html; charset=utf-8',
-        'Cache-Control': 'public, max-age=300', // Кешируем на 5 минут для теста
+        'Cache-Control': 'public, max-age=300',
       },
     });
-    const cacheKey = `track:${trackId}`;
-    const cache = caches.default;
-    await cache.put(cacheKey, response.clone());
     return response;
   }
 }
