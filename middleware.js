@@ -267,8 +267,7 @@ ${audio ? `<meta property="og:audio" content="${esc(audio)}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(description)}">
-<meta name="twitter:image" content="${esc(image)}">
-<meta http-equiv="refresh" content="0; url=${esc(redirectUrl)}">
+<meta name="twitter:image" content="${esc(image)}"> 
 </head>
 <body>
 <script>location.replace(${JSON.stringify(redirectUrl)});</script>
