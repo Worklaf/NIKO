@@ -13,6 +13,17 @@ const HOME_OG_COVER = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_
 
 const BOT_UA = /facebookexternalhit|Facebot|Twitterbot|TelegramBot|WhatsApp|Slackbot|LinkedInBot|Discordbot|Pinterest|SkypeUriPreview|vkShare|Applebot/i;
 
+// Безопасно кодирует URL (спецсимволы вроде ę, ł, ś и т.п.),
+// не ломая уже закодированные части и не трогая структуру URL.
+function safeUrl(u) {
+  if (!u) return u;
+  try {
+    return new URL(u).href;
+  } catch (e) {
+    return u;
+  }
+}
+
 export default async function middleware(request) {
   const url = new URL(request.url);
   const ua = request.headers.get('user-agent') || '';
@@ -165,8 +176,9 @@ export default async function middleware(request) {
     const title = f.title?.stringValue || '';
     const artist = f.artist?.stringValue || '';
     // ВАЖНО: если у трека нет cover → используем СТАРЫЙ дефолт, не логотип
-    const cover = encodeURI(f.cover?.stringValue || TRACK_FALLBACK_COVER
-    const audio = encodeURI(f.audio?.stringValue || '
+    // + кодируем URL, чтобы спецсимволы (ę, ł, ś...) не ломали og:image
+    const cover = safeUrl(f.cover?.stringValue || TRACK_FALLBACK_COVER);
+    const audio = safeUrl(f.audio?.stringValue || '');
     const lyrics = f.lyrics?.stringValue || '';
 
     const fullTitle = artist ? `${artist} — ${title}` : title;
