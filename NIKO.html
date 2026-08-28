@@ -716,7 +716,8 @@
   <main>
     <div class="list" id="tracksList">
       <div class="loading-state">
-        <h2>⏳ Loading tracks...</h2>
+        <img src="icons/icon-512x512.png" alt="N1K∅" style="width: 120px; height: 120px; animation: pulse 2s infinite;">
+        <p style="margin-top: 20px; color: #888;">Loading tracks...</p>
       </div>
     </div>
     <div id="pagination-bar" class="pagination-bar"></div>
@@ -1804,13 +1805,17 @@ async function subscribeTracks() {
         console.log('✅ Loaded', offlineTracks.length, 'offline tracks');
       } else {
         console.warn('⚠️ No cached tracks available offline');
-        document.getElementById('tracks-list').innerHTML = 
-          '<div style="text-align:center;padding:40px;color:var(--muted)">📴 No cached tracks available. Connect to internet to download tracks first.</div>';
+        const tracksList = document.getElementById('tracksList');
+        if (tracksList) {
+          tracksList.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">📴 No cached tracks available. Connect to internet to download tracks first.</div>';
+        }
       }
     } catch (e) {
       console.error('❌ Failed to load offline tracks:', e);
-      document.getElementById('tracks-list').innerHTML = 
-        '<div style="text-align:center;padding:40px;color:var(--muted)">❌ Error loading cached tracks: ' + e.message + '</div>';
+      const tracksList = document.getElementById('tracksList');
+      if (tracksList) {
+        tracksList.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">❌ Error loading cached tracks: ' + e.message + '</div>';
+      }
     }
     
     // Don't try Firestore when offline
