@@ -236,7 +236,7 @@ function renderHomeHtml(url) {
 <meta property="og:image:alt" content="N1K∅ Music logo">
 <meta property="og:url" content="${esc(pageUrl)}">
 
-<meta property="fb:app_id" content="966242223397117">
+<meta property="fb:app_id" content="854560431074113">
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(title)}">
@@ -275,7 +275,7 @@ ${audio ? `<meta property="og:audio" content="${esc(audio)}">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(description)}">
 <meta name="twitter:image" content="${esc(image)}"> 
-<meta property="fb:app_id" content="966242223397117">
+<meta property="fb:app_id" content="854560431074113">
 </head>
 <body> 
 </body>
