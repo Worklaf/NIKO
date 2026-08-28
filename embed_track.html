@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>N1K∅ Player</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: #0b0b0f;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow: hidden;
+  }
+  .player {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 100%;
+    padding: 10px 14px;
+    color: #fff;
+  }
+  .cover {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: #1a1a22;
+  }
+  .info {
+    flex: 1;
+    min-width: 0;
+  }
+  .title {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .artist {
+    font-size: 12px;
+    color: #a0a0ab;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+  }
+  .play-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #ff4da6;
+    border: none;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+  }
+  .play-btn svg { width: 18px; height: 18px; fill: #fff; }
+  .status {
+    font-size: 13px;
+    color: #a0a0ab;
+    padding: 20px;
+  }
+</style>
+</head>
+<body>
+  <div id="root" class="status">Ładowanie…</div>
+
+<script>
+(function () {
+  const FIREBASE_PROJECT_ID = 'niko-music-1d585';
+  const FIREBASE_API_KEY = 'AIzaSyBzCiSmy714eAS_sDQffBHHhN3HkPniIKk';
+
+  const params = new URLSearchParams(window.location.search);
+  const trackId = params.get('id');
+  const root = document.getElementById('root');
+
+  if (!trackId) {
+    root.textContent = 'Brak ID utworu';
+    return;
+  }
+
+  const fsUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/tracks/${trackId}?key=${FIREBASE_API_KEY}`;
+
+  fetch(fsUrl)
+    .then(function (res) {
+      if (!res.ok) throw new Error('not found');
+      return res.json();
+    })
+    .then(function (doc) {
+      const f = doc.fields || {};
+      const title = f.title && f.title.stringValue || '';
+      const artist = f.artist && f.artist.stringValue || '';
+      const cover = f.cover && f.cover.stringValue || '';
+      const audio = f.audio && f.audio.stringValue || '';
+
+      if (!audio) {
+        root.textContent = 'Brak pliku audio';
+        return;
+      }
+
+      root.className = '';
+      root.innerHTML =
+        '<div class="player">' +
+        (cover ? '<img class="cover" src="' + escapeHtml(cover) + '" alt="">' : '') +
+        '<div class="info">' +
+          '<div class="title">' + escapeHtml(title || 'N1K∅') + '</div>' +
+          '<div class="artist">' + escapeHtml(artist) + '</div>' +
+        '</div>' +
+        '<button class="play-btn" id="playBtn" aria-label="Play">' +
+          '<svg viewBox="0 0 24 24" id="playIcon"><path d="M8 5v14l11-7z"/></svg>' +
+        '</button>' +
+        '<audio id="audioEl" src="' + escapeHtml(audio) + '" preload="none"></audio>' +
+        '</div>';
+
+      const audioEl = document.getElementById('audioEl');
+      const playBtn = document.getElementById('playBtn');
+      const playIcon = document.getElementById('playIcon');
+
+      const PLAY_PATH = 'M8 5v14l11-7z';
+      const PAUSE_PATH = 'M6 5h4v14H6zM14 5h4v14h-4z';
+
+      playBtn.addEventListener('click', function () {
+        if (audioEl.paused) {
+          audioEl.play();
+          playIcon.querySelector('path').setAttribute('d', PAUSE_PATH);
+        } else {
+          audioEl.pause();
+          playIcon.querySelector('path').setAttribute('d', PLAY_PATH);
+        }
+      });
+
+      audioEl.addEventListener('ended', function () {
+        playIcon.querySelector('path').setAttribute('d', PLAY_PATH);
+      });
+    })
+    .catch(function () {
+      root.textContent = 'Nie udało się załadować utworu';
+    });
+
+  function escapeHtml(s) {
+    return String(s || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+})();
+</script>
+</body>
+</html>
