@@ -1,5 +1,6 @@
 const translations = {
   en: {
+    updateAvailable: "🔄 Update available — tap to reload",
     searchPlaceholder: "Search: title, artist or genre",
     searchLyricsPlaceholder: "Search: lyrics",
     allGenres: "All genres",
@@ -105,7 +106,7 @@ const translations = {
     filterAdmin: "👑 Admin",
     filterPartnerOnlyMe: "🔒 Only for me",
     multiSelect: "Multi-select",
-        uploadSuccess: "✅ Song uploaded!",
+    uploadSuccess: "✅ Song uploaded!",
     uploadError: "❌ Error: ",
     uploading: "⏳ Uploading...",
     uploadBtn: "Upload",
@@ -235,6 +236,7 @@ const translations = {
 
   },
   pl: {
+    updateAvailable: "🔄 Dostępna aktualizacja — kliknij, aby odświeżyć",
     searchPlaceholder: "Szukaj: tytuł, artysta lub gatunek",
     searchLyricsPlaceholder: "Szukaj: tekst piosenki",
     allGenres: "Wszystkie gatunki",
@@ -470,6 +472,7 @@ const translations = {
 
   },
   ua: {
+    updateAvailable: "🔄 Доступне оновлення — натисніть, щоб перезавантажити",
     searchPlaceholder: "Пошук: назва, виконавець або жанр",
     searchLyricsPlaceholder: "Пошук: текст пісні",
     allGenres: "Усі жанри",
@@ -701,6 +704,7 @@ const translations = {
 
   },
   es: {
+    updateAvailable: "🔄 Actualización disponible — toque para recargar",
     searchPlaceholder: "Buscar: título, artista o género",
     searchLyricsPlaceholder: "Buscar: letra",
     allGenres: "Todos los géneros",
