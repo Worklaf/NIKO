@@ -6,28 +6,20 @@
 
 
 
-const CACHE_NAME = 'niko-music-v3';
+const CACHE_NAME = 'niko-music-v2';
 
-const AUDIO_CACHE = 'niko-audio-v3';
+const AUDIO_CACHE = 'niko-audio-v2';
 
 
 
 const STATIC_ASSETS = [
-
-  './NIKO.html',
-
-  './styles.css',
-
-  './player-core.js',
-
-  './visualizers.js',
-
-  './language.js',
-
-  './offline-cache.js',
-
-  './manifest.json'
-
+  './NIKO.html?v=2',
+  './styles.css?v=2',
+  './player-core.js?v=2',
+  './visualizers.js?v=2',
+  './language.js?v=2',
+  './offline-cache.js?v=2',
+  './manifest.json?v=2'
 ];
 
 
