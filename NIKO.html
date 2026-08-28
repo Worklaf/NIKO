@@ -1206,7 +1206,7 @@ if ('serviceWorker' in navigator) {
                 box-shadow: 0 4px 24px rgba(77,255,138,0.4);
                 cursor: pointer;
               `;
-              toast.innerHTML = '🔄 Доступно обновление — нажмите для перезагрузки';
+              toast.innerHTML = t('updateAvailable');
               toast.onclick = () => location.reload();
               document.body.appendChild(toast);
             }
