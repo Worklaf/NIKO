@@ -165,8 +165,8 @@ export default async function middleware(request) {
     const title = f.title?.stringValue || '';
     const artist = f.artist?.stringValue || '';
     // ВАЖНО: если у трека нет cover → используем СТАРЫЙ дефолт, не логотип
-    const cover = f.cover?.stringValue || TRACK_FALLBACK_COVER;
-    const audio = f.audio?.stringValue || '';
+    const cover = encodeURI(f.cover?.stringValue || TRACK_FALLBACK_COVER
+    const audio = encodeURI(f.audio?.stringValue || '
     const lyrics = f.lyrics?.stringValue || '';
 
     const fullTitle = artist ? `${artist} — ${title}` : title;
