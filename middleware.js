@@ -199,6 +199,8 @@ export default async function middleware(request) {
       redirectUrl: pageType === 'home'
         ? `${url.origin}/NIKO.html?track=${trackId}`
         : `${url.origin}/track.html?id=${trackId}`,
+      trackId,
+      origin: url.origin,
     });
 
     const response = new Response(html, {
@@ -266,7 +268,11 @@ function renderHomeHtml(url) {
 
 
 // ==================== СТРАНИЦА ТРЕКА ====================
-function renderTrackHtml({ title, description, image, audio, pageUrl, redirectUrl }) {
+function renderTrackHtml({ title, description, image, audio, pageUrl, redirectUrl, trackId, origin }) {
+  // URL встроенного плеера (используется Twitter Player Card и Telegram,
+  // который распознаёт ту же разметку twitter:player)
+  const embedUrl = trackId ? `${origin}/embed/track.html?id=${encodeURIComponent(trackId)}` : '';
+
   return `<!doctype html>
 <html lang="pl">
 <head>
@@ -283,7 +289,12 @@ function renderTrackHtml({ title, description, image, audio, pageUrl, redirectUr
 <meta property="og:url" content="${esc(pageUrl)}">
 ${audio ? `<meta property="og:audio" content="${esc(audio)}">
 <meta property="og:audio:type" content="audio/mpeg">` : ''}
-<meta name="twitter:card" content="summary_large_image">
+${audio && embedUrl ? `<meta name="twitter:card" content="player">
+<meta name="twitter:player" content="${esc(embedUrl)}">
+<meta name="twitter:player:width" content="480">
+<meta name="twitter:player:height" content="80">
+<meta name="twitter:player:stream" content="${esc(audio)}">
+<meta name="twitter:player:stream:content_type" content="audio/mpeg">` : `<meta name="twitter:card" content="summary_large_image">`}
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(description)}">
 <meta name="twitter:image" content="${esc(image)}"> 
