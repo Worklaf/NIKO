@@ -49,13 +49,16 @@
 	
   <style>
   .site-footer {
-    text-align: center;
-    padding: 32px 20px 100px; /* 100px bottom so mini-player never covers it */
-    color: var(--muted, #bfc3d6);
-    font-size: 13px;
-    border-top: 1px solid rgba(255,255,255,0.06);
-    margin-top: 40px;
-  }
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  padding: 32px 20px 100px; /* 100px снизу, чтобы мини-плеер не перекрывал */
+  color: var(--muted, #bfc3d6);
+  font-size: 13px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  margin-top: 40px;
+  flex-shrink: 0;
+}
   .site-footer a {
     color: var(--accent-2, #00E5FF);
     text-decoration: none;
@@ -749,6 +752,16 @@
     <div id="pagination-bar" class="pagination-bar"></div>
     <div class="pagination-spacer"></div>
   </main>
+
+  <footer class="site-footer">
+    <span>© 2026 N1K∅ Music</span>
+    <span class="footer-divider"></span>
+    <a href="/legal/terms.html">Terms of Service</a>
+    <span class="footer-divider"></span>
+    <a href="/legal/privacy.html">Privacy Policy</a>
+    <span class="footer-divider"></span>
+    <a href="/legal/delete-data.html">Delete My Data</a>
+  </footer>
 </div>
 
 <div id="playlists-modal" class="modal">
@@ -7622,14 +7635,6 @@ if (feedbackSubmitBtn) {
     </div>
   </div>
 </div>
-	<footer class="site-footer">
-  <span>© 2026 N1K∅ Music</span>
-  <span class="footer-divider"></span>
-  <a href="/legal/terms.html">Terms</a>
-  <span class="footer-divider"></span>
-  <a href="/legal/privacy.html">Privacy</a>
-  <span class="footer-divider"></span>
-  <a href="/legal/delete-data.html">Delete Data</a>
-</footer>
+	
 </body>
 </html>
