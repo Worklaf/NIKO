@@ -8,22 +8,14 @@
   <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
   <style>
     :root {
-      --bg: #0a0a0f;
-      --bg-2: #07060a;
-      --text: #eaeaf2;
-      --muted: #bfc3d6;
-      --accent: #ff4da6;
-      --accent-2: #00E5FF;
-      --success: #4dff8a;
+      --bg: #0a0a0f; --text: #eaeaf2; --muted: #bfc3d6;
+      --accent: #ff4da6; --accent-2: #00E5FF; --success: #4dff8a;
       --border: rgba(255,255,255,0.08);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.7;
-      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.7; min-height: 100vh;
     }
     a { color: var(--accent-2); text-decoration: none; transition: color 0.2s; }
     a:hover { color: var(--accent); }
@@ -41,17 +33,12 @@
       background: linear-gradient(90deg, var(--accent), #ff7a4d);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-    h2 {
-      font-size: 20px; color: var(--accent-2); margin: 40px 0 16px;
-      text-shadow: 0 0 20px rgba(0,229,255,0.2);
-    }
+    h2 { font-size: 20px; color: var(--accent-2); margin: 40px 0 16px; text-shadow: 0 0 20px rgba(0,229,255,0.2); }
     p, ul { margin-bottom: 16px; color: var(--muted); }
-    ul { padding-left: 24px; }
-    li { margin-bottom: 8px; }
+    ul { padding-left: 24px; } li { margin-bottom: 8px; }
     .card {
       background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-      border: 1px solid var(--border);
-      border-radius: 16px; padding: 28px; margin-bottom: 24px;
+      border: 1px solid var(--border); border-radius: 16px; padding: 28px; margin-bottom: 24px;
       backdrop-filter: blur(10px);
     }
     .step {
@@ -72,8 +59,7 @@
       display: inline-flex; align-items: center; gap: 8px;
       background: rgba(255,255,255,0.05); border: 1px solid var(--border);
       color: var(--text); padding: 10px 20px; border-radius: 50px;
-      font-size: 14px; font-weight: 600; margin-bottom: 32px;
-      transition: all 0.3s;
+      font-size: 14px; font-weight: 600; margin-bottom: 32px; transition: all 0.3s;
     }
     .back-btn:hover { background: rgba(255,77,166,0.15); border-color: var(--accent); }
     .contact-box {
@@ -92,6 +78,11 @@
       border-radius: 12px; padding: 20px; margin: 20px 0;
     }
     .deleted-list li { color: var(--success); }
+    .provider-box {
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px; margin: 12px 0;
+    }
+    .provider-box h4 { color: var(--accent-2); margin-bottom: 8px; font-size: 14px; }
     footer {
       text-align: center; margin-top: 60px; padding: 24px;
       color: var(--muted); font-size: 13px; border-top: 1px solid var(--border);
@@ -102,6 +93,7 @@
       .card, .step { padding: 20px; }
     }
   </style>
+<base target="_blank">
 </head>
 <body>
   <div class="container">
@@ -113,18 +105,19 @@
     <a href="/" class="back-btn">← Back to Home</a>
     <h1>Data Deletion</h1>
     <p style="color:var(--muted);font-size:13px;margin-bottom:32px;">
-      You have the right to request complete deletion of your personal data from N1K∅ Music.
+      You have the right to request complete deletion of your personal data from N1K∅ Music at any time.
     </p>
 
     <div class="card">
       <h2>What Will Be Deleted</h2>
       <div class="deleted-list">
         <ul>
-          <li>Account and authentication data (Google, Email, Facebook)</li>
-          <li>Listening history and likes</li>
+          <li>Account and authentication data (Google, Email, Facebook, PIN)</li>
+          <li>Listening history, likes, and dislikes</li>
           <li>Comments and feedback submissions</li>
-          <li>Local playlists and settings</li>
-          <li>Push subscriptions and notifications</li>
+          <li>Custom playlists and saved preferences</li>
+          <li>Push notification subscriptions</li>
+          <li>Offline cached tracks and local storage data</li>
         </ul>
       </div>
 
@@ -133,45 +126,66 @@
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-content">
-          <h3>Automatic Deletion (coming soon)</h3>
-          <p>An "Delete Account" button will be available in your profile settings. Until then, please use the manual method below.</p>
+          <h3>Fastest Way — Feedback Form</h3>
+          <p>The quickest way to request deletion is through the <strong>💬 Feedback</strong> button on the main N1K∅ Music page. Select "Other" as the type and write "Delete my account and all data". Include the email you used to sign in. We process these requests within 48 hours.</p>
         </div>
       </div>
 
       <div class="step">
         <div class="step-num">2</div>
         <div class="step-content">
-          <h3>Manual Request (recommended)</h3>
-          <p>Send an email with the subject "Data Deletion Request" to the address below. Include the email you used to sign in. We will delete all data within 7 business days.</p>
+          <h3>Email Request</h3>
+          <p>Send an email with the subject <strong>"Data Deletion Request"</strong> to <a href="mailto:niko.music.app@gmail.com">niko.music.app@gmail.com</a>. Include your registered email address. We will confirm deletion within 48 hours and complete it within 7 business days.</p>
         </div>
       </div>
 
       <div class="step">
         <div class="step-num">3</div>
         <div class="step-content">
-          <h3>Revoke Facebook Access</h3>
-          <p>If you signed in via Facebook, you can also revoke access in your Facebook app settings:<br>
-          <a href="https://www.facebook.com/settings?tab=applications" target="_blank" rel="noopener">facebook.com/settings → Apps and Websites</a></p>
+          <h3>Revoke Third-Party Access</h3>
+          <p>You can also disconnect the Service from your social accounts directly:</p>
         </div>
+      </div>
+
+      <div class="provider-box">
+        <h4>🔵 Facebook (Meta)</h4>
+        <p>Go to <a href="https://www.facebook.com/settings?tab=applications" target="_blank" rel="noopener">facebook.com/settings → Apps and Websites</a>, find N1K∅ Music, and click "Remove". This will stop Facebook from sharing data with us, but to delete data already stored on our servers, you still need to submit a request via Step 1 or 2.</p>
+      </div>
+
+      <div class="provider-box">
+        <h4>🔴 Google</h4>
+        <p>Go to <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com/permissions</a>, find N1K∅ Music, and click "Remove access". To delete data from our servers, submit a request via Step 1 or 2.</p>
       </div>
 
       <div class="step">
         <div class="step-num">4</div>
         <div class="step-content">
-          <h3>Clear Local Data</h3>
-          <p>To remove cached data and cookies from your device: Browser Settings → Privacy → Clear Site Data → <code>niko-vert.vercel.app</code></p>
+          <h3>Clear Local Data (Optional)</h3>
+          <p>To remove cached files and cookies from your device:</p>
+          <p><strong>Desktop:</strong> Browser Settings → Privacy → Clear browsing data → Select "Cookies and site data" for <code>niko-vert.vercel.app</code></p>
+          <p><strong>Mobile (PWA):</strong> Uninstall the app or clear app data in system settings.</p>
         </div>
       </div>
 
       <div class="contact-box">
-        <p>📧 Send your deletion request to:</p>
-        <a href="mailto:privacy@niko-vert.vercel.app?subject=Data%20Deletion%20Request">privacy@niko-vert.vercel.app</a>
+        <p>📧 Prefer email? Send your request to:</p>
+        <a href="mailto:niko.music.app@gmail.com?subject=Data%20Deletion%20Request">niko.music.app@gmail.com</a>
         <p style="margin-top:12px;font-size:13px;">We will respond and confirm deletion within 48 hours.</p>
       </div>
+
+      <h2 style="margin-top:40px;">Data Retention</h2>
+      <p>After receiving your deletion request, we will:</p>
+      <ul>
+        <li>Acknowledge receipt within 24 hours.</li>
+        <li>Permanently delete your data from our Firebase database within 7 business days.</li>
+        <li>Delete associated audio/cover files from Cloudflare R2 storage (if you uploaded content).</li>
+        <li>Send you a final confirmation email once deletion is complete.</li>
+      </ul>
+      <p style="font-size:13px;color:#888;margin-top:12px;"><strong>Note:</strong> Some anonymized analytics data (e.g., total play counts) may be retained in aggregated form that cannot be linked back to you.</p>
     </div>
 
     <footer>
-      <p>© 2026 N1K∅ Music · <a href="/privacy.html">Privacy Policy</a> · <a href="/terms.html">Terms of Service</a></p>
+      <p>© 2026 N1K∅ Music · <a href="/legal/privacy.html">Privacy Policy</a> · <a href="/legal/terms.html">Terms of Service</a> · <a href="/legal/delete-data.html">Data Deletion</a></p>
     </footer>
   </div>
 </body>
