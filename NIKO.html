@@ -675,6 +675,118 @@
   text-align: center;
   padding: 80px 20px;
 }
+@keyframes fadePulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+/* ===== ЭКВАЛАЙЗЕР НА ОБЛОЖКЕ ===== */
+.thumb-wrap {
+  position: relative;
+  display: block;
+  flex-shrink: 0;
+  align-self: flex-start;
+  border-radius: 8px;
+  overflow: hidden;
+  /* НЕТ фиксированных width/height — размеры берутся от .thumb в твоём styles.css */
+}
+
+.thumb {
+  display: block; /* убирает лишний отступ под картинкой */
+}
+
+.track.playing .track-playing-indicator {
+  display: flex;
+}
+
+.track-playing-indicator {
+  display: none;
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  cursor: pointer;
+  background: rgba(10, 10, 15, 0.35);
+  backdrop-filter: blur(1px);
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.track-playing-indicator:hover {
+  background: rgba(10, 10, 15, 0.55);
+}
+
+/* Круглая подложка под полоски */
+.eq-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(10, 10, 15, 0.78);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.track-playing-indicator:hover .eq-circle {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(255,77,166,0.3), 0 4px 16px rgba(0,0,0,0.4);
+}
+
+/* Три полоски */
+.eq-bars {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 16px;
+}
+
+.eq-bars span {
+  display: block;
+  width: 3px;
+  height: 14px;
+  background: linear-gradient(180deg, #ff4da6, #00E5FF);
+  border-radius: 2px;
+  animation: eqPulse 0.85s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.eq-bars span:nth-child(1) { animation-delay: 0s; }
+.eq-bars span:nth-child(2) { animation-delay: 0.17s; }
+.eq-bars span:nth-child(3) { animation-delay: 0.34s; }
+
+@keyframes eqPulse {
+  0%, 100% { transform: scaleY(0.3); opacity: 0.7; }
+  50%      { transform: scaleY(1.0);  opacity: 1; }
+}
+/* === ЭКВАЛАЙЗЕР: стоп на паузе === */
+.track.playing.paused .eq-bars span {
+  animation-play-state: paused;
+}
+/* Визуально приглушить карточку на паузе (по желанию) */
+.track.playing.paused {
+  background: linear-gradient(135deg, rgba(39, 182, 70, .1), rgba(255, 122, 77, .1));
+  border-color: rgba(39, 182, 70, .2);
+}
+/* Мобильная адаптация — меньше круг и полоски */
+@media (max-width: 600px) {
+  .eq-circle {
+    width: 28px;
+    height: 28px;
+  }
+  .eq-bars {
+    gap: 2px;
+    height: 12px;
+  }
+  .eq-bars span {
+    width: 2.5px;
+    height: 10px;
+  }
+}
   </style>
 <base target="_blank">
 <base target="_blank">
@@ -685,6 +797,13 @@
 <base target="_blank">
 </head>
 <body>
+  <!-- PWA Splash -->
+<div id="app-splash" style="position:fixed;inset:0;background:var(--bg,#0a0a0f);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.5s ease;">
+  <div class="loader-wrap" style="width:120px;height:120px;">
+    <img src="icons/niko-loader-hd.png" class="loader-spin" alt="N1K∅" style="filter:drop-shadow(0 0 24px rgba(255,77,166,0.5)) drop-shadow(0 0 48px rgba(0,229,255,0.2));">
+  </div>
+  <div style="margin-top:16px;color:var(--muted,#bfc3d6);font-size:13px;letter-spacing:3px;text-transform:uppercase;animation:fadePulse 1.5s ease-in-out infinite;">Loading</div>
+</div>
   <div class="container">
   <header>
     <a id="site-logo" class="site-logo" href="#">
@@ -2577,8 +2696,15 @@ function renderDraftTracks(tracks) {
       : (uploadDate ? `<div class="track-date" title="Uploaded: ${uploadDate}">${uploadDate}</div>` : '');
 
     div.innerHTML = `
-      <img class="thumb lazy" data-src="${track.cover}" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 200'%3E%3Crect fill='%230b0b10' width='120' height='200'/%3E%3C/svg%3E" alt="${track.title}">
-      <div class="info">
+      <div class="thumb-wrap">
+  <img class="thumb lazy" data-src="${track.cover}" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 200'%3E%3Crect fill='%230b0b10' width='120' height='200'/%3E%3C/svg%3E" alt="${track.title}">
+  <div class="track-playing-indicator" data-id="${track.id}">
+    <div class="eq-circle">
+      <div class="eq-bars"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+</div>
+<div class="info">
          <div class="title"><a class="track-title-link" href="track.html?id=${track.id}">${track.artist ? `${track.artist} - ${track.title}` : track.title}</a></div>
         <div class="meta">${getTrackGenreLabels(track.genre).join(', ')} · ${track.duration || '—'}</div>
         ${partnerListenInfo}
@@ -2661,8 +2787,7 @@ function renderDraftTracks(tracks) {
       ${dateHtml}
     `;
 
-    list.appendChild(div);
-
+    list.appendChild(div); 
         let touchStartX = 0;
     let touchStartY = 0;
     div.addEventListener('touchstart', (e) => { 
@@ -2721,8 +2846,9 @@ function renderDraftTracks(tracks) {
       renderHomePage();
     }
   }
-}
-
+  window.updateTrackPlayIcons();
+} 
+  
 function getMyLocalPlaylist() {
   return JSON.parse(localStorage.getItem('myPlaylist') || '[]');
 }
@@ -5602,23 +5728,32 @@ function updateEmailAuthModalTranslations() {
   setText('forgot-toggle-login', 'backToLogin', 'Back to Login');
   setText('email-auth-cancel', 'cancel', 'Cancel');
 }
-
-/* Обновление UI иконок play/pause */
+ 
+/* Обновление UI иконок play/pause + эквалайзер */
 window.updateTrackPlayIcons = function() {
   const currentId = window.currentTrackId || null;
   const isPlaying = window.isPlaying || false;
+
   document.querySelectorAll('.track').forEach(el => {
     const id = el.dataset.id;
     const playBtn = el.querySelector('.play-btn');
     if (!playBtn) return;
+
     if (id === currentId) {
       el.classList.add('playing');
+      // ВАЖНО: управляем анимацией эквалайзера
+      if (isPlaying) {
+        el.classList.remove('paused');
+      } else {
+        el.classList.add('paused');
+      }
+
       playBtn.classList.add('playing');
       playBtn.innerHTML = isPlaying
         ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
         : '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3v18l15-9L5 3z"/></svg>';
     } else {
-      el.classList.remove('playing');
+      el.classList.remove('playing', 'paused');
       playBtn.classList.remove('playing');
       playBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3v18l15-9L5 3z"/></svg>';
     }
@@ -7628,7 +7763,14 @@ if (feedbackSubmitBtn) {
   setTimeout(function() {
     updateFeedbackCounters();
   }, 1000);
-
+  // Hide PWA splash
+  setTimeout(() => {
+    const splash = document.getElementById('app-splash');
+    if (splash) {
+      splash.style.opacity = '0';
+      setTimeout(() => splash.remove(), 500);
+    }
+  }, 900);
   // Close feedback restriction modal
   const feedbackRestrictionCloseBtn = document.getElementById('feedback-restriction-close-btn');
   const feedbackRestrictionCloseX = document.getElementById('feedback-restriction-close-x');
