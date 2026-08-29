@@ -52,11 +52,6 @@
       font-size: 14px; font-weight: 600; margin-bottom: 32px; transition: all 0.3s;
     }
     .back-btn:hover { background: rgba(255,77,166,0.15); border-color: var(--accent); }
-    .provider-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
-      padding: 6px 12px; border-radius: 20px; font-size: 13px; margin: 4px 4px 4px 0;
-    }
     footer {
       text-align: center; margin-top: 60px; padding: 24px;
       color: var(--muted); font-size: 13px; border-top: 1px solid var(--border);
@@ -102,15 +97,6 @@
       <h3>Email & Password</h3>
       <p>Email and password are handled by Firebase Authentication. Passwords are hashed by Firebase; we never see your plain-text password.</p>
 
-      <h3>Facebook Login (Meta)</h3>
-      <p>When you log in via Facebook, we receive only:</p>
-      <ul>
-        <li>Your name</li>
-        <li>Email address</li>
-        <li>Profile picture URL</li>
-      </ul>
-      <p>We <strong>do not</strong> post on your behalf, <strong>do not</strong> read your friends list, and <strong>do not</strong> share your Facebook data with any third party. You can revoke Facebook access at any time in your <a href="https://www.facebook.com/settings?tab=applications" target="_blank" rel="noopener">Facebook App Settings</a>.</p>
-
       <h3>PIN Code Access (Admin / Partner)</h3>
       <p>For admin and partner accounts, we use a SHA-256 hashed PIN code stored in our database. The PIN itself is never stored in plain text.</p>
 
@@ -132,7 +118,6 @@
       <ul>
         <li><strong>Firebase</strong> (Google) — authentication, database, analytics, hosting.</li>
         <li><strong>Cloudflare R2</strong> — storage for audio files and cover images.</li>
-        <li><strong>Meta (Facebook)</strong> — optional social login.</li>
         <li><strong>Google</strong> — optional social login and analytics.</li>
       </ul>
       <p>We do not sell, rent, or trade your personal data to any third party.</p>
