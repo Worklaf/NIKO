@@ -46,7 +46,35 @@
   <meta id="tw-image" name="twitter:image" content="">
   
 </head>
+	
   <style>
+  .site-footer {
+    text-align: center;
+    padding: 32px 20px 100px; /* 100px bottom so mini-player never covers it */
+    color: var(--muted, #bfc3d6);
+    font-size: 13px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin-top: 40px;
+  }
+  .site-footer a {
+    color: var(--accent-2, #00E5FF);
+    text-decoration: none;
+    margin: 0 8px;
+    transition: color 0.2s;
+  }
+  .site-footer a:hover { color: var(--accent, #ff4da6); }
+  .site-footer .footer-divider {
+    display: inline-block;
+    width: 4px; height: 4px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    margin: 0 8px;
+    vertical-align: middle;
+  }
+  @media (max-width: 480px) {
+    .site-footer { font-size: 12px; padding-bottom: 120px; }
+    .site-footer a { margin: 0 4px; }
+  }
     .track.ready-to-play {
   animation: pulseReady 1s ease 2;
   border: 2px solid #ff4da6;
@@ -7594,5 +7622,14 @@ if (feedbackSubmitBtn) {
     </div>
   </div>
 </div>
+	<footer class="site-footer">
+  <span>© 2026 N1K∅ Music</span>
+  <span class="footer-divider"></span>
+  <a href="/legal/terms.html">Terms</a>
+  <span class="footer-divider"></span>
+  <a href="/legal/privacy.html">Privacy</a>
+  <span class="footer-divider"></span>
+  <a href="/legal/delete-data.html">Delete Data</a>
+</footer>
 </body>
 </html>
