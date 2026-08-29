@@ -2829,6 +2829,9 @@ div[style*="overflow-x: auto"]::-webkit-scrollbar { display: none; }
   .genre-tag { font-size: 11px; padding: 3px 10px; }
 
   .np-actions { display: grid; grid-template-columns: 1fr 1fr; }
+    .pagination-bar {
+    margin-bottom: 20px !important; 
+  }
 }
 
 /* Узкий планшет (до 768px) */
@@ -2892,3 +2895,4 @@ header,
     box-sizing: border-box;
   }
 }
+ 
