@@ -49,35 +49,48 @@
 	
   <style>
   .site-footer {
-  width: 100%;
-  box-sizing: border-box;
-  text-align: center;
-  padding: 32px 20px 100px; /* 100px снизу, чтобы мини-плеер не перекрывал */
-  color: var(--muted, #bfc3d6);
-  font-size: 13px;
-  border-top: 1px solid rgba(255,255,255,0.06);
-  margin-top: 40px;
-  flex-shrink: 0;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    padding: 32px 20px 20px;   /* обычный компактный отступ */
+    color: var(--muted, #bfc3d6);
+    font-size: 13px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin-top: 20px;
+    transition: padding-bottom 0.3s ease;
 }
-  .site-footer a {
+.site-footer.player-active {
+    padding-bottom: 110px;    /* отступ только когда плеер открыт */
+}
+
+.site-footer a {
     color: var(--accent-2, #00E5FF);
     text-decoration: none;
     margin: 0 8px;
     transition: color 0.2s;
-  }
-  .site-footer a:hover { color: var(--accent, #ff4da6); }
-  .site-footer .footer-divider {
+}
+.site-footer a:hover { color: var(--accent, #ff4da6); }
+
+.site-footer .footer-divider {
     display: inline-block;
     width: 4px; height: 4px;
     background: rgba(255,255,255,0.2);
     border-radius: 50%;
     margin: 0 8px;
     vertical-align: middle;
-  }
-  @media (max-width: 480px) {
-    .site-footer { font-size: 12px; padding-bottom: 120px; }
+}
+
+/* Чтобы слова не разрывались — целая фраза переносится */
+.footer-nowrap {
+    display: inline-block;
+    white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+    .site-footer { font-size: 12px; padding-bottom: 20px; }
     .site-footer a { margin: 0 4px; }
-  }
+    .site-footer.player-active { padding-bottom: 130px; }
+}
     .track.ready-to-play {
   animation: pulseReady 1s ease 2;
   border: 2px solid #ff4da6;
@@ -265,13 +278,10 @@
   /* ===== Pagination ===== */
         .pagination-bar {
     display: flex; gap: 8px; justify-content: center; align-items: center;
-    margin: 20px 0 0; /
+    margin: 20px 0 100px;   /* ← 100px снизу на ПК — выше плеера */
     flex-wrap: wrap;
-  }
-    .pagination-spacer {
-    height: 220px; /* ← отступ чтобы треки не прятались под плеер */
-    width: 100%;
-  }
+}
+   
   .pagination-bar button {
     background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
     color: #eaeaf2; padding: 6px 14px; border-radius: 8px; cursor: pointer;
@@ -749,18 +759,14 @@
          
       </div>
     </div>
-    <div id="pagination-bar" class="pagination-bar"></div>
-    <div class="pagination-spacer"></div>
+          <div id="pagination-bar" class="pagination-bar"></div>
   </main>
 
-  <footer class="site-footer">
-    <span>© 2026 N1K∅ Music</span>
-    <span class="footer-divider"></span>
-    <a href="/legal/terms.html">Terms of Service</a>
-    <span class="footer-divider"></span>
-    <a href="/legal/privacy.html">Privacy Policy</a>
-    <span class="footer-divider"></span>
-    <a href="/legal/delete-data.html">Delete My Data</a>
+  <footer class="site-footer" id="site-footer">
+    <span class="footer-nowrap">© 2026 N1K∅ Music</span>
+    <span class="footer-nowrap"><span class="footer-divider"></span><a href="/legal/terms.html">Terms of Service</a></span>
+    <span class="footer-nowrap"><span class="footer-divider"></span><a href="/legal/privacy.html">Privacy Policy</a></span>
+    <span class="footer-nowrap"><span class="footer-divider"></span><a href="/legal/delete-data.html">Delete My Data</a></span>
   </footer>
 </div>
 
@@ -4501,6 +4507,21 @@ if (e.target.closest('.track-date-editable')) {
 
   // === FIX: обновление UI кнопок ===
   refreshLoginBtn();
+    // ===== Footer auto-padding when mini-player is visible =====
+  (function initFooterPlayerOffset() {
+    const footer = document.getElementById('site-footer');
+    const player = document.getElementById('mini-player');
+    if (!footer || !player) return;
+
+    function sync() {
+      const visible = player.style.display !== 'none' && getComputedStyle(player).display !== 'none';
+      footer.classList.toggle('player-active', visible);
+    }
+
+    new MutationObserver(sync).observe(player, { attributes: true, attributeFilter: ['style'] });
+    window.addEventListener('resize', sync);
+    sync(); // проверка при старте
+  })();
 });
 /* ---------- модалка «Pobieranie ograniczone» ---------- */
 function openDownloadRestriction() {
