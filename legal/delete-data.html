@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Data Deletion — N1K∅ Music</title>
+  <meta name="description" content="How to delete your data from N1K∅ Music">
+  <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --bg-2: #07060a;
+      --text: #eaeaf2;
+      --muted: #bfc3d6;
+      --accent: #ff4da6;
+      --accent-2: #00E5FF;
+      --success: #4dff8a;
+      --border: rgba(255,255,255,0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+    a { color: var(--accent-2); text-decoration: none; transition: color 0.2s; }
+    a:hover { color: var(--accent); }
+    .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+    header { text-align: center; margin-bottom: 48px; padding-top: 20px; }
+    .logo {
+      font-size: 32px; font-weight: 800; letter-spacing: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      display: inline-block; margin-bottom: 8px;
+    }
+    .logo-sub { color: var(--muted); font-size: 13px; letter-spacing: 2px; text-transform: uppercase; }
+    h1 {
+      font-size: 28px; margin-bottom: 32px;
+      background: linear-gradient(90deg, var(--accent), #ff7a4d);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    h2 {
+      font-size: 20px; color: var(--accent-2); margin: 40px 0 16px;
+      text-shadow: 0 0 20px rgba(0,229,255,0.2);
+    }
+    p, ul { margin-bottom: 16px; color: var(--muted); }
+    ul { padding-left: 24px; }
+    li { margin-bottom: 8px; }
+    .card {
+      background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      border: 1px solid var(--border);
+      border-radius: 16px; padding: 28px; margin-bottom: 24px;
+      backdrop-filter: blur(10px);
+    }
+    .step {
+      display: flex; gap: 16px; align-items: flex-start;
+      margin-bottom: 20px; padding: 20px;
+      background: rgba(255,255,255,0.02); border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .step-num {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 14px; flex-shrink: 0;
+    }
+    .step-content h3 { margin: 0 0 6px; color: var(--text); font-size: 15px; }
+    .step-content p { margin: 0; color: var(--muted); font-size: 14px; }
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      color: var(--text); padding: 10px 20px; border-radius: 50px;
+      font-size: 14px; font-weight: 600; margin-bottom: 32px;
+      transition: all 0.3s;
+    }
+    .back-btn:hover { background: rgba(255,77,166,0.15); border-color: var(--accent); }
+    .contact-box {
+      background: linear-gradient(145deg, rgba(0,229,255,0.08), rgba(255,77,166,0.08));
+      border: 1px solid rgba(0,229,255,0.2); border-radius: 16px;
+      padding: 24px; text-align: center; margin-top: 32px;
+    }
+    .contact-box a {
+      display: inline-block; margin-top: 8px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      font-weight: 700; font-size: 16px;
+    }
+    .deleted-list {
+      background: rgba(77,255,138,0.05); border: 1px solid rgba(77,255,138,0.15);
+      border-radius: 12px; padding: 20px; margin: 20px 0;
+    }
+    .deleted-list li { color: var(--success); }
+    footer {
+      text-align: center; margin-top: 60px; padding: 24px;
+      color: var(--muted); font-size: 13px; border-top: 1px solid var(--border);
+    }
+    @media (max-width: 600px) {
+      .container { padding: 24px 16px; }
+      h1 { font-size: 22px; }
+      .card, .step { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a href="/" class="logo">N1K∅</a>
+      <div class="logo-sub">Music</div>
+    </header>
+
+    <a href="/" class="back-btn">← Back to Home</a>
+    <h1>Data Deletion</h1>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:32px;">
+      You have the right to request complete deletion of your personal data from N1K∅ Music.
+    </p>
+
+    <div class="card">
+      <h2>What Will Be Deleted</h2>
+      <div class="deleted-list">
+        <ul>
+          <li>Account and authentication data (Google, Email, Facebook)</li>
+          <li>Listening history and likes</li>
+          <li>Comments and feedback submissions</li>
+          <li>Local playlists and settings</li>
+          <li>Push subscriptions and notifications</li>
+        </ul>
+      </div>
+
+      <h2>How to Delete Your Data</h2>
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Automatic Deletion (coming soon)</h3>
+          <p>An "Delete Account" button will be available in your profile settings. Until then, please use the manual method below.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Manual Request (recommended)</h3>
+          <p>Send an email with the subject "Data Deletion Request" to the address below. Include the email you used to sign in. We will delete all data within 7 business days.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Revoke Facebook Access</h3>
+          <p>If you signed in via Facebook, you can also revoke access in your Facebook app settings:<br>
+          <a href="https://www.facebook.com/settings?tab=applications" target="_blank" rel="noopener">facebook.com/settings → Apps and Websites</a></p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h3>Clear Local Data</h3>
+          <p>To remove cached data and cookies from your device: Browser Settings → Privacy → Clear Site Data → <code>niko-vert.vercel.app</code></p>
+        </div>
+      </div>
+
+      <div class="contact-box">
+        <p>📧 Send your deletion request to:</p>
+        <a href="mailto:privacy@niko-vert.vercel.app?subject=Data%20Deletion%20Request">privacy@niko-vert.vercel.app</a>
+        <p style="margin-top:12px;font-size:13px;">We will respond and confirm deletion within 48 hours.</p>
+      </div>
+    </div>
+
+    <footer>
+      <p>© 2026 N1K∅ Music · <a href="/privacy.html">Privacy Policy</a> · <a href="/terms.html">Terms of Service</a></p>
+    </footer>
+  </div>
+</body>
+</html>
