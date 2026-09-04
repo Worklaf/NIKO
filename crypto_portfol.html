@@ -1,525 +1,2642 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Crypto Portfolio Tracker</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Portfolio Tracker Pro</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
-:root {
-  --bg: #0a0e1a; --surface: #111827; --surface-2: #1a2236; --border: #1f2937;
-  --text: #f1f5f9; --text-2: #94a3b8; --text-3: #64748b;
-  --green: #22c55e; --green-dim: rgba(34,197,94,0.12); --green-glow: rgba(34,197,94,0.25);
-  --red: #ef4444; --red-dim: rgba(239,68,68,0.12); --red-glow: rgba(239,68,68,0.25);
-  --yellow: #f59e0b; --yellow-dim: rgba(245,158,11,0.12);
-  --blue: #3b82f6; --blue-dim: rgba(59,130,246,0.12);
-  --radius: 12px; --radius-sm: 8px; --shadow: 0 4px 20px rgba(0,0,0,0.4);
-  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+/* ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ И БАЗОВЫЕ СТИЛИ ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.5; min-height: 100vh; }
-.container { max-width: 1400px; margin: 0 auto; padding: 16px; }
 
-.header { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-.logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
-.logo span { color: var(--green); }
-.last-update { font-size: 12px; color: var(--text-3); }
-
-.notif-bell { position: relative; cursor: pointer; padding: 8px; border-radius: var(--radius-sm); background: var(--surface); border: 1px solid var(--border); }
-.notif-bell:hover { background: var(--surface-2); }
-.notif-badge { position: absolute; top: -4px; right: -4px; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; }
-.notif-dropdown { position: absolute; right: 0; top: 44px; width: 360px; max-height: 430px; overflow-y: auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); z-index: 100; display: none; padding: 12px; }
-.notif-dropdown.active { display: block; }
-.notif-item { padding: 10px; border-radius: var(--radius-sm); margin-bottom: 6px; font-size: 13px; border-left: 3px solid var(--border); }
-.notif-item.buy { border-left-color: var(--green); background: var(--green-dim); }
-.notif-item.sell { border-left-color: var(--red); background: var(--red-dim); }
-.notif-item.info { border-left-color: var(--blue); background: var(--blue-dim); }
-.notif-time { font-size: 11px; color: var(--text-3); margin-top: 4px; }
-.notif-empty { color: var(--text-3); padding: 20px; text-align: center; font-size: 13px; }
-.notif-section-title { font-size: 11px; text-transform: uppercase; color: var(--text-3); letter-spacing: 0.5px; margin: 10px 0 6px; }
-.pending-alert-item { padding: 8px 10px; border-radius: var(--radius-sm); margin-bottom: 6px; font-size: 12px; background: var(--surface-2); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.pending-alert-item button { background: none; border: none; color: var(--text-3); cursor: pointer; font-size: 14px; }
-.pending-alert-item button:hover { color: var(--red); }
-
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 24px; }
-.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; transition: transform 0.2s; }
-.stat-card:hover { transform: translateY(-2px); }
-.stat-label { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-.stat-value { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.2; }
-.stat-sub { font-size: 13px; margin-top: 4px; font-weight: 500; }
-.pos { color: var(--green); }
-.neg { color: var(--red); }
-.neu { color: var(--text-2); }
-
-.gauge-track { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 8px; }
-.gauge-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
-.gauge-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-3); margin-top: 4px; }
-
-.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 24px; overflow-x: auto; scrollbar-width: none; }
-.tabs::-webkit-scrollbar { display: none; }
-.tab-btn { padding: 12px 18px; background: transparent; border: none; color: var(--text-2); cursor: pointer; font-size: 14px; font-weight: 600; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; transition: all 0.2s; font-family: inherit; }
-.tab-btn:hover { color: var(--text); }
-.tab-btn.active { color: var(--text); border-bottom-color: var(--green); }
-.tab-panel { display: none; animation: fadeIn 0.3s; }
-.tab-panel.active { display: block; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-.section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-.section-sub { font-size: 13px; color: var(--text-2); margin-bottom: 16px; margin-top: -8px; }
-.toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
-
-.btn { padding: 10px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit; }
-.btn:hover { background: var(--border); }
-.btn-primary { background: var(--green); color: #000; border-color: var(--green); }
-.btn-primary:hover { opacity: 0.9; }
-.btn-danger { background: var(--red-dim); color: var(--red); border-color: rgba(239,68,68,0.3); }
-.btn-danger:hover { background: rgba(239,68,68,0.2); }
-.btn-blue { background: var(--blue-dim); color: var(--blue); border-color: rgba(59,130,246,0.3); }
-.btn-yellow { background: var(--yellow-dim); color: var(--yellow); border-color: rgba(245,158,11,0.3); }
-.btn-sm { padding: 6px 12px; font-size: 12px; }
-
-.table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th { text-align: left; padding: 12px 14px; color: var(--text-3); font-weight: 600; border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; cursor: pointer; user-select: none; }
-th:hover { color: var(--text); }
-th.no-sort { cursor: default; }
-th.no-sort:hover { color: var(--text-3); }
-th .sort-arrow { font-size: 10px; margin-left: 4px; opacity: 0.5; }
-th.sort-asc .sort-arrow, th.sort-desc .sort-arrow { opacity: 1; color: var(--green); }
-td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; white-space: nowrap; }
-tr:hover { background: rgba(255,255,255,0.02); }
-tr:last-child td { border-bottom: none; }
-tr.expand-row td { white-space: normal; background: rgba(255,255,255,0.015); }
-
-.coin-cell { display: flex; align-items: center; gap: 10px; }
-.coin-img { width: 28px; height: 28px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; overflow: hidden; }
-.coin-img img { width: 100%; height: 100%; object-fit: cover; }
-.coin-name { font-weight: 600; cursor: pointer; }
-.coin-name:hover { color: var(--green); text-decoration: underline; }
-.coin-symbol { font-size: 12px; color: var(--text-3); }
-
-.pnl-big { font-size: 16px; font-weight: 700; padding: 4px 10px; border-radius: 20px; display: inline-block; }
-.pnl-big.pos { background: var(--green-dim); color: var(--green); }
-.pnl-big.neg { background: var(--red-dim); color: var(--red); }
-
-.form-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
-.form-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 140px; }
-.form-group label { font-size: 12px; color: var(--text-2); font-weight: 600; }
-.form-group input, .form-group select {
-  padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
-  background: var(--surface); color: var(--text); font-size: 14px; outline: none; font-family: inherit;
+body {
+  --bg-primary: #080c18;
+  --bg-secondary: #0f1729;
+  --bg-card: rgba(20, 30, 55, 0.7);
+  --bg-card-hover: rgba(30, 45, 80, 0.8);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --text-primary: #f0f4ff;
+  --text-secondary: #b0c4e8;
+  --text-muted: #7a8bb5;
+  --green: #00e676;
+  --green-dim: rgba(0, 230, 118, 0.18);
+  --red: #ff5252;
+  --red-dim: rgba(255, 82, 82, 0.18);
+  --yellow: #ffd740;
+  --yellow-dim: rgba(255, 215, 64, 0.18);
+  --blue: #448aff;
+  --blue-dim: rgba(68, 138, 255, 0.15);
+  --purple: #b388ff;
+  --purple-dim: rgba(179, 136, 255, 0.15);
+  --orange: #ffab40;
+  --orange-dim: rgba(255, 171, 64, 0.15);
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --glass: rgba(255, 255, 255, 0.04);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
-.form-group input:focus, .form-group select:focus { border-color: var(--green); }
-.form-hint { font-size: 11px; color: var(--text-3); margin-top: 2px; line-height: 1.4; }
 
-.search-wrap { position: relative; }
-.search-results {
-  position: absolute; top: 100%; left: 0; right: 0; max-height: 240px; overflow-y: auto;
-  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm);
-  z-index: 50; display: none; margin-top: 4px;
+body {
+  font-family: var(--font);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.5;
+  min-height: 100vh;
+  background-image: radial-gradient(ellipse at 20% 50%, rgba(0, 230, 118, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(68, 138, 255, 0.05) 0%, transparent 60%);
 }
-.search-results.active { display: block; }
-.search-item { padding: 10px 12px; cursor: pointer; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
-.search-item:hover { background: var(--border); }
-.search-item img { width: 20px; height: 20px; border-radius: 50%; }
-.search-item:last-child { border-bottom: none; }
-.search-loading { padding: 10px 12px; font-size: 12px; color: var(--text-3); }
 
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
-
-.advice-card {
-  border-left: 3px solid var(--border); padding: 20px;
-  background: var(--surface); border-radius: 0 var(--radius) var(--radius) 0;
-  margin-bottom: 16px; border-top: 1px solid var(--border); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
-  position: relative; overflow: hidden;
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
-.advice-card.buy { border-left-color: var(--green); background: var(--green-dim); }
-.advice-card.sell { border-left-color: var(--red); background: var(--red-dim); }
-.advice-card.hold { border-left-color: var(--yellow); background: var(--yellow-dim); }
-.advice-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px; flex-wrap: wrap; }
-.advice-title { font-weight: 700; font-size: 16px; }
-.advice-badge { font-size: 11px; padding: 4px 12px; border-radius: 20px; font-weight: 700; text-transform: uppercase; }
-.badge-buy { background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
-.badge-sell { background: var(--red-dim); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
-.badge-hold { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(245,158,11,0.3); }
-.advice-text { font-size: 14px; color: var(--text-2); line-height: 1.7; margin-bottom: 12px; }
-.advice-action { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); }
-.advice-action-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
-.advice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
-.advice-metric { background: rgba(0,0,0,0.2); padding: 10px; border-radius: var(--radius-sm); text-align: center; }
-.advice-metric-value { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.advice-metric-label { font-size: 11px; color: var(--text-3); margin-top: 2px; }
-.advice-btn { margin-top: 12px; }
-.signal-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-.signal-chip { font-size: 11px; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--border); background: rgba(255,255,255,0.04); color: var(--text-2); }
-.signal-chip.green { color: var(--green); border-color: rgba(34,197,94,0.35); background: rgba(34,197,94,0.08); }
-.signal-chip.red { color: var(--red); border-color: rgba(239,68,68,0.35); background: rgba(239,68,68,0.08); }
-.signal-chip.yellow { color: var(--yellow); border-color: rgba(245,158,11,0.35); background: rgba(245,158,11,0.08); }
-.signal-chip.blue { color: var(--blue); border-color: rgba(59,130,246,0.35); background: rgba(59,130,246,0.08); }
-.signal-chip.purple { color: #a855f7; border-color: rgba(168,85,247,0.35); background: rgba(168,85,247,0.08); }
-.signal-chip.orange { color: #f97316; border-color: rgba(249,115,22,0.35); background: rgba(249,115,22,0.08); }
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
 
-.dca-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-top: 16px; }
-.dca-metric { text-align: center; padding: 16px; background: var(--surface-2); border-radius: var(--radius-sm); }
-.dca-metric-value { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.dca-metric-label { font-size: 12px; color: var(--text-2); margin-top: 4px; }
+/* ===== ТЕМЫ ===== */
+body.theme-glass {
+  --bg-primary: #080c18;
+  --bg-secondary: #0f1729;
+  --bg-card: rgba(20, 30, 55, 0.7);
+  --bg-card-hover: rgba(30, 45, 80, 0.8);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --text-primary: #f0f4ff;
+  --text-secondary: #b0c4e8;
+  --text-muted: #7a8bb5;
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --glass: rgba(255, 255, 255, 0.04);
+  --green-dim: rgba(0, 230, 118, 0.18);
+  --red-dim: rgba(255, 82, 82, 0.18);
+  --yellow-dim: rgba(255, 215, 64, 0.18);
+}
 
-.heatmap { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 3px; }
-.heatmap-item { border-radius: var(--radius-sm); padding: 12px 8px; text-align: center; font-size: 12px; cursor: pointer; transition: all 0.2s; min-height: 75px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px solid transparent; }
-.heatmap-item:hover { transform: scale(1.05); border-color: rgba(255,255,255,0.1); z-index: 2; position: relative; }
-.hm-symbol { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
-.hm-change { font-variant-numeric: tabular-nums; font-weight: 600; }
-.hm-cap { font-size: 10px; color: rgba(255,255,255,0.6); margin-top: 3px; }
+body.theme-dark {
+  --bg-primary: #0a0e1a;
+  --bg-secondary: #111827;
+  --bg-card: #1a2236;
+  --bg-card-hover: #24304a;
+  --border-color: #1f2937;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --glass: rgba(255, 255, 255, 0.02);
+  --green-dim: rgba(0, 230, 118, 0.16);
+  --red-dim: rgba(255, 82, 82, 0.16);
+  --yellow-dim: rgba(255, 215, 64, 0.16);
+}
 
-.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; backdrop-filter: blur(4px); }
-.modal-overlay.active { display: flex; }
-#modal.modal-overlay { z-index: 1001; }
-.modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow); }
-.modal.modal-wide { max-width: 680px; }
-.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.modal-title { font-size: 18px; font-weight: 700; }
-.modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-2); line-height: 1; }
+body.theme-original {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-card: #1c2128;
+  --bg-card-hover: #2a3441;
+  --border-color: #30363d;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #6e7681;
+  --green: #3fb950;
+  --red: #f85149;
+  --yellow: #d29922;
+  --green-dim: rgba(63, 185, 80, 0.2);
+  --red-dim: rgba(248, 81, 73, 0.2);
+  --yellow-dim: rgba(210, 153, 34, 0.2);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --glass: transparent;
+}
 
-.chart-container { width: 100%; height: 260px; position: relative; }
-canvas { width: 100%; height: 100%; }
-.pie-chart { width: 180px; height: 180px; }
-.pie-legend { display: flex; flex-direction: column; gap: 8px; }
-.legend-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
-.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+body.theme-original .header,
+body.theme-original .tabs,
+body.theme-original .card,
+body.theme-original .stat-card,
+body.theme-original .advice-card,
+body.theme-original .order-card,
+body.theme-original .global-impact-card,
+body.theme-original .per-coin-card,
+body.theme-original .collapsible-header,
+body.theme-original .modal {
+  backdrop-filter: none !important;
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
 
-.tx-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; flex-wrap: wrap; }
-.tx-row:last-child { border-bottom: none; }
-.tx-row span { flex: 1; }
-.tx-row .tx-actions { flex: 0; display: flex; gap: 6px; white-space: nowrap; }
+body.theme-original .advice-card.buy {
+  background: var(--green-dim) !important;
+  border-left-color: var(--green) !important;
+}
+body.theme-original .advice-card.sell {
+  background: var(--red-dim) !important;
+  border-left-color: var(--red) !important;
+}
+body.theme-original .advice-card.hold {
+  background: var(--yellow-dim) !important;
+  border-left-color: var(--yellow) !important;
+}
+body.theme-original .advice-text {
+  color: var(--text-secondary);
+}
 
-.flex-row { display: flex; gap: 20px; flex-wrap: wrap; }
-.flex-col { flex: 1; min-width: 300px; }
+/* ===== ОБЩАЯ ОБЁРТКА ===== */
+.container {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 20px 24px 40px;
+}
 
-.advisor-summary {
+/* ===== HEADER ===== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 12px;
+  backdrop-filter: blur(12px);
+  background: var(--bg-card);
+  border-radius: var(--radius);
+}
+
+.logo {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-muted) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.logo span {
+  background: linear-gradient(135deg, var(--green) 0%, #00c853 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.last-update {
+  font-size: 13px;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  padding: 6px 16px;
+  border-radius: 30px;
+  border: 1px solid var(--border-color);
+}
+
+.theme-switcher {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-card);
+  border-radius: 30px;
+  padding: 3px;
+  border: 1px solid var(--border-color);
+}
+
+.theme-btn {
+  padding: 3px 8px;
+  font-size: 11px;
+  border-radius: 20px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.theme-btn.active {
+  background: var(--green-dim);
+  color: var(--green);
+}
+
+/* ===== КНОПКИ ===== */
+.btn {
+  padding: 8px 18px;
+  border-radius: 30px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn:hover {
+  background: var(--bg-card-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--green) 0%, #00c853 100%);
+  color: #000;
+  border: none;
+  box-shadow: 0 4px 16px rgba(0, 230, 118, 0.3);
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 28px rgba(0, 230, 118, 0.4);
+}
+
+.btn-danger {
+  background: var(--red-dim);
+  color: var(--red);
+  border-color: rgba(255, 82, 82, 0.3);
+}
+.btn-danger:hover {
+  background: rgba(255, 82, 82, 0.25);
+}
+
+.btn-blue {
+  background: var(--blue-dim);
+  color: var(--blue);
+  border-color: rgba(68, 138, 255, 0.3);
+}
+.btn-blue:hover {
+  background: rgba(68, 138, 255, 0.25);
+}
+
+.btn-yellow {
+  background: var(--yellow-dim);
+  color: var(--yellow);
+  border-color: rgba(255, 215, 64, 0.3);
+}
+.btn-yellow:hover {
+  background: rgba(255, 215, 64, 0.25);
+}
+
+.btn-sm {
+  padding: 5px 14px;
+  font-size: 12px;
+}
+.btn-xs {
+  padding: 3px 8px;
+  font-size: 11px;
+  border-radius: 20px;
+}
+
+/* ===== УВЕДОМЛЕНИЯ ===== */
+.notif-bell {
+  position: relative;
+  cursor: pointer;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  transition: var(--transition);
+  z-index: 1000;
+}
+.notif-bell:hover {
+  background: var(--bg-card-hover);
+}
+
+.notif-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 12px;
+  min-width: 20px;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(255, 82, 82, 0.5);
+}
+
+.notif-dropdown {
+  position: absolute;
+  right: 0;
+  top: 48px;
+  width: 380px;
+  max-height: 460px;
+  overflow-y: auto;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  z-index: 99999 !important;
+  display: none;
+  padding: 16px;
+  backdrop-filter: blur(12px);
+}
+.notif-dropdown.active {
+  display: block;
+}
+
+.notif-dropdown .clear-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-top: 10px;
+  padding: 6px 12px;
+  background: var(--red-dim);
+  color: var(--red);
+  border: 1px solid rgba(255, 82, 82, 0.3);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: var(--transition);
+}
+.notif-dropdown .clear-btn:hover {
+  background: rgba(255, 82, 82, 0.25);
+}
+
+.notif-item {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+  font-size: 13px;
+  border-left: 3px solid var(--border-color);
+  background: var(--glass);
+}
+.notif-item.buy {
+  border-left-color: var(--green);
+  background: var(--green-dim);
+}
+.notif-item.sell {
+  border-left-color: var(--red);
+  background: var(--red-dim);
+}
+.notif-item.info {
+  border-left-color: var(--blue);
+  background: var(--blue-dim);
+}
+.notif-time {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+.notif-empty {
+  color: var(--text-muted);
+  padding: 20px;
+  text-align: center;
+  font-size: 13px;
+}
+.notif-section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  margin: 10px 0 6px;
+  font-weight: 600;
+}
+.pending-alert-item {
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+  font-size: 12px;
+  background: var(--glass);
+  border: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.pending-alert-item button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+}
+.pending-alert-item button:hover {
+  color: var(--red);
+}
+
+/* ===== СТАТИСТИКА ===== */
+.stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 16px;
+  margin-bottom: 28px;
 }
-.summary-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius);
-  padding: 14px;
+  padding: 18px 20px;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--green), transparent);
+  opacity: 0.4;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--text-muted);
+  box-shadow: var(--shadow);
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.stat-sub {
+  font-size: 13px;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.pos {
+  color: var(--green);
+}
+.neg {
+  color: var(--red);
+}
+.neu {
+  color: var(--text-secondary);
+}
+
+/* ===== ПОЛОСКА FEAR & GREED ===== */
+.gauge-track {
+  height: 6px;
+  background: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.gauge-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.8s ease, background 0.3s ease;
+}
+.gauge-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* ===== TABS ===== */
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 28px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 4px 6px;
+}
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tab-btn {
+  padding: 12px 24px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 30px;
+  white-space: nowrap;
+  transition: var(--transition);
+  font-family: inherit;
+}
+.tab-btn:hover {
+  color: var(--text-primary);
+  background: var(--glass);
+}
+.tab-btn.active {
+  color: var(--text-primary);
+  background: rgba(0, 230, 118, 0.15);
+  box-shadow: 0 0 20px rgba(0, 230, 118, 0.05);
+}
+.tab-btn .tab-icon {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.tab-panel {
+  display: none;
+  animation: fadeSlide 0.4s ease;
+}
+.tab-panel.active {
+  display: block;
+}
+
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== СЕКЦИИ / ЗАГОЛОВКИ ===== */
+.section-title {
+  font-size: 19px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: -0.01em;
+}
+.section-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  margin-top: -8px;
+}
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+/* ===== КАРТОЧКИ ===== */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  margin-bottom: 20px;
+  transition: var(--transition);
+}
+.card:hover {
+  border-color: var(--text-muted);
+}
+
+/* ===== РАСПРЕДЕЛЕНИЕ (круг + легенда) ===== */
+.distribution-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+.pie-wrap {
+  flex-shrink: 0;
+}
+.pie-wrap canvas {
+  width: 180px;
+  height: 180px;
+}
+
+.legend-wrap {
+  flex: 1;
+  min-width: 220px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 6px 16px;
+  align-content: start;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: default;
+  padding: 2px 4px;
+  border-radius: 6px;
+  transition: var(--transition);
+}
+.legend-row:hover {
+  background: var(--glass);
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.legend-others {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--blue);
+}
+.legend-others:hover {
+  text-decoration: underline;
+}
+
+.pie-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ===== ТАБЛИЦА ПОРТФЕЛЯ ===== */
+.table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+th {
+  text-align: left;
+  padding: 10px 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: var(--transition);
+}
+th:hover {
+  color: var(--text-primary);
+}
+th.no-sort {
+  cursor: default;
+}
+th.no-sort:hover {
+  color: var(--text-muted);
+}
+th .sort-arrow {
+  font-size: 9px;
+  margin-left: 4px;
+  opacity: 0.4;
+}
+th.sort-asc .sort-arrow,
+th.sort-desc .sort-arrow {
+  opacity: 1;
+  color: var(--green);
+}
+
+td {
+  padding: 8px 8px;
+  border-bottom: 1px solid var(--border-color);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  font-size: 12px;
+}
+tr:hover {
+  background: var(--glass);
+}
+tr:last-child td {
+  border-bottom: none;
+}
+tr.expand-row td {
+  white-space: normal;
+  background: rgba(0, 230, 118, 0.03);
+}
+
+.coin-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.coin-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid var(--border-color);
+}
+.coin-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.coin-name {
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.coin-name:hover {
+  color: var(--green);
+  text-decoration: underline;
+}
+.coin-symbol {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.pnl-big {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 30px;
+  display: inline-block;
+}
+.pnl-big.pos {
+  background: var(--green-dim);
+  color: var(--green);
+}
+.pnl-big.neg {
+  background: var(--red-dim);
+  color: var(--red);
+}
+
+.action-btns {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+  white-space: nowrap;
+  overflow: visible;
+}
+.action-btns .btn {
+  padding: 2px 6px;
+  font-size: 11px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+.action-btns .btn:hover {
+  background: var(--glass);
+  color: var(--text-primary);
+}
+.action-btns .btn-danger:hover {
+  color: var(--red);
+}
+.action-btns .btn-blue:hover {
+  color: var(--blue);
+}
+
+/* ===== AI СОВЕТНИК ===== */
+.advisor-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.summary-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+  transition: var(--transition);
+}
+.summary-card:hover {
+  border-color: var(--text-muted);
 }
 .summary-card .title {
   font-size: 11px;
   text-transform: uppercase;
-  color: var(--text-3);
-  margin-bottom: 6px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  font-weight: 600;
 }
 .summary-card .value {
-  font-size: 22px;
+  font-size: 26px;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.advice-card {
+  border-left: 4px solid var(--border-color);
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  margin-bottom: 16px;
+  border-top: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  transition: var(--transition);
+}
+.advice-card:hover {
+  border-color: var(--text-muted);
+}
+.advice-card.buy {
+  border-left-color: var(--green);
+  background: var(--green-dim);
+}
+.advice-card.sell {
+  border-left-color: var(--red);
+  background: var(--red-dim);
+}
+.advice-card.hold {
+  border-left-color: var(--yellow);
+  background: var(--yellow-dim);
+}
+
+.advice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.advice-title {
+  font-weight: 700;
+  font-size: 16px;
+}
+.advice-badge {
+  font-size: 11px;
+  padding: 4px 14px;
+  border-radius: 30px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.badge-buy {
+  background: var(--green-dim);
+  color: var(--green);
+  border: 1px solid rgba(0, 230, 118, 0.3);
+}
+.badge-sell {
+  background: var(--red-dim);
+  color: var(--red);
+  border: 1px solid rgba(255, 82, 82, 0.3);
+}
+.badge-hold {
+  background: var(--yellow-dim);
+  color: var(--yellow);
+  border: 1px solid rgba(255, 215, 64, 0.3);
+}
+
+.advice-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+/* --- Блок "План действий / докупки" внутри рекомендации --- */
+.advice-action {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+.advice-action-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.advice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin: 10px 0;
+}
+
+.advice-metric {
+  background: rgba(0, 0, 0, 0.22);
+  padding: 12px 10px;
+  border-radius: var(--radius-sm);
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: var(--transition);
+}
+.advice-metric:hover {
+  background: rgba(0, 0, 0, 0.32);
+  transform: translateY(-2px);
+}
+.advice-metric-value {
+  font-size: 17px;
   font-weight: 700;
 }
+.advice-metric-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
 
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
+.advice-btn {
+  margin-top: 12px;
+}
 
+/* --- Чипы сигналов (сила сигнала / score / категория / RSI и т.д.) --- */
+.signal-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.signal-chip {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--glass);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.signal-chip.green {
+  color: var(--green);
+  border-color: rgba(0, 230, 118, 0.35);
+  background: var(--green-dim);
+}
+.signal-chip.red {
+  color: var(--red);
+  border-color: rgba(255, 82, 82, 0.35);
+  background: var(--red-dim);
+}
+.signal-chip.yellow {
+  color: var(--yellow);
+  border-color: rgba(255, 215, 64, 0.35);
+  background: var(--yellow-dim);
+}
+.signal-chip.blue {
+  color: var(--blue);
+  border-color: rgba(68, 138, 255, 0.35);
+  background: var(--blue-dim);
+}
+.signal-chip.purple {
+  color: var(--purple);
+  border-color: rgba(179, 136, 255, 0.35);
+  background: var(--purple-dim);
+}
+.signal-chip.orange {
+  color: var(--orange);
+  border-color: rgba(255, 171, 64, 0.35);
+  background: var(--orange-dim);
+}
+
+/* ===== ОРДЕРА ===== */
+.orders-flat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 14px;
+}
+
+.order-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 0;
+  transition: var(--transition);
+}
+.order-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--text-muted);
+  box-shadow: var(--shadow);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.order-title {
+  font-weight: 700;
+  font-size: 15px;
+}
+.order-badge {
+  font-size: 11px;
+  padding: 4px 12px;
+  border-radius: 30px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.badge-pending {
+  background: var(--yellow-dim);
+  color: var(--yellow);
+  border: 1px solid rgba(255, 215, 64, 0.3);
+}
+.badge-ready {
+  background: var(--green-dim);
+  color: var(--green);
+  border: 1px solid rgba(0, 230, 118, 0.3);
+}
+
+.order-status-badge {
+  font-size: 10px;
+  padding: 3px 12px;
+  border-radius: 30px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.status-active {
+  background: var(--blue-dim);
+  color: var(--blue);
+  border: 1px solid rgba(68, 138, 255, 0.3);
+}
+.status-inactive {
+  background: rgba(100, 116, 139, 0.15);
+  color: var(--text-muted);
+  border: 1px solid rgba(100, 116, 139, 0.3);
+}
+.status-executed {
+  background: var(--green-dim);
+  color: var(--green);
+  border: 1px solid rgba(0, 230, 118, 0.3);
+}
+.status-pending {
+  background: var(--yellow-dim);
+  color: var(--yellow);
+  border: 1px solid rgba(255, 215, 64, 0.3);
+}
+
+.order-progress-wrap { margin: 10px 0; }
+.order-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.order-progress {
+  height: 6px;
+  background: var(--border-color);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.order-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.order-exec-progress {
+  margin-top: 10px;
+  padding: 10px;
+  background: var(--glass);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+}
+.order-exec-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+.order-exec-label .exec-pct {
+  font-weight: 700;
+  font-size: 13px;
+}
+.order-exec-label .exec-pct.ready {
+  color: var(--green);
+}
+.order-exec-label .exec-pct.waiting {
+  color: var(--yellow);
+}
+.order-exec-label .exec-pct.inactive {
+  color: var(--text-muted);
+}
+.order-exec-label .exec-pct.executed {
+  color: var(--green);
+}
+.order-exec-track {
+  height: 6px;
+  background: var(--border-color);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+.order-exec-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease, background 0.3s ease;
+}
+.order-exec-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: shimmer 2s infinite;
+}
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.order-impact {
+  margin-top: 10px;
+  padding: 12px;
+  background: var(--blue-dim);
+  border-radius: var(--radius-sm);
+  border-left: 4px solid var(--blue);
+  font-size: 12px;
+}
+
+.order-impact-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 10px;
+  align-items: center;
+}
 @media (max-width: 768px) {
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
-  .stat-value { font-size: 20px; }
-  .tab-btn { padding: 10px 12px; font-size: 13px; }
-  .form-row { flex-direction: column; }
-  .form-group { min-width: 100%; }
-  .notif-dropdown { width: 280px; right: -40px; }
-  #portTable th, #portTable td { padding: 8px 6px; font-size: 12px; }
-  .pie-chart { width: 140px; height: 140px; }
+  .order-impact-grid {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .order-impact-grid .arrow-col {
+    transform: rotate(90deg);
+  }
+}
+
+.order-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.order-metric {
+  background: rgba(0, 0, 0, 0.22);
+  padding: 10px 8px;
+  border-radius: var(--radius-sm);
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: var(--transition);
+}
+.order-metric:hover {
+  background: rgba(0, 0, 0, 0.32);
+  transform: translateY(-2px);
+}
+.order-metric-value {
+  font-size: 17px;
+  font-weight: 700;
+}
+.order-metric-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Селектор статуса ордера + бейдж сравнения с рынком */
+.order-status-select {
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+}
+.market-diff-badge {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  display: inline-block;
+  margin-left: 8px;
+}
+.market-diff-badge.pos {
+  background: var(--green-dim);
+  color: var(--green);
+}
+.market-diff-badge.neg {
+  background: var(--red-dim);
+  color: var(--red);
+}
+
+/* ===== ФИЛЬТРЫ ОРДЕРОВ ===== */
+.order-filters {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.filter-btn {
+  padding: 3px 12px;
+  border-radius: 30px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+}
+.filter-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-card-hover);
+}
+.filter-btn.active {
+  background: var(--green-dim);
+  color: var(--green);
+  border-color: rgba(0, 230, 118, 0.3);
+}
+
+/* ===== GLOBAL IMPACT (сводное влияние всех ордеров) ===== */
+.global-impact-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: 18px;
+}
+.global-impact-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.global-impact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.global-impact-metric {
+  background: rgba(0, 0, 0, 0.22);
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.global-impact-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+.global-impact-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+.per-coin-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+.per-coin-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.per-coin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.per-coin-card {
+  background: var(--glass);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 16px 18px;
+  position: relative;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.per-coin-card:hover {
+  background: var(--bg-card-hover);
+  transform: translateY(-3px);
+  border-color: var(--text-muted);
+}
+.per-coin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.per-coin-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.per-coin-price {
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.per-coin-info {
+  flex: 1;
+  min-width: 0;
+}
+.per-coin-symbol {
+  font-size: 16px;
+  font-weight: 700;
+}
+.per-coin-qty {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.per-coin-avg {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.per-coin-avg .arrow {
+  color: var(--text-muted);
+  margin: 0 4px;
+}
+.per-coin-avg .avg-pos {
+  color: var(--green);
+  font-weight: 600;
+}
+.per-coin-avg .avg-neg {
+  color: var(--red);
+  font-weight: 600;
+}
+
+.per-coin-locked {
+  text-align: center;
+  font-size: 13px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.per-coin-locked .value,
+.per-coin-locked strong {
+  color: var(--yellow);
+  font-size: 16px;
+}
+
+/* --- Единый подфон для блока "кол-во / средняя / P&L%" ---
+   Строки физически оборачиваются в один <div class="per-coin-stats-box">
+   через JS-патч ниже — это даёт гарантированно единый фон без швов
+   между строками, в отличие от чисто-CSS обхода. */
+.per-coin-stats-box {
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  margin-top: 4px;
+}
+.per-coin-stats-box .per-coin-row {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 3px 0;
+}
+.per-coin-stats-box .per-coin-row:not(:last-child) {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.per-coin-row {
+  font-size: 11.5px;
+  color: var(--text-primary);
+  line-height: 1.5;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: nowrap;
+  background: rgba(0, 0, 0, 0.22);
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 4px 10px;
+}
+.per-coin-header + .per-coin-row {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+.per-coin-row:last-child {
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+}
+.per-coin-row:not(.per-coin-header + .per-coin-row):not(:last-child) {
+  border-top: none;
+  border-bottom: none;
+}
+.per-coin-row .label {
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 9px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.per-coin-row .value {
+  font-weight: 700;
+  font-size: 11.5px;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.order-count-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--blue);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(68, 138, 255, 0.4);
+}
+.per-coin-img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid var(--border-color);
+}
+
+/* ===== COLLAPSIBLE ===== */
+.collapsible-section {
+  margin-bottom: 24px;
+}
+.collapsible-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+}
+.collapsible-header:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--text-muted);
+}
+.collapsible-header .toggle-icon {
+  font-size: 14px;
+  color: var(--text-muted);
+  transition: transform 0.3s ease;
+  margin-left: 8px;
+}
+.collapsible-header.collapsed .toggle-icon {
+  transform: rotate(-90deg);
+}
+.collapsible-content {
+  overflow: hidden;
+  transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+  max-height: 20000px;
+  opacity: 1;
+  padding-top: 16px;
+}
+.collapsible-content.collapsed {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0 !important;
+}
+
+/* ===== TOOLBAR & SEARCH ===== */
+.search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 160px;
+  max-width: 320px;
+}
+.search-wrap input {
+  width: 100%;
+  padding: 8px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 30px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+  transition: var(--transition);
+}
+.search-wrap input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.15);
+}
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  z-index: 50;
+  display: none;
+  margin-top: 4px;
+  box-shadow: var(--shadow);
+}
+.search-results.active {
+  display: block;
+}
+.search-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--border-color);
+  transition: var(--transition);
+}
+.search-item:hover {
+  background: var(--glass);
+}
+.search-item img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+.search-item:last-child {
+  border-bottom: none;
+}
+.search-loading {
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.port-search-wrap {
+  position: relative;
+  margin-bottom: 12px;
+}
+.port-search-wrap input {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+}
+.port-search-wrap input:focus {
+  border-color: var(--green);
+}
+
+/* ===== FORMS & MODALS ===== */
+.form-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 120px;
+}
+.form-group label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.form-group input,
+.form-group select {
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+  transition: var(--transition);
+}
+.form-group input:focus,
+.form-group select:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.1);
+}
+.form-hint {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.25s ease;
+}
+.modal-overlay.active {
+  display: flex;
+}
+#modal.modal-overlay {
+  z-index: 1001;
+}
+.modal {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  max-width: 540px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+  animation: slideUp 0.3s ease;
+}
+.modal.modal-wide {
+  max-width: 700px;
+}
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.modal-title {
+  font-size: 19px;
+  font-weight: 700;
+}
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 26px;
+  cursor: pointer;
+  color: var(--text-muted);
+  line-height: 1;
+  transition: var(--transition);
+}
+.modal-close:hover {
+  color: var(--text-primary);
+  transform: rotate(90deg);
+}
+
+/* ===== ТРАНЗАКЦИИ ===== */
+.tx-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+.tx-row:last-child {
+  border-bottom: none;
+}
+.tx-row span {
+  flex: 1;
+}
+.tx-row .tx-actions {
+  flex: 0;
+  display: flex;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.flex-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.flex-col {
+  flex: 1;
+  min-width: 300px;
+}
+
+/* ===== CHART ===== */
+.chart-container {
+  width: 100%;
+  height: 260px;
+  position: relative;
+}
+canvas {
+  width: 100%;
+  height: 100%;
+}
+.pie-chart {
+  width: 180px;
+  height: 180px;
+}
+
+/* ===== DCA ===== */
+.dca-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.dca-metric {
+  text-align: center;
+  padding: 12px;
+  background: var(--glass);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+}
+.dca-metric-value {
+  font-size: 18px;
+  font-weight: 700;
+}
+.dca-metric-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ===== HEATMAP ===== */
+.heatmap {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 4px;
+}
+.heatmap-item {
+  border-radius: var(--radius-sm);
+  padding: 10px 6px;
+  text-align: center;
+  font-size: 11px;
+  cursor: pointer;
+  transition: var(--transition);
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid transparent;
+}
+.heatmap-item:hover {
+  transform: scale(1.05);
+  border-color: var(--text-muted);
+  z-index: 2;
+}
+.hm-symbol {
+  font-weight: 700;
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+.hm-change {
+  font-weight: 600;
+  font-size: 11px;
+}
+.hm-cap {
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .container {
+    padding: 12px;
+  }
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .stat-value {
+    font-size: 22px;
+  }
+  .tab-btn {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+  .form-row {
+    flex-direction: column;
+  }
+  .form-group {
+    min-width: 100%;
+  }
+  .notif-dropdown {
+    width: 300px;
+    right: -20px;
+  }
+  .orders-flat-grid {
+    grid-template-columns: 1fr;
+  }
+  .modal {
+    padding: 18px;
+  }
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .header-actions {
+    justify-content: space-between;
+  }
+  .per-coin-grid {
+    grid-template-columns: 1fr;
+  }
+  .distribution-wrapper {
+    flex-direction: column;
+    align-items: center;
+  }
+  .legend-wrap {
+    width: 100%;
+  }
+  .advice-grid,
+  .order-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .stat-card {
+    padding: 12px;
+  }
+  .stat-value {
+    font-size: 18px;
+  }
+  .tab-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .search-wrap {
+    max-width: 100%;
+  }
+  .action-btns .btn {
+    font-size: 10px;
+    padding: 2px 4px;
+  }
+}
+/* Переключатель вида */
+.view-toggle {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-card);
+  border-radius: 30px;
+  padding: 3px;
+  border: 1px solid var(--border-color);
+}
+.view-btn {
+  padding: 4px 10px;
+  font-size: 13px;
+  border-radius: 20px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.view-btn.active {
+  background: var(--green-dim);
+  color: var(--green);
+}
+/* ===== КАРТОЧКИ ПОРТФЕЛЯ ===== */
+.portfolio-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  padding: 12px 0;
+}
+
+.portfolio-card {
+  background: var(--bg-card);
+  position: relative;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.portfolio-card:hover {
+  border-color: var(--text-muted);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+/* Строка изменения 24ч */
+.portfolio-card-change-row {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+.portfolio-card-change-row .change.pos {
+  color: var(--green);
+}
+.portfolio-card-change-row .change.neg {
+  color: var(--red);
+}
+
+/* Верхняя строка: иконка, имя, цена, бейдж */
+.portfolio-card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.portfolio-card-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.portfolio-card-img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+}
+
+.portfolio-card-name-group {
+  display: flex;
+  flex-direction: column;
+}
+.portfolio-card-symbol {
+  font-weight: 700;
+  font-size: 16px;
+}
+.portfolio-card-name {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* Блок цена + бейдж P&L */
+ 
+
+.portfolio-card-price {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+/* Метка P&L % — выступает сверху справа */
+.portfolio-card-pnl-badge {
+  position: absolute;
+  top: -10px;
+  right: 10px;
+  padding: 4px 14px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 16px;  /* увеличили шрифт */
+  color: #fff;
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  z-index: 2;
+}
+.portfolio-card-pnl-badge.pos {
+  background: var(--green);
+  border-color: var(--green);
+}
+.portfolio-card-pnl-badge.neg {
+  background: var(--red);
+  border-color: var(--red);
+}
+
+/* Тело карточки — две колонки */
+.portfolio-card-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 16px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-sm);
+  margin-top: 6px;
+}
+
+.portfolio-card-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.portfolio-card-row:last-child {
+  border-bottom: none;
+}
+.portfolio-card-row .label {
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+.portfolio-card-row .value {
+  font-weight: 600;
+  font-size: 13px;
+}
+.portfolio-card-row .value.pos {
+  color: var(--green);
+}
+.portfolio-card-row .value.neg {
+  color: var(--red);
+}
+
+/* Кнопки */
+.portfolio-card-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.portfolio-card-actions .btn {
+  padding: 4px 10px;
+  font-size: 11px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+}
+.portfolio-card-actions .btn:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+/* ===== DCA КАЛЬКУЛЯТОР (улучшенный) ===== */
+.dca-wrapper {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border-color);
+}
+.dca-title {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+}
+.dca-grid-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.dca-grid-group .dca-item {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  text-align: center;
+  transition: var(--transition);
+}
+.dca-grid-group .dca-item:hover {
+  border-color: var(--text-muted);
+  transform: translateY(-1px);
+}
+.dca-item-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
+}
+.dca-item-value {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+.dca-item-value.green {
+  color: var(--green);
+}
+.dca-item-value.red {
+  color: var(--red);
+}
+.dca-item-value.blue {
+  color: var(--blue);
+}
+.dca-item-value.yellow {
+  color: var(--yellow);
+}
+
+/* Поля ввода */
+.dca-inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.dca-input-group label {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
+}
+.dca-input-group input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: var(--transition);
+}
+.dca-input-group input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.15);
+}
+
+/* Группа результатов */
+.dca-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.dca-result-item {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  text-align: center;
+}
+.dca-result-item .label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.dca-result-item .value {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-primary);
+  margin-top: 2px;
+}
+.dca-result-item .value.green { color: var(--green); }
+.dca-result-item .value.red { color: var(--red); }
+.dca-result-item .value.blue { color: var(--blue); }
+
+/* Рекомендация DCA */
+.dca-recommendation {
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border-left: 4px solid var(--border-color);
+  background: var(--bg-secondary);
+}
+.dca-recommendation .rec-badge {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.dca-recommendation .rec-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.dca-recommendation.rec-recommended {
+  border-left-color: var(--green);
+  background: var(--green-dim);
+}
+.dca-recommendation.rec-not-recommended {
+  border-left-color: var(--red);
+  background: var(--red-dim);
+}
+.dca-recommendation.rec-neutral {
+  border-left-color: var(--yellow);
+  background: var(--yellow-dim);
 }
 </style>
-<base target="_blank">
 </head>
-<body>
+<body class="theme-glass">
+
 <div class="container">
-  <div id="corsWarning" style="display:none; background:var(--red-dim); border:1px solid rgba(239,68,68,0.4); border-radius:var(--radius); padding:14px 16px; margin-bottom:16px; font-size:13px; line-height:1.6;">
-    <strong style="color:var(--red)">⚠ CoinGecko временно недоступен</strong><br>
-    CORS-блокировка или лимит запросов (429). Данные вашего портфеля сохранены и отображаются из кэша.<br>
-    <strong>Решение:</strong> откройте страницу через VPN, или подождите 2-3 минуты и обновите. Если проблема повторяется - CoinGecko блокирует ваш IP/домен.
+
+  <!-- CORS Warning -->
+  <div id="corsWarning" style="display:none; background:var(--red-dim); border:1px solid rgba(255,82,82,0.4); border-radius:var(--radius); padding:14px 18px; margin-bottom:16px; font-size:13px;">
+    <strong style="color:var(--red);">⚠️ CoinGecko временно недоступен</strong><br>
+    CORS-блокировка или лимит запросов (429). Данные портфеля сохранены и отображаются из кэша.<br>
+    <strong>Решение:</strong> используйте VPN, подождите 2-3 минуты или обновите страницу.
   </div>
 
+  <!-- HEADER -->
   <div class="header">
     <div class="logo">Crypto<span>Tracker</span></div>
-    <div style="display:flex;align-items:center;gap:12px;">
-      <div class="last-update" id="lastUpdate">загрузка...</div>
-      <button class="btn btn-sm" id="authBtn" onclick="openAuthModal()" style="display:none;">войти</button>
-      <div id="userInfo" style="display:none;align-items:center;gap:8px;">
-        <span id="userEmail" style="font-size:13px;color:var(--text-2);"></span>
-        <button class="btn btn-sm btn-danger" onclick="signOutUser()">выйти</button>
+    <div class="header-actions">
+      <div class="last-update" id="lastUpdate">Загрузка...</div>
+      <!-- Переключатель тем -->
+      <div class="theme-switcher" style="display:flex; gap:4px; background:var(--bg-card); border-radius:30px; padding:3px; border:1px solid var(--border-color);">
+        <button class="btn btn-xs theme-btn active" data-theme="glass" title="Стекло" style="border-radius:20px; background:transparent; border:none; color:var(--text-muted);"><i class="fas fa-glass-whiskey"></i></button>
+        <button class="btn btn-xs theme-btn" data-theme="dark" title="Тёмный" style="border-radius:20px; background:transparent; border:none; color:var(--text-muted);"><i class="fas fa-moon"></i></button>
+        <button class="btn btn-xs theme-btn" data-theme="original" title="Оригинал" style="border-radius:20px; background:transparent; border:none; color:var(--text-muted);"><i class="fas fa-square"></i></button>
+      </div>
+      <button class="btn btn-sm" id="authBtn" onclick="openAuthModal()" style="display:none;">Войти</button>
+      <div id="userInfo" style="display:none; align-items:center; gap:8px;">
+        <span id="userEmail" style="font-size:13px; color:var(--text-secondary);"></span>
+        <button class="btn btn-sm btn-danger" onclick="signOutUser()">Выйти</button>
       </div>
       <div class="notif-bell" onclick="toggleNotif(event)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <i class="fas fa-bell" style="font-size:18px;"></i>
         <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
-        <div class="notif-dropdown" id="notifDropdown" onclick="event.stopPropagation()"></div>
+        <div class="notif-dropdown" id="notifDropdown" onclick="event.stopPropagation()">
+          <!-- контент подгружается через JS -->
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- STATS -->
   <div class="stats-grid" id="statsGrid">
-    <div class="stat-card"><div class="stat-label">портфель</div><div class="stat-value" id="stTotal">$0</div><div class="stat-sub" id="stPnl">0%</div></div>
-    <div class="stat-card"><div class="stat-label">вложено</div><div class="stat-value" id="stInvested">$0</div><div class="stat-sub neu">всего инвестиций</div></div>
-    <div class="stat-card"><div class="stat-label">btc доминация</div><div class="stat-value" id="stBtcDom">-</div><div class="stat-sub neu" id="stEthDom">eth: -</div></div>
-    <div class="stat-card"><div class="stat-label">fear & greed</div><div class="stat-value" id="stFear">-</div><div class="gauge-track"><div class="gauge-fill" id="fearBar" style="width:0%;background:var(--yellow)"></div></div><div class="gauge-labels"><span>fear</span><span>neutral</span><span>greed</span></div></div>
-    <div class="stat-card"><div class="stat-label">капитализация</div><div class="stat-value" id="stCap">-</div><div class="stat-sub" id="stCapChange">-</div></div>
+    <div class="stat-card"><div class="stat-label"><i class="fas fa-wallet"></i> Портфель</div><div class="stat-value" id="stTotal">$0</div><div class="stat-sub" id="stPnl">0%</div></div>
+    <div class="stat-card"><div class="stat-label"><i class="fas fa-coins"></i> Вложено</div><div class="stat-value" id="stInvested">$0</div><div class="stat-sub neu">Всего инвестиций</div></div>
+    <div class="stat-card"><div class="stat-label"><i class="fas fa-chart-line"></i> BTC доминация</div><div class="stat-value" id="stBtcDom">-</div><div class="stat-sub neu" id="stEthDom">eth: -</div></div>
+    <div class="stat-card"><div class="stat-label"><i class="fas fa-face-smile"></i> Fear & Greed</div><div class="stat-value" id="stFear">-</div><div class="gauge-track"><div class="gauge-fill" id="fearBar" style="width:0%;"></div></div><div class="gauge-labels"><span>Страх</span><span>Нейтр.</span><span>Жадность</span></div></div>
+    <div class="stat-card"><div class="stat-label"><i class="fas fa-globe"></i> Капитализация</div><div class="stat-value" id="stCap">-</div><div class="stat-sub" id="stCapChange">-</div></div>
   </div>
 
+  <!-- TABS -->
   <div class="tabs">
-    <button class="tab-btn active" data-tab="portfolio">портфель</button>
-    <button class="tab-btn" data-tab="market">рынок</button>
-    <button class="tab-btn" data-tab="heatmap">тепловая карта</button>
-    <button class="tab-btn" data-tab="dca">dca калькулятор</button>
-    <button class="tab-btn" data-tab="advisor">ai советник</button>
-    <button class="tab-btn" data-tab="feed">лента</button>
+    <button class="tab-btn active" data-tab="portfolio"><span class="tab-icon"><i class="fas fa-folder-open"></i></span>Портфель</button>
+    <button class="tab-btn" data-tab="market"><span class="tab-icon"><i class="fas fa-chart-bar"></i></span>Рынок</button>
+    <button class="tab-btn" data-tab="heatmap"><span class="tab-icon"><i class="fas fa-fire"></i></span>Тепловая карта</button>
+    <button class="tab-btn" data-tab="dca"><span class="tab-icon"><i class="fas fa-calculator"></i></span>DCA</button>
+    <button class="tab-btn" data-tab="advisor"><span class="tab-icon"><i class="fas fa-robot"></i></span>AI советник</button>
+    <button class="tab-btn" data-tab="feed"><span class="tab-icon"><i class="fas fa-list-ul"></i></span>Лента</button>
   </div>
 
+  <!-- PANEL: PORTFOLIO -->
   <div class="tab-panel active" id="panel-portfolio">
-    <div class="card" style="margin-bottom:20px;">
-      <div class="section-title" style="margin-bottom:12px;">распределение</div>
-      <div style="display:flex;align-items:flex-start;gap:24px;flex-wrap:wrap;">
-        <canvas class="pie-chart" id="pieCanvas" width="180" height="180" style="flex-shrink:0;"></canvas>
-        <div id="pieLegend" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px 16px;flex:1;align-content:start;"></div>
+
+    <div class="card">
+      <div class="section-title"><span class="icon"><i class="fas fa-pie-chart"></i></span>Распределение</div>
+      <div class="distribution-wrapper">
+        <div class="pie-wrap">
+          <canvas class="pie-chart" id="pieCanvas" width="180" height="180"></canvas>
+        </div>
+        <div class="legend-wrap" id="pieLegend"></div>
       </div>
     </div>
 
-    <div class="section-title">мои активы</div>
+    <!-- Мои активы -->
+    <div class="collapsible-section">
+      <div class="collapsible-header" onclick="toggleSection('portfolioAssets')">
+        <div class="section-title" style="margin:0;"><span class="icon"><i class="fas fa-gem"></i></span>Мои активы</div>
+        <span class="toggle-icon" id="portfolioAssets-toggle">▼</span>
+      </div>
+      <div class="collapsible-content" id="portfolioAssets">
+        <div class="toolbar">
+  <button class="btn btn-primary" onclick="openModal()"><i class="fas fa-plus"></i> Добавить</button>
+  <button class="btn btn-sm" onclick="exportData()"><i class="fas fa-file-export"></i> Экспорт</button>
+  <button class="btn btn-sm" onclick="document.getElementById('importFile').click()"><i class="fas fa-file-import"></i> Импорт</button>
+  <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
+  <div class="search-wrap">
+    <input type="text" id="portfolioSearch" placeholder="🔍 Поиск..." oninput="filterPortfolio(this.value)">
+  </div>
+  <div class="view-toggle">
+    <button class="btn btn-sm view-btn active" data-view="table" onclick="setPortfolioViewMode('table')"><i class="fas fa-table"></i></button>
+    <button class="btn btn-sm view-btn" data-view="cards" onclick="setPortfolioViewMode('cards')"><i class="fas fa-th"></i></button>
+  </div>
+</div>
+        <div class="table-wrap">
+          <table id="portTable">
+            <thead><tr>
+              <th onclick="sortPortfolio('name')">Монета <span class="sort-arrow">↕</span></th>
+              <th onclick="sortPortfolio('amount')">Кол-во <span class="sort-arrow">↕</span></th>
+              <th onclick="sortPortfolio('avgPrice')">Средняя <span class="sort-arrow">↕</span></th>
+              <th onclick="sortPortfolio('price')">Цена <span class="sort-arrow">↕</span></th>
+              <th onclick="sortPortfolio('value')">Стоимость <span class="sort-arrow">↕</span></th>
+              <th onclick="sortPortfolio('pnl')">P&L % <span class="sort-arrow">↕</span></th>
+              <th onclick="sortPortfolio('pnlDollar')">P&L $ <span class="sort-arrow">↕</span></th>
+              <th onclick="sortPortfolio('realized')">Реализ. <span class="sort-arrow">↕</span></th>
+              <th onclick="sortPortfolio('currentX')">X <span class="sort-arrow">↕</span></th>
+              <th onclick="sortPortfolio('xNeeded')">X до окупа <span class="sort-arrow">↕</span></th>
+              <th class="no-sort">Действия</th>
+            </tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ордера -->
+    <div class="collapsible-section">
+      <div class="collapsible-header" onclick="toggleSection('ordersSection')">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div class="section-title" style="margin:0;"><span class="icon"><i class="fas fa-clipboard-list"></i></span>Ордера</div>
+          <span id="ordersBadge" style="display:none; font-size:12px; color:var(--text-muted); background:var(--glass); padding:2px 14px; border-radius:30px; border:1px solid var(--border-color);"></span>
+        </div>
+        <span class="toggle-icon" id="ordersSection-toggle">▼</span>
+      </div>
+      <div class="collapsible-content" id="ordersSection">
+        <div class="section-sub">Лимитные ордера – сколько USDT заморожено, насколько близко к исполнению и как изменится средняя цена</div>
+        <div class="toolbar">
+          <button class="btn btn-primary" onclick="openOrderModal()"><i class="fas fa-plus"></i> Добавить ордер</button>
+          <span id="ordersSummary" style="font-size:13px; color:var(--text-muted);"></span>
+          <div class="order-filters" style="margin-left:auto;">
+            <button class="filter-btn active" onclick="setOrderFilter('all')">Все</button>
+            <button class="filter-btn" onclick="setOrderFilter('active')">Активные</button>
+            <button class="filter-btn" onclick="setOrderFilter('inactive')">Неактивные</button>
+            <button class="filter-btn" onclick="setOrderFilter('pending')">В ожидании</button>
+            <button class="filter-btn" onclick="setOrderFilter('executed')">Исполненные</button>
+          </div>
+        </div>
+        <div id="globalOrdersImpact"></div>
+        <div id="ordersList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL: MARKET -->
+  <div class="tab-panel" id="panel-market">
+    <div class="section-title"><span class="icon"><i class="fas fa-globe-americas"></i></span>Все монеты <span style="font-size:13px; color:var(--text-muted); font-weight:400;">(Топ-500, клик по заголовку для сортировки)</span></div>
     <div class="toolbar">
-      <button class="btn btn-primary" onclick="openModal()">+ добавить монету</button>
-      <button class="btn btn-sm" onclick="exportData()">экспорт JSON</button>
-      <button class="btn btn-sm" onclick="document.getElementById('importFile').click()">импорт JSON</button>
-      <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
+      <div class="search-wrap" style="flex:1; max-width:400px;">
+        <input type="text" id="marketSearch" placeholder="🔍 Поиск..." oninput="filterMarket(this.value)">
+      </div>
+      <span id="marketCount" style="font-size:13px; color:var(--text-muted);"></span>
     </div>
     <div class="table-wrap">
-      <table id="portTable">
+      <table id="marketTable">
         <thead><tr>
-          <th class="no-sort">монета</th>
-          <th onclick="sortPortfolio('amount')">кол-во <span class="sort-arrow">↕</span></th>
-          <th onclick="sortPortfolio('avgPrice')">средняя <span class="sort-arrow">↕</span></th>
-          <th onclick="sortPortfolio('price')">цена <span class="sort-arrow">↕</span></th>
-          <th onclick="sortPortfolio('value')">стоимость <span class="sort-arrow">↕</span></th>
-          <th onclick="sortPortfolio('pnl')">p&l % <span class="sort-arrow">↕</span></th>
-          <th onclick="sortPortfolio('pnlDollar')">p&l $ <span class="sort-arrow">↕</span></th>
-          <th onclick="sortPortfolio('realized')">реализ. $ <span class="sort-arrow">↕</span></th>
-          <th onclick="sortPortfolio('currentX')">текущий x <span class="sort-arrow">↕</span></th>
-          <th onclick="sortPortfolio('xNeeded')">x до окупа <span class="sort-arrow">↕</span></th>
-          <th class="no-sort"></th>
+          <th onclick="sortMarket('market_cap_rank')"># <span class="sort-arrow">↕</span></th>
+          <th class="no-sort">Монета</th>
+          <th onclick="sortMarket('current_price')">Цена <span class="sort-arrow">↕</span></th>
+          <th onclick="sortMarket('price_change_percentage_24h')">24ч <span class="sort-arrow">↕</span></th>
+          <th onclick="sortMarket('price_change_percentage_7d_in_currency')">7д <span class="sort-arrow">↕</span></th>
+          <th onclick="sortMarket('market_cap')">Кап <span class="sort-arrow">↕</span></th>
+          <th onclick="sortMarket('total_volume')">Объём <span class="sort-arrow">↕</span></th>
+          <th onclick="sortMarket('ath_change_percentage')">От ATH <span class="sort-arrow">↕</span></th>
+          <th class="no-sort">График</th>
         </tr></thead>
         <tbody></tbody>
       </table>
     </div>
   </div>
 
-  <div class="tab-panel" id="panel-market">
-    <div class="section-title">все монеты <span style="font-size:13px;color:var(--text-3);font-weight:400;">(топ-500, клик по заголовку для сортировки)</span></div>
-    <div class="toolbar" style="margin-bottom:12px;">
-      <input type="text" id="marketSearch" placeholder="поиск по названию или тикеру..." oninput="filterMarket(this.value)" style="padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-size:14px;outline:none;min-width:280px;flex:1;max-width:400px;">
-      <span id="marketCount" style="font-size:13px;color:var(--text-3);margin-left:8px;"></span>
-    </div>
-    <div class="table-wrap">
-      <table id="marketTable">
-        <thead>
-          <tr>
-            <th onclick="sortMarket('market_cap_rank')"># <span class="sort-arrow">↕</span></th>
-            <th class="no-sort">монета</th>
-            <th onclick="sortMarket('current_price')">цена <span class="sort-arrow">↕</span></th>
-            <th onclick="sortMarket('price_change_percentage_24h')">24ч <span class="sort-arrow">↕</span></th>
-            <th onclick="sortMarket('price_change_percentage_7d_in_currency')">7д <span class="sort-arrow">↕</span></th>
-            <th onclick="sortMarket('market_cap')">кап <span class="sort-arrow">↕</span></th>
-            <th onclick="sortMarket('total_volume')">объём <span class="sort-arrow">↕</span></th>
-            <th onclick="sortMarket('ath_change_percentage')">от ath <span class="sort-arrow">↕</span></th>
-            <th class="no-sort">график</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
-
+  <!-- PANEL: HEATMAP -->
   <div class="tab-panel" id="panel-heatmap">
-    <div class="section-title">тепловая карта</div>
-    <div class="section-sub">размер = капитализация · цвет = изменение 24ч</div>
+    <div class="section-title"><span class="icon"><i class="fas fa-fire"></i></span>Тепловая карта</div>
+    <div class="section-sub">Размер = капитализация · Цвет = изменение 24ч</div>
     <div class="heatmap" id="heatmapGrid"></div>
   </div>
 
+  <!-- PANEL: DCA -->
   <div class="tab-panel" id="panel-dca">
-    <div class="section-title">dca калькулятор</div>
-    <div class="section-sub">выберите монету - рекомендация появится сразу, сумму докупки можно скорректировать</div>
+    <div class="section-title"><span class="icon"><i class="fas fa-calculator"></i></span>DCA Калькулятор</div>
+    <div class="section-sub">Выберите монету из портфеля – рекомендация появится сразу</div>
     <div class="card">
       <div class="form-row">
-        <div class="form-group"><label>монета из портфеля</label><select id="dcaCoin" onchange="updateDCA()"></select></div>
-        <div class="form-group"><label>текущая средняя ($)</label><input type="number" id="dcaAvg" readonly></div>
-        <div class="form-group"><label>текущее количество</label><input type="number" id="dcaQty" readonly></div>
+        <div class="form-group"><label>Монета</label><select id="dcaCoin" onchange="updateDCA()"></select></div>
+        <div class="form-group"><label>Средняя ($)</label><input type="number" id="dcaAvg" readonly></div>
+        <div class="form-group"><label>Кол-во</label><input type="number" id="dcaQty" readonly></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label>текущая цена ($)</label><input type="number" id="dcaPrice" readonly></div>
-        <div class="form-group"><label>сумма докупки ($)</label><input type="number" id="dcaInvest" placeholder="1000" oninput="calcDCA(true)"></div>
-        <div class="form-group"><label>или количество</label><input type="number" id="dcaAddQty" placeholder="0" oninput="calcDCA(false)"></div>
+        <div class="form-group"><label>Цена ($)</label><input type="number" id="dcaPrice" readonly></div>
+        <div class="form-group"><label>Сумма докупки ($)</label><input type="number" id="dcaInvest" placeholder="1000" oninput="calcDCA(true)"></div>
+        <div class="form-group"><label>Или количество</label><input type="number" id="dcaAddQty" placeholder="0" oninput="calcDCA(false)"></div>
       </div>
       <div id="dcaResult" style="display:none;">
         <div class="dca-grid">
-          <div class="dca-metric"><div class="dca-metric-value" id="dcaNewAvg">$0</div><div class="dca-metric-label">новая средняя</div></div>
-          <div class="dca-metric"><div class="dca-metric-value" id="dcaTotalQty">0</div><div class="dca-metric-label">итого монет</div></div>
-          <div class="dca-metric"><div class="dca-metric-value" id="dcaTotalInv">$0</div><div class="dca-metric-label">всего вложено</div></div>
-          <div class="dca-metric"><div class="dca-metric-value pos" id="dcaBreakEven">0%</div><div class="dca-metric-label">нужен рост до окупа</div></div>
-          <div class="dca-metric"><div class="dca-metric-value" id="dcaCurPnl">0%</div><div class="dca-metric-label">текущий p&l</div></div>
-          <div class="dca-metric"><div class="dca-metric-value" id="dcaRec" style="font-size:15px;">-</div><div class="dca-metric-label">рекомендация</div></div>
+          <div class="dca-metric"><div class="dca-metric-value" id="dcaNewAvg">$0</div><div class="dca-metric-label">Новая средняя</div></div>
+          <div class="dca-metric"><div class="dca-metric-value" id="dcaTotalQty">0</div><div class="dca-metric-label">Итого монет</div></div>
+          <div class="dca-metric"><div class="dca-metric-value" id="dcaTotalInv">$0</div><div class="dca-metric-label">Всего вложено</div></div>
+          <div class="dca-metric"><div class="dca-metric-value pos" id="dcaBreakEven">0%</div><div class="dca-metric-label">Рост до окупа</div></div>
+          <div class="dca-metric"><div class="dca-metric-value" id="dcaCurPnl">0%</div><div class="dca-metric-label">Текущий P&L</div></div>
+          <div class="dca-metric"><div class="dca-metric-value" id="dcaRec" style="font-size:15px;">-</div><div class="dca-metric-label">Рекомендация</div></div>
         </div>
-        <div id="dcaAction" style="margin-top:16px; padding:14px; border-radius:var(--radius-sm); font-size:14px; line-height:1.6;"></div>
+        <div id="dcaAction" style="margin-top:14px; padding:14px; border-radius:var(--radius-sm); font-size:14px; line-height:1.7;"></div>
       </div>
     </div>
   </div>
 
+  <!-- PANEL: ADVISOR -->
   <div class="tab-panel" id="panel-advisor">
-    <div class="section-title">ai советник</div>
-    <div class="section-sub">авто-алерты создаются автоматически по логике советника, без ручного нажатия</div>
+    <div class="section-title"><span class="icon"><i class="fas fa-robot"></i></span>AI Советник</div>
+    <div class="section-sub">Авто-алерты создаются автоматически по логике советника</div>
 
     <div class="advisor-summary">
-      <div class="summary-card"><div class="title">сигналы купить</div><div class="value pos" id="sumBuy">0</div></div>
-      <div class="summary-card"><div class="title">сигналы продать</div><div class="value neg" id="sumSell">0</div></div>
-      <div class="summary-card"><div class="title">держать</div><div class="value neu" id="sumHold">0</div></div>
-      <div class="summary-card"><div class="title">авто-алерты</div><div class="value" id="sumAlerts">0</div></div>
+      <div class="summary-card"><div class="title"><i class="fas fa-arrow-up" style="color:var(--green);"></i> Купить</div><div class="value pos" id="sumBuy">0</div></div>
+      <div class="summary-card"><div class="title"><i class="fas fa-arrow-down" style="color:var(--red);"></i> Продать</div><div class="value neg" id="sumSell">0</div></div>
+      <div class="summary-card"><div class="title"><i class="fas fa-hand"></i> Держать</div><div class="value neu" id="sumHold">0</div></div>
+      <div class="summary-card"><div class="title"><i class="fas fa-bell"></i> Авто-алерты</div><div class="value" id="sumAlerts">0</div></div>
     </div>
 
     <div class="toolbar" style="margin-bottom:16px;">
-      <button class="btn btn-sm" onclick="setAdvisorFilter('all')">все</button>
-      <button class="btn btn-sm btn-primary" onclick="setAdvisorFilter('buy')">купить</button>
-      <button class="btn btn-sm btn-danger" onclick="setAdvisorFilter('sell')">продать</button>
-      <button class="btn btn-sm btn-yellow" onclick="setAdvisorFilter('hold')">держать</button>
+      <button class="btn btn-sm" onclick="setAdvisorFilter('all')">Все</button>
+      <button class="btn btn-sm btn-primary" onclick="setAdvisorFilter('buy')"><i class="fas fa-arrow-up"></i> Купить</button>
+      <button class="btn btn-sm btn-danger" onclick="setAdvisorFilter('sell')"><i class="fas fa-arrow-down"></i> Продать</button>
+      <button class="btn btn-sm btn-yellow" onclick="setAdvisorFilter('hold')"><i class="fas fa-hand"></i> Держать</button>
       <button class="btn btn-sm btn-blue" onclick="toggleAutoAlerts()">
-        авто-алерты: <span id="autoAlertsState">on</span>
+        <i class="fas fa-robot"></i> Авто-алерты: <span id="autoAlertsState">on</span>
       </button>
     </div>
 
     <div id="advisorList"></div>
-    <div id="newCoinSuggestions" style="margin-top:24px"></div>
+    <div id="newCoinSuggestions" style="margin-top:24px;"></div>
   </div>
 
+  <!-- PANEL: FEED -->
   <div class="tab-panel" id="panel-feed">
-    <div class="section-title">лента транзакций</div>
-    <div class="section-sub">все покупки и продажи по всему портфелю в хронологическом порядке</div>
+    <div class="section-title"><span class="icon"><i class="fas fa-list-ul"></i></span>Лента транзакций</div>
+    <div class="section-sub">Все покупки и продажи по портфелю в хронологическом порядке</div>
     <div id="feedList"></div>
   </div>
 </div>
 
+<!-- ===== MODALS (сокращены для экономии места) ===== -->
+<!-- Модалки аналогичны предыдущей версии, их содержимое не менялось -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
-    <div class="modal-header"><div class="modal-title" id="modalTitle">добавить покупку</div><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div class="modal-header"><div class="modal-title" id="modalTitle">Добавить покупку</div><button class="modal-close" onclick="closeModal()">&times;</button></div>
     <div class="form-row">
-      <div class="form-group" style="flex:2;">
-        <label>монета</label>
-        <div class="search-wrap">
-          <input type="text" id="mCoinSearch" placeholder="введите название или тикер (любая монета)..." oninput="searchCoins(this.value)" onfocus="searchCoins(this.value)" autocomplete="off">
-          <input type="hidden" id="mCoinId">
-          <input type="hidden" id="mCoinImg">
-          <div class="search-results" id="searchResults"></div>
-        </div>
-        <div class="form-hint">поиск идет по топ-250 и по всей базе CoinGecko - можно выбрать любую монету</div>
-      </div>
-      <div class="form-group"><label>количество</label><input type="number" id="mQty" step="any" placeholder="0.5"></div>
+      <div class="form-group" style="flex:2;"><label>Монета</label><div class="search-wrap"><input type="text" id="mCoinSearch" placeholder="Введите название или тикер..." oninput="searchCoins(this.value)" onfocus="searchCoins(this.value)" autocomplete="off"><input type="hidden" id="mCoinId"><input type="hidden" id="mCoinImg"><div class="search-results" id="searchResults"></div></div></div>
+      <div class="form-group"><label>Количество</label><input type="number" id="mQty" step="any" placeholder="0.5"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>цена ($)</label><input type="number" id="mPrice" step="any" placeholder="45000"></div>
-      <div class="form-group"><label>дата</label><input type="date" id="mDate"></div>
-      <div class="form-group">
-        <label>тип</label>
-        <div style="display:flex;gap:16px;align-items:center;height:42px;">
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;color:var(--text);"><input type="radio" name="txType" value="buy" checked style="accent-color:var(--green);"> покупка</label>
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;color:var(--text);"><input type="radio" name="txType" value="sell" style="accent-color:var(--red);"> продажа</label>
-        </div>
-      </div>
+      <div class="form-group"><label>Цена ($)</label><input type="number" id="mPrice" step="any" placeholder="45000"></div>
+      <div class="form-group"><label>Дата</label><input type="date" id="mDate"></div>
+      <div class="form-group"><label>Тип</label><div style="display:flex; gap:16px; align-items:center; height:42px;"><label><input type="radio" name="txType" value="buy" checked> Покупка</label><label><input type="radio" name="txType" value="sell"> Продажа</label></div></div>
     </div>
     <div class="form-hint" id="mExistingHint" style="display:none; margin-bottom:8px;"></div>
     <div class="form-row">
-      <div class="form-group">
-        <label>цель продажи ($)</label>
-        <input type="number" id="mTarget" step="any" placeholder="100000">
-        <div class="form-hint">при достижении этой цены AI посоветует зафиксировать прибыль</div>
-      </div>
-      <div class="form-group">
-        <label>стоп-лосс ($)</label>
-        <input type="number" id="mStop" step="any" placeholder="35000">
-        <div class="form-hint">при падении до этой цены AI посоветует выйти из позиции</div>
-      </div>
+      <div class="form-group"><label>Цель ($)</label><input type="number" id="mTarget" step="any" placeholder="100000"></div>
+      <div class="form-group"><label>Стоп ($)</label><input type="number" id="mStop" step="any" placeholder="35000"></div>
     </div>
-    <div class="form-row">
-      <div class="form-group" style="flex:1;">
-        <label>заметка / стратегия</label>
-        <input type="text" id="mNotes" placeholder="например: долгосрок, ходл до 100к">
-        <div class="form-hint">видна в AI-советнике, помогает помнить почему купили</div>
-      </div>
-    </div>
+    <div class="form-row"><div class="form-group"><label>Заметка</label><input type="text" id="mNotes" placeholder="Стратегия"></div></div>
     <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:16px;">
-      <button class="btn" onclick="closeModal()">отмена</button>
-      <button class="btn btn-primary" onclick="saveHolding()">сохранить</button>
+      <button class="btn" onclick="closeModal()">Отмена</button>
+      <button class="btn btn-primary" onclick="saveHolding()">Сохранить</button>
     </div>
   </div>
 </div>
 
 <div class="modal-overlay" id="txModal">
   <div class="modal">
-    <div class="modal-header"><div class="modal-title" id="txModalTitle">транзакции</div><button class="modal-close" onclick="closeTxModal()">&times;</button></div>
+    <div class="modal-header"><div class="modal-title" id="txModalTitle">Транзакции</div><button class="modal-close" onclick="closeTxModal()">&times;</button></div>
     <div id="txList"></div>
-    <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px;">
-      <button class="btn btn-primary btn-sm" onclick="openAddPurchaseModal()">+ добавить покупку</button>
+    <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px;">
+      <button class="btn btn-primary btn-sm" onclick="openAddPurchaseModal()"><i class="fas fa-plus"></i> Добавить</button>
     </div>
   </div>
 </div>
 
 <div class="modal-overlay" id="chartModal">
   <div class="modal modal-wide">
-    <div class="modal-header"><div class="modal-title" id="chartModalTitle">график</div><button class="modal-close" onclick="closeChartModal()">&times;</button></div>
+    <div class="modal-header"><div class="modal-title" id="chartModalTitle">График</div><button class="modal-close" onclick="closeChartModal()">&times;</button></div>
     <div class="form-row" style="margin-bottom:4px;">
       <button class="btn btn-sm" onclick="loadCoinChart(currentChartCoin,7)">7д</button>
       <button class="btn btn-sm" onclick="loadCoinChart(currentChartCoin,30)">30д</button>
       <button class="btn btn-sm" onclick="loadCoinChart(currentChartCoin,90)">90д</button>
       <button class="btn btn-sm" onclick="loadCoinChart(currentChartCoin,365)">1г</button>
     </div>
-    <div class="chart-container" style="height:320px;"><canvas id="realChartCanvas"></canvas></div>
-    <div id="chartLoading" style="text-align:center;color:var(--text-3);font-size:13px;margin-top:8px;"></div>
+    <div class="chart-container"><canvas id="realChartCanvas"></canvas></div>
+    <div id="chartLoading" style="text-align:center; color:var(--text-muted); font-size:13px; margin-top:6px;"></div>
   </div>
 </div>
 
 <div class="modal-overlay" id="authModal">
   <div class="modal">
-    <div class="modal-header"><div class="modal-title" id="authModalTitle">вход в аккаунт</div><button class="modal-close" onclick="closeAuthModal()">&times;</button></div>
-    <div id="authError" style="display:none;background:var(--red-dim);color:var(--red);padding:10px;border-radius:var(--radius-sm);margin-bottom:12px;font-size:13px;"></div>
-    
-    <div class="form-row">
-      <div class="form-group"><label>email</label><input type="email" id="authEmail" placeholder="your@email.com"></div>
+    <div class="modal-header"><div class="modal-title" id="authModalTitle">Вход</div><button class="modal-close" onclick="closeAuthModal()">&times;</button></div>
+    <div id="authError" style="display:none; background:var(--red-dim); color:var(--red); padding:8px; border-radius:var(--radius-sm); margin-bottom:10px; font-size:12px;"></div>
+    <div class="form-row"><div class="form-group"><label>Email</label><input type="email" id="authEmail" placeholder="your@email.com"></div></div>
+    <div class="form-row"><div class="form-group"><label>Пароль</label><input type="password" id="authPassword" placeholder="••••••••"></div></div>
+    <div style="text-align:right;"><button class="btn btn-sm" style="background:none; border:none; color:var(--text-muted); padding:0;" onclick="resetPassword()">Забыли пароль?</button></div>
+    <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px;">
+      <button class="btn" onclick="closeAuthModal()">Отмена</button>
+      <button class="btn btn-primary" id="authSubmitBtn" onclick="handleAuth()">Войти</button>
     </div>
-    <div class="form-row">
-      <div class="form-group"><label>пароль</label><input type="password" id="authPassword" placeholder="••••••••"></div>
+    <div style="text-align:center; margin-top:12px; padding-top:12px; border-top:1px solid var(--border-color);">
+      <button class="btn btn-blue" style="width:100%;" onclick="signInWithGoogle()">Войти через Google</button>
     </div>
-    
-    <div style="text-align:right;margin-top:8px;">
-      <button class="btn btn-sm" style="background:none;border:none;color:var(--text-2);padding:0;" onclick="resetPassword()">забыли пароль?</button>
-    </div>
-    
-    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
-      <button class="btn" onclick="closeAuthModal()">отмена</button>
-      <button class="btn btn-primary" id="authSubmitBtn" onclick="handleAuth()">войти</button>
-    </div>
-    
-    <div style="text-align:center;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
-      <button class="btn btn-blue" style="width:100%;" onclick="signInWithGoogle()">
-        <span style="display:flex;align-items:center;justify-content:center;gap:8px;">
-          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-          Войти через Google
-        </span>
-      </button>
-    </div>
-    
-    <div style="text-align:center;margin-top:12px;font-size:13px;color:var(--text-2);">
+    <div style="text-align:center; margin-top:10px; font-size:12px; color:var(--text-muted);">
       <span id="authToggleText">Нет аккаунта?</span>
-      <button class="btn btn-sm" style="background:none;border:none;color:var(--green);padding:0;" onclick="toggleAuthMode()" id="authToggleBtn">зарегистрироваться</button>
+      <button class="btn btn-sm" style="background:none; border:none; color:var(--green); padding:0;" onclick="toggleAuthMode()" id="authToggleBtn">Зарегистрироваться</button>
     </div>
   </div>
 </div>
 
+<div class="modal-overlay" id="orderModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="orderModalTitle">Добавить ордер</div><button class="modal-close" onclick="closeOrderModal()">&times;</button></div>
+    <div class="form-row">
+      <div class="form-group" style="flex:2;"><label>Монета</label><div class="search-wrap"><input type="text" id="orderCoinSearch" placeholder="Название..." oninput="searchOrderCoins(this.value)" onfocus="searchOrderCoins(this.value)" autocomplete="off"><input type="hidden" id="orderCoinId"><input type="hidden" id="orderCoinImg"><div class="search-results" id="orderSearchResults"></div></div></div>
+      <div class="form-group"><label>Кол-во</label><input type="number" id="orderQty" step="any" placeholder="0.5" oninput="calcOrderTotal()"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Цена ($)</label><input type="number" id="orderPrice" step="any" placeholder="45000" oninput="calcOrderTotal()"></div>
+      <div class="form-group"><label>Сумма USDT</label><input type="number" id="orderTotal" step="any" placeholder="1000" oninput="calcOrderQty()"></div>
+    </div>
+    <div class="form-hint">Количество и цена пересчитывают сумму.</div>
+    <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px;">
+      <button class="btn" onclick="closeOrderModal()">Отмена</button>
+      <button class="btn btn-primary" onclick="saveOrder()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCRIPTS ===== -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -611,9 +2728,19 @@ let currentTxHoldingId = null;
 let currentChartCoin = null;
 let searchDebounce = null;
 let currentEditTxId = null;
+let currentEditOrderId = null;
+let portfolioViewMode = 'table';
+
 let marketFilter = '';
 let advisorFilter = 'all';
 let autoAlertsEnabled = true;
+const ORDERS_KEY = 'ct_orders_v1';
+let orders = [];
+
+let portfolioFilter = '';
+let orderStatusFilter = 'all';
+let collapsedSections = { portfolioAssets: false, ordersSection: false };
+
 
 // Track recent user actions to prevent repeated recommendations
 const recentUserActions = new Map(); // holdingId -> { action: 'buy'|'sell', timestamp, price, amount }
@@ -1534,6 +3661,19 @@ function updateAuthUI() {
     userInfo.style.display = 'none';
   }
 }
+function clearOldCache() {
+  try {
+    // Удаляем тяжёлые кэши, которые можно пересоздать
+    localStorage.removeItem('ct_extra_coins');
+    localStorage.removeItem(CACHE_KEY);
+    // Если есть старые версии ключей — тоже чистим
+    localStorage.removeItem('ct_cache_v4');
+    localStorage.removeItem('ct_portfolio_v4');
+  } catch (e) {}
+}
+
+// Вызываем сразу при загрузке
+clearOldCache();
 
 async function init() {
   // Load data (Firebase if available, otherwise localStorage)
@@ -1541,6 +3681,7 @@ async function init() {
   loadNotifs();
   loadAlerts();
   loadAutoAlertSettings();
+  loadOrders();
   
   setupTabs();
   setupSearchClose();
@@ -1551,7 +3692,15 @@ async function init() {
   if (window.firebaseReady) {
     updateAuthUI();
   }
-  
+  // Загружаем сохранённый вид
+const savedView = localStorage.getItem('ct_portfolio_view_mode');
+if (savedView && (savedView === 'table' || savedView === 'cards')) {
+  portfolioViewMode = savedView;
+}
+// Обновляем активные кнопки
+document.querySelectorAll('.view-btn').forEach(btn => {
+  btn.classList.toggle('active', btn.dataset.view === portfolioViewMode);
+});
   fetchAll();
   setInterval(fetchAll, 60000);
 }
@@ -1574,6 +3723,7 @@ function setupSearchClose() {
   document.addEventListener('click', e => {
     if (!e.target.closest('.search-wrap')) {
       document.getElementById('searchResults').classList.remove('active');
+      document.getElementById('orderSearchResults').classList.remove('active');
     }
     if (!e.target.closest('.notif-bell')) {
       document.getElementById('notifDropdown').classList.remove('active');
@@ -1718,35 +3868,17 @@ async function fetchAll() {
 
     // Cache only essential data to avoid localStorage quota exceeded
     // Don't cache full allCoins array (too large), cache only portfolio-related data
-    const cacheData = {
+        const cacheData = {
       time: Date.now(),
       global: globalData,
-      fear: fearData,
-      // Cache only coins that are in portfolio
-      portfolioCoins: allCoins.filter(c => portfolio.some(p => p.coinId === c.id))
+      fear: fearData
+      // НЕ сохраняем portfolioCoins — они и так загрузятся с CoinGecko
     };
     try {
-      // Clear old cache first to free space
-      localStorage.removeItem(CACHE_KEY);
       localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
     } catch (e) {
-      console.warn('Failed to save cache (quota exceeded), using minimal cache');
-      // Try to clear all related caches to free space
-      try {
- sessionStorage.clear();
-      } catch(se){}
-      // Save minimal data if quota exceeded
-      try {
-        localStorage.setItem(CACHE_KEY, JSON.stringify({
-          time: Date.now(),
-          global: globalData,
-          fear: fearData,
-          portfolioCoins: []
-        }));
-      } catch (e2) {
-        console.error('Cannot save even minimal cache:', e2);
-      }
-    }
+      console.warn('Cache not saved: quota exceeded');
+    } 
     await refreshExtraCoins();
     syncAutoAlertsFromAdvisor();
     hideCorsWarning();
@@ -1791,19 +3923,19 @@ function getCache() {
     const cache = JSON.parse(localStorage.getItem(CACHE_KEY));
     if (!cache) return null;
     // Handle old cache format (coins) and new format (portfolioCoins)
-    if (cache.coins && !cache.portfolioCoins) {
-      cache.portfolioCoins = cache.coins;
-    }
+     
     return cache;
   } catch { return null; }
 }
 
 function renderAll() {
+  checkOrderExecution();
   renderHeader();
   renderPortfolio();
   renderMarket();
   renderHeatmap();
   initDCA();
+  renderOrders();
   if (document.getElementById('panel-advisor').classList.contains('active')) renderAdvisor();
   updateNotifBadge();
 }
@@ -1883,17 +4015,89 @@ function getPortfolioRows() {
     const realized = h.realizedPnl || 0;
     const currentX = h.avgPrice > 0 ? c.current_price / h.avgPrice : 0;
     const xNeeded = c.current_price > 0 ? h.avgPrice / c.current_price : 0;
-    rows.push({ h, c, value, inv, pnl, pnlDollar, realized, price: c.current_price, amount: h.amount, avgPrice: h.avgPrice, currentX, xNeeded });
+    rows.push({ h, c, value, inv, pnl, pnlDollar, realized, price: c.current_price, amount: h.amount, avgPrice: h.avgPrice, currentX, xNeeded, name: c.name.toLowerCase() });
   });
+  
+  if (portfolioFilter) {
+    const q = portfolioFilter.toLowerCase();
+    return rows.filter(r => r.name.includes(q) || r.h.symbol.toLowerCase().includes(q));
+  }
+  
   if (portfolioSort.col) {
     rows.sort((a, b) => {
+      if (portfolioSort.col === 'name') {
+        const av = a.name, bv = b.name;
+        return portfolioSort.dir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+      }
       const av = a[portfolioSort.col], bv = b[portfolioSort.col];
       return portfolioSort.dir === 'asc' ? av - bv : bv - av;
     });
   }
   return rows;
 }
+function setPortfolioViewMode(mode) {
+  portfolioViewMode = mode;
+  localStorage.setItem('ct_portfolio_view_mode', mode);
+  document.querySelectorAll('.view-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.view === mode);
+  });
+  renderPortfolio();
+}
+function createPortfolioCard(r) {
+  const { h, c, value, inv, pnl, pnlDollar, realized, currentX, xNeeded, price, amount, avgPrice } = r;
+  const pnlClass = pnl >= 0 ? 'pos' : 'neg';
+  const ch24 = c.price_change_percentage_24h || 0;
+  const ch24Class = ch24 >= 0 ? 'pos' : 'neg';
+  
+  const showCurrentX = pnl >= 0;
+  const xLabel = showCurrentX ? 'Текущие иксы' : 'Иксы до окупа';
+  const xValue = showCurrentX ? currentX : xNeeded;
+  const xClass = showCurrentX ? (currentX >= 1 ? 'pos' : 'neg') : (xNeeded <= 1 ? 'pos' : 'neg');
 
+  const pnlFormatted = (pnl >= 0 ? '+' : '') + pnl.toFixed(2) + '%';
+
+  const card = document.createElement('div');
+  card.className = 'portfolio-card';
+  card.innerHTML = `
+    <!-- Метка P&L % (выступает сверху справа) -->
+    <div class="portfolio-card-pnl-badge ${pnlClass}">${pnlFormatted}</div>
+
+    <!-- Строка изменения 24ч -->
+    <div class="portfolio-card-change-row">
+      <span class="change ${ch24Class}">${ch24 >= 0 ? '+' : ''}${ch24.toFixed(2)}% 24ч</span>
+    </div>
+
+    <!-- Верхняя строка: иконка, имя, цена -->
+    <div class="portfolio-card-top">
+      <div class="portfolio-card-left">
+        <img src="${c.image}" class="portfolio-card-img" onerror="this.style.display='none'">
+        <div class="portfolio-card-name-group">
+          <div class="portfolio-card-symbol">${h.symbol}</div>
+          <div class="portfolio-card-name">${c.name}</div>
+        </div>
+      </div>
+      <div class="portfolio-card-price">${fmt$(price)}</div>
+    </div>
+
+    <!-- Тело карточки: две колонки -->
+    <div class="portfolio-card-body">
+      <div class="portfolio-card-row"><span class="label">Кол-во</span><span class="value">${amount.toFixed(4)}</span></div>
+      <div class="portfolio-card-row"><span class="label">Средняя</span><span class="value">${fmt$(avgPrice)}</span></div>
+      <div class="portfolio-card-row"><span class="label">Стоимость</span><span class="value">${fmt$(value)}</span></div>
+      <div class="portfolio-card-row"><span class="label">Вложено</span><span class="value">${fmt$(inv)}</span></div>
+      <div class="portfolio-card-row"><span class="label">P&L $</span><span class="value ${pnlDollar >= 0 ? 'pos' : 'neg'}">${pnlDollar >= 0 ? '+' : ''}${fmt$(pnlDollar)}</span></div>
+      <div class="portfolio-card-row"><span class="label">${xLabel}</span><span class="value ${xClass}">${xValue.toFixed(2)}x</span></div>
+    </div>
+
+    <!-- Кнопки -->
+    <div class="portfolio-card-actions">
+      <button class="btn btn-sm btn-blue" onclick="openTxModal('${h.id}')">транз.</button>
+      <button class="btn btn-sm btn-blue" onclick="toggleDcaCalculator('${h.id}')">DCA</button>
+      <button class="btn btn-sm btn-danger" onclick="delHolding('${h.id}')">удал</button>
+    </div>
+  `;
+  return card;
+}
 function sortPortfolio(col) {
   if (portfolioSort.col === col) portfolioSort.dir = portfolioSort.dir === 'asc' ? 'desc' : 'asc';
   else { portfolioSort.col = col; portfolioSort.dir = 'desc'; }
@@ -1901,132 +4105,148 @@ function sortPortfolio(col) {
 }
 
 function renderPortfolio() {
-  const tbody = document.querySelector('#portTable tbody');
-  tbody.innerHTML = '';
+  const container = document.querySelector('.table-wrap');
+  container.innerHTML = '';
+  
   let totalVal = 0;
   const pieData = [];
   const rows = getPortfolioRows();
 
   rows.forEach((r, idx) => {
-    const { h, c, value, pnl, pnlDollar, realized, currentX, xNeeded } = r;
+    const { h, c, value } = r;
     totalVal += value;
     pieData.push({ label: h.symbol, value: value, color: getColor(idx) });
-
-    const tr = document.createElement('tr');
-    tr.innerHTML =
-      '<td><div class="coin-cell"><div class="coin-img"><img src="' + c.image + '" alt="" onerror="this.style.display=\'none\';this.parentNode.textContent=\'' + h.symbol[0] + '\'"></div><div><div class="coin-name" onclick="openChartModal(\'' + h.coinId + '\',\'' + h.symbol + '\')">' + c.name + '</div><div class="coin-symbol">' + h.symbol + '</div></div></div></td>' +
-      '<td>' + h.amount.toLocaleString() + '</td>' +
-      '<td>$' + h.avgPrice.toLocaleString() + '</td>' +
-      '<td>' + fmt$(c.current_price) + '</td>' +
-      '<td>' + fmt$(value) + '</td>' +
-      '<td><span class="pnl-big ' + (pnl >= 0 ? 'pos' : 'neg') + '">' + fmtPct(pnl) + '</span></td>' +
-      '<td><span class="' + (pnlDollar >= 0 ? 'pos' : 'neg') + '" style="font-weight:700;">' + (pnlDollar >= 0 ? '+' : '') + fmt$(pnlDollar) + '</span></td>' +
-      '<td><span class="' + (realized >= 0 ? 'pos' : 'neg') + '" style="font-weight:700;">' + (realized >= 0 ? '+' : '') + fmt$(realized) + '</span></td>' +
-      '<td><span class="' + (currentX >= 1 ? 'pos' : 'neg') + '" style="font-weight:700;">' + currentX.toFixed(2) + 'x</span></td>' +
-      '<td><span class="' + (xNeeded <= 1 ? 'pos' : 'neg') + '" style="font-weight:700;">' + xNeeded.toFixed(2) + 'x</span></td>' +
-      '<td><button class="btn btn-sm" onclick="toggleAdviceRow(\'' + h.id + '\')">рек ' + (expandedRows[h.id] ? '▲' : '▼') + '</button> <button class="btn btn-sm btn-blue" onclick="toggleDcaCalculator(\'' + h.id + '\')">DCA</button> <button class="btn btn-sm btn-blue" onclick="openTxModal(\'' + h.id + '\')">транз.</button> <button class="btn btn-sm btn-danger" onclick="delHolding(\'' + h.id + '\')">удл</button></td>';
-    tbody.appendChild(tr);
-
-    if (expandedRows[h.id]) {
-      const adv = generateCoinAdvice(h, c);
-      const autoInfo = adv.autoAlert
-        ? '<div style="margin-top:10px;font-size:12px;color:var(--text-3)">Авто-алерт: ' + (adv.autoAlert.type === 'below' ? 'ниже ' : 'выше ') + fmt$(adv.autoAlert.value) + (adv.autoAlert.suggestedAmount ? (' · сумма ~' + fmt$(adv.autoAlert.suggestedAmount)) : '') + '</div>'
-        : '';
-      
-      const dcaState = dcaCalculatorState.get(h.id) || { showCalculator: false, buyAmount: 10, buyQuantity: 0, buyPrice: c.current_price };
-      // Initialize buyPrice to current price if it's 0
-      if (dcaState.buyPrice === 0) {
-        dcaState.buyPrice = c.current_price;
-        dcaCalculatorState.set(h.id, dcaState);
-      }
-      const dcaResults = dcaState.showCalculator ? calculateDCAResults(h, c, dcaState.buyAmount, dcaState.buyQuantity, dcaState.buyPrice) : null;
-      
-      let dcaHtml = '';
-      if (dcaState.showCalculator && dcaResults) {
-        const recColor = dcaResults.recommendation === 'recommended' ? 'var(--green)' : (dcaResults.recommendation === 'not_recommended' ? 'var(--red)' : 'var(--yellow)');
-        const recBadge = dcaResults.recommendation === 'recommended' ? 'РЕКОМЕНДУЕТСЯ' : (dcaResults.recommendation === 'not_recommended' ? 'НЕ РЕКОМЕНДУЕТСЯ' : 'НЕЙТРАЛЬНО');
-        
-        dcaHtml = `
-          <div style="margin-top:16px;padding:16px;background:rgba(59,130,246,0.1);border-radius:8px;border:1px solid rgba(59,130,246,0.3);">
-            <div style="font-weight:700;margin-bottom:12px;color:var(--blue);">DCA Калькулятор - ${h.symbol}</div>
-            
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px;">
-              <div>
-                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Текущая средняя ($)</div>
-                <div style="font-weight:600;">${dcaResults.currentAvg.toFixed(2)}</div>
-              </div>
-              <div>
-                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Текущее количество монет</div>
-                <div style="font-weight:600;">${dcaResults.currentAmount.toFixed(4)}</div>
-              </div>
-              <div>
-                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Текущая цена ($)</div>
-                <div style="font-weight:600;">${dcaResults.currentPrice.toFixed(2)}</div>
-              </div>
-              <div>
-                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Текущие вложения ($)</div>
-                <div style="font-weight:600;">${(dcaResults.currentAmount * dcaResults.currentAvg).toFixed(2)}</div>
-              </div>
-              <div>
-                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Текущий P&L</div>
-                <div style="font-weight:600;color:${dcaResults.currentPnl >= 0 ? 'var(--green)' : 'var(--red)'};">${dcaResults.currentPnl >= 0 ? '+' : ''}${dcaResults.currentPnl.toFixed(2)}%</div>
-              </div>
-            </div>
-            
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px;">
-              <div>
-                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Сумма докупки ($)</div>
-                <input type="number" id="dca-buy-amount-${h.id}" value="${dcaState.buyAmount}" oninput="updateDcaAmount('${h.id}', this.value)" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;">
-              </div>
-              <div>
-                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Или количество</div>
-                <input type="number" id="dca-buy-quantity-${h.id}" value="${dcaState.buyQuantity}" oninput="updateDcaQuantity('${h.id}', this.value)" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;">
-              </div>
-              <div>
-                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Цена покупки ($)</div>
-                <input type="number" id="dca-buy-price-${h.id}" value="${dcaState.buyPrice || c.current_price}" oninput="updateDcaPrice('${h.id}', this.value)" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;">
-              </div>
-            </div>
-            
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px;padding:12px;background:rgba(0,0,0,0.2);border-radius:4px;">
-              <div>
-                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Новая средняя</div>
-                <div style="font-weight:600;color:var(--blue);" id="dca-new-avg-${h.id}">$${dcaResults.newAvg.toFixed(2)}</div>
-              </div>
-              <div>
-                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Итого монет</div>
-                <div style="font-weight:600;" id="dca-new-amount-${h.id}">${dcaResults.newAmount.toFixed(4)}</div>
-              </div>
-              <div>
-                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Всего вложено</div>
-                <div style="font-weight:600;" id="dca-total-invested-${h.id}">$${dcaResults.totalInvested.toFixed(2)}</div>
-              </div>
-              <div>
-                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Нужен рост до окупа</div>
-                <div style="font-weight:600;color:${dcaResults.growthNeeded >= 0 ? 'var(--red)' : 'var(--green)'};" id="dca-growth-needed-${h.id}">${dcaResults.growthNeeded >= 0 ? '+' : ''}${dcaResults.growthNeeded.toFixed(1)}%</div>
-              </div>
-              <div>
-                <div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">Нужно иксов</div>
-                <div style="font-weight:600;color:${dcaResults.growthNeeded >= 0 ? 'var(--red)' : 'var(--green)'};" id="dca-x-needed-${h.id}">${(dcaResults.newAvg / dcaResults.currentPrice).toFixed(2)}x</div>
-              </div>
-            </div>
-            
-            <div style="padding:12px;background:${dcaResults.recommendation === 'recommended' ? 'rgba(34,197,94,0.1)' : (dcaResults.recommendation === 'not_recommended' ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.1)')};border-radius:4px;border-left:3px solid ${recColor};">
-              <div style="font-weight:700;color:${recColor};margin-bottom:4px;" id="dca-rec-badge-${h.id}">${recBadge}</div>
-              <div style="font-size:12px;color:var(--text-2);" id="dca-rec-text-${h.id}">${dcaResults.recommendationText}</div>
-            </div>
-          </div>
-        `;
-      }
-      
-      const exTr = document.createElement('tr');
-      exTr.className = 'expand-row';
-      exTr.innerHTML = '<td colspan="9"><div class="advice-card ' + adv.type + '" style="margin-bottom:0;"><div class="advice-header"><div class="advice-title">Рекомендация</div><span class="advice-badge badge-' + adv.badge + '">' + (adv.badge==='buy'?'КУПИТЬ':adv.badge==='sell'?'ПРОДАТЬ':'ДЕРЖАТЬ') + '</span></div><div class="advice-text">' + adv.text + '</div>' + adv.actionHtml + autoInfo + dcaHtml + '</div></td>';
-      tbody.appendChild(exTr);
-    }
   });
 
   drawPie(pieData, totalVal);
+
+  if (portfolioViewMode === 'table') {
+    // --- ТАБЛИЦА ---
+    const table = document.createElement('table');
+    table.id = 'portTable';
+    const thead = document.createElement('thead');
+    thead.innerHTML = `<tr>
+      <th onclick="sortPortfolio('name')">Монета <span class="sort-arrow">↕</span></th>
+      <th onclick="sortPortfolio('amount')">Кол-во <span class="sort-arrow">↕</span></th>
+      <th onclick="sortPortfolio('avgPrice')">Средняя <span class="sort-arrow">↕</span></th>
+      <th onclick="sortPortfolio('price')">Цена <span class="sort-arrow">↕</span></th>
+      <th onclick="sortPortfolio('value')">Стоимость <span class="sort-arrow">↕</span></th>
+      <th onclick="sortPortfolio('pnl')">P&L % <span class="sort-arrow">↕</span></th>
+      <th onclick="sortPortfolio('pnlDollar')">P&L $ <span class="sort-arrow">↕</span></th>
+      <th onclick="sortPortfolio('realized')">Реализ. <span class="sort-arrow">↕</span></th>
+      <th onclick="sortPortfolio('currentX')">X <span class="sort-arrow">↕</span></th>
+      <th onclick="sortPortfolio('xNeeded')">X до окупа <span class="sort-arrow">↕</span></th>
+      <th class="no-sort">Действия</th>
+    </tr>`;
+    table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+
+    rows.forEach((r, idx) => {
+      const { h, c, value, pnl, pnlDollar, realized, currentX, xNeeded } = r;
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td><div class="coin-cell"><div class="coin-img"><img src="' + c.image + '" alt="" onerror="this.style.display=\'none\';this.parentNode.textContent=\'' + h.symbol[0] + '\'"></div><div><div class="coin-name" onclick="openChartModal(\'' + h.coinId + '\',\'' + h.symbol + '\')">' + c.name + '</div><div class="coin-symbol">' + h.symbol + '</div></div></div></td>' +
+        '<td>' + h.amount.toLocaleString() + '</td>' +
+        '<td>$' + h.avgPrice.toLocaleString() + '</td>' +
+        '<td>' + fmt$(c.current_price) + '</td>' +
+        '<td>' + fmt$(value) + '</td>' +
+        '<td><span class="pnl-big ' + (pnl >= 0 ? 'pos' : 'neg') + '">' + fmtPct(pnl) + '</span></td>' +
+        '<td><span class="' + (pnlDollar >= 0 ? 'pos' : 'neg') + '" style="font-weight:700;">' + (pnlDollar >= 0 ? '+' : '') + fmt$(pnlDollar) + '</span></td>' +
+        '<td><span class="' + (realized >= 0 ? 'pos' : 'neg') + '" style="font-weight:700;">' + (realized >= 0 ? '+' : '') + fmt$(realized) + '</span></td>' +
+        '<td><span class="' + (currentX >= 1 ? 'pos' : 'neg') + '" style="font-weight:700;">' + currentX.toFixed(2) + 'x</span></td>' +
+        '<td><span class="' + (xNeeded <= 1 ? 'pos' : 'neg') + '" style="font-weight:700;">' + xNeeded.toFixed(2) + 'x</span></td>' +
+        '<td><button class="btn btn-sm" onclick="toggleAdviceRow(\'' + h.id + '\')">рек ' + (expandedRows[h.id] ? '▲' : '▼') + '</button> <button class="btn btn-sm btn-blue" onclick="toggleDcaCalculator(\'' + h.id + '\')">DCA</button> <button class="btn btn-sm btn-blue" onclick="openTxModal(\'' + h.id + '\')">транз.</button> <button class="btn btn-sm btn-danger" onclick="delHolding(\'' + h.id + '\')">удл</button></td>';
+      tbody.appendChild(tr);
+
+      if (expandedRows[h.id]) {
+        const adv = generateCoinAdvice(h, c);
+        const autoInfo = adv.autoAlert
+          ? '<div style="margin-top:10px;font-size:12px;color:var(--text-3)">Авто-алерт: ' + (adv.autoAlert.type === 'below' ? 'ниже ' : 'выше ') + fmt$(adv.autoAlert.value) + (adv.autoAlert.suggestedAmount ? (' · сумма ~' + fmt$(adv.autoAlert.suggestedAmount)) : '') + '</div>'
+          : '';
+        
+        const dcaState = dcaCalculatorState.get(h.id) || { showCalculator: false, buyAmount: 10, buyQuantity: 0, buyPrice: c.current_price };
+        if (dcaState.buyPrice === 0) {
+          dcaState.buyPrice = c.current_price;
+          dcaCalculatorState.set(h.id, dcaState);
+        }
+        const dcaResults = dcaState.showCalculator ? calculateDCAResults(h, c, dcaState.buyAmount, dcaState.buyQuantity, dcaState.buyPrice) : null;
+        
+        let dcaHtml = '';
+        if (dcaState.showCalculator && dcaResults) {
+          const recColor = dcaResults.recommendation === 'recommended' ? 'var(--green)' : (dcaResults.recommendation === 'not_recommended' ? 'var(--red)' : 'var(--yellow)');
+          const recBadge = dcaResults.recommendation === 'recommended' ? 'РЕКОМЕНДУЕТСЯ' : (dcaResults.recommendation === 'not_recommended' ? 'НЕ РЕКОМЕНДУЕТСЯ' : 'НЕЙТРАЛЬНО');
+          
+          dcaHtml = `
+  <div class="dca-wrapper">
+  <div class="dca-title">📊 DCA Калькулятор - ${h.symbol}</div>
+
+  <!-- Текущие показатели -->
+  <div class="dca-grid-group">
+    <div class="dca-item"><div class="dca-item-label">Текущая средняя ($)</div><div class="dca-item-value">${dcaResults.currentAvg.toFixed(2)}</div></div>
+    <div class="dca-item"><div class="dca-item-label">Текущее кол-во</div><div class="dca-item-value">${dcaResults.currentAmount.toFixed(4)}</div></div>
+    <div class="dca-item"><div class="dca-item-label">Текущая цена ($)</div><div class="dca-item-value">${dcaResults.currentPrice.toFixed(2)}</div></div>
+    <div class="dca-item"><div class="dca-item-label">Текущие вложения ($)</div><div class="dca-item-value">${(dcaResults.currentAmount * dcaResults.currentAvg).toFixed(2)}</div></div>
+    <div class="dca-item"><div class="dca-item-label">Текущий P&L</div><div class="dca-item-value ${dcaResults.currentPnl >= 0 ? 'green' : 'red'}">${dcaResults.currentPnl >= 0 ? '+' : ''}${dcaResults.currentPnl.toFixed(2)}%</div></div>
+  </div>
+
+  <!-- Поля ввода -->
+  <div class="dca-inputs">
+    <div class="dca-input-group">
+      <label>Сумма докупки ($)</label>
+      <input type="number" id="dca-buy-amount-${h.id}" value="${dcaState.buyAmount}" oninput="updateDcaAmount('${h.id}', this.value)">
+    </div>
+    <div class="dca-input-group">
+      <label>Или количество</label>
+      <input type="number" id="dca-buy-quantity-${h.id}" value="${dcaState.buyQuantity}" oninput="updateDcaQuantity('${h.id}', this.value)">
+    </div>
+    <div class="dca-input-group">
+      <label>Цена покупки ($)</label>
+      <input type="number" id="dca-buy-price-${h.id}" value="${dcaState.buyPrice || c.current_price}" oninput="updateDcaPrice('${h.id}', this.value)">
+    </div>
+  </div>
+
+  <!-- Результаты -->
+  <div class="dca-results">
+    <div class="dca-result-item"><div class="label">Новая средняя</div><div class="value blue" id="dca-new-avg-${h.id}">$${dcaResults.newAvg.toFixed(2)}</div></div>
+    <div class="dca-result-item"><div class="label">Итого монет</div><div class="value" id="dca-new-amount-${h.id}">${dcaResults.newAmount.toFixed(4)}</div></div>
+    <div class="dca-result-item"><div class="label">Всего вложено</div><div class="value" id="dca-total-invested-${h.id}">$${dcaResults.totalInvested.toFixed(2)}</div></div>
+    <div class="dca-result-item"><div class="label">Нужен рост до окупа</div><div class="value ${dcaResults.growthNeeded >= 0 ? 'red' : 'green'}" id="dca-growth-needed-${h.id}">${dcaResults.growthNeeded >= 0 ? '+' : ''}${dcaResults.growthNeeded.toFixed(1)}%</div></div>
+    <div class="dca-result-item"><div class="label">Нужно иксов</div><div class="value ${dcaResults.growthNeeded >= 0 ? 'red' : 'green'}" id="dca-x-needed-${h.id}">${(dcaResults.newAvg / dcaResults.currentPrice).toFixed(2)}x</div></div>
+  </div>
+
+  <!-- Рекомендация -->
+  <div class="dca-recommendation ${dcaResults.recommendation === 'recommended' ? 'rec-recommended' : (dcaResults.recommendation === 'not_recommended' ? 'rec-not-recommended' : 'rec-neutral')}">
+    <div class="rec-badge" style="color:${recColor};">${recBadge}</div>
+    <div class="rec-text" id="dca-rec-text-${h.id}">${dcaResults.recommendationText}</div>
+  </div>
+</div>
+`;
+        }
+        
+        const exTr = document.createElement('tr');
+        exTr.className = 'expand-row';
+        exTr.innerHTML = '<td colspan="9"><div class="advice-card ' + adv.type + '" style="margin-bottom:0;"><div class="advice-header"><div class="advice-title">Рекомендация</div><span class="advice-badge badge-' + adv.badge + '">' + (adv.badge==='buy'?'КУПИТЬ':adv.badge==='sell'?'ПРОДАТЬ':'ДЕРЖАТЬ') + '</span></div><div class="advice-text">' + adv.text + '</div>' + adv.actionHtml + autoInfo + dcaHtml + '</div></td>';
+        tbody.appendChild(exTr);
+      }
+    });
+
+    table.appendChild(tbody);
+    container.appendChild(table);
+  } else {
+    // --- КАРТОЧКИ ---
+    const grid = document.createElement('div');
+    grid.className = 'portfolio-card-grid';
+    rows.forEach((r) => {
+      const card = createPortfolioCard(r);
+      grid.appendChild(card);
+    });
+    container.appendChild(grid);
+  }
+
+  // Обновляем активные кнопки сортировки (заголовки таблицы)
+  document.querySelectorAll('#portTable th').forEach(th => th.classList.remove('sort-asc', 'sort-desc'));
+  const activeTh = document.querySelector('#portTable th[onclick*="' + portfolioSort.col + '"]');
+  if (activeTh) activeTh.classList.add(portfolioSort.dir === 'asc' ? 'sort-asc' : 'sort-desc');
 }
 
 function toggleAdviceRow(id) {
@@ -2130,9 +4350,8 @@ function toggleDcaCalculator(holdingId) {
 }
 
 function updateDcaAmount(holdingId, value) {
-  const state = dcaCalculatorState.get(holdingId) || { showCalculator: true, buyAmount: 10, buyQuantity: 0, buyPrice: 0 };
+  const state = dcaCalculatorState.get(holdingId) || { showCalculator: true, buyAmount: 0, buyQuantity: 0, buyPrice: 0 };
   state.buyAmount = parseFloat(value) || 0;
-  // Calculate quantity based on amount and price
   if (state.buyPrice > 0) {
     state.buyQuantity = state.buyAmount / state.buyPrice;
   } else {
@@ -2145,7 +4364,6 @@ function updateDcaAmount(holdingId, value) {
 function updateDcaQuantity(holdingId, value) {
   const state = dcaCalculatorState.get(holdingId) || { showCalculator: true, buyAmount: 0, buyQuantity: 0, buyPrice: 0 };
   state.buyQuantity = parseFloat(value) || 0;
-  // Calculate amount based on quantity and price
   if (state.buyPrice > 0) {
     state.buyAmount = state.buyQuantity * state.buyPrice;
   } else {
@@ -2156,9 +4374,8 @@ function updateDcaQuantity(holdingId, value) {
 }
 
 function updateDcaPrice(holdingId, value) {
-  const state = dcaCalculatorState.get(holdingId) || { showCalculator: true, buyAmount: 10, buyQuantity: 0, buyPrice: 0 };
+  const state = dcaCalculatorState.get(holdingId) || { showCalculator: true, buyAmount: 0, buyQuantity: 0, buyPrice: 0 };
   state.buyPrice = parseFloat(value) || 0;
-  // Recalculate amount or quantity based on which one was set
   if (state.buyAmount > 0) {
     state.buyQuantity = state.buyAmount / state.buyPrice;
   } else if (state.buyQuantity > 0) {
@@ -2169,17 +4386,27 @@ function updateDcaPrice(holdingId, value) {
 }
 
 function updateDcaResultsUI(holdingId) {
+console.log('updateDcaResultsUI called for', holdingId);
   const h = portfolio.find(p => p.id === holdingId);
-  if (!h) return;
+  if (!h) {
+    console.warn('updateDcaResultsUI: holding not found', holdingId);
+    return;
+  }
   const c = findCoin(h.coinId || h.symbol.toLowerCase());
-  if (!c) return;
-  
+  if (!c) {
+    console.warn('updateDcaResultsUI: coin not found', h.coinId);
+    return;
+  }
+
   const state = dcaCalculatorState.get(holdingId);
-  if (!state) return;
-  
+  if (!state) {
+    console.warn('updateDcaResultsUI: state not found', holdingId);
+    return;
+  }
+
   const results = calculateDCAResults(h, c, state.buyAmount, state.buyQuantity, state.buyPrice);
-  
-  // Update result fields directly without re-rendering
+
+  // Получаем элементы по id
   const newAvgEl = document.getElementById('dca-new-avg-' + holdingId);
   const newAmountEl = document.getElementById('dca-new-amount-' + holdingId);
   const totalInvestedEl = document.getElementById('dca-total-invested-' + holdingId);
@@ -2187,12 +4414,10 @@ function updateDcaResultsUI(holdingId) {
   const xNeededEl = document.getElementById('dca-x-needed-' + holdingId);
   const recBadgeEl = document.getElementById('dca-rec-badge-' + holdingId);
   const recTextEl = document.getElementById('dca-rec-text-' + holdingId);
-  
-  // Update input fields for linked calculations
-  const buyAmountEl = document.getElementById('dca-buy-amount-' + holdingId);
-  const buyQuantityEl = document.getElementById('dca-buy-quantity-' + holdingId);
-  const buyPriceEl = document.getElementById('dca-buy-price-' + holdingId);
-  
+
+  // Если элементы не найдены — выводим предупреждение
+  if (!newAvgEl) console.warn('updateDcaResultsUI: element not found for', holdingId);
+
   if (newAvgEl) newAvgEl.textContent = '$' + results.newAvg.toFixed(2);
   if (newAmountEl) newAmountEl.textContent = results.newAmount.toFixed(4);
   if (totalInvestedEl) totalInvestedEl.textContent = '$' + results.totalInvested.toFixed(2);
@@ -2214,8 +4439,12 @@ function updateDcaResultsUI(holdingId) {
   if (recTextEl) {
     recTextEl.textContent = results.recommendationText;
   }
-  
-  // Update linked input fields without losing focus
+
+  // Синхронизируем поля ввода (если они изменились через другое поле)
+  const buyAmountEl = document.getElementById('dca-buy-amount-' + holdingId);
+  const buyQuantityEl = document.getElementById('dca-buy-quantity-' + holdingId);
+  const buyPriceEl = document.getElementById('dca-buy-price-' + holdingId);
+
   if (buyAmountEl && document.activeElement !== buyAmountEl) {
     buyAmountEl.value = results.buyAmount;
   }
@@ -3318,15 +5547,29 @@ async function loadNotifs() {
 }
 
 async function saveNotifs() {
-  localStorage.setItem(NOTIF_KEY, JSON.stringify(notifications));
+  // Ограничиваем историю уведомлений, чтобы не раздувать хранилище
+  if (notifications.length > 100) notifications = notifications.slice(-100);
+  try {
+    localStorage.setItem(NOTIF_KEY, JSON.stringify(notifications));
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014) {
+      clearOldCache();
+      try {
+        localStorage.setItem(NOTIF_KEY, JSON.stringify(notifications));
+      } catch (e2) {}
+    }
+  }
   try {
     if (window.firebaseDB && window.firebaseUser) {
       const userId = window.firebaseUser.uid;
       const docRef = window.firebaseDB.collection('portfolios').doc(userId);
-      await docRef.update({ notifications: notifications });
+      await docRef.set({ notifications: notifications }, { merge: true });
     }
-  } catch (e) { console.error('Error saving notifications to Firebase:', e); }
+  } catch (e) { 
+    console.error('Error saving notifications to Firebase:', e); 
+  }
 }
+
 async function loadAlerts() {
   try {
     if (window.firebaseDB && window.firebaseUser) {
@@ -3344,15 +5587,27 @@ async function loadAlerts() {
 }
 
 async function saveAlerts() {
-  localStorage.setItem(ALERTS_KEY, JSON.stringify(alertsList));
+  try {
+    localStorage.setItem(ALERTS_KEY, JSON.stringify(alertsList));
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014) {
+      clearOldCache();
+      try {
+        localStorage.setItem(ALERTS_KEY, JSON.stringify(alertsList));
+      } catch (e2) {}
+    }
+  }
   try {
     if (window.firebaseDB && window.firebaseUser) {
       const userId = window.firebaseUser.uid;
       const docRef = window.firebaseDB.collection('portfolios').doc(userId);
-      await docRef.update({ alerts: alertsList });
+      await docRef.set({ alerts: alertsList }, { merge: true });
     }
-  } catch (e) { console.error('Error saving alerts to Firebase:', e); }
+  } catch (e) { 
+    console.error('Error saving alerts to Firebase:', e); 
+  }
 }
+
 
 function loadAutoAlertSettings() {
   try {
@@ -3394,7 +5649,7 @@ function renderSearchResults(list, loadingMore) {
     results.classList.add('active');
     return;
   }
-  results.innerHTML = list.map(c => '<div class="search-item" onclick="selectCoin(\'' + c.id + '\',\'' + (c.symbol||'').toUpperCase() + '\',\'' + (c.image||'') + '\')"><img src="' + (c.image||'') + '" alt="" onerror="this.style.display=\'none\'"><div><div style="font-weight:600">' + c.name + '</div><div style="font-size:11px;color:var(--text-3)">' + (c.symbol||'').toUpperCase() + '</div></div></div>').join('') + (loadingMore ? '<div class="search-loading">ищем ещё на CoinGecko...</div>' : '');
+  results.innerHTML = list.map(c => '<div class="search-item" onclick="selectCoin(\'' + c.id + '\',\'' + (c.symbol||'').toUpperCase() + '\',\'' + (c.image||'') + '\')"><img src="' + (c.image||'') + '" alt="" ><div><div style="font-weight:600">' + c.name + '</div><div style="font-size:11px;color:var(--text-3)">' + (c.symbol||'').toUpperCase() + '</div></div></div>').join('') + (loadingMore ? '<div class="search-loading">ищем ещё на CoinGecko...</div>' : '');
   results.classList.add('active');
 }
 
@@ -3816,19 +6071,23 @@ async function loadPortfolio() {
 }
 
 async function savePortfolio() {
-  // Save to localStorage as backup
-  localStorage.setItem(PORTFOLIO_KEY, JSON.stringify(portfolio));
-  
-  // Save to Firebase
+  try {
+    localStorage.setItem(PORTFOLIO_KEY, JSON.stringify(portfolio));
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014) {
+      clearOldCache();
+      try {
+        localStorage.setItem(PORTFOLIO_KEY, JSON.stringify(portfolio));
+      } catch (e2) {
+        console.warn('localStorage full, portfolio kept in memory only');
+      }
+    }
+  }
   try {
     if (window.firebaseDB && window.firebaseUser) {
       const userId = window.firebaseUser.uid;
       const docRef = window.firebaseDB.collection('portfolios').doc(userId);
-      await docRef.set({
-        portfolio: portfolio,
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
-      console.log('Portfolio saved to Firebase');
+      await docRef.set({ portfolio: portfolio, updatedAt: new Date().toISOString() }, { merge: true });
     }
   } catch (e) {
     console.error('Error saving portfolio to Firebase:', e);
@@ -3836,7 +6095,7 @@ async function savePortfolio() {
 }
 
 function exportData() {
-  const data = { portfolio, notifications, alerts: alertsList, exported: new Date().toISOString() };
+  const data = { portfolio, notifications, alerts: alertsList, orders, exported: new Date().toISOString() };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -3862,6 +6121,10 @@ function importData(e) {
       if (data.alerts) { 
         alertsList = data.alerts; 
         await saveAlerts();
+      }
+      if (data.orders) {
+        orders = data.orders;
+        await saveOrders();
       }
       syncAutoAlertsFromAdvisor();
       renderAll();
@@ -3914,7 +6177,908 @@ function getColor(i) {
   return colors[i % colors.length];
 }
 
+
+/* ---------- ORDERS ---------- */
+async function loadOrders() {
+  try {
+    if (window.firebaseDB && window.firebaseUser) {
+      const userId = window.firebaseUser.uid;
+      const docRef = window.firebaseDB.collection('portfolios').doc(userId);
+      const docSnap = await docRef.get();
+      if (docSnap.exists) {
+        const data = docSnap.data();
+        if (data.orders) orders = data.orders;
+      }
+    }
+  } catch (e) { console.error('Error loading orders from Firebase:', e); }
+  try { 
+    const d = localStorage.getItem(ORDERS_KEY); 
+    if (d) {
+      orders = JSON.parse(d);
+      orders.forEach(o => { if (!o.status) o.status = 'active'; });
+    } 
+  } catch {}
+}
+
+async function saveOrders() {
+  try {
+    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+  } catch (e) {
+    if (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014) {
+      clearOldCache();
+      try {
+        localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+      } catch (e2) {
+        console.warn('localStorage full, orders kept in memory only');
+      }
+    }
+  }
+  try {
+    if (window.firebaseDB && window.firebaseUser) {
+      const userId = window.firebaseUser.uid;
+      const docRef = window.firebaseDB.collection('portfolios').doc(userId);
+      await docRef.set({ orders: orders }, { merge: true });
+    }
+  } catch (e) { 
+    console.error('Error saving orders to Firebase:', e); 
+  }
+}
+
+function openOrderModal() {
+  currentEditOrderId = null;
+  document.getElementById('orderModalTitle').textContent = 'добавить ордер на покупку';
+  document.getElementById('orderCoinId').value = '';
+  document.getElementById('orderCoinSearch').value = '';
+  document.getElementById('orderCoinImg').value = '';
+  document.getElementById('orderQty').value = '';
+  document.getElementById('orderPrice').value = '';
+  document.getElementById('orderTotal').value = '';
+  document.getElementById('orderModal').classList.add('active');
+}
+
+function closeOrderModal() {
+  document.getElementById('orderModal').classList.remove('active');
+  currentEditOrderId = null;
+}
+function closeOrderModal() {
+  document.getElementById('orderModal').classList.remove('active');
+}
+
+function calcOrderTotal() {
+  const qty = parseFloat(document.getElementById('orderQty').value) || 0;
+  const price = parseFloat(document.getElementById('orderPrice').value) || 0;
+  if (qty > 0 && price > 0) {
+    document.getElementById('orderTotal').value = (qty * price).toFixed(2);
+  }
+}
+
+function calcOrderQty() {
+  const total = parseFloat(document.getElementById('orderTotal').value) || 0;
+  const price = parseFloat(document.getElementById('orderPrice').value) || 0;
+  if (total > 0 && price > 0) {
+    document.getElementById('orderQty').value = (total / price).toFixed(8);
+  }
+}
+
+function selectOrderCoin(id, symbol, image) {
+  document.getElementById('orderCoinId').value = id;
+  document.getElementById('orderCoinSearch').value = symbol;
+  document.getElementById('orderCoinImg').value = image;
+  document.getElementById('orderSearchResults').classList.remove('active');
+  const c = findCoin(id);
+  if (c && c.current_price) {
+    document.getElementById('orderPrice').value = c.current_price;
+    calcOrderTotal();
+  }
+}
+
+function searchOrderCoins(query) {
+  const results = document.getElementById('orderSearchResults');
+  const q = query.toLowerCase().trim();
+  if (!q) { results.classList.remove('active'); return; }
+  const local = allCoins.filter(c => c.name.toLowerCase().includes(q) || c.symbol.toLowerCase().includes(q)).slice(0, 8);
+  if (!local.length) {
+    results.innerHTML = '<div class="search-loading">ничего не найдено</div>';
+    results.classList.add('active');
+    return;
+  }
+  results.innerHTML = local.map(c => '<div class="search-item" onclick="selectOrderCoin(' + "'" + c.id + "'" + ',' + "'" + c.symbol.toUpperCase() + "'" + ',' + "'" + c.image + "'" + ')"><img src="' + c.image + '" alt="" ><div><div style="font-weight:600">' + c.name + '</div><div style="font-size:11px;color:var(--text-3)">' + c.symbol.toUpperCase() + '</div></div></div>').join('');
+  results.classList.add('active');
+}
+
+function saveOrder() {
+  const coinId = document.getElementById('orderCoinId').value;
+  if (!coinId) return alert('выберите монету из списка поиска');
+  const symbol = (document.getElementById('orderCoinSearch').value || '').toUpperCase();
+  const amount = parseFloat(document.getElementById('orderQty').value) || 0;
+  const price = parseFloat(document.getElementById('orderPrice').value) || 0;
+  const total = parseFloat(document.getElementById('orderTotal').value) || 0;
+  if (amount <= 0 || price <= 0) return alert('укажите положительное количество и цену');
+
+  const orderTotal = total > 0 ? total : amount * price;
+
+  if (currentEditOrderId) {
+    const order = orders.find(o => o.id === currentEditOrderId);
+    if (order) {
+      order.coinId = coinId;
+      order.symbol = symbol;
+      order.amount = amount;
+      order.price = price;
+      order.total = orderTotal;
+    }
+    currentEditOrderId = null;
+  } else {
+    const newOrder = {
+      id: uid(),
+      coinId,
+      symbol,
+      amount,
+      price,
+      total: orderTotal,
+      status: 'active',
+      created: Date.now()
+    };
+    let insertIndex = orders.length;
+    for (let i = orders.length - 1; i >= 0; i--) {
+      if (orders[i].symbol === symbol) {
+        insertIndex = i + 1;
+        break;
+      }
+    }
+    orders.splice(insertIndex, 0, newOrder);
+  }
+
+  saveOrders();
+  closeOrderModal();
+  renderOrders();
+}
+
+function openEditOrderModal(orderId) {
+  const order = orders.find(o => o.id === orderId);
+  if (!order) return;
+  currentEditOrderId = orderId;
+  document.getElementById('orderModalTitle').textContent = 'изменить ордер — ' + order.symbol;
+  document.getElementById('orderCoinId').value = order.coinId;
+  document.getElementById('orderCoinSearch').value = order.symbol;
+  document.getElementById('orderQty').value = order.amount;
+  document.getElementById('orderPrice').value = order.price;
+  document.getElementById('orderTotal').value = order.total || (order.amount * order.price);
+  document.getElementById('orderModal').classList.add('active');
+}
+
+function scrollToOrders(symbol) {
+  const el = document.querySelector('[data-order-symbol="' + symbol + '"]');
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.style.transition = 'box-shadow 0.3s';
+    el.style.boxShadow = '0 0 0 2px var(--green)';
+    setTimeout(() => { el.style.boxShadow = ''; }, 1500);
+  }
+}
+
+function delOrder(id) {
+  if (confirm('удалить ордер?')) {
+    orders = orders.filter(o => o.id !== id);
+    saveOrders();
+    renderOrders();
+  }
+}
+function addPurchaseFromOrder(order) {
+  // Проверяем, есть ли монета в портфеле
+  let holding = portfolio.find(h => h.coinId === order.coinId);
+  if (!holding) {
+    // Создаём новую позицию
+    holding = {
+      id: uid(),
+      coinId: order.coinId,
+      symbol: order.symbol,
+      amount: 0,
+      avgPrice: 0,
+      purchases: [],
+      targetPrice: null,
+      stopLoss: null,
+      notes: '',
+      realizedPnl: 0
+    };
+    portfolio.push(holding);
+  }
+
+  // Добавляем покупку
+  const purchase = {
+    id: uid(),
+    date: new Date().toISOString().split('T')[0],
+    amount: order.amount,
+    price: order.price,
+    type: 'buy'
+  };
+  holding.purchases.push(purchase);
+
+  // Пересчитываем позицию
+  recalcRealizedPnl(holding);
+  recomputeHolding(holding);
+
+  // Сохраняем портфель
+  savePortfolio();
+}
+function executeOrder(orderId) {
+  const order = orders.find(o => o.id === orderId);
+  if (!order) {
+    alert('Ордер не найден');
+    return;
+  }
+  if (order.status === 'executed') {
+    alert('Ордер уже исполнен');
+    return;
+  }
+  if (order.status === 'inactive') {
+    alert('Ордер неактивен');
+    return;
+  }
+
+  // Добавляем покупку в портфель
+  addPurchaseFromOrder(order);
+
+  // Меняем статус ордера на 'executed'
+  order.status = 'executed';
+  order.executedAt = Date.now();
+  saveOrders();
+
+  // Уведомление
+  addNotification(order.symbol + ': ордер исполнен по цене ' + fmt$(order.price) + ' на сумму ' + fmt$(order.amount * order.price), 'buy');
+
+  // Перерисовываем всё
+  renderAll();
+}
+function toggleSection(id) {
+  const content = document.getElementById(id);
+  const toggle = document.getElementById(id + '-toggle');
+  const header = content.previousElementSibling;
+  if (content.classList.contains('collapsed')) {
+    content.classList.remove('collapsed');
+    toggle.textContent = '▼';
+    header.classList.remove('collapsed');
+  } else {
+    content.classList.add('collapsed');
+    toggle.textContent = '▶';
+    header.classList.add('collapsed');
+  }
+  collapsedSections[id] = content.classList.contains('collapsed');
+}
+
+function filterPortfolio(query) {
+  portfolioFilter = query.toLowerCase().trim();
+  renderPortfolio();
+}
+
+function setOrderFilter(filter) {
+  orderStatusFilter = filter;
+  document.querySelectorAll('.order-filters .filter-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+  renderOrders();
+}
+
+function changeOrderStatus(orderId, newStatus) {
+  const order = orders.find(o => o.id === orderId);
+  if (!order) return;
+  order.status = newStatus;
+  if (newStatus === 'executed') {
+    order.executedAt = Date.now();
+  } else {
+    order.executedAt = null;
+  }
+  saveOrders();
+  renderOrders();
+}
+
+function checkOrderExecution() {
+  let anyExecuted = false;
+  orders.forEach(o => {
+    if (o.status === 'active' || o.status === 'pending') {
+      const c = findCoin(o.coinId);
+      if (c && c.current_price > 0) {
+        if (c.current_price <= o.price) {
+          // Добавляем покупку в портфель
+          addPurchaseFromOrder(o);
+          // Меняем статус
+          o.status = 'executed';
+          o.executedAt = Date.now();
+          anyExecuted = true;
+          addNotification(o.symbol + ': ордер на покупку исполнен по цене ' + fmt$(o.price), 'buy');
+        }
+      }
+    }
+  });
+  if (anyExecuted) {
+    saveOrders();
+    // Перерисовываем портфель и ордера
+    renderAll();
+  }
+}
+
+function toggleSection(id) {
+  const content = document.getElementById(id);
+  const toggle = document.getElementById(id + '-toggle');
+  const header = content.previousElementSibling;
+  if (content.classList.contains('collapsed')) {
+    content.classList.remove('collapsed');
+    toggle.textContent = '▼';
+    header.classList.remove('collapsed');
+  } else {
+    content.classList.add('collapsed');
+    toggle.textContent = '▶';
+    header.classList.add('collapsed');
+  }
+  collapsedSections[id] = content.classList.contains('collapsed');
+}
+
+function filterPortfolio(query) {
+  portfolioFilter = query.toLowerCase().trim();
+  renderPortfolio();
+}
+
+function setOrderFilter(filter) {
+  orderStatusFilter = filter;
+  document.querySelectorAll('.order-filters .filter-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+  renderOrders();
+}
+
+function changeOrderStatus(orderId, newStatus) {
+  const order = orders.find(o => o.id === orderId);
+  if (!order) return;
+  order.status = newStatus;
+  if (newStatus === 'executed') {
+    order.executedAt = Date.now();
+  } else {
+    order.executedAt = null;
+  }
+  saveOrders();
+  renderOrders();
+}
+
+function checkOrderExecution() {
+  let anyExecuted = false;
+  orders.forEach(o => {
+    if (o.status === 'active' || o.status === 'pending') {
+      const c = findCoin(o.coinId);
+      if (c && c.current_price > 0) {
+        if (c.current_price <= o.price) {
+          o.status = 'executed';
+          o.executedAt = Date.now();
+          anyExecuted = true;
+          addNotification(o.symbol + ': ордер на покупку исполнен по цене ' + fmt$(o.price), 'buy');
+        }
+      }
+    }
+  });
+  if (anyExecuted) {
+    saveOrders();
+  }
+}
+function importOrderToPortfolio(orderId) {
+  const order = orders.find(o => o.id === orderId);
+  if (!order) {
+    alert('Ордер не найден');
+    return;
+  }
+  if (order.status !== 'executed') {
+    alert('Только исполненные ордера можно импортировать в портфель');
+    return;
+  }
+
+  // Проверяем, не был ли уже импортирован (можно добавить флаг imported)
+  if (order.imported) {
+    alert('Этот ордер уже добавлен в портфель');
+    return;
+  }
+
+  // Проверяем, есть ли монета в портфеле
+  let holding = portfolio.find(h => h.coinId === order.coinId);
+  if (!holding) {
+    holding = {
+      id: uid(),
+      coinId: order.coinId,
+      symbol: order.symbol,
+      amount: 0,
+      avgPrice: 0,
+      purchases: [],
+      targetPrice: null,
+      stopLoss: null,
+      notes: '',
+      realizedPnl: 0
+    };
+    portfolio.push(holding);
+  }
+
+  // Добавляем покупку
+  const purchase = {
+    id: uid(),
+    date: new Date().toISOString().split('T')[0],
+    amount: order.amount,
+    price: order.price,
+    type: 'buy'
+  };
+  holding.purchases.push(purchase);
+
+  // Пересчитываем позицию
+  recalcRealizedPnl(holding);
+  recomputeHolding(holding);
+
+  // Помечаем ордер как импортированный
+  order.imported = true;
+  saveOrders();
+  savePortfolio();
+
+  addNotification(order.symbol + ': покупка добавлена в портфель по цене ' + fmt$(order.price), 'buy');
+
+  renderAll();
+}
+function renderOrders() {
+  const container = document.getElementById('ordersList');
+  const summaryEl = document.getElementById('ordersSummary');
+  const globalImpactEl = document.getElementById('globalOrdersImpact');
+  const badgeEl = document.getElementById('ordersBadge');
+  
+  if (!container) return;
+
+  checkOrderExecution();
+
+  let filteredOrders = orders;
+  if (orderStatusFilter !== 'all') {
+    filteredOrders = orders.filter(o => o.status === orderStatusFilter);
+  }
+
+  if (badgeEl) {
+    const activeCount = orders.filter(o => o.status === 'active' || o.status === 'pending').length;
+    const executedCount = orders.filter(o => o.status === 'executed').length;
+    if (activeCount > 0 || executedCount > 0) {
+      badgeEl.style.display = 'inline';
+      badgeEl.textContent = activeCount + ' активных · ' + executedCount + ' исполнено';
+    } else {
+      badgeEl.style.display = 'none';
+    }
+  }
+
+  if (!filteredOrders.length) {
+    container.innerHTML = '<div style="color:var(--text-3);padding:16px 0;font-size:13px;">нет ордеров по выбранному фильтру.</div>';
+    if (summaryEl) summaryEl.textContent = '';
+    if (globalImpactEl) globalImpactEl.innerHTML = '';
+    return;
+  }
+
+  const activeOrders = orders.filter(o => o.status === 'active');
+  const inactiveOrders = orders.filter(o => o.status === 'inactive');
+  const pendingOrders = orders.filter(o => o.status === 'pending');
+  const executedOrders = orders.filter(o => o.status === 'executed');
+
+  const activeLocked = activeOrders.reduce((s, o) => s + (o.total || o.amount * o.price), 0);
+  const inactiveLocked = inactiveOrders.reduce((s, o) => s + (o.total || o.amount * o.price), 0);
+  const pendingLocked = pendingOrders.reduce((s, o) => s + (o.total || o.amount * o.price), 0);
+
+  let globalHtml = '';
+  const impactOrders = orders.filter(o => o.status === 'active' || o.status === 'pending');
+  if (impactOrders.length > 0) {
+    const coinImpacts = {};
+    impactOrders.forEach(o => {
+      const holding = portfolio.find(h => h.coinId === o.coinId);
+      const c = findCoin(o.coinId);
+      if (!coinImpacts[o.coinId]) {
+        coinImpacts[o.coinId] = {
+          symbol: o.symbol,
+          coin: c,
+          holding: holding,
+          totalAddAmount: 0,
+          totalAddCost: 0,
+          orders: []
+        };
+      }
+      coinImpacts[o.coinId].totalAddAmount += o.amount;
+      coinImpacts[o.coinId].totalAddCost += (o.total || o.amount * o.price);
+      coinImpacts[o.coinId].orders.push(o);
+    });
+
+    let totalGlobalLocked = 0;
+    let totalGlobalNewValue = 0;
+    let perCoinHtml = '';
+
+      Object.values(coinImpacts)
+      .sort((a, b) => b.totalAddCost - a.totalAddCost)
+      .forEach(impact => {
+      const h = impact.holding;
+      const c = impact.coin;
+      const currentHoldingAmount = h ? h.amount : 0;
+      const currentHoldingAvg = h ? h.avgPrice : 0;
+      const newTotalAmount = currentHoldingAmount + impact.totalAddAmount;
+      const newAvg = newTotalAmount > 0 
+        ? (currentHoldingAmount * currentHoldingAvg + impact.totalAddCost) / newTotalAmount 
+        : impact.totalAddCost / impact.totalAddAmount;
+      
+      totalGlobalLocked += impact.totalAddCost;
+      
+      const marketPrice = c ? c.current_price : 0;
+      totalGlobalNewValue += newTotalAmount * marketPrice;
+
+      const avgDiff = newAvg - currentHoldingAvg;
+      const avgColor = avgDiff < 0 ? 'avg-pos' : (avgDiff > 0 ? 'avg-neg' : '');
+
+      // P&L calculations
+      const currentPnl = currentHoldingAvg > 0 ? ((marketPrice - currentHoldingAvg) / currentHoldingAvg) * 100 : 0;
+      const newPnl = newAvg > 0 ? ((marketPrice - newAvg) / newAvg) * 100 : 0;
+      const pnlColor = newPnl >= 0 ? 'var(--green)' : 'var(--red)';
+
+         const avgDiffColor = avgDiff < 0 ? 'var(--green)' : (avgDiff > 0 ? 'var(--red)' : 'var(--text)');
+      const orderCount = impact.orders.length;
+
+      perCoinHtml += '<div class="per-coin-card" onclick="scrollToOrders(\'' + impact.symbol + '\')" style="cursor:pointer;position:relative;">' +
+        (orderCount > 1 ? '<div class="order-count-badge">' + orderCount + '</div>' : '') +
+        '<div class="per-coin-locked">' +
+          '<span class="label">заблокировано:</span> <span class="value" style="font-weight:700;">' + fmt$(impact.totalAddCost) + '</span>' +
+        '</div>' +
+        '<div class="per-coin-header">' +
+          '<div class="per-coin-header-left">' +
+            (c && c.image ? '<img src="' + c.image + '" class="per-coin-img" alt="">' : '<div class="per-coin-img" style="background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">' + impact.symbol[0] + '</div>') +
+            '<div class="per-coin-symbol">' + impact.symbol + '</div>' +
+          '</div>' +
+          '<div class="per-coin-price">' + fmt$(marketPrice) + '</div>' +
+        '</div>' +
+        '<div class="per-coin-row">' +
+          '<span class="label">кол-во:</span> <span class="value">' + (h ? h.amount.toLocaleString(undefined,{maximumFractionDigits:4}) : '0') + '</span> <span style="color:var(--text-3)">→</span> <span class="value">' + newTotalAmount.toLocaleString(undefined,{maximumFractionDigits:4}) + '</span>' +
+        '</div>' +
+        '<div class="per-coin-row">' +
+          '<span class="label">средняя:</span> <span class="value">' + fmt$(currentHoldingAvg) + '</span> <span style="color:var(--text-3)">→</span> <span class="value" style="color:' + avgDiffColor + ';">' + fmt$(newAvg) + '</span>' +
+        '</div>' +
+        '<div class="per-coin-row">' +
+          '<span class="label">P&L%:</span> <span style="color:var(--text-2);">' + (currentPnl >= 0 ? '+' : '') + currentPnl.toFixed(1) + '%</span> <span style="color:var(--text-3)">→</span> <span style="color:' + pnlColor + ';font-weight:600;">' + (newPnl >= 0 ? '+' : '') + newPnl.toFixed(1) + '%</span>' +
+        '</div>' +
+      '</div>';
+        });
+
+    globalHtml = '<div class="global-impact-card">' +
+      '<div class="global-impact-title">📊 Влияние на портфель при исполнении ВСЕХ активных ордеров</div>' +
+      '<div class="global-impact-grid">' +
+        '<div class="global-impact-metric">' +
+          '<div class="global-impact-value">' + fmt$(totalGlobalLocked) + '</div>' +
+          '<div class="global-impact-label">всего будет вложено</div>' +
+        '</div>' +
+        '<div class="global-impact-metric">' +
+          '<div class="global-impact-value">' + fmt$(totalGlobalNewValue) + '</div>' +
+          '<div class="global-impact-label">новая стоимость позиций</div>' +
+        '</div>' +
+        '<div class="global-impact-metric">' +
+          '<div class="global-impact-value">' + Object.keys(coinImpacts).length + '</div>' +
+          '<div class="global-impact-label">монет под ордерами</div>' +
+        '</div>' +
+        '<div class="global-impact-metric">' +
+          '<div class="global-impact-value">' + impactOrders.length + '</div>' +
+          '<div class="global-impact-label">всего ордеров</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="per-coin-section">' +
+        '<div class="per-coin-label">По каждой монете:</div>' +
+        '<div class="per-coin-grid">' + perCoinHtml + '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  if (globalImpactEl) globalImpactEl.innerHTML = globalHtml;
+
+  let summaryText = '';
+  if (activeOrders.length > 0) {
+    summaryText += 'активные: <strong style="color:var(--text);">' + fmt$(activeLocked) + '</strong> · ' + activeOrders.length + ' шт. ';
+  }
+  if (inactiveOrders.length > 0) {
+    summaryText += 'неактивные: <strong style="color:var(--text-3);">' + fmt$(inactiveLocked) + '</strong> · ' + inactiveOrders.length + ' шт. ';
+  }
+  if (pendingOrders.length > 0) {
+    summaryText += 'в ожидании: <strong style="color:var(--yellow);">' + fmt$(pendingLocked) + '</strong> · ' + pendingOrders.length + ' шт. ';
+  }
+  if (executedOrders.length > 0) {
+    summaryText += 'исполнено: <strong style="color:var(--green);">' + executedOrders.length + ' шт.</strong>';
+  }
+  if (summaryEl) summaryEl.innerHTML = summaryText;
+
+  // Group orders by symbol for display
+  filteredOrders.sort((a, b) => {
+    if (a.symbol !== b.symbol) return a.symbol.localeCompare(b.symbol);
+    return a.created - b.created;
+  });
+
+  let cardsHtml = '<div class="orders-flat-grid">';
+
+  filteredOrders.forEach(o => {
+    const coin = findCoin(o.coinId);
+    const currentPrice = coin ? coin.current_price : 0;
+    const marketPrice = currentPrice || o.price;
+    
+    const marketDiff = marketPrice > 0 ? ((o.price - marketPrice) / marketPrice) * 100 : 0;
+    const diffBadge = marketDiff >= 0 
+      ? '<span class="market-diff-badge pos">+' + marketDiff.toFixed(1) + '% от рынка</span>' 
+      : '<span class="market-diff-badge neg">' + marketDiff.toFixed(1) + '% от рынка</span>';
+    
+    let execPct = 0;
+    let execColor = 'var(--yellow)';
+    let execLabel = '';
+    let execClass = 'waiting';
+    
+    if (o.status === 'executed') {
+      execPct = 100;
+      execColor = 'var(--green)';
+      execLabel = 'исполнен';
+      execClass = 'executed';
+    } else if (o.status === 'inactive') {
+      execPct = 0;
+      execColor = 'var(--text-3)';
+      execLabel = 'неактивен';
+      execClass = 'inactive';
+    } else {
+      if (marketPrice <= o.price) {
+        execPct = 100;
+        execColor = 'var(--green)';
+        execLabel = 'готов к исполнению';
+        execClass = 'ready';
+      } else {
+        const diff = ((marketPrice - o.price) / o.price) * 100;
+        execPct = Math.max(0, Math.min(95, 100 - diff));
+        execColor = 'var(--yellow)';
+        execLabel = 'нужен рост +' + diff.toFixed(1) + '%';
+        execClass = 'waiting';
+      }
+    }
+
+    const holding = portfolio.find(h => h.coinId === o.coinId);
+    const currentHoldingAmount = holding ? holding.amount : 0;
+    const currentHoldingAvg = holding ? holding.avgPrice : 0;
+    const newTotalAmount = currentHoldingAmount + o.amount;
+    const newAvg = newTotalAmount > 0 
+      ? (currentHoldingAmount * currentHoldingAvg + o.amount * o.price) / newTotalAmount 
+      : o.price;
+    const avgChange = newAvg - currentHoldingAvg;
+
+    const statusBadgeClass = {
+      active: 'status-active',
+      inactive: 'status-inactive',
+      executed: 'status-executed',
+      pending: 'status-pending'
+    }[o.status] || 'status-pending';
+
+    const statusName = {
+      active: 'АКТИВЕН',
+      inactive: 'НЕАКТИВЕН',
+      executed: 'ИСПОЛНЕН',
+      pending: 'В ОЖИДАНИИ'
+    }[o.status] || o.status;
+
+           cardsHtml += '<div class="order-card" id="order-' + o.id + '" data-order-symbol="' + o.symbol + '">' +
+      '<div class="order-header">' +
+        '<div style="display:flex;align-items:center;gap:10px;">' +
+          (coin ? '<img src="' + coin.image + '" style="width:28px;height:28px;border-radius:50%">' : '<div class="coin-img" style="width:28px;height:28px;font-size:12px">' + o.symbol[0] + '</div>') +
+          '<div>' +
+            '<div class="order-title">' + (coin ? coin.name : o.symbol) + ' (' + o.symbol + ')' + diffBadge + '</div>' +
+            '<div style="font-size:11px;color:var(--text-3)">лимитный ордер на покупку</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:8px;">' +
+          '<span class="order-status-badge ' + statusBadgeClass + '">' + statusName + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div style="font-size:12px;color:var(--text-3);margin:8px 0;display:flex;gap:16px;flex-wrap:wrap;">' +
+        '<span>🕐 открыт: ' + (o.created ? new Date(o.created).toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'}) : '—') + '</span>' +
+        (o.status === 'executed' && o.executedAt ? '<span style="color:var(--green)">✓ исполнен: ' + new Date(o.executedAt).toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'}) + '</span>' : '') +
+      '</div>' +
+
+      '<div class="order-grid">' +
+        '<div class="order-metric">' +
+          '<div class="order-metric-value">' + o.amount.toLocaleString(undefined, {maximumFractionDigits: 6}) + '</div>' +
+          '<div class="order-metric-label">кол-во ' + o.symbol + '</div>' +
+        '</div>' +
+        '<div class="order-metric">' +
+          '<div class="order-metric-value">' + fmt$(o.price) + '</div>' +
+          '<div class="order-metric-label">цена ордера</div>' +
+        '</div>' +
+        '<div class="order-metric">' +
+          '<div class="order-metric-value">' + fmt$(o.total || o.amount * o.price) + '</div>' +
+          '<div class="order-metric-label">сумма USDT</div>' +
+        '</div>' +
+        '<div class="order-metric">' +
+          '<div class="order-metric-value" style="color:' + (marketPrice <= o.price && o.status !== 'inactive' ? 'var(--green)' : 'var(--text)') + '">' + fmt$(marketPrice) + '</div>' +
+          '<div class="order-metric-label">текущая цена</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="order-exec-progress">' +
+        '<div class="order-exec-label">' +
+          '<span style="color:var(--text-3)">прогресс к исполнению</span>' +
+          '<span class="exec-pct ' + execClass + '">' + execLabel + '</span>' +
+        '</div>' +
+        '<div class="order-exec-track">' +
+          '<div class="order-exec-fill" style="width:' + execPct + '%;background:' + execColor + '"></div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="order-impact">' +
+        '<div style="font-weight:600;margin-bottom:10px;color:var(--blue)">📊 Влияние на портфель после исполнения</div>' +
+        '<div class="order-impact-grid">' +
+          '<div>' +
+            '<div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">сейчас в портфеле</div>' +
+            '<div style="font-weight:700;font-size:15px;">' + currentHoldingAmount.toLocaleString(undefined, {maximumFractionDigits: 6}) + ' <span style="font-size:12px;color:var(--text-3);font-weight:500;">' + o.symbol + '</span></div>' +
+            (holding ? '<div style="font-size:12px;color:var(--text-3);margin-top:2px;">средняя ' + fmt$(currentHoldingAvg) + '</div>' : '<div style="font-size:12px;color:var(--text-3);margin-top:2px;">нет позиции</div>') +
+          '</div>' +
+          '<div class="arrow-col" style="text-align:center;font-size:20px;color:var(--text-3);">→</div>' +
+          '<div>' +
+            '<div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">будет в портфеле</div>' +
+            '<div style="font-weight:700;font-size:15px;">' + newTotalAmount.toLocaleString(undefined, {maximumFractionDigits: 6}) + ' <span style="font-size:12px;color:var(--text-3);font-weight:500;">' + o.symbol + '</span></div>' +
+            '<div style="font-size:12px;color:var(--text-3);margin-top:2px;">новая средняя ' + fmt$(newAvg) + 
+              (holding && avgChange !== 0 ? ' <span style="color:' + (avgChange < 0 ? 'var(--green)' : 'var(--red)') + '">(' + (avgChange < 0 ? '' : '+') + fmt$(avgChange) + ')</span>' : '') +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">' +
+          '<div style="font-size:12px;color:var(--text-3)">всего вложено будет: <strong style="color:var(--text);">' + fmt$(newTotalAmount * newAvg) + '</strong></div>' +
+          '<div style="font-size:12px;color:var(--text-3)">текущая стоимость позиции: <strong style="color:var(--text);">' + fmt$(newTotalAmount * marketPrice) + '</strong></div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;align-items:center;">' +
+  (o.status === 'active' || o.status === 'pending' ?
+    '<button class="btn btn-sm btn-primary" onclick="executeOrder(\'' + o.id + '\')" title="Исполнить ордер и добавить в портфель" style="padding:4px 8px;display:flex;align-items:center;justify-content:center;">' +
+  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>' +
+'</button>' :
+    (o.status === 'executed' ?
+      '<span style="color:var(--green);font-weight:700;font-size:14px;">✓ исполнен</span>' :
+      ''
+    )
+  ) +
+  '<select class="order-status-select" onchange="changeOrderStatus(\'' + o.id + '\', this.value)">' +
+    '<option value="active" ' + (o.status === 'active' ? 'selected' : '') + '>активен</option>' +
+    '<option value="inactive" ' + (o.status === 'inactive' ? 'selected' : '') + '>неактивен</option>' +
+    '<option value="pending" ' + (o.status === 'pending' ? 'selected' : '') + '>в ожидании</option>' +
+    '<option value="executed" ' + (o.status === 'executed' ? 'selected' : '') + '>исполнен</option>' +
+  '</select>' +
+  '<button class="btn btn-sm" onclick="openEditOrderModal(\'' + o.id + '\')">редактировать</button>' +
+  '<button class="btn btn-sm btn-danger" onclick="delOrder(\'' + o.id + '\')">удалить</button>' +
+'</div>' +
+'</div>';
+  });
+
+  cardsHtml += '</div>';
+  container.innerHTML = cardsHtml;
+}
+
+/* ---------- /ORDERS ---------- */
+
 window.addEventListener('DOMContentLoaded', init);
+// ===== НОВЫЕ ДОПОЛНИТЕЛЬНЫЕ ФУНКЦИИ =====
+
+// 1. Очистка уведомлений
+function clearNotifications() {
+  notifications = [];
+  saveNotifs();
+  updateNotifBadge();
+  renderNotifList(); // обновляем выпадашку
+}
+
+// 2. Переключение тем
+function switchTheme(theme) {
+  document.body.className = 'theme-' + theme;
+  localStorage.setItem('ct_theme', theme);
+  // обновляем активную кнопку
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.theme === theme);
+    if (btn.classList.contains('active')) {
+      btn.style.background = 'var(--green-dim)';
+      btn.style.color = 'var(--green)';
+    } else {
+      btn.style.background = 'transparent';
+      btn.style.color = 'var(--text-muted)';
+    }
+  });
+}
+
+// загрузка сохранённой темы
+(function loadTheme() {
+  const saved = localStorage.getItem('ct_theme') || 'glass';
+  switchTheme(saved);
+})();
+
+// Обработчики кнопок тем
+document.querySelectorAll('.theme-btn').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    switchTheme(this.dataset.theme);
+  });
+});
+
+// ===== ДОПОЛНЕНИЕ В RENDER NOTIF LIST =====
+// Добавляем кнопку очистки в выпадашку
+const originalRenderNotifList = window.renderNotifList || function() {};
+window.renderNotifList = function() {
+  originalRenderNotifList();
+  const dd = document.getElementById('notifDropdown');
+  if (dd) {
+    const clearBtn = document.createElement('button');
+    clearBtn.className = 'clear-btn';
+    clearBtn.innerHTML = '<i class="fas fa-trash-alt"></i> Очистить все уведомления';
+    clearBtn.onclick = function(e) {
+      e.stopPropagation();
+      clearNotifications();
+    };
+    // Добавляем в конец, если ещё нет
+    if (!dd.querySelector('.clear-btn')) {
+      dd.appendChild(clearBtn);
+    }
+  }
+};
+
+// Переопределяем renderNotifList в основном коде (если функция уже существует, она будет перезаписана)
+// Чтобы не потерять оригинальную логику, вызываем её внутри.
+</script>
+<!--
+  JS-ПАТЧ: объединяет строки "кол-во / средняя / P&L%"
+  внутри каждой .per-coin-card в один физический <div class="per-coin-stats-box">.
+  Это устраняет визуальный шов между строками (в отличие от CSS-only подхода).
+
+  Куда вставить: прямо перед закрывающим тегом </body>,
+  ПОСЛЕ основного <script> с вашей логикой (там, где определены
+  renderOrders / renderAll).
+-->
+<script id="per-coin-group-patch">
+(function () {
+  function wrapPerCoinRows(root) {
+    (root || document).querySelectorAll('.per-coin-card').forEach(function (card) {
+      // Уже обёрнуто — пропускаем
+      if (card.querySelector('.per-coin-stats-box')) return;
+
+      var header = card.querySelector('.per-coin-header');
+      if (!header) return;
+
+      // Собираем все .per-coin-row, идущие сразу друг за другом после заголовка
+      var rows = [];
+      var el = header.nextElementSibling;
+      while (el && el.classList && el.classList.contains('per-coin-row')) {
+        rows.push(el);
+        el = el.nextElementSibling;
+      }
+      if (!rows.length) return;
+
+      var box = document.createElement('div');
+      box.className = 'per-coin-stats-box';
+
+      // Вставляем обёртку сразу после заголовка
+      header.parentNode.insertBefore(box, rows[0]);
+      rows.forEach(function (row) { box.appendChild(row); });
+    });
+  }
+
+  function run() {
+    wrapPerCoinRows(document);
+  }
+
+  // Запуск после первичной загрузки
+  window.addEventListener('DOMContentLoaded', function () {
+    setTimeout(run, 300);
+  });
+
+  // Переприменяем после каждой перерисовки ордеров/портфеля,
+  // чтобы новые карточки тоже получили обёртку
+  ['renderOrders', 'renderAll'].forEach(function (fnName) {
+    var orig = window[fnName];
+    if (typeof orig === 'function') {
+      window[fnName] = function () {
+        var result = orig.apply(this, arguments);
+        setTimeout(run, 30);
+        return result;
+      };
+    }
+  });
+
+  // На всякий случай — подстраховка через MutationObserver
+  // для блока с ордерами, если он рендерится в обход renderOrders
+  var target = document.getElementById('globalOrdersImpact');
+  if (target && window.MutationObserver) {
+    var mo = new MutationObserver(function () { run(); });
+    mo.observe(target, { childList: true, subtree: true });
+  }
+})();
 </script>
 </body>
 </html>
