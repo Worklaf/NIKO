@@ -2682,10 +2682,12 @@ try {
     localStorage.setItem('userEmail', user.email);
     localStorage.setItem('userDisplayName', user.displayName || '');
 
-    // 🔁 Загружаем ордера из Firebase и обновляем UI
-    if (window.loadOrders) window.loadOrders().then(() => {
-      if (window.renderAll) window.renderAll();
-    });
+    // Загружаем данные из Firebase и обновляем интерфейс
+    if (window.loadOrders) {
+      window.loadOrders().then(() => {
+        if (window.renderAll) window.renderAll();
+      });
+    }
     if (window.loadPortfolio) window.loadPortfolio();
     if (window.loadNotifs) window.loadNotifs();
     if (window.loadAlerts) window.loadAlerts();
@@ -2697,7 +2699,7 @@ try {
     localStorage.removeItem('userDisplayName');
   }
   if (window.updateAuthUI) window.updateAuthUI();
-});
+});  // <-- здесь обязательно должна быть закрывающая скобка и точка с запятой
 </script>
 
 <script>
@@ -6197,7 +6199,7 @@ async function loadOrders() {
     console.error('Error loading orders from Firebase:', e);
   }
 
-  // Если из Firebase ничего не загружено – берем из localStorage
+  // Если из Firebase ничего не загружено – берём из localStorage
   if (!loadedFromFirebase) {
     try {
       const d = localStorage.getItem(ORDERS_KEY);
@@ -6210,7 +6212,6 @@ async function loadOrders() {
     }
   }
 }
-
 async function saveOrders() {
   try {
     localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
