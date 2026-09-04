@@ -2674,27 +2674,34 @@ try {
   }
 
   // Auth state listener
-  auth.onAuthStateChanged((user) => {
-    if (user) {
-      console.log('User signed in:', user.email);
-      window.firebaseUser = user;
-      localStorage.setItem('ct_user_id', user.uid);
-      localStorage.setItem('userEmail', user.email);
-      localStorage.setItem('userDisplayName', user.displayName || '');
-      // Reload portfolio when user signs in
-      if (window.loadPortfolio) window.loadPortfolio();
-      if (window.loadNotifs) window.loadNotifs();
-      if (window.loadAlerts) window.loadAlerts();
-    } else {
-      console.log('User signed out');
-      window.firebaseUser = null;
-      localStorage.removeItem('ct_user_id');
-      localStorage.removeItem('userEmail');
-      localStorage.removeItem('userDisplayName');
-    }
-    // Update UI
-    if (window.updateAuthUI) window.updateAuthUI();
-  });
+ auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    console.log('User signed in:', user.email);
+    window.firebaseUser = user;
+    localStorage.setItem('ct_user_id', user.uid);
+    localStorage.setItem('userEmail', user.email);
+    localStorage.setItem('userDisplayName', user.displayName || '');
+    // Загружаем все данные из Firebase (с приоритетом)
+    if (window.loadPortfolio) await window.loadPortfolio();
+    if (window.loadNotifs) await window.loadNotifs();
+    if (window.loadAlerts) await window.loadAlerts();
+    if (window.loadOrders) await window.loadOrders();
+    if (window.renderAll) window.renderAll();
+  } else {
+    console.log('User signed out');
+    window.firebaseUser = null;
+    localStorage.removeItem('ct_user_id');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userDisplayName');
+    // После выхода загружаем из localStorage
+    if (window.loadPortfolio) window.loadPortfolio();
+    if (window.loadNotifs) window.loadNotifs();
+    if (window.loadAlerts) window.loadAlerts();
+    if (window.loadOrders) window.loadOrders();
+    if (window.renderAll) window.renderAll();
+  }
+  if (window.updateAuthUI) window.updateAuthUI();
+});
 } catch (e) {
   console.error('Firebase initialization failed:', e);
   window.firebaseDB = null;
@@ -3602,6 +3609,8 @@ async function signOutUser() {
     loadPortfolio();
     loadNotifs();
     loadAlerts();
+    loadOrders();   // <-- добавлено
+    renderAll();    // <-- добавлено, чтобы обновить интерфейс
   } catch (e) {
     console.error('Sign out error:', e);
   }
@@ -6180,6 +6189,7 @@ function getColor(i) {
 
 /* ---------- ORDERS ---------- */
 async function loadOrders() {
+  let loadedFromFirebase = false;
   try {
     if (window.firebaseDB && window.firebaseUser) {
       const userId = window.firebaseUser.uid;
@@ -6187,17 +6197,23 @@ async function loadOrders() {
       const docSnap = await docRef.get();
       if (docSnap.exists) {
         const data = docSnap.data();
-        if (data.orders) orders = data.orders;
+        if (data.orders) {
+          orders = data.orders;
+          loadedFromFirebase = true;
+        }
       }
     }
   } catch (e) { console.error('Error loading orders from Firebase:', e); }
-  try { 
-    const d = localStorage.getItem(ORDERS_KEY); 
-    if (d) {
-      orders = JSON.parse(d);
-      orders.forEach(o => { if (!o.status) o.status = 'active'; });
-    } 
-  } catch {}
+  
+  if (!loadedFromFirebase) {
+    try { 
+      const d = localStorage.getItem(ORDERS_KEY); 
+      if (d) {
+        orders = JSON.parse(d);
+        orders.forEach(o => { if (!o.status) o.status = 'active'; });
+      } 
+    } catch (e) { console.error('Error loading orders from localStorage:', e); }
+  }
 }
 
 async function saveOrders() {
