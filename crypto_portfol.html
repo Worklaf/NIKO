@@ -2308,6 +2308,38 @@ canvas {
   border-left-color: var(--yellow);
   background: var(--yellow-dim);
 }
+/* Scroll Navigation Buttons */
+.scroll-nav-btn {
+    position: fixed;
+    right: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+.scroll-nav-btn:hover {
+    background: var(--bg-card-hover);
+    transform: scale(1.05);
+    border-color: var(--text-primary);
+}
+#scrollToTopBtn {
+    bottom: 80px;
+}
+#scrollToOrdersBtn {
+    bottom: 24px;
+}
+.scroll-nav-btn.visible {
+    display: flex;
+}
 </style>
 </head>
 <body class="theme-glass">
@@ -2432,16 +2464,19 @@ canvas {
       <div class="collapsible-content" id="ordersSection">
         <div class="section-sub">Лимитные ордера – сколько USDT заморожено, насколько близко к исполнению и как изменится средняя цена</div>
         <div class="toolbar">
-          <button class="btn btn-primary" onclick="openOrderModal()"><i class="fas fa-plus"></i> Добавить ордер</button>
-          <span id="ordersSummary" style="font-size:13px; color:var(--text-muted);"></span>
-          <div class="order-filters" style="margin-left:auto;">
-            <button class="filter-btn active" onclick="setOrderFilter('all')">Все</button>
-            <button class="filter-btn" onclick="setOrderFilter('active')">Активные</button>
-            <button class="filter-btn" onclick="setOrderFilter('inactive')">Неактивные</button>
-            <button class="filter-btn" onclick="setOrderFilter('pending')">В ожидании</button>
-            <button class="filter-btn" onclick="setOrderFilter('executed')">Исполненные</button>
-          </div>
-        </div>
+    <button class="btn btn-primary" onclick="openOrderModal()"><i class="fas fa-plus"></i> Добавить ордер</button>
+    <div class="search-wrap" style="flex:1; max-width:300px; margin-left:16px;">
+        <input type="text" id="ordersSearch" placeholder="🔍 Поиск по монете..." oninput="filterOrdersByCoin(this.value)">
+    </div>
+    <span id="ordersSummary" style="font-size:13px; color:var(--text-muted);"></span>
+    <div class="order-filters" style="margin-left:auto;">
+        <button class="filter-btn active" onclick="setOrderFilter('all')">Все</button>
+        <button class="filter-btn" onclick="setOrderFilter('active')">Активные</button>
+        <button class="filter-btn" onclick="setOrderFilter('inactive')">Неактивные</button>
+        <button class="filter-btn" onclick="setOrderFilter('pending')">В ожидании</button>
+        <button class="filter-btn" onclick="setOrderFilter('executed')">Исполненные</button>
+    </div>
+</div>
         <div id="globalOrdersImpact"></div>
         <div id="ordersList"></div>
       </div>
@@ -2635,7 +2670,15 @@ canvas {
     </div>
   </div>
 </div>
-
+<!-- Scroll Navigation Buttons -->
+<button id="scrollToTopBtn" class="scroll-nav-btn" onclick="scrollToTop()" title="Вверх">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 15l-6-6-6 6"/>
+    </svg>
+</button>
+<button id="scrollToOrdersBtn" class="scroll-nav-btn" onclick="scrollToOrdersSection()" title="К ордерам">
+    <i class="fas fa-clipboard-list" style="font-size: 20px;"></i>
+</button>
 <!-- ===== SCRIPTS ===== -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -2748,7 +2791,7 @@ let portfolioFilter = '';
 let orderStatusFilter = 'all';
 let collapsedSections = { portfolioAssets: false, ordersSection: false };
 
-
+let ordersSortBySum = true;
 // Track recent user actions to prevent repeated recommendations
 const recentUserActions = new Map(); // holdingId -> { action: 'buy'|'sell', timestamp, price, amount }
 
@@ -6630,336 +6673,434 @@ function importOrderToPortfolio(orderId) {
   renderAll();
 }
 function renderOrders() {
-  const container = document.getElementById('ordersList');
-  const summaryEl = document.getElementById('ordersSummary');
-  const globalImpactEl = document.getElementById('globalOrdersImpact');
-  const badgeEl = document.getElementById('ordersBadge');
-  
-  if (!container) return;
+    const container = document.getElementById('ordersList');
+    const summaryEl = document.getElementById('ordersSummary');
+    const globalImpactEl = document.getElementById('globalOrdersImpact');
+    const badgeEl = document.getElementById('ordersBadge');
+    const searchInput = document.getElementById('ordersSearch');
 
-  checkOrderExecution();
+    if (!container) return;
 
-  let filteredOrders = orders;
-  if (orderStatusFilter !== 'all') {
-    filteredOrders = orders.filter(o => o.status === orderStatusFilter);
-  }
+    checkOrderExecution();
 
-  if (badgeEl) {
-    const activeCount = orders.filter(o => o.status === 'active' || o.status === 'pending').length;
-    const executedCount = orders.filter(o => o.status === 'executed').length;
-    if (activeCount > 0 || executedCount > 0) {
-      badgeEl.style.display = 'inline';
-      badgeEl.textContent = activeCount + ' активных · ' + executedCount + ' исполнено';
-    } else {
-      badgeEl.style.display = 'none';
+    let filteredOrders = orders;
+    if (orderStatusFilter !== 'all') {
+        filteredOrders = orders.filter(o => o.status === orderStatusFilter);
     }
-  }
+    
+    // Применяем фильтр по поиску
+    let searchTerm = '';
+    if (searchInput && searchInput.value.trim()) {
+        searchTerm = searchInput.value.trim().toLowerCase();
+        filteredOrders = filteredOrders.filter(o => 
+            o.symbol.toLowerCase().includes(searchTerm) ||
+            (o.coinId && o.coinId.toLowerCase().includes(searchTerm))
+        );
+    }
 
-  if (!filteredOrders.length) {
-    container.innerHTML = '<div style="color:var(--text-3);padding:16px 0;font-size:13px;">нет ордеров по выбранному фильтру.</div>';
-    if (summaryEl) summaryEl.textContent = '';
-    if (globalImpactEl) globalImpactEl.innerHTML = '';
-    return;
-  }
+    if (badgeEl) {
+        const activeCount = orders.filter(o => o.status === 'active' || o.status === 'pending').length;
+        const executedCount = orders.filter(o => o.status === 'executed').length;
+        if (activeCount > 0 || executedCount > 0) {
+            badgeEl.style.display = 'inline';
+            badgeEl.textContent = activeCount + ' активных · ' + executedCount + ' исполнено';
+        } else {
+            badgeEl.style.display = 'none';
+        }
+    }
 
-  const activeOrders = orders.filter(o => o.status === 'active');
-  const inactiveOrders = orders.filter(o => o.status === 'inactive');
-  const pendingOrders = orders.filter(o => o.status === 'pending');
-  const executedOrders = orders.filter(o => o.status === 'executed');
+    if (!filteredOrders.length) {
+        container.innerHTML = '<div style="color:var(--text-3);padding:16px 0;font-size:13px;">нет ордеров по выбранному фильтру.</div>';
+        if (summaryEl) summaryEl.textContent = '';
+        if (globalImpactEl) globalImpactEl.innerHTML = '';
+        return;
+    }
 
-  const activeLocked = activeOrders.reduce((s, o) => s + (o.total || o.amount * o.price), 0);
-  const inactiveLocked = inactiveOrders.reduce((s, o) => s + (o.total || o.amount * o.price), 0);
-  const pendingLocked = pendingOrders.reduce((s, o) => s + (o.total || o.amount * o.price), 0);
+    const activeOrders = orders.filter(o => o.status === 'active');
+    const inactiveOrders = orders.filter(o => o.status === 'inactive');
+    const pendingOrders = orders.filter(o => o.status === 'pending');
+    const executedOrders = orders.filter(o => o.status === 'executed');
 
-  let globalHtml = '';
-  const impactOrders = orders.filter(o => o.status === 'active' || o.status === 'pending');
-  if (impactOrders.length > 0) {
-    const coinImpacts = {};
-    impactOrders.forEach(o => {
-      const holding = portfolio.find(h => h.coinId === o.coinId);
-      const c = findCoin(o.coinId);
-      if (!coinImpacts[o.coinId]) {
-        coinImpacts[o.coinId] = {
-          symbol: o.symbol,
-          coin: c,
-          holding: holding,
-          totalAddAmount: 0,
-          totalAddCost: 0,
-          orders: []
-        };
-      }
-      coinImpacts[o.coinId].totalAddAmount += o.amount;
-      coinImpacts[o.coinId].totalAddCost += (o.total || o.amount * o.price);
-      coinImpacts[o.coinId].orders.push(o);
-    });
+    const activeLocked = activeOrders.reduce((s, o) => s + (o.total || o.amount * o.price), 0);
+    const inactiveLocked = inactiveOrders.reduce((s, o) => s + (o.total || o.amount * o.price), 0);
+    const pendingLocked = pendingOrders.reduce((s, o) => s + (o.total || o.amount * o.price), 0);
 
-    let totalGlobalLocked = 0;
-    let totalGlobalNewValue = 0;
-    let perCoinHtml = '';
-
-      Object.values(coinImpacts)
-      .sort((a, b) => b.totalAddCost - a.totalAddCost)
-      .forEach(impact => {
-      const h = impact.holding;
-      const c = impact.coin;
-      const currentHoldingAmount = h ? h.amount : 0;
-      const currentHoldingAvg = h ? h.avgPrice : 0;
-      const newTotalAmount = currentHoldingAmount + impact.totalAddAmount;
-      const newAvg = newTotalAmount > 0 
-        ? (currentHoldingAmount * currentHoldingAvg + impact.totalAddCost) / newTotalAmount 
-        : impact.totalAddCost / impact.totalAddAmount;
-      
-      totalGlobalLocked += impact.totalAddCost;
-      
-      const marketPrice = c ? c.current_price : 0;
-      totalGlobalNewValue += newTotalAmount * marketPrice;
-
-      const avgDiff = newAvg - currentHoldingAvg;
-      const avgColor = avgDiff < 0 ? 'avg-pos' : (avgDiff > 0 ? 'avg-neg' : '');
-
-      // P&L calculations
-      const currentPnl = currentHoldingAvg > 0 ? ((marketPrice - currentHoldingAvg) / currentHoldingAvg) * 100 : 0;
-      const newPnl = newAvg > 0 ? ((marketPrice - newAvg) / newAvg) * 100 : 0;
-      const pnlColor = newPnl >= 0 ? 'var(--green)' : 'var(--red)';
-
-         const avgDiffColor = avgDiff < 0 ? 'var(--green)' : (avgDiff > 0 ? 'var(--red)' : 'var(--text)');
-      const orderCount = impact.orders.length;
-
-      perCoinHtml += '<div class="per-coin-card" onclick="scrollToOrders(\'' + impact.symbol + '\')" style="cursor:pointer;position:relative;">' +
-        (orderCount > 1 ? '<div class="order-count-badge">' + orderCount + '</div>' : '') +
-        '<div class="per-coin-locked">' +
-          '<span class="label">заблокировано:</span> <span class="value" style="font-weight:700;">' + fmt$(impact.totalAddCost) + '</span>' +
-        '</div>' +
-        '<div class="per-coin-header">' +
-          '<div class="per-coin-header-left">' +
-            (c && c.image ? '<img src="' + c.image + '" class="per-coin-img" alt="">' : '<div class="per-coin-img" style="background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">' + impact.symbol[0] + '</div>') +
-            '<div class="per-coin-symbol">' + impact.symbol + '</div>' +
-          '</div>' +
-          '<div class="per-coin-price">' + fmt$(marketPrice) + '</div>' +
-        '</div>' +
-        '<div class="per-coin-row">' +
-          '<span class="label">кол-во:</span> <span class="value">' + (h ? h.amount.toLocaleString(undefined,{maximumFractionDigits:4}) : '0') + '</span> <span style="color:var(--text-3)">→</span> <span class="value">' + newTotalAmount.toLocaleString(undefined,{maximumFractionDigits:4}) + '</span>' +
-        '</div>' +
-        '<div class="per-coin-row">' +
-          '<span class="label">средняя:</span> <span class="value">' + fmt$(currentHoldingAvg) + '</span> <span style="color:var(--text-3)">→</span> <span class="value" style="color:' + avgDiffColor + ';">' + fmt$(newAvg) + '</span>' +
-        '</div>' +
-        '<div class="per-coin-row">' +
-          '<span class="label">P&L%:</span> <span style="color:var(--text-2);">' + (currentPnl >= 0 ? '+' : '') + currentPnl.toFixed(1) + '%</span> <span style="color:var(--text-3)">→</span> <span style="color:' + pnlColor + ';font-weight:600;">' + (newPnl >= 0 ? '+' : '') + newPnl.toFixed(1) + '%</span>' +
-        '</div>' +
-      '</div>';
+    let globalHtml = '';
+    let impactOrders = orders.filter(o => o.status === 'active' || o.status === 'pending');
+    
+    // Применяем фильтр по поиску к impactOrders для мини-списка
+    if (searchTerm) {
+        impactOrders = impactOrders.filter(o => 
+            o.symbol.toLowerCase().includes(searchTerm) ||
+            (o.coinId && o.coinId.toLowerCase().includes(searchTerm))
+        );
+    }
+    
+    if (impactOrders.length > 0) {
+        const coinImpacts = {};
+        impactOrders.forEach(o => {
+            const holding = portfolio.find(h => h.coinId === o.coinId);
+            const c = findCoin(o.coinId);
+            if (!coinImpacts[o.coinId]) {
+                coinImpacts[o.coinId] = {
+                    symbol: o.symbol,
+                    coin: c,
+                    holding: holding,
+                    totalAddAmount: 0,
+                    totalAddCost: 0,
+                    orders: []
+                };
+            }
+            coinImpacts[o.coinId].totalAddAmount += o.amount;
+            coinImpacts[o.coinId].totalAddCost += (o.total || o.amount * o.price);
+            coinImpacts[o.coinId].orders.push(o);
         });
 
-    globalHtml = '<div class="global-impact-card">' +
-      '<div class="global-impact-title">📊 Влияние на портфель при исполнении ВСЕХ активных ордеров</div>' +
-      '<div class="global-impact-grid">' +
-        '<div class="global-impact-metric">' +
-          '<div class="global-impact-value">' + fmt$(totalGlobalLocked) + '</div>' +
-          '<div class="global-impact-label">всего будет вложено</div>' +
-        '</div>' +
-        '<div class="global-impact-metric">' +
-          '<div class="global-impact-value">' + fmt$(totalGlobalNewValue) + '</div>' +
-          '<div class="global-impact-label">новая стоимость позиций</div>' +
-        '</div>' +
-        '<div class="global-impact-metric">' +
-          '<div class="global-impact-value">' + Object.keys(coinImpacts).length + '</div>' +
-          '<div class="global-impact-label">монет под ордерами</div>' +
-        '</div>' +
-        '<div class="global-impact-metric">' +
-          '<div class="global-impact-value">' + impactOrders.length + '</div>' +
-          '<div class="global-impact-label">всего ордеров</div>' +
-        '</div>' +
-      '</div>' +
-      '<div class="per-coin-section">' +
-        '<div class="per-coin-label">По каждой монете:</div>' +
-        '<div class="per-coin-grid">' + perCoinHtml + '</div>' +
-      '</div>' +
-    '</div>';
-  }
+        let totalGlobalLocked = 0;
+        let totalGlobalNewValue = 0;
+        let perCoinHtml = '';
 
-  if (globalImpactEl) globalImpactEl.innerHTML = globalHtml;
+        Object.values(coinImpacts)
+            .sort((a, b) => {
+                if (ordersSortBySum) {
+                    return b.totalAddCost - a.totalAddCost;
+                } else {
+                    return a.symbol.localeCompare(b.symbol);
+                }
+            })
+            .forEach(impact => {
+                const h = impact.holding;
+                const c = impact.coin;
+                const currentHoldingAmount = h ? h.amount : 0;
+                const currentHoldingAvg = h ? h.avgPrice : 0;
+                const newTotalAmount = currentHoldingAmount + impact.totalAddAmount;
+                const newAvg = newTotalAmount > 0 ?
+                    (currentHoldingAmount * currentHoldingAvg + impact.totalAddCost) / newTotalAmount :
+                    impact.totalAddCost / impact.totalAddAmount;
 
-  let summaryText = '';
-  if (activeOrders.length > 0) {
-    summaryText += 'активные: <strong style="color:var(--text);">' + fmt$(activeLocked) + '</strong> · ' + activeOrders.length + ' шт. ';
-  }
-  if (inactiveOrders.length > 0) {
-    summaryText += 'неактивные: <strong style="color:var(--text-3);">' + fmt$(inactiveLocked) + '</strong> · ' + inactiveOrders.length + ' шт. ';
-  }
-  if (pendingOrders.length > 0) {
-    summaryText += 'в ожидании: <strong style="color:var(--yellow);">' + fmt$(pendingLocked) + '</strong> · ' + pendingOrders.length + ' шт. ';
-  }
-  if (executedOrders.length > 0) {
-    summaryText += 'исполнено: <strong style="color:var(--green);">' + executedOrders.length + ' шт.</strong>';
-  }
-  if (summaryEl) summaryEl.innerHTML = summaryText;
+                totalGlobalLocked += impact.totalAddCost;
 
-  // Group orders by symbol for display
-  filteredOrders.sort((a, b) => {
-    if (a.symbol !== b.symbol) return a.symbol.localeCompare(b.symbol);
-    return a.created - b.created;
-  });
+                const marketPrice = c ? c.current_price : 0;
+                totalGlobalNewValue += newTotalAmount * marketPrice;
 
-  let cardsHtml = '<div class="orders-flat-grid">';
+                const avgDiff = newAvg - currentHoldingAvg;
+                const avgColor = avgDiff < 0 ? 'avg-pos' : (avgDiff > 0 ? 'avg-neg' : '');
 
-  filteredOrders.forEach(o => {
-    const coin = findCoin(o.coinId);
-    const currentPrice = coin ? coin.current_price : 0;
-    const marketPrice = currentPrice || o.price;
-    
-    const marketDiff = marketPrice > 0 ? ((o.price - marketPrice) / marketPrice) * 100 : 0;
-    const diffBadge = marketDiff >= 0 
-      ? '<span class="market-diff-badge pos">+' + marketDiff.toFixed(1) + '% от рынка</span>' 
-      : '<span class="market-diff-badge neg">' + marketDiff.toFixed(1) + '% от рынка</span>';
-    
-    let execPct = 0;
-    let execColor = 'var(--yellow)';
-    let execLabel = '';
-    let execClass = 'waiting';
-    
-    if (o.status === 'executed') {
-      execPct = 100;
-      execColor = 'var(--green)';
-      execLabel = 'исполнен';
-      execClass = 'executed';
-    } else if (o.status === 'inactive') {
-      execPct = 0;
-      execColor = 'var(--text-3)';
-      execLabel = 'неактивен';
-      execClass = 'inactive';
-    } else {
-      if (marketPrice <= o.price) {
-        execPct = 100;
-        execColor = 'var(--green)';
-        execLabel = 'готов к исполнению';
-        execClass = 'ready';
-      } else {
-        const diff = ((marketPrice - o.price) / o.price) * 100;
-        execPct = Math.max(0, Math.min(95, 100 - diff));
-        execColor = 'var(--yellow)';
-        execLabel = 'нужен рост +' + diff.toFixed(1) + '%';
-        execClass = 'waiting';
-      }
+                const currentPnl = currentHoldingAvg > 0 ? ((marketPrice - currentHoldingAvg) / currentHoldingAvg) * 100 : 0;
+                const newPnl = newAvg > 0 ? ((marketPrice - newAvg) / newAvg) * 100 : 0;
+                const pnlColor = newPnl >= 0 ? 'var(--green)' : 'var(--red)';
+
+                const avgDiffColor = avgDiff < 0 ? 'var(--green)' : (avgDiff > 0 ? 'var(--red)' : 'var(--text)');
+                const orderCount = impact.orders.length;
+
+                perCoinHtml += '<div class="per-coin-card" onclick="scrollToOrders(\'' + impact.symbol + '\')" style="cursor:pointer;position:relative;">' +
+                    (orderCount > 1 ? '<div class="order-count-badge">' + orderCount + '</div>' : '') +
+                    '<div class="per-coin-locked">' +
+                    '<span class="label">заблокировано:</span> <span class="value" style="font-weight:700;">' + fmt$(impact.totalAddCost) + '</span>' +
+                    '</div>' +
+                    '<div class="per-coin-header">' +
+                    '<div class="per-coin-header-left">' +
+                    (c && c.image ? '<img src="' + c.image + '" class="per-coin-img" alt="">' : '<div class="per-coin-img" style="background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">' + impact.symbol[0] + '</div>') +
+                    '<div class="per-coin-symbol">' + impact.symbol + '</div>' +
+                    '</div>' +
+                    '<div class="per-coin-price">' + fmt$(marketPrice) + '</div>' +
+                    '</div>' +
+                    '<div class="per-coin-row">' +
+                    '<span class="label">кол-во:</span> <span class="value">' + (h ? h.amount.toLocaleString(undefined, { maximumFractionDigits: 4 }) : '0') + '</span> <span style="color:var(--text-3)">→</span> <span class="value">' + newTotalAmount.toLocaleString(undefined, { maximumFractionDigits: 4 }) + '</span>' +
+                    '</div>' +
+                    '<div class="per-coin-row">' +
+                    '<span class="label">средняя:</span> <span class="value">' + fmt$(currentHoldingAvg) + '</span> <span style="color:var(--text-3)">→</span> <span class="value" style="color:' + avgDiffColor + ';">' + fmt$(newAvg) + '</span>' +
+                    '</div>' +
+                    '<div class="per-coin-row">' +
+                    '<span class="label">P&L%:</span> <span style="color:var(--text-2);">' + (currentPnl >= 0 ? '+' : '') + currentPnl.toFixed(1) + '%</span> <span style="color:var(--text-3)">→</span> <span style="color:' + pnlColor + ';font-weight:600;">' + (newPnl >= 0 ? '+' : '') + newPnl.toFixed(1) + '%</span>' +
+                    '</div>' +
+                    '</div>';
+            });
+
+        globalHtml = '<div class="global-impact-card">' +
+            '<div class="global-impact-title">📊 Влияние на портфель при исполнении ВСЕХ активных ордеров</div>' +
+            '<div class="global-impact-grid">' +
+            '<div class="global-impact-metric">' +
+            '<div class="global-impact-value">' + fmt$(totalGlobalLocked) + '</div>' +
+            '<div class="global-impact-label">всего будет вложено</div>' +
+            '</div>' +
+            '<div class="global-impact-metric">' +
+            '<div class="global-impact-value">' + fmt$(totalGlobalNewValue) + '</div>' +
+            '<div class="global-impact-label">новая стоимость позиций</div>' +
+            '</div>' +
+            '<div class="global-impact-metric">' +
+            '<div class="global-impact-value">' + Object.keys(coinImpacts).length + '</div>' +
+            '<div class="global-impact-label">монет под ордерами</div>' +
+            '</div>' +
+            '<div class="global-impact-metric">' +
+            '<div class="global-impact-value">' + impactOrders.length + '</div>' +
+            '<div class="global-impact-label">всего ордеров</div>' +
+            '</div>' +
+            '</div>' +
+            '<div class="per-coin-section">' +
+            '<div class="per-coin-label" style="display:flex; align-items:center; gap:8px;">По каждой монете:' +
+            '<div style="display:flex; gap:4px; background:var(--bg-card); border-radius:30px; padding:3px; border:1px solid var(--border-color);">' +
+            '<button class="btn btn-xs ' + (ordersSortBySum ? 'active' : '') + '" onclick="toggleOrdersSort(\'sum\')" title="По сумме" style="border-radius:20px; background:' + (ordersSortBySum ? 'var(--blue)' : 'transparent') + '; border:1px solid ' + (ordersSortBySum ? 'var(--blue)' : 'var(--border-color)') + '; color:' + (ordersSortBySum ? '#fff' : 'var(--text-muted)') + '; padding:4px 8px;"><i class="fas fa-dollar-sign"></i></button>' +
+            '<button class="btn btn-xs ' + (!ordersSortBySum ? 'active' : '') + '" onclick="toggleOrdersSort(\'alpha\')" title="По алфавиту" style="border-radius:20px; background:' + (!ordersSortBySum ? 'var(--blue)' : 'transparent') + '; border:1px solid ' + (!ordersSortBySum ? 'var(--blue)' : 'var(--border-color)') + '; color:' + (!ordersSortBySum ? '#fff' : 'var(--text-muted)') + '; padding:4px 8px;"><i class="fas fa-sort-alpha-down"></i></button>' +
+            '</div>' +
+            '</div>' +
+            '<div class="per-coin-grid">' + perCoinHtml + '</div>' +
+            '</div>' +
+            '</div>';
     }
 
-    const holding = portfolio.find(h => h.coinId === o.coinId);
-    const currentHoldingAmount = holding ? holding.amount : 0;
-    const currentHoldingAvg = holding ? holding.avgPrice : 0;
-    const newTotalAmount = currentHoldingAmount + o.amount;
-    const newAvg = newTotalAmount > 0 
-      ? (currentHoldingAmount * currentHoldingAvg + o.amount * o.price) / newTotalAmount 
-      : o.price;
-    const avgChange = newAvg - currentHoldingAvg;
+    if (globalImpactEl) globalImpactEl.innerHTML = globalHtml;
 
-    const statusBadgeClass = {
-      active: 'status-active',
-      inactive: 'status-inactive',
-      executed: 'status-executed',
-      pending: 'status-pending'
-    }[o.status] || 'status-pending';
+    let summaryText = '';
+    if (activeOrders.length > 0) {
+        summaryText += 'активные: <strong style="color:var(--text);">' + fmt$(activeLocked) + '</strong> · ' + activeOrders.length + ' шт. ';
+    }
+    if (inactiveOrders.length > 0) {
+        summaryText += 'неактивные: <strong style="color:var(--text-3);">' + fmt$(inactiveLocked) + '</strong> · ' + inactiveOrders.length + ' шт. ';
+    }
+    if (pendingOrders.length > 0) {
+        summaryText += 'в ожидании: <strong style="color:var(--yellow);">' + fmt$(pendingLocked) + '</strong> · ' + pendingOrders.length + ' шт. ';
+    }
+    if (executedOrders.length > 0) {
+        const executedTotal = executedOrders.reduce((s, o) => s + (o.total || o.amount * o.price), 0);
+        summaryText += 'исполнено: <strong style="color:var(--green);">' + fmt$(executedTotal) + '</strong> · ' + executedOrders.length + ' шт.';
+    }
+    if (summaryEl) summaryEl.innerHTML = summaryText;
 
-    const statusName = {
-      active: 'АКТИВЕН',
-      inactive: 'НЕАКТИВЕН',
-      executed: 'ИСПОЛНЕН',
-      pending: 'В ОЖИДАНИИ'
-    }[o.status] || o.status;
+    // Сортируем ордера по сумме или алфавиту
+    filteredOrders.sort((a, b) => {
+        if (ordersSortBySum) {
+            const sumA = a.total || a.amount * a.price;
+            const sumB = b.total || b.amount * b.price;
+            return sumB - sumA;
+        } else {
+            if (a.symbol !== b.symbol) return a.symbol.localeCompare(b.symbol);
+            return a.created - b.created;
+        }
+    });
 
-           cardsHtml += '<div class="order-card" id="order-' + o.id + '" data-order-symbol="' + o.symbol + '">' +
-      '<div class="order-header">' +
-        '<div style="display:flex;align-items:center;gap:10px;">' +
-          (coin ? '<img src="' + coin.image + '" style="width:28px;height:28px;border-radius:50%">' : '<div class="coin-img" style="width:28px;height:28px;font-size:12px">' + o.symbol[0] + '</div>') +
-          '<div>' +
+    let cardsHtml = '<div class="orders-flat-grid">';
+
+    filteredOrders.forEach(o => {
+        const coin = findCoin(o.coinId);
+        const currentPrice = coin ? coin.current_price : 0;
+        const marketPrice = currentPrice || o.price;
+
+        const marketDiff = marketPrice > 0 ? ((o.price - marketPrice) / marketPrice) * 100 : 0;
+        const diffBadge = marketDiff >= 0 ?
+            '<span class="market-diff-badge pos">+' + marketDiff.toFixed(1) + '% от рынка</span>' :
+            '<span class="market-diff-badge neg">' + marketDiff.toFixed(1) + '% от рынка</span>';
+
+        let execPct = 0;
+        let execColor = 'var(--yellow)';
+        let execLabel = '';
+        let execClass = 'waiting';
+
+        if (o.status === 'executed') {
+            execPct = 100;
+            execColor = 'var(--green)';
+            execLabel = 'исполнен';
+            execClass = 'executed';
+        } else if (o.status === 'inactive') {
+            execPct = 0;
+            execColor = 'var(--text-3)';
+            execLabel = 'неактивен';
+            execClass = 'inactive';
+        } else {
+            if (marketPrice <= o.price) {
+                execPct = 100;
+                execColor = 'var(--green)';
+                execLabel = 'готов к исполнению';
+                execClass = 'ready';
+            } else {
+                const diff = ((marketPrice - o.price) / o.price) * 100;
+                execPct = Math.max(0, Math.min(95, 100 - diff));
+                execColor = 'var(--yellow)';
+                execLabel = 'нужен рост +' + diff.toFixed(1) + '%';
+                execClass = 'waiting';
+            }
+        }
+
+        const holding = portfolio.find(h => h.coinId === o.coinId);
+        const currentHoldingAmount = holding ? holding.amount : 0;
+        const currentHoldingAvg = holding ? holding.avgPrice : 0;
+        const newTotalAmount = currentHoldingAmount + o.amount;
+        const newAvg = newTotalAmount > 0 ?
+            (currentHoldingAmount * currentHoldingAvg + o.amount * o.price) / newTotalAmount :
+            o.price;
+        const avgChange = newAvg - currentHoldingAvg;
+
+        const statusBadgeClass = {
+            active: 'status-active',
+            inactive: 'status-inactive',
+            executed: 'status-executed',
+            pending: 'status-pending'
+        } [o.status] || 'status-pending';
+
+        const statusName = {
+            active: 'АКТИВЕН',
+            inactive: 'НЕАКТИВЕН',
+            executed: 'ИСПОЛНЕН',
+            pending: 'В ОЖИДАНИИ'
+        } [o.status] || o.status;
+
+        cardsHtml += '<div class="order-card" id="order-' + o.id + '" data-order-symbol="' + o.symbol + '">' +
+            '<div class="order-header">' +
+            '<div style="display:flex;align-items:center;gap:10px;">' +
+            (coin ? '<img src="' + coin.image + '" style="width:28px;height:28px;border-radius:50%">' : '<div class="coin-img" style="width:28px;height:28px;font-size:12px">' + o.symbol[0] + '</div>') +
+            '<div>' +
             '<div class="order-title">' + (coin ? coin.name : o.symbol) + ' (' + o.symbol + ')' + diffBadge + '</div>' +
             '<div style="font-size:11px;color:var(--text-3)">лимитный ордер на покупку</div>' +
-          '</div>' +
-        '</div>' +
-        '<div style="display:flex;align-items:center;gap:8px;">' +
-          '<span class="order-status-badge ' + statusBadgeClass + '">' + statusName + '</span>' +
-        '</div>' +
-      '</div>' +
-      '<div style="font-size:12px;color:var(--text-3);margin:8px 0;display:flex;gap:16px;flex-wrap:wrap;">' +
-        '<span>🕐 открыт: ' + (o.created ? new Date(o.created).toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'}) : '—') + '</span>' +
-        (o.status === 'executed' && o.executedAt ? '<span style="color:var(--green)">✓ исполнен: ' + new Date(o.executedAt).toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'}) + '</span>' : '') +
-      '</div>' +
-
-      '<div class="order-grid">' +
-        '<div class="order-metric">' +
-          '<div class="order-metric-value">' + o.amount.toLocaleString(undefined, {maximumFractionDigits: 6}) + '</div>' +
-          '<div class="order-metric-label">кол-во ' + o.symbol + '</div>' +
-        '</div>' +
-        '<div class="order-metric">' +
-          '<div class="order-metric-value">' + fmt$(o.price) + '</div>' +
-          '<div class="order-metric-label">цена ордера</div>' +
-        '</div>' +
-        '<div class="order-metric">' +
-          '<div class="order-metric-value">' + fmt$(o.total || o.amount * o.price) + '</div>' +
-          '<div class="order-metric-label">сумма USDT</div>' +
-        '</div>' +
-        '<div class="order-metric">' +
-          '<div class="order-metric-value" style="color:' + (marketPrice <= o.price && o.status !== 'inactive' ? 'var(--green)' : 'var(--text)') + '">' + fmt$(marketPrice) + '</div>' +
-          '<div class="order-metric-label">текущая цена</div>' +
-        '</div>' +
-      '</div>' +
-
-      '<div class="order-exec-progress">' +
-        '<div class="order-exec-label">' +
-          '<span style="color:var(--text-3)">прогресс к исполнению</span>' +
-          '<span class="exec-pct ' + execClass + '">' + execLabel + '</span>' +
-        '</div>' +
-        '<div class="order-exec-track">' +
-          '<div class="order-exec-fill" style="width:' + execPct + '%;background:' + execColor + '"></div>' +
-        '</div>' +
-      '</div>' +
-
-      '<div class="order-impact">' +
-        '<div style="font-weight:600;margin-bottom:10px;color:var(--blue)">📊 Влияние на портфель после исполнения</div>' +
-        '<div class="order-impact-grid">' +
-          '<div>' +
-            '<div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">сейчас в портфеле</div>' +
-            '<div style="font-weight:700;font-size:15px;">' + currentHoldingAmount.toLocaleString(undefined, {maximumFractionDigits: 6}) + ' <span style="font-size:12px;color:var(--text-3);font-weight:500;">' + o.symbol + '</span></div>' +
-            (holding ? '<div style="font-size:12px;color:var(--text-3);margin-top:2px;">средняя ' + fmt$(currentHoldingAvg) + '</div>' : '<div style="font-size:12px;color:var(--text-3);margin-top:2px;">нет позиции</div>') +
-          '</div>' +
-          '<div class="arrow-col" style="text-align:center;font-size:20px;color:var(--text-3);">→</div>' +
-          '<div>' +
-            '<div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">будет в портфеле</div>' +
-            '<div style="font-weight:700;font-size:15px;">' + newTotalAmount.toLocaleString(undefined, {maximumFractionDigits: 6}) + ' <span style="font-size:12px;color:var(--text-3);font-weight:500;">' + o.symbol + '</span></div>' +
-            '<div style="font-size:12px;color:var(--text-3);margin-top:2px;">новая средняя ' + fmt$(newAvg) + 
-              (holding && avgChange !== 0 ? ' <span style="color:' + (avgChange < 0 ? 'var(--green)' : 'var(--red)') + '">(' + (avgChange < 0 ? '' : '+') + fmt$(avgChange) + ')</span>' : '') +
             '</div>' +
-          '</div>' +
-        '</div>' +
-        '<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">' +
-          '<div style="font-size:12px;color:var(--text-3)">всего вложено будет: <strong style="color:var(--text);">' + fmt$(newTotalAmount * newAvg) + '</strong></div>' +
-          '<div style="font-size:12px;color:var(--text-3)">текущая стоимость позиции: <strong style="color:var(--text);">' + fmt$(newTotalAmount * marketPrice) + '</strong></div>' +
-        '</div>' +
-      '</div>' +
+            '</div>' +
+            '<div style="display:flex;align-items:center;gap:8px;">' +
+            '<span class="order-status-badge ' + statusBadgeClass + '">' + statusName + '</span>' +
+            '</div>' +
+            '</div>' +
+            '<div style="font-size:12px;color:var(--text-3);margin:8px 0;display:flex;gap:16px;flex-wrap:wrap;">' +
+            '<span>🕐 открыт: ' + (o.created ? new Date(o.created).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—') + '</span>' +
+            (o.status === 'executed' && o.executedAt ? '<span style="color:var(--green)">✓ исполнен: ' + new Date(o.executedAt).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + '</span>' : '') +
+            '</div>' +
 
-      '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;align-items:center;">' +
-  (o.status === 'active' || o.status === 'pending' ?
-    '<button class="btn btn-sm btn-primary" onclick="executeOrder(\'' + o.id + '\')" title="Исполнить ордер и добавить в портфель" style="padding:4px 8px;display:flex;align-items:center;justify-content:center;">' +
-  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>' +
-'</button>' :
-    (o.status === 'executed' ?
-      '<span style="color:var(--green);font-weight:700;font-size:14px;">✓ исполнен</span>' :
-      ''
-    )
-  ) +
-  '<select class="order-status-select" onchange="changeOrderStatus(\'' + o.id + '\', this.value)">' +
-    '<option value="active" ' + (o.status === 'active' ? 'selected' : '') + '>активен</option>' +
-    '<option value="inactive" ' + (o.status === 'inactive' ? 'selected' : '') + '>неактивен</option>' +
-    '<option value="pending" ' + (o.status === 'pending' ? 'selected' : '') + '>в ожидании</option>' +
-    '<option value="executed" ' + (o.status === 'executed' ? 'selected' : '') + '>исполнен</option>' +
-  '</select>' +
-  '<button class="btn btn-sm" onclick="openEditOrderModal(\'' + o.id + '\')">редактировать</button>' +
-  '<button class="btn btn-sm btn-danger" onclick="delOrder(\'' + o.id + '\')">удалить</button>' +
-'</div>' +
-'</div>';
-  });
+            '<div class="order-grid">' +
+            '<div class="order-metric">' +
+            '<div class="order-metric-value">' + o.amount.toLocaleString(undefined, { maximumFractionDigits: 6 }) + '</div>' +
+            '<div class="order-metric-label">кол-во ' + o.symbol + '</div>' +
+            '</div>' +
+            '<div class="order-metric">' +
+            '<div class="order-metric-value">' + fmt$(o.price) + '</div>' +
+            '<div class="order-metric-label">цена ордера</div>' +
+            '</div>' +
+            '<div class="order-metric">' +
+            '<div class="order-metric-value">' + fmt$(o.total || o.amount * o.price) + '</div>' +
+            '<div class="order-metric-label">сумма USDT</div>' +
+            '</div>' +
+            '<div class="order-metric">' +
+            '<div class="order-metric-value" style="color:' + (marketPrice <= o.price && o.status !== 'inactive' ? 'var(--green)' : 'var(--text)') + '">' + fmt$(marketPrice) + '</div>' +
+            '<div class="order-metric-label">текущая цена</div>' +
+            '</div>' +
+            '</div>' +
 
-  cardsHtml += '</div>';
-  container.innerHTML = cardsHtml;
+            '<div class="order-exec-progress">' +
+            '<div class="order-exec-label">' +
+            '<span style="color:var(--text-3)">прогресс к исполнению</span>' +
+            '<span class="exec-pct ' + execClass + '">' + execLabel + '</span>' +
+            '</div>' +
+            '<div class="order-exec-track">' +
+            '<div class="order-exec-fill" style="width:' + execPct + '%;background:' + execColor + '"></div>' +
+            '</div>' +
+            '</div>' +
+
+            '<div class="order-impact">' +
+            '<div style="font-weight:600;margin-bottom:10px;color:var(--blue)">📊 Влияние на портфель после исполнения</div>' +
+            '<div class="order-impact-grid">' +
+            '<div>' +
+            '<div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">сейчас в портфеле</div>' +
+            '<div style="font-weight:700;font-size:15px;">' + currentHoldingAmount.toLocaleString(undefined, { maximumFractionDigits: 6 }) + ' <span style="font-size:12px;color:var(--text-3);font-weight:500;">' + o.symbol + '</span></div>' +
+            (holding ? '<div style="font-size:12px;color:var(--text-3);margin-top:2px;">средняя ' + fmt$(currentHoldingAvg) + '</div>' : '<div style="font-size:12px;color:var(--text-3);margin-top:2px;">нет позиции</div>') +
+            '</div>' +
+            '<div class="arrow-col" style="text-align:center;font-size:20px;color:var(--text-3);">→</div>' +
+            '<div>' +
+            '<div style="font-size:11px;color:var(--text-3);margin-bottom:4px;">будет в портфеле</div>' +
+            '<div style="font-weight:700;font-size:15px;">' + newTotalAmount.toLocaleString(undefined, { maximumFractionDigits: 6 }) + ' <span style="font-size:12px;color:var(--text-3);font-weight:500;">' + o.symbol + '</span></div>' +
+            '<div style="font-size:12px;color:var(--text-3);margin-top:2px;">новая средняя ' + fmt$(newAvg) +
+            (holding && avgChange !== 0 ? ' <span style="color:' + (avgChange < 0 ? 'var(--green)' : 'var(--red)') + '">(' + (avgChange < 0 ? '' : '+') + fmt$(avgChange) + ')</span>' : '') +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">' +
+            '<div style="font-size:12px;color:var(--text-3)">всего вложено будет: <strong style="color:var(--text);">' + fmt$(newTotalAmount * newAvg) + '</strong></div>' +
+            '<div style="font-size:12px;color:var(--text-3)">текущая стоимость позиции: <strong style="color:var(--text);">' + fmt$(newTotalAmount * marketPrice) + '</strong></div>' +
+            '</div>' +
+            '</div>' +
+
+            '<div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;align-items:center;">' +
+            (o.status === 'active' || o.status === 'pending' ?
+                '<button class="btn btn-sm btn-primary" onclick="executeOrder(\'' + o.id + '\')" title="Исполнить ордер и добавить в портфель" style="padding:4px 8px;display:flex;align-items:center;justify-content:center;">' +
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>' +
+                '</button>' :
+                (o.status === 'executed' ?
+                    '<span style="color:var(--green);font-weight:700;font-size:14px;">✓ исполнен</span>' :
+                    ''
+                )
+            ) +
+            '<select class="order-status-select" onchange="changeOrderStatus(\'' + o.id + '\', this.value)">' +
+            '<option value="active" ' + (o.status === 'active' ? 'selected' : '') + '>активен</option>' +
+            '<option value="inactive" ' + (o.status === 'inactive' ? 'selected' : '') + '>неактивен</option>' +
+            '<option value="pending" ' + (o.status === 'pending' ? 'selected' : '') + '>в ожидании</option>' +
+            '<option value="executed" ' + (o.status === 'executed' ? 'selected' : '') + '>исполнен</option>' +
+            '</select>' +
+            '<button class="btn btn-sm" onclick="openEditOrderModal(\'' + o.id + '\')">редактировать</button>' +
+            '<button class="btn btn-sm btn-danger" onclick="delOrder(\'' + o.id + '\')">удалить</button>' +
+            '</div>' +
+            '</div>';
+    });
+
+    cardsHtml += '</div>';
+    container.innerHTML = cardsHtml;
+}
+// Show/hide scroll buttons based on active tab
+function updateScrollButtons() {
+    const activeTab = document.querySelector('.tab-btn.active');
+    const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+    const scrollToOrdersBtn = document.getElementById('scrollToOrdersBtn');
+    
+    if (activeTab && activeTab.dataset.tab === 'portfolio') {
+        scrollToTopBtn.classList.add('visible');
+        scrollToOrdersBtn.classList.add('visible');
+    } else {
+        scrollToTopBtn.classList.remove('visible');
+        scrollToOrdersBtn.classList.remove('visible');
+    }
 }
 
+// Listen for tab changes
+document.addEventListener('DOMContentLoaded', function() {
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            setTimeout(updateScrollButtons, 100);
+        });
+    });
+    updateScrollButtons();
+});
+// ============================================================
+// СОРТИРОВКА ОРДЕРОВ
+// ============================================================
+
+function toggleOrdersSort(type) {
+    ordersSortBySum = type === 'sum';
+    renderOrders();
+}
+
+// ============================================================
+// СКРОЛЛ К ОРДЕРАМ И НАВЕРХ
+// ============================================================
+
+function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function scrollToOrdersSection() {
+    const ordersHeader = document.querySelector('.collapsible-header[onclick*="ordersSection"]');
+    if (ordersHeader) {
+        const headerOffset = 80;
+        const elementPosition = ordersHeader.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+        });
+    }
+}
+
+// ============================================================
+// ФИЛЬТР ОРДЕРОВ ПО ПОИСКУ
+// ============================================================
+
+function filterOrdersByCoin(searchTerm) {
+    renderOrders();
+}
 /* ---------- /ORDERS ---------- */
 
 window.addEventListener('DOMContentLoaded', init);
