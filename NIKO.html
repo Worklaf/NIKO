@@ -1889,13 +1889,80 @@ function isVisibleToRole(item, role) {
 function renderPlaylistsList() {
   const list = document.getElementById('playlists-list');
   if (!list) return;
-  const mine = globalPlaylists.filter(p => p.ownerRole === getRole());
-  list.innerHTML = mine.map(p => `
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:rgba(255,255,255,0.05);border-radius:8px;margin-bottom:6px">
-      <span>${p.name} <small style="color:var(--muted)">(${p.visibility})</small>${p.hideFromHome ? ' <span title="Скрыт с главной" style="opacity:.6">👁️‍🗨️</span>' : ''}</span>
-      <button class="btn icon delete-playlist-btn" data-id="${p.id}">🗑️</button>
-    </div>
-  `).join('');
+  
+  const role = getRole();
+  const user = firebase.auth().currentUser;
+  const ownerId = user?.email || role; // Используем email вместо uid
+  
+  // Фильтруем плейлисты
+  let visiblePlaylists;
+  if (role === 'admin') {
+    // Админ видит свои + партнера (или все если тумблер включен)
+    const showAll = window.showAllPlaylists || false;
+    if (showAll) {
+      visiblePlaylists = globalPlaylists.filter(p => isVisibleToRole(p, role));
+    } else {
+      visiblePlaylists = globalPlaylists.filter(p => 
+        isVisibleToRole(p, role) && (!p.owner || p.owner === ownerId || p.owner === 'role_partner')
+      );
+    }
+  } else if (role === 'partner') {
+    // Партнер видит свои (любой visibility) + админские public/partner (не hidden/admin only)
+    visiblePlaylists = globalPlaylists.filter(p => {
+      if (p.owner === ownerId) return true; // мой плейлист - всегда показываем
+      // Если не мой - проверяем остальные условия
+      if (!isVisibleToRole(p, role)) return false;
+      if (p.owner && p.owner !== 'role_admin') return false;
+      if (p.owner === 'role_admin' && (p.visibility === 'hidden' || p.visibility === 'admin')) return false;
+      return true;
+    });
+  } else if (role === 'user') {
+    // Обычный пользователь видит свои (любой visibility) + админские public + плейлисты без owner (старые)
+    // Если это мой плейлист - показываем (не фильтруем)
+    visiblePlaylists = globalPlaylists.filter(p => {
+      if (p.owner === ownerId) return true; // мой плейлист - всегда показываем
+      // Если не мой - проверяем остальные условия
+      if (!isVisibleToRole(p, role)) return false;
+      if (p.owner && p.owner !== 'role_admin') return false;
+      if (p.owner === 'role_admin' && p.visibility !== 'public') return false;
+      if (p.visibility === 'hidden' || p.visibility === 'admin') return false;
+      if (p.visibility === 'private') return false; // чужие private не показываем
+      return true;
+    });
+  } else if (role === 'guest') {
+    // Гость видит только админские public и плейлисты без owner (старые public)
+    visiblePlaylists = globalPlaylists.filter(p => 
+      (p.visibility === 'public' || !p.visibility) && 
+      (!p.owner || p.owner === 'role_admin' || p.owner === 'role_partner')
+    );
+  }
+  
+  if (!visiblePlaylists || visiblePlaylists.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">Нет плейлистов. Создайте первый!</div>';
+    return;
+  }
+  
+  list.innerHTML = visiblePlaylists.map(p => {
+    const isOwner = p.owner === ownerId;
+    const isPartner = p.owner === 'role_partner';
+    const canDelete = isOwner || role === 'admin';
+    const canEdit = isOwner || role === 'admin';
+    const ownerLabel = isOwner ? ' (мой)' : isPartner ? ' (партнер)' : p.ownerEmail ? ` (${p.ownerEmail})` : '';
+    
+    return `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:rgba(255,255,255,0.05);border-radius:8px;margin-bottom:8px;${canEdit ? 'cursor:pointer;' : ''}" ${canEdit ? `onclick="editPlaylist('${p.id}')"` : ''}>
+        <div style="display:flex;align-items:center;gap:10px;flex:1;">
+          ${p.cover ? `<img src="${p.cover}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;">` : '<div style="width:40px;height:40px;background:rgba(255,77,166,0.1);border-radius:6px;display:flex;align-items:center;justify-content:center;">🎵</div>'}
+          <div>
+            <div style="font-weight:600;">${p.name}${ownerLabel}</div>
+            <div style="font-size:12px;color:var(--muted);">${p.visibility}${p.hideFromHome ? ' · 👁️‍🗨️' : ''}</div>
+          </div>
+        </div>
+        ${canDelete ? `<button class="btn icon delete-playlist-btn" data-id="${p.id}" style="padding:4px 8px;" onclick="event.stopPropagation();">🗑️</button>` : ''}
+      </div>
+    `;
+  }).join('');
+  
   list.querySelectorAll('.delete-playlist-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       if (confirm(t('deletePlaylistConfirm') || 'Удалить плейлист?')) {
@@ -2056,9 +2123,10 @@ async function subscribeTracks() {
     isCacheValid = true;
   }
   
-  // Subscribe to real-time updates
+  // Subscribe to real-time updates (ограничено до 5 для теста из-за лимитов Firebase)
   db.collection('tracks')
     .orderBy('createdAt', 'desc')
+    .limit(5) // ВРЕМЕННОЕ ОГРАНИЧЕНИЕ ДЛЯ ТЕСТА
     .onSnapshot(async (snap) => {
       let allTracks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     
@@ -2610,6 +2678,8 @@ function renderDraftTracks(tracks) {
   const curTrackId = window.currentTrackId || null;
   const listened = getListenedTracks();
   const role = getRole();
+  const user = firebase.auth().currentUser;
+  const ownerId = user?.email || role; // Используем email вместо uid
 
   tracks.forEach((track, index) => {
     const div = document.createElement('div');
@@ -2709,17 +2779,21 @@ function renderDraftTracks(tracks) {
          <div class="title"><a class="track-title-link" href="track.html?id=${track.id}">${track.artist ? `${track.artist} - ${track.title}` : track.title}</a></div>
         <div class="meta">${getTrackGenreLabels(track.genre).join(', ')} · ${track.duration || '—'}</div>
         ${partnerListenInfo}
+        ${role !== 'guest' ? `
         <div class="playlist-badges" style="display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 2px 0">
           ${track.playlistIds && track.playlistIds.length > 0
             ? track.playlistIds.map(pid => {
                 const pl = globalPlaylists.find(p => p.id === pid);
                 if (!pl) return '';
+                // Private плейлисты показываем только создателю
+                if (pl.visibility === 'private' && pl.owner !== ownerId) return '';
                 const icon = pl.visibility === 'public' ? '🌍' : pl.visibility === 'partner' ? '♥' : '🔒';
                 const bg = pl.visibility === 'public' ? 'rgba(0,180,255,0.25)' : pl.visibility === 'partner' ? 'rgba(255,100,180,0.25)' : 'rgba(255,255,255,0.15)';
                 return `<span class="playlist-badge" data-id="${pl.id}" style="padding:2px 6px;font-size:10px;border-radius:6px;display:inline-flex;align-items:center;gap:4px;cursor:pointer;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:${bg};color:#fff;">${icon} ${pl.name}</span>`;
               }).join('')
             : ''}
         </div>
+        ` : ''}
                         <div class="counts">
           <div class="play-count" data-key="${track.id}"><span class="num">${track.plays || 0}</span> ${t('plays') || 'прослушиваний'}</div>
           <div class="likes-count ${val === 'like' ? 'active' : ''}" data-key="${track.id}"><span class="num">${track.likes || 0}</span> ❤</div>
@@ -3020,31 +3094,103 @@ const VIS_LABELS = {
   partner: 'Premium',   // вместо «partner»
   hidden:  'Prywatna'
 };
+
+// Обработчики для модального окна ограничения плейлистов
+function showPlaylistRestriction() {
+  document.getElementById('playlist-restriction-modal').classList.add('open');
+}
+function closePlaylistRestriction() {
+  document.getElementById('playlist-restriction-modal').classList.remove('open');
+}
+
 async function openPlaylistPicker(trackId) {
   const role = getRole();
+  
+  // Для гостей сразу показываем модальное окно с требованием авторизации
+ if (role === 'guest') {
+  showPlaylistRestriction();
+  return;
+}
+  
   const track = globalTracks.find(t => t.id === trackId);
-  const myPlaylists = globalPlaylists.filter(p => isVisibleToRole(p, role));
+  const user = firebase.auth().currentUser;
+  const ownerId = user?.email || role; // Используем email вместо uid
+  
+  // Фильтруем плейлисты по новым правилам
+  let myPlaylists;
+  if (role === 'admin') {
+    myPlaylists = globalPlaylists.filter(p => 
+      isVisibleToRole(p, role) && (!p.owner || p.owner === ownerId || p.owner === 'role_partner')
+    );
+  } else if (role === 'partner') {
+    myPlaylists = globalPlaylists.filter(p => {
+      if (p.owner === ownerId) return true; // мой плейлист - всегда показываем
+      // Если не мой - проверяем остальные условия
+      if (!isVisibleToRole(p, role)) return false;
+      if (p.owner && p.owner !== 'role_admin') return false;
+      if (p.owner === 'role_admin' && (p.visibility === 'hidden' || p.visibility === 'admin')) return false;
+      return true;
+    });
+  } else if (role === 'user') {
+    myPlaylists = globalPlaylists.filter(p => {
+      if (p.owner === ownerId) return true; // мой плейлист - всегда показываем
+      // Если не мой - проверяем остальные условия
+      if (!isVisibleToRole(p, role)) return false;
+      if (p.owner && p.owner !== 'role_admin') return false;
+      if (p.owner === 'role_admin' && p.visibility !== 'public') return false;
+      if (p.visibility === 'hidden' || p.visibility === 'admin') return false;
+      if (p.visibility === 'private') return false; // чужие private не показываем
+      return true;
+    });
+  } else if (role === 'guest') {
+    myPlaylists = globalPlaylists.filter(p => 
+      (p.visibility === 'public' || !p.visibility) && 
+      (!p.owner || p.owner === 'role_admin' || p.owner === 'role_partner')
+    );
+  }
+  
   const modal = document.getElementById('playlist-picker-modal');
   const listEl = document.getElementById('playlist-picker-list');
   listEl.innerHTML = '';
 
   myPlaylists.forEach(p => {
     const isInPlaylist = track.playlistIds?.includes(p.id);
-    const isOwnerPartner = (p.ownerRole === 'partner');
-    const isOwnerAdmin = (p.ownerRole === 'admin');
-    let canAdd = false, canRemove = false;
-    if (isAdmin) { canAdd = true; canRemove = true; }
-    else if (isPartner && isOwnerPartner) { canAdd = true; canRemove = true; }
-    if (role === 'guest') { canAdd = false; canRemove = false; }
+    // === ФИКС: проверяем и owner, и ownerRole ===
+const isOwner = p.owner === ownerId;
+// Партнерский плейлист: старый (ownerRole) или новый (owner)
+const isPartnerPlaylist = p.owner === 'role_partner' || 
+                          p.owner === 'partner' || 
+                          p.owner === role || 
+                          p.ownerRole === 'partner';
+
+let canAdd = false, canRemove = false;
+
+if (isAdmin) { 
+  canAdd = true; 
+  canRemove = true; 
+} else if (isPartner && isPartnerPlaylist) { 
+  // Партнер управляет партнерскими плейлистами
+  canAdd = true; 
+  canRemove = true; 
+} else if (role === 'user' && isOwner) { 
+  canAdd = true; 
+  canRemove = true; 
+} else if (role === 'guest') { 
+  canAdd = false; 
+  canRemove = false; 
+}
+    
     const showPlus = (!isInPlaylist && canAdd);
     const showMinus = (isInPlaylist && canRemove);
     const visIcon = p.visibility === 'public' ? '🌍' : p.visibility === 'partner' ? '♥' : '🔒';
+    const ownerLabel = isOwner ? ' (мой)' : isPartner ? ' (партнер)' : p.ownerEmail ? ` (${p.ownerEmail})` : '';
+    
     const div = document.createElement('div');
     div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;background:rgba(255,255,255,0.04);margin-bottom:6px;position:relative;';
     div.innerHTML = `
       <img src="${p.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png'}" style="width:40px;height:40px;border-radius:6px;object-fit:cover">
       <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</div>
+        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}${ownerLabel}</div>
                 <div style="font-size:11px;color:#bfc3d6">${
           role === 'admin'
             ? visIcon + ' ' + (VIS_LABELS[p.visibility] || p.visibility) + ' · '
@@ -3079,45 +3225,71 @@ async function openPlaylistPicker(trackId) {
     listEl.appendChild(div);
   });
 
-  if (role === 'admin' || role === 'partner') {
+  // Кнопка создания плейлиста для гостей, партнеров и обычных пользователей
+  if (role === 'guest' || role === 'user' || role === 'partner') {
     const createBtn = document.createElement('button');
-    createBtn.textContent = '+ Create new playlist';
-    createBtn.style.cssText = 'width:100%;padding:10px;margin-top:10px;background:#4d8aff;border:none;border-radius:8px;color:white;font-weight:600;cursor:pointer;';
+    createBtn.textContent = '+ Создать плейлист';
+    createBtn.style.cssText = 'width:100%;padding:12px;border-radius:8px;border:none;background:linear-gradient(90deg,#ff4da6,#ff7a4d);color:#fff;font-weight:600;cursor:pointer;margin-top:8px;';
     createBtn.addEventListener('click', async () => {
-  const data = await askNewPlaylist(role);
-  if (!data) return;
-
-  // Get track data for cover image
-  const trackSnap = await db.collection('tracks').doc(trackId).get();
-  const trackData = trackSnap.data();
-
-  const payload = {
-    name: data.name,
-    description: '',
-    ownerRole: role,
-    visibility: role === 'admin' ? data.visibility : 'partner',
-    hideFromHome: data.hideFromHome,
-    songCount: 1,
-    cover: trackData?.cover || null,
-    coverFileName: trackData?.coverFileName || null,
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  };
-
-  const docRef = await db.collection('playlists').add(payload);
-  await db.collection('tracks').doc(trackId)
-    .update({ playlistIds: firebase.firestore.FieldValue.arrayUnion(docRef.id) });
-  await loadGlobalPlaylists();
-  openPlaylistPicker(trackId);
-});
+      // Для гостей - показываем модальное окно с требованием авторизации
+      if (role === 'guest') {
+        showPlaylistRestriction();
+        return;
+      }
+      
+      // Для партнеров и обычных пользователей - создаем плейлист
+      const name = prompt('Введите название плейлиста:');
+      if (!name) return;
+      
+      // Партнер создает с visibility 'partner' (виден партнеру и админу)
+      // Обычный пользователь создает с visibility 'private' (виден только пользователю и админу)
+      const visibility = role === 'partner' ? 'partner' : 'private';
+      
+      console.log('Creating playlist from main page with visibility:', visibility, 'for role:', role, 'ownerId:', ownerId);
+      
+      const newPlaylistRef = await db.collection('playlists').add({
+        name,
+        visibility: visibility,
+        hideFromHome: false,
+        cover: null,
+        owner: ownerId, // Теперь это email
+        ownerEmail: user?.email || role,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      
+      // Добавляем трек в новый плейлист
+      await db.collection('tracks').doc(trackId).update({ playlistIds: firebase.firestore.FieldValue.arrayUnion(newPlaylistRef.id) });
+      await newPlaylistRef.update({ songCount: 1 });
+      if (track?.cover) {
+        await newPlaylistRef.update({ cover: track.cover, coverFileName: track.coverFileName });
+      }
+      
+      // Добавляем новый плейлист в массив без перезагрузки
+      openPlaylistPicker(trackId);
+    });
     listEl.appendChild(createBtn);
   }
+
   modal.classList.add('open');
   document.getElementById('playlist-picker-cancel').onclick = () => { modal.classList.remove('open'); };
 }
 
 async function loadGlobalPlaylists() {
   const snap = await db.collection('playlists').get();
-  globalPlaylists = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const newPlaylists = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  
+  // Проверяем, изменился ли список плейлистов
+  if (globalPlaylists.length === newPlaylists.length) {
+    const hasChanges = newPlaylists.some(np => {
+      const existing = globalPlaylists.find(gp => gp.id === np.id);
+      if (!existing) return true;
+      return JSON.stringify(existing) !== JSON.stringify(np);
+    });
+    if (!hasChanges) return; // Изменений нет, не обновляем
+  }
+  
+  globalPlaylists = newPlaylists;
 }
 
 function openVisibilityPicker(trackId) {
@@ -4393,17 +4565,61 @@ if (e.target.closest('.track-date-editable')) {
     (uploadPermission === 'admin_only' && isAdmin);
 
   document.getElementById('pl-save')?.addEventListener('click', async () => {
+    const plId = document.getElementById('pl-id').value;
     const name = document.getElementById('pl-name').value.trim();
-    const visibility = document.getElementById('pl-visibility').value;
+    const type = document.getElementById('pl-type').value;
     const hideFromHome = document.getElementById('pl-hide-from-home').checked;
+    
     if (!name) return alert(t('playlistName') || 'Введите название');
-    await db.collection('playlists').add({
-      name, visibility, hideFromHome,
-      ownerRole: getRole(),
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    
+    const role = getRole();
+    if (role === 'guest') return alert('Требуется авторизация');
+    
+    const user = firebase.auth().currentUser;
+    // Для обычных пользователей Firebase - используем их uid
+    // Для админа/партнера без Firebase auth - используем специальный идентификатор
+    let ownerId, ownerEmail;
+    if (role === 'user' && user) {
+      ownerId = user.uid;
+      ownerEmail = user.email || localStorage.getItem('userDisplayName') || 'User';
+    } else {
+      ownerId = `role_${role}`;
+      ownerEmail = role;
+    }
+    
+    const playlistData = {
+      name,
+      visibility: type === 'user' ? 'public' : type, // user -> public для совместимости
+      hideFromHome,
+      cover: playlistCoverDataUrl || null,
+      owner: ownerId,
+      ownerEmail: ownerEmail,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
+    if (plId) {
+      // Редактирование существующего плейлиста
+      await db.collection('playlists').doc(plId).update(playlistData);
+    } else {
+      // Создание нового плейлиста
+      await db.collection('playlists').add(playlistData);
+    }
+    
+    // Сброс формы
     document.getElementById('pl-name').value = '';
+    document.getElementById('pl-id').value = '';
     document.getElementById('pl-hide-from-home').checked = false;
+    document.getElementById('pl-type').value = 'user';
+    document.getElementById('pl-cover-preview').innerHTML = '<span style="font-size:24px;">🎵</span>';
+    playlistCoverDataUrl = null;
+    document.getElementById('pl-delete').style.display = 'none';
+    document.getElementById('pl-save').textContent = t('createPlaylist') || 'Создать';
+    
+    // Перезагрузка списка плейлистов
+    subscribePlaylists();
+    
+    document.getElementById('playlists-modal').classList.remove('open');
   });
 
   document.getElementById('pl-cancel')?.addEventListener('click', () => {
@@ -5328,7 +5544,10 @@ document.addEventListener('click', (e) => {
   document.getElementById('download-restriction-login-btn')?.addEventListener('click', () => {
   closeDownloadRestriction();
   const login = document.getElementById('login-modal');
-  if (login) { login.style.display = ''; login.classList.add('open'); }
+  if (login) {
+    login.classList.add('open');
+    login.style.display = 'flex';
+  }
 });
 
 document.getElementById('download-restriction-close-btn')?.addEventListener('click', closeDownloadRestriction);
@@ -5338,6 +5557,22 @@ document.getElementById('download-restriction-modal')?.addEventListener('click',
   if (e.target.id === 'download-restriction-modal') closeDownloadRestriction();
 });
 document.getElementById('download-restriction-close-x')?.addEventListener('click', closeDownloadRestriction);
+
+document.getElementById('playlist-restriction-close-x')?.addEventListener('click', closePlaylistRestriction);
+document.getElementById('playlist-restriction-close-btn')?.addEventListener('click', closePlaylistRestriction);
+document.getElementById('playlist-restriction-login-btn')?.addEventListener('click', () => {
+  closePlaylistRestriction();
+  
+  // Открываем модальное окно логина
+  const loginModal = document.getElementById('login-modal');
+  if (loginModal) {
+    loginModal.classList.add('open');
+    loginModal.style.display = 'flex';
+  }
+});
+document.getElementById('playlist-restriction-modal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'playlist-restriction-modal') closePlaylistRestriction();
+});
 
 /* Escape */
 document.addEventListener('keydown', (e) => {
@@ -6050,6 +6285,45 @@ window.updateTrackPlayIcons = function() {
     <!-- Close Button -->
     <button id="download-restriction-close-btn" class="email-btn email-btn-ghost" style="margin-top:14px;">
       <span id="download-restricted-close-text" data-i18n="downloadRestrictedClose">Zamknij</span>
+    </button>
+
+  </div>
+</div>
+
+<div id="playlist-restriction-modal" class="modal">
+  <div class="panel login-panel" style="max-width:380px;text-align:center;position:relative;">
+
+    <!-- Close X -->
+    <button id="playlist-restriction-close-x" class="login-close-btn" aria-label="Close">✕</button>
+
+    <!-- Animated Lock Icon -->
+    <div class="login-lock-icon" style="color:#ff4da6;animation:lockPulse 2.5s ease-inout infinite;">
+      🎵
+    </div>
+
+    <!-- Title -->
+    <h3 id="playlist-restricted-title"
+        data-i18n="playlistRestrictedTitle"
+        style="color:#ff4da6;font-weight:800;font-size:20px;margin-bottom:8px;text-shadow:0 0 10px rgba(255,77,166,0.4);">
+      Создание плейлиста
+    </h3>
+
+    <!-- Subtitle -->
+    <p id="playlist-restricted-text"
+       data-i18n="playlistRestrictedText"
+       style="color:#bfc3d6;font-size:14px;line-height:1.6;margin-bottom:24px;text-transform:none;">
+      Создание плейлистов доступно только для авторизованных пользователей
+    </p>
+
+    <!-- Login Button -->
+    <button id="playlist-restriction-login-btn" class="login-niko-btn" style="background:linear-gradient(90deg,#ff4da6,#ff7a4d);">
+      <span class="login-icon">🔑</span>
+      <span id="playlist-restricted-login-text" data-i18n="playlistRestrictedLogin">Войти</span>
+    </button>
+
+    <!-- Close Button -->
+    <button id="playlist-restriction-close-btn" class="email-btn email-btn-ghost" style="margin-top:14px;">
+      <span id="playlist-restricted-close-text" data-i18n="playlistRestrictedClose">Закрыть</span>
     </button>
 
   </div>
