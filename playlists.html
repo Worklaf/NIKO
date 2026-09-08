@@ -1133,7 +1133,7 @@
         container.innerHTML = '';
         container.appendChild(createAddCard());
 
-        const snap = await db.collection('playlists').orderBy('createdAt', 'desc').limit(10).get();
+        const snap = await db.collection('playlists').orderBy('createdAt', 'desc').get();
         if (snap.empty) return;
 
         const user = firebase.auth().currentUser;
