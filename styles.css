@@ -1730,6 +1730,7 @@ header .new-tracks-btn .badge {
   font-weight: 700;
   letter-spacing: .2px;
   margin-bottom: 2px;
+  margin-top: -5px !important;
 }
 .custom-genre-option.genre-parent .genre-label { color: #fff; }
 
@@ -1842,7 +1843,7 @@ header .new-tracks-btn .badge {
 
   /* ЗАГОЛОВОК ЖАНРА — отличимый фон */
   .custom-genre-option.genre-parent {
-    margin-top: 0.5px;
+    margin-top: 6px;
     background: linear-gradient(90deg, rgba(255, 77, 166, .12), rgba(0, 209, 255, .08));
     border: 1px solid rgba(255, 77, 166, .15);
     border-radius: 10px;
@@ -1922,7 +1923,7 @@ header .new-tracks-btn .badge {
   }
 
   .custom-genre-option {
-    font-size: 12.5px;
+    font-size: 12.5px; 
     padding: 11px 10px;
     min-width: 0;
     border-radius: 10px;
@@ -1943,9 +1944,8 @@ header .new-tracks-btn .badge {
   }
 
   /* ЗАГОЛОВОК ЖАНРА на мобильном — такой же фон как на ПК */
-  .custom-genre-option.genre-parent {
-    margin-top: 6px;
-    margin-bottom: 0;
+  .custom-genre-option.genre-parent { 
+    margin-bottom: 5px;
     background: linear-gradient(90deg, rgba(255, 77, 166, .12), rgba(0, 209, 255, .08));
     border: 1px solid rgba(255, 77, 166, .15);
     border-radius: 10px;
