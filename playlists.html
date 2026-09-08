@@ -29,7 +29,6 @@
     }
     main, #playlistsContainer {
       margin-left: 0 !important;
-      width: 100% !important;
       max-width: none !important;
     }
 
@@ -81,11 +80,12 @@
     @media (min-width: 480px) {
       .content-wrap { padding: 0 16px 40px; }
     }
-        /* ===== Сетка ===== */
+    /* ===== Сетка ===== */
     .playlists-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
+      margin-right: 10px;
     }
     @media (min-width: 480px) {
       .playlists-grid { gap: 14px; }
@@ -329,8 +329,490 @@
       color: #ff4da6;
     }
     .btn.danger:hover { background: rgba(255,0,0,0.2); }
+
+    /* ===== Выпадающее меню ===== */
+    .playlist-menu {
+      position: fixed;
+      background: #1a1a20;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 6px;
+      min-width: 140px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      z-index: 1000;
+    }
+    .menu-item {
+      width: 100%;
+      border: none;
+      background: transparent;
+      color: #eaeaf2;
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 13px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .menu-item:hover {
+      background: rgba(255,255,255,0.08);
+    }
+    .menu-item.delete-item {
+      color: #ff4da6;
+    }
+    .menu-item.delete-item:hover {
+      background: rgba(255,77,166,0.12);
+    }
+
+    /* ===== Login Panel Styles ===== */
+    .login-panel {
+      max-width: 380px;
+      width: 90%;
+      text-align: center;
+      background: linear-gradient(145deg, rgba(16,16,28,0.98), rgba(8,8,16,0.98));
+      border: 1px solid rgba(0,229,255,0.2);
+      box-shadow: 
+        0 0 60px rgba(0,229,255,0.1),
+        0 25px 80px rgba(0,0,0,0.7),
+        inset 0 1px 0 rgba(255,255,255,0.04);
+      border-radius: 28px;
+      padding: 40px 32px 32px;
+      position: relative;
+      overflow: hidden;
+      animation: loginAppear 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes loginAppear {
+      from { opacity: 0; transform: scale(0.9) translateY(30px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* Glow orb at top */
+    .login-panel::before {
+      content: '';
+      position: absolute;
+      top: -60%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 140%;
+      height: 140%;
+      background: radial-gradient(ellipse at 50% 0%, rgba(0,229,255,0.1) 0%, transparent 55%);
+      pointer-events: none;
+    }
+
+    /* Close button — seamless top-right corner */
+    .login-close-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: #6b6f7e;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 10;
+      backdrop-filter: blur(12px);
+    }
+
+    .login-close-btn:hover {
+      background: rgba(255,77,166,0.12);
+      border-color: rgba(255,77,166,0.35);
+      color: #ff4da6;
+      transform: rotate(90deg);
+      box-shadow: 0 0 24px rgba(255,77,166,0.25);
+    }
+
+    .login-close-btn:active {
+      transform: rotate(90deg) scale(0.9);
+    }
+
+    .login-lock-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      animation: lockPulse 2.5s ease-in-out infinite;
+    }
+
+    @keyframes lockPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    .login-niko-btn {
+      width: 100%;
+      padding: 14px 20px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(90deg, #30be70, #00d1ff);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .login-niko-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(48,190,112,0.3);
+    }
+    .email-btn {
+      width: 100%;
+      padding: 12px 20px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: transparent;
+      color: #bfc3d6;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .email-btn-ghost {
+      background: transparent;
+      border: none;
+    }
+    .email-btn-ghost:hover {
+      color: #fff;
+      background: rgba(255,255,255,0.05);
+    }
+    /* ========================================
+   LOGIN MODAL — полные стили
+   ======================================== */
+
+/* Контейнер модалки */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  align-items: center;
+  justify-content: center;
+  z-index: 100010;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+.modal.open {
+  display: flex;
+}
+
+/* Панель логина */
+.login-panel {
+  max-width: 380px;
+  width: 90%;
+  text-align: center;
+  background: linear-gradient(145deg, rgba(16, 16, 28, 0.98), rgba(8, 8, 16, 0.98));
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  box-shadow: 
+    0 0 60px rgba(0, 229, 255, 0.1),
+    0 25px 80px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border-radius: 28px;
+  padding: 40px 32px 32px;
+  position: relative;
+  overflow: hidden;
+  animation: loginAppear 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes loginAppear {
+  from { opacity: 0; transform: scale(0.9) translateY(30px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Glow orb at top */
+.login-panel::before {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140%;
+  height: 140%;
+  background: radial-gradient(ellipse at 50% 0%, rgba(0, 229, 255, 0.1) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+/* Close button */
+.login-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #6b6f7e;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
+  backdrop-filter: blur(12px);
+}
+.login-close-btn:hover {
+  background: rgba(255, 77, 166, 0.12);
+  border-color: rgba(255, 77, 166, 0.35);
+  color: #ff4da6;
+  transform: rotate(90deg);
+  box-shadow: 0 0 24px rgba(255, 77, 166, 0.25);
+}
+.login-close-btn:active {
+  transform: rotate(90deg) scale(0.9);
+}
+
+/* Header */
+.login-header {
+  margin-bottom: 28px;
+  position: relative;
+  z-index: 1;
+}
+.login-lock-icon {
+  font-size: 40px;
+  margin-bottom: 14px;
+  filter: drop-shadow(0 0 16px rgba(0, 229, 255, 0.35));
+  animation: lockFloat 3s ease-in-out infinite;
+}
+@keyframes lockFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+.login-title {
+  color: #00E5FF;
+  text-shadow: 0 0 20px rgba(0, 229, 255, 0.45);
+  margin: 0 0 6px;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 4px;
+}
+.login-subtitle {
+  color: #4a4e5e;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  margin: 0;
+}
+
+/* PIN Display */
+.pin-display {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: 16px;
+  color: #00E5FF;
+  text-shadow: 0 0 30px rgba(0, 229, 255, 0.5), 0 0 60px rgba(0, 229, 255, 0.15);
+  margin: 24px 0 28px;
+  min-height: 56px;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 18px;
+  padding: 14px 24px;
+  border: 1px solid rgba(0, 229, 255, 0.12);
+  box-shadow: 
+    inset 0 2px 12px rgba(0, 0, 0, 0.5), 
+    0 0 30px rgba(0, 229, 255, 0.06);
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+.pin-display.filled {
+  color: #4dff8a;
+  text-shadow: 0 0 30px rgba(77, 255, 138, 0.5);
+  border-color: rgba(77, 255, 138, 0.25);
+}
+.pin-display.error {
+  animation: pinShake 0.45s ease;
+  color: #ff4d4d;
+  text-shadow: 0 0 30px rgba(255, 77, 77, 0.5);
+  border-color: rgba(255, 77, 77, 0.35);
+}
+@keyframes pinShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-10px); }
+  40% { transform: translateX(10px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+
+/* PIN Pad */
+.pin-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 0 0 28px;
+  position: relative;
+  z-index: 1;
+}
+.pin-btn {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #eaeaf2;
+  font-size: 20px;
+  font-weight: 600;
+  padding: 18px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(6px);
+}
+.pin-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(0, 229, 255, 0.12) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.pin-btn:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(0, 229, 255, 0.25);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+}
+.pin-btn:hover::after { opacity: 1; }
+.pin-btn:active {
+  transform: translateY(-1px) scale(0.96);
+  transition-duration: 0.05s;
+}
+.pin-btn-clear {
+  background: rgba(255, 77, 166, 0.06);
+  border-color: rgba(255, 77, 166, 0.15);
+  color: #ff4da6;
+}
+.pin-btn-clear:hover {
+  background: rgba(255, 77, 166, 0.15);
+  border-color: rgba(255, 77, 166, 0.4);
+  box-shadow: 0 12px 28px rgba(255, 77, 166, 0.18);
+}
+.pin-btn-confirm {
+  background: rgba(39, 182, 70, 0.06);
+  border-color: rgba(39, 182, 70, 0.15);
+  color: #27b646;
+}
+.pin-btn-confirm:hover {
+  background: rgba(39, 182, 70, 0.15);
+  border-color: rgba(39, 182, 70, 0.4);
+  box-shadow: 0 12px 28px rgba(39, 182, 70, 0.18);
+}
+
+/* Divider */
+.login-divider {
+  position: relative;
+  margin: 24px 0 16px;
+  text-align: center;
+}
+.login-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+}
+.login-divider span {
+  position: relative;
+  background: transparent;
+  padding: 0 12px;
+  color: #7a7f92;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+/* Social Login Buttons */
+.login-socials {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+.login-social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: #eaeaf2;
+  backdrop-filter: blur(6px);
+}
+.login-social-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  filter: brightness(1.1);
+}
+.login-social-btn.google {
+  background: rgba(66, 133, 244, 0.08);
+  border-color: rgba(66, 133, 244, 0.15);
+}
+.login-social-btn.google:hover {
+  background: rgba(66, 133, 244, 0.18);
+  border-color: rgba(66, 133, 244, 0.35);
+  box-shadow: 0 10px 28px rgba(66, 133, 244, 0.18);
+}
+.login-social-btn.email {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+.login-social-btn.email:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 10px 28px rgba(255, 255, 255, 0.15);
+}
+.login-social-btn svg {
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
+  transition: transform 0.3s ease;
+}
+.login-social-btn:hover svg { transform: scale(1.1); }
+
+/* Login Niko Button */
+.login-niko-btn {
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(90deg, #30be70, #00d1ff);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.login-niko-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(48, 190, 112, 0.3);
+}
   </style>
-<base target="_blank">
 <base target="_blank">
 </head>
 <body>
@@ -344,183 +826,236 @@
   <!-- Заголовок -->
   <h1 class="page-title">🎵 Playlists</h1>
 
+  <!-- Тумблер для админа -->
+  <div id="adminToggleRow" style="display:none;padding:0 16px 12px;">
+    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:#8b8fa3;">
+      <input type="checkbox" id="showAllPlaylistsToggle" style="width:18px;height:18px;cursor:pointer;accent-color:#ff4da6;">
+      <span>Показать все плейлисты пользователей</span>
+    </label>
+  </div>
+
   <!-- Контент -->
   <div class="content-wrap">
     <div id="playlistsContainer" class="playlists-grid"></div>
   </div>
 
-  <!-- Модалка -->
-  <div id="playlistModal" class="modal">
-    <div class="panel">
-      <h3 id="playlistModalTitle">New playlist</h3>
+  <!-- Модалка для создания/редактирования плейлиста -->
+  <!-- Модалка для создания/редактирования плейлиста -->
+<div id="playlistModal" class="modal">
+  <div class="panel">
+    <h3 id="playlistModalTitle" data-i18n="playlistModalTitle">New playlist</h3>
 
-      <div class="panel-cover-row">
-        <img id="playlistCoverPreview" src="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png" alt="Cover">
-        <div style="flex:1">
-          <div class="panel-row">
-            <label>Cover image</label>
-            <input type="file" id="playlistCoverFile" accept="image/*">
-          </div>
+    <div class="panel-cover-row">
+      <img id="playlistCoverPreview" src="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png" alt="Cover">
+      <div style="flex:1">
+        <div class="panel-row">
+          <label data-i18n="coverImage">Cover image</label>
+          <input type="file" id="playlistCoverFile" accept="image/*">
         </div>
       </div>
+    </div>
 
-      <div class="panel-row">
-        <label>Name</label>
-        <input id="playlistNameInput" placeholder="Playlist name">
-      </div>
+    <div class="panel-row">
+      <label data-i18n="playlistName">Name</label>
+      <input id="playlistNameInput" data-i18n-placeholder="playlistName" placeholder="Playlist name">
+    </div>
 
-      <div class="panel-row">
-        <label>Description</label>
-        <textarea id="playlistDescriptionInput" placeholder="Short description"></textarea>
-      </div>
+    <div class="panel-row">
+      <label data-i18n="description">Description</label>
+      <textarea id="playlistDescriptionInput" data-i18n-placeholder="playlistDescription" placeholder="Short description"></textarea>
+    </div>
 
-      <div class="panel-row" id="visibilityRow">
-        <label>Visibility</label>
-        <select id="playlistVisibilitySelect">
-          <option value="public">🌍 Everyone</option>
-          <option value="partner">♥ Admin + partner</option>
-          <option value="admin">🔒 Only admin</option>
-        </select>
-      </div>
-      <div class="panel-row" id="hideFromHomeRow" style="display:flex;align-items:center;gap:10px;background:rgba(255,77,166,0.08);border:1px solid rgba(255,77,166,0.2);border-radius:10px;padding:10px 12px;">
-        <input type="checkbox" id="playlistHideFromHome" style="width:20px;height:20px;cursor:pointer;accent-color:#ff4da6;flex-shrink:0;">
-        <label for="playlistHideFromHome" style="margin:0;cursor:pointer;color:#eaeaf2;font-weight:600;font-size:13px;">👁️‍🗨️ Hide tracks from home page</label>
-      </div>
+    <div class="panel-row" id="visibilityRow">
+      <label data-i18n="visibility">Visibility</label>
+      <select id="playlistVisibilitySelect">
+        <option value="public" data-i18n="public">🌍 Everyone</option>
+        <option value="partner" data-i18n="partner">♥ Admin + partner</option>
+        <option value="admin" data-i18n="admin">🔒 Only admin</option>
+      </select>
+    </div>
+    <div class="panel-row" id="hideFromHomeRow" style="display:flex;align-items:center;gap:10px;background:rgba(255,77,166,0.08);border:1px solid rgba(255,77,166,0.2);border-radius:10px;padding:10px 12px;">
+      <input type="checkbox" id="playlistHideFromHome" style="width:20px;height:20px;cursor:pointer;accent-color:#ff4da6;flex-shrink:0;">
+      <label for="playlistHideFromHome" data-i18n="hideFromHome" style="margin:0;cursor:pointer;color:#eaeaf2;font-weight:600;font-size:13px;">👁️‍🗨️ Hide tracks from home page</label>
+    </div>
 
-      <div class="panel-actions">
-        <button id="playlistCancelBtn" class="btn">Cancel</button>
-        <button id="playlistSaveBtn" class="btn active">💾 Save</button>
-      </div>
+    <div class="panel-actions">
+      <button id="playlistCancelBtn" class="btn" data-i18n="cancel">Cancel</button>
+      <button id="playlistSaveBtn" class="btn active" data-i18n="save">💾 Save</button>
+    </div>
 
-      <div class="panel-actions" id="playlistDeleteRow" style="margin-top:8px;display:none">
-        <button id="playlistDeleteBtn" class="btn danger">🗑️ Delete playlist</button>
-      </div>
+    <div class="panel-actions" id="playlistDeleteRow" style="margin-top:8px;display:none">
+      <button id="playlistDeleteBtn" class="btn danger" data-i18n="deletePlaylist">🗑️ Delete playlist</button>
     </div>
   </div>
+</div>
 
+  <!-- ===== КОНТЕЙНЕР ДЛЯ ОБЩИХ МОДАЛОК ===== -->
+  <div id="modals-container"></div>
+
+  <!-- Подключаем Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script>
-  // Аналитика запускается автоматически, если measurementId есть в конфиге
-  if (typeof firebase !== 'undefined' && firebase.analytics) {
-    firebase.analytics();
-    console.log('📊 Analytics initialized');
-  }
-</script>
-  <script src="language.js"></script>
+  <script src="firebase-config.js"></script> 
+  
   <script>
-window.initPlaylistsView = function() {
-  const isEmbed = new URLSearchParams(location.search).get('embed') === '1';
-
-    function getRole() { return localStorage.getItem('siteRole') || 'guest'; }
-    const role = getRole();
-    const isAdmin = role === 'admin';
-    const isPartner = role === 'partner';
-
-    let currentPlaylistId = null;
-    let currentCoverBlob = null;
-
-    function isVisibleToRole(p) {
-      if (p.visibility === 'admin') return role === 'admin';
-      if (p.visibility === 'partner') return role === 'admin' || role === 'partner';
-      return true;
+    // Аналитика запускается автоматически, если measurementId есть в конфиге
+    if (typeof firebase !== 'undefined' && firebase.analytics) {
+      firebase.analytics();
+      console.log('📊 Analytics initialized');
     }
-
-    const WORKER_URL = "https://r2-upload-proxy.nikolfar91.workers.dev/upload";
-
-    async function uploadToWorker(file, folder, fileName) {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('folder', folder);
-      formData.append('fileName', fileName);
-      const response = await fetch(WORKER_URL, { method: 'POST', body: formData });
-      const data = await response.json();
-      return data.url;
-    }
-
-    function createAddCard() {
-  const div = document.createElement('div');
-  div.className = 'playlist-card add-card';
-  div.innerHTML = `
-    <div class="playlist-cover-wrap">
-      <span class="add-icon">+</span>
-      <span class="add-label">New</span>
-    </div>
-    <div class="playlist-info">
-      <div class="playlist-name">Create playlist</div>
-      <div class="playlist-meta">Add your songs</div>
-    </div>
-  `;
+  </script>
   
-  div.addEventListener('click', () => {
-    if (role === 'guest') {
-      // Гость → переход на главную с флагом открытия логина
-      if (window.parent && window.parent !== window) {
-        // Внутри iframe — шлём команду родителю
-        window.parent.postMessage('open-login', '*');
-      } else {
-        // Обычный переход
-        window.location.href = 'NIKO.html?openLogin=1';
+  <script src="language.js"></script>
+  
+ <!-- ===== ЗАГРУЗКА ОБЩИХ МОДАЛОК ===== -->
+<script>
+  let modalsLoaded = false;
+  let playlistsStarted = false;
+
+  // Загружаем модалки
+  fetch('modals.html')
+    .then(res => {
+      if (!res.ok) throw new Error('Failed to load modals.html');
+      return res.text();
+    })
+    .then(html => {
+      document.getElementById('modals-container').innerHTML = html;
+      modalsLoaded = true;
+      
+      // Инициализируем модалки
+      if (typeof initModals === 'function') {
+        initModals();
       }
-      return;
-    }
-    openPlaylistModal(null, null);
-  });
+      
+      // Запускаем основную логику страницы ТОЛЬКО ОДИН РАЗ
+      if (!playlistsStarted && typeof window.initPlaylistsView === 'function') {
+        playlistsStarted = true;
+        window.initPlaylistsView();
+      }
+    })
+    .catch(err => {
+      console.error('❌ Failed to load modals:', err);
+      if (!playlistsStarted && typeof window.initPlaylistsView === 'function') {
+        playlistsStarted = true;
+        window.initPlaylistsView();
+      }
+    });
+</script>
+
+<script src="modals.js"></script>
   
-  return div;
-}
+  <script>
+    // ========================================
+    // ОСНОВНАЯ ЛОГИКА СТРАНИЦЫ ПЛЕЙЛИСТОВ
+    // ========================================
+    window.initPlaylistsView = function() {
+      const isEmbed = new URLSearchParams(location.search).get('embed') === '1';
 
-    function getOwnerBadge(ownerRole) {
-      if (isPartner && ownerRole === 'partner') return { text: 'My', cls: 'my' };
-      if (isAdmin && ownerRole === 'partner') return { text: 'Partner', cls: 'partner' };
-      return null;
-    }
+      function getRole() { return localStorage.getItem('siteRole') || 'guest'; }
+      const role = getRole();
+      const isAdmin = role === 'admin';
+      const isPartner = role === 'partner';
 
-    function canManagePlaylist(ownerRole) {
-      if (isAdmin) return true;
-      if (isPartner && ownerRole === 'partner') return true;
-      return false;
-    }
+      let currentPlaylistId = null;
+      let currentCoverBlob = null;
 
-    async function loadPlaylists() {
-      const container = document.getElementById('playlistsContainer');
-      container.innerHTML = '';
-      container.appendChild(createAddCard());
+      function isVisibleToRole(p) {
+        if (p.visibility === 'admin') return role === 'admin';
+        if (p.visibility === 'partner') return role === 'admin' || role === 'partner';
+        return true;
+      }
 
-      const snap = await db.collection('playlists').orderBy('createdAt', 'desc').get();
-      if (snap.empty) return;
+      const WORKER_URL = "https://r2-upload-proxy.nikolfar91.workers.dev/upload";
 
-      snap.docs.forEach(doc => {
-        const p = doc.data();
-        if (!isVisibleToRole(p)) return;
+      async function uploadToWorker(file, folder, fileName) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', folder);
+        formData.append('fileName', fileName);
+        const response = await fetch(WORKER_URL, { method: 'POST', body: formData });
+        const data = await response.json();
+        return data.url;
+      }
 
+      function createAddCard() {
+        const div = document.createElement('div');
+        div.className = 'playlist-card add-card';
+        div.innerHTML = `
+          <div class="playlist-cover-wrap">
+            <span class="add-icon">+</span>
+            <span class="add-label" data-i18n="createPlaylist">Create playlist</span>
+          </div>
+          <div class="playlist-info">
+            <div class="playlist-name" data-i18n="createPlaylist">Create playlist</div>
+            <div class="playlist-meta" data-i18n="addSongsToPlaylist">Add your songs</div>
+          </div>
+        `;
+        
+        // Применяем переводы после создания
+        setTimeout(() => {
+          if (typeof applyTranslations === 'function') {
+            applyTranslations();
+          }
+        }, 50);
+        
+        div.addEventListener('click', () => {
+          if (role === 'guest') {
+            if (typeof openPlaylistRestriction === 'function') {
+              openPlaylistRestriction();
+            } else {
+              alert('Please login to create a playlist');
+            }
+            return;
+          }
+          openPlaylistModal(null, null);
+        });
+        
+        return div;
+      }
+
+      // Показываем тумблер только админу
+      if (isAdmin) {
+        document.getElementById('adminToggleRow').style.display = 'block';
+        document.getElementById('showAllPlaylistsToggle').addEventListener('change', loadPlaylists);
+      }
+
+      // Проверка прав на управление плейлистом
+      function canManagePlaylist(ownerRole) {
+        return isAdmin || ownerRole === role;
+      }
+
+      // Создание карточки плейлиста
+      function createPlaylistCard(p) {
+        const user = firebase.auth().currentUser;
+        const ownerId = user?.email || role;
         const cover = p.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
         const songCount = p.songCount || 0;
-        const ownerRole = p.ownerRole || 'user';
         const vis = p.visibility || 'public';
-        const visIcon = vis === 'admin' ? '🔒' : vis === 'partner' ? '♥' : '🌍';
+        const visIcon = vis === 'admin' ? '🔒' : vis === 'partner' ? '♥' : vis === 'private' ? '🔒' : '🌍';
+        const isOwner = p.owner === ownerId;
+        const isPartner = p.owner === 'role_partner';
+        const ownerLabel = isOwner ? ' (мой)' : isPartner ? ' (партнер)' : p.ownerEmail ? ` (${p.ownerEmail})` : '';
 
-        const badge = getOwnerBadge(ownerRole);
-        const manageable = canManagePlaylist(ownerRole);
+        const manageable = isOwner || isAdmin;
 
         const div = document.createElement('div');
         div.className = 'playlist-card';
-        div.dataset.id = doc.id;
+        div.dataset.id = p.id;
 
         div.innerHTML = `
           <div class="playlist-cover-wrap">
-            ${badge ? `<div class="owner-badge ${badge.cls}">${badge.text}</div>` : ''}
+            ${isOwner ? `<div class="owner-badge my">My</div>` : ''}
+            ${!isOwner && isPartner ? `<div class="owner-badge partner">Partner</div>` : ''}
             <img src="${cover}" alt="${p.name}" loading="lazy">
             <div class="playlist-overlay">
-              ${manageable ? '<button class="overlay-btn edit-btn" title="Edit">✏️</button>' : ''}
-              ${manageable ? '<button class="overlay-btn danger delete-btn" title="Delete">🗑️</button>' : ''}
+              <button class="overlay-btn menu-btn" title="Menu">⋮</button>
             </div>
           </div>
           <div class="playlist-info">
-            <div class="playlist-name">${p.name}</div>
+            <div class="playlist-name">${p.name}${ownerLabel}</div>
             <div class="playlist-meta">${songCount} tracks <span class="dot"></span> ${visIcon}${p.hideFromHome ? ' <span style="opacity:.6;margin-left:4px;" title="Hidden from home">👁️‍🗨️</span>' : ''}</div>
           </div>
         `;
@@ -528,148 +1063,343 @@ window.initPlaylistsView = function() {
         div.addEventListener('click', (e) => {
           if (e.target.closest('.overlay-btn')) return;
           if (window.parent && window.parent !== window) {
-            window.parent.postMessage({type: 'open-playlist', id: doc.id}, '*');
+            window.parent.postMessage({type: 'open-playlist', id: p.id}, '*');
           } else {
-            window.location.href = `playlist-view.html?id=${doc.id}`;
+            window.location.href = `playlist-view.html?id=${p.id}`;
           }
         });
 
-        const editBtn = div.querySelector('.edit-btn');
-        if (editBtn) {
-          editBtn.addEventListener('click', (e) => {
+        const menuBtn = div.querySelector('.menu-btn');
+        if (menuBtn) {
+          menuBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            openPlaylistModal(doc.id, p);
+            document.querySelectorAll('.playlist-menu').forEach(m => m.remove());
+            
+            const menu = document.createElement('div');
+            menu.className = 'playlist-menu';
+            
+            let menuHtml = '';
+            if (manageable) {
+              menuHtml += '<button class="menu-item edit-item">✏️ Edit</button>';
+              menuHtml += '<button class="menu-item delete-item">🗑️ Delete</button>';
+            } else {
+              menuHtml = '<div style="padding:10px;font-size:12px;color:#8b8fa3;text-align:center">Только владелец может редактировать</div>';
+            }
+            menu.innerHTML = menuHtml;
+            
+            const rect = menuBtn.getBoundingClientRect();
+            menu.style.position = 'fixed';
+            menu.style.right = (window.innerWidth - rect.left) + 'px';
+            menu.style.top = (rect.bottom + 5) + 'px';
+            
+            document.body.appendChild(menu);
+            
+            const editItem = menu.querySelector('.edit-item');
+            if (editItem) {
+              editItem.addEventListener('click', () => {
+                menu.remove();
+                openPlaylistModal(p.id, p);
+              });
+            }
+            
+            const deleteItem = menu.querySelector('.delete-item');
+            if (deleteItem) {
+              deleteItem.addEventListener('click', () => {
+                menu.remove();
+                if (!confirm('Delete this playlist?')) return;
+                db.collection('playlists').doc(p.id).delete();
+                const card = document.querySelector(`.playlist-card[data-id="${p.id}"]`);
+                if (card) card.remove();
+              });
+            }
+            
+            setTimeout(() => {
+              const closeMenu = (e) => {
+                if (!menu.contains(e.target)) {
+                  menu.remove();
+                  document.removeEventListener('click', closeMenu);
+                }
+              };
+              document.addEventListener('click', closeMenu);
+            }, 0);
           });
         }
 
-        const delBtn = div.querySelector('.delete-btn');
-        if (delBtn) {
-          delBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (!confirm('Delete this playlist?')) return;
-            db.collection('playlists').doc(doc.id).delete().then(() => loadPlaylists());
+        return div;
+      }
+
+      async function loadPlaylists() {
+        const container = document.getElementById('playlistsContainer');
+        container.innerHTML = '';
+        container.appendChild(createAddCard());
+
+        const snap = await db.collection('playlists').orderBy('createdAt', 'desc').limit(10).get();
+        if (snap.empty) return;
+
+        const user = firebase.auth().currentUser;
+        const ownerId = user?.email || role;
+        // ✅ ЛОГ УДАЛЕН
+        const showAll = isAdmin && document.getElementById('showAllPlaylistsToggle')?.checked;
+
+        snap.docs.forEach(doc => {
+          const p = doc.data();
+          // ✅ ЛОГ УДАЛЕН
+          if (!isVisibleToRole(p)) return;
+
+          if (showAll) {
+            if (role === 'admin') {
+            }
+          } else {
+            if (role === 'admin') {
+              if (p.owner && p.owner !== ownerId && p.owner !== 'role_partner') return;
+            } else if (role === 'partner') {
+              if (p.owner !== ownerId) {
+                if (p.owner && p.owner !== 'role_admin') return;
+                if (p.owner === 'role_admin' && (p.visibility === 'hidden' || p.visibility === 'admin')) return;
+              }
+            } else if (role === 'user') {
+              if (p.owner !== ownerId) {
+                if (p.owner === 'role_admin' && p.visibility !== 'public') return;
+                if (p.owner && p.owner !== 'role_admin') return;
+                if (!p.owner && (p.visibility === 'hidden' || p.visibility === 'admin')) return;
+                if (p.visibility === 'private') return;
+              }
+            } else if (role === 'guest') {
+              if (p.visibility && p.visibility !== 'public') return;
+              if (p.owner && p.owner !== 'role_admin' && p.owner !== 'role_partner') return;
+            }
+          }
+
+          const cover = p.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
+          const songCount = p.songCount || 0;
+          const vis = p.visibility || 'public';
+          const visIcon = vis === 'admin' ? '🔒' : vis === 'partner' ? '♥' : vis === 'private' ? '🔒' : '🌍';
+          const isOwner = p.owner === ownerId;
+          const isPartner = p.owner === 'role_partner';
+          const ownerLabel = isOwner ? '  ' : isPartner ? ' (партнер)' : p.ownerEmail ? ` (${p.ownerEmail})` : '';
+
+          const manageable = isOwner || isAdmin;
+
+          const div = document.createElement('div');
+          div.className = 'playlist-card';
+          div.dataset.id = doc.id;
+
+          div.innerHTML = `
+            <div class="playlist-cover-wrap">
+              ${isOwner ? `<div class="owner-badge my">My</div>` : ''}
+              ${!isOwner && isPartner ? `<div class="owner-badge partner">Partner</div>` : ''}
+              <img src="${cover}" alt="${p.name}" loading="lazy">
+              <div class="playlist-overlay">
+                <button class="overlay-btn menu-btn" title="Menu">⋮</button>
+              </div>
+            </div>
+            <div class="playlist-info">
+              <div class="playlist-name">${p.name}${ownerLabel}</div>
+              <div class="playlist-meta">${songCount} tracks <span class="dot"></span> ${visIcon}${p.hideFromHome ? ' <span style="opacity:.6;margin-left:4px;" title="Hidden from home">👁️‍🗨️</span>' : ''}</div>
+            </div>
+          `;
+
+          div.addEventListener('click', (e) => {
+            if (e.target.closest('.overlay-btn')) return;
+            if (window.parent && window.parent !== window) {
+              window.parent.postMessage({type: 'open-playlist', id: doc.id}, '*');
+            } else {
+              window.location.href = `playlist-view.html?id=${doc.id}`;
+            }
           });
-        }
 
-        container.appendChild(div);
-      });
-    }
+          const menuBtn = div.querySelector('.menu-btn');
+          if (menuBtn) {
+            menuBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              document.querySelectorAll('.playlist-menu').forEach(m => m.remove());
+              
+              const menu = document.createElement('div');
+              menu.className = 'playlist-menu';
+              
+              let menuHtml = '';
+              if (manageable) {
+                menuHtml += '<button class="menu-item edit-item">✏️ Edit</button>';
+                menuHtml += '<button class="menu-item delete-item">🗑️ Delete</button>';
+              } else {
+                menuHtml = '<div style="padding:10px;font-size:12px;color:#8b8fa3;text-align:center">Только владелец может редактировать</div>';
+              }
+              menu.innerHTML = menuHtml;
+              
+              const rect = menuBtn.getBoundingClientRect();
+              menu.style.position = 'fixed';
+              menu.style.right = (window.innerWidth - rect.left) + 'px';
+              menu.style.top = (rect.bottom + 5) + 'px';
+              
+              document.body.appendChild(menu);
+              
+              const editItem = menu.querySelector('.edit-item');
+              if (editItem) {
+                editItem.addEventListener('click', () => {
+                  menu.remove();
+                  openPlaylistModal(doc.id, p);
+                });
+              }
+              
+              const deleteItem = menu.querySelector('.delete-item');
+              if (deleteItem) {
+                deleteItem.addEventListener('click', () => {
+                  menu.remove();
+                  if (!confirm('Delete this playlist?')) return;
+                  db.collection('playlists').doc(doc.id).delete();
+                  const card = document.querySelector(`.playlist-card[data-id="${doc.id}"]`);
+                  if (card) card.remove();
+                });
+              }
+              
+              setTimeout(() => {
+                const closeMenu = (e) => {
+                  if (!menu.contains(e.target)) {
+                    menu.remove();
+                    document.removeEventListener('click', closeMenu);
+                  }
+                };
+                document.addEventListener('click', closeMenu);
+              }, 0);
+            });
+          }
 
-    function openPlaylistModal(id, data) {
-      currentPlaylistId = id || null;
-      currentCoverBlob = null;
-
-      const modal = document.getElementById('playlistModal');
-      const titleEl = document.getElementById('playlistModalTitle');
-      const nameInput = document.getElementById('playlistNameInput');
-      const descInput = document.getElementById('playlistDescriptionInput');
-      const visSelect = document.getElementById('playlistVisibilitySelect');
-      const visRow = document.getElementById('visibilityRow');
-      const coverPreview = document.getElementById('playlistCoverPreview');
-      const deleteRow = document.getElementById('playlistDeleteRow');
-
-      if (visRow) visRow.style.display = isAdmin ? 'block' : 'none';
-      const hideRow = document.getElementById('hideFromHomeRow');
-      if (hideRow) hideRow.style.display = isAdmin ? 'flex' : 'none';
-
-      const hideCheck = document.getElementById('playlistHideFromHome');
-      if (data) {
-        titleEl.textContent = 'Edit playlist';
-        nameInput.value = data.name || '';
-        descInput.value = data.description || '';
-        visSelect.value = data.visibility || 'public';
-        if (hideCheck) hideCheck.checked = !!data.hideFromHome;
-        coverPreview.src = data.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
-        deleteRow.style.display = canManagePlaylist(data.ownerRole || '') ? 'flex' : 'none';
-      } else {
-        titleEl.textContent = 'New playlist';
-        nameInput.value = '';
-        descInput.value = '';
-        visSelect.value = 'public';
-        if (hideCheck) hideCheck.checked = false;
-        coverPreview.src = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
-        deleteRow.style.display = 'none';
+          container.appendChild(div);
+        });
+        
+        // Применяем переводы после загрузки
+        setTimeout(() => {
+          if (typeof applyTranslations === 'function') {
+            applyTranslations();
+          }
+        }, 100);
       }
 
-      modal.classList.add('open');
-    }
+      function openPlaylistModal(id, data) {
+        currentPlaylistId = id || null;
+        currentCoverBlob = null;
 
-    document.getElementById('playlistCancelBtn').addEventListener('click', () => {
-      document.getElementById('playlistModal').classList.remove('open');
-    });
+        const modal = document.getElementById('playlistModal');
+        const titleEl = document.getElementById('playlistModalTitle');
+        const nameInput = document.getElementById('playlistNameInput');
+        const descInput = document.getElementById('playlistDescriptionInput');
+        const visSelect = document.getElementById('playlistVisibilitySelect');
+        const visRow = document.getElementById('visibilityRow');
+        const coverPreview = document.getElementById('playlistCoverPreview');
+        const deleteRow = document.getElementById('playlistDeleteRow');
 
-    document.getElementById('playlistCoverFile').addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      currentCoverBlob = file;
-      document.getElementById('playlistCoverPreview').src = URL.createObjectURL(file);
-    });
+        if (visRow) visRow.style.display = isAdmin ? 'block' : 'none';
+        const hideRow = document.getElementById('hideFromHomeRow');
+        if (hideRow) hideRow.style.display = isAdmin ? 'flex' : 'none';
 
-    async function uploadCoverIfNeeded(baseName) {
-      if (!currentCoverBlob) return null;
-      const ext = currentCoverBlob.name.split('.').pop();
-      const fileName = `${baseName}.${ext}`;
-      const coverUrl = await uploadToWorker(currentCoverBlob, 'NIKO_music_covers', fileName);
-      return { coverUrl, coverFileName: fileName };
-    }
-
-    document.getElementById('playlistSaveBtn').addEventListener('click', async () => {
-      const name = document.getElementById('playlistNameInput').value.trim();
-      const description = document.getElementById('playlistDescriptionInput').value.trim();
-      if (!name) { alert('Enter playlist name'); return; }
-
-      const visibility = isAdmin
-        ? (document.getElementById('playlistVisibilitySelect').value || 'public')
-        : 'partner';
-
-      const baseName = name.toLowerCase().replace(/\s+/g, '_').replace(/[^\w\-]/g, '');
-
-      let coverData = null;
-      try { coverData = await uploadCoverIfNeeded(baseName); }
-      catch (e) { console.error(e); alert('Cover upload error: ' + e.message); }
-
-      const hideFromHome = !!document.getElementById('playlistHideFromHome')?.checked;
-      const payload = {
-        name, description, visibility, hideFromHome,
-        ownerRole: role,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      };
-      if (coverData && coverData.coverUrl) {
-        payload.cover = coverData.coverUrl;
-        payload.coverFileName = coverData.coverFileName;
-      }
-
-      try {
-        if (currentPlaylistId) {
-          await db.collection('playlists').doc(currentPlaylistId).update(payload);
+        const hideCheck = document.getElementById('playlistHideFromHome');
+        if (data) {
+          titleEl.textContent = 'Edit playlist';
+          nameInput.value = data.name || '';
+          descInput.value = data.description || '';
+          visSelect.value = data.visibility || 'public';
+          if (hideCheck) hideCheck.checked = !!data.hideFromHome;
+          coverPreview.src = data.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
+          deleteRow.style.display = canManagePlaylist(data.ownerRole || '') ? 'flex' : 'none';
         } else {
-          payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-          payload.songCount = 0;
-          await db.collection('playlists').add(payload);
+          titleEl.textContent = 'New playlist';
+          nameInput.value = '';
+          descInput.value = '';
+          visSelect.value = 'public';
+          if (hideCheck) hideCheck.checked = false;
+          coverPreview.src = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
+          deleteRow.style.display = 'none';
         }
-        document.getElementById('playlistModal').classList.remove('open');
-        await loadPlaylists();
-      } catch (e) {
-        console.error(e);
-        alert('Save error: ' + e.message);
+
+        modal.classList.add('open');
       }
-    });
 
-    document.getElementById('playlistDeleteBtn').addEventListener('click', async () => {
-      if (!currentPlaylistId) return;
-      if (!confirm('Delete this playlist?')) return;
-      await db.collection('playlists').doc(currentPlaylistId).delete();
-      document.getElementById('playlistModal').classList.remove('open');
-      await loadPlaylists();
-    });
+      document.getElementById('playlistCancelBtn').addEventListener('click', () => {
+        document.getElementById('playlistModal').classList.remove('open');
+      });
 
-    loadPlaylists();
-};
+      document.getElementById('playlistCoverFile').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        currentCoverBlob = file;
+        document.getElementById('playlistCoverPreview').src = URL.createObjectURL(file);
+      });
 
-if (!false /* __appShell removed */) {
-  window.initPlaylistsView();
-}
-</script>
+      async function uploadCoverIfNeeded(baseName) {
+        if (!currentCoverBlob) return null;
+        const ext = currentCoverBlob.name.split('.').pop();
+        const fileName = `${baseName}.${ext}`;
+        const coverUrl = await uploadToWorker(currentCoverBlob, 'NIKO_music_covers', fileName);
+        return { coverUrl, coverFileName: fileName };
+      }
+
+      document.getElementById('playlistSaveBtn').addEventListener('click', async () => {
+        const name = document.getElementById('playlistNameInput').value.trim();
+        const description = document.getElementById('playlistDescriptionInput').value.trim();
+        if (!name) { alert('Enter playlist name'); return; }
+
+        const user = firebase.auth().currentUser;
+        const ownerId = user?.email || role;
+        const ownerEmail = user?.email || role;
+
+        const visibility = isAdmin
+          ? (document.getElementById('playlistVisibilitySelect').value || 'public')
+          : (role === 'partner' ? 'partner' : 'private');
+        
+        // ✅ ЛОГ УДАЛЕН
+
+        const baseName = name.toLowerCase().replace(/\s+/g, '_').replace(/[^\w\-]/g, '');
+
+        let coverData = null;
+        try { coverData = await uploadCoverIfNeeded(baseName); }
+        catch (e) { console.error(e); alert('Cover upload error: ' + e.message); }
+
+        const hideFromHome = !!document.getElementById('playlistHideFromHome')?.checked;
+        const payload = {
+          name, description, visibility, hideFromHome,
+          owner: ownerId,
+          ownerEmail: ownerEmail,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        if (coverData && coverData.coverUrl) {
+          payload.cover = coverData.coverUrl;
+          payload.coverFileName = coverData.coverFileName;
+        }
+
+        try {
+          if (currentPlaylistId) {
+            await db.collection('playlists').doc(currentPlaylistId).update(payload);
+          } else {
+            payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+            payload.songCount = 0;
+            const docRef = await db.collection('playlists').add(payload);
+            payload.id = docRef.id;
+          }
+          document.getElementById('playlistModal').classList.remove('open');
+          await loadPlaylists();
+        } catch (e) {
+          console.error(e);
+          alert('Save error: ' + e.message);
+        }
+      });
+
+      document.getElementById('playlistDeleteBtn').addEventListener('click', async () => {
+        if (!currentPlaylistId) return;
+        if (!confirm('Delete this playlist?')) return;
+        await db.collection('playlists').doc(currentPlaylistId).delete();
+        document.getElementById('playlistModal').classList.remove('open');
+        const card = document.querySelector(`.playlist-card[data-id="${currentPlaylistId}"]`);
+        if (card) card.remove();
+      });
+
+      // ===== ЗАГРУЗКА ПЛЕЙЛИСТОВ ПРИ АВТОРИЗАЦИИ =====
+      firebase.auth().onAuthStateChanged((user) => {
+        loadPlaylists();
+      });
+    };
+
+  </script>
+  
 </div>
 </body>
 </html>
