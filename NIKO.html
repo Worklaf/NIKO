@@ -2123,10 +2123,9 @@ async function subscribeTracks() {
     isCacheValid = true;
   }
   
-  // Subscribe to real-time updates (ограничено до 5 для теста из-за лимитов Firebase)
+  // Subscribe to real-time updates
   db.collection('tracks')
     .orderBy('createdAt', 'desc')
-    .limit(5) // ВРЕМЕННОЕ ОГРАНИЧЕНИЕ ДЛЯ ТЕСТА
     .onSnapshot(async (snap) => {
       let allTracks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     
