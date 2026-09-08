@@ -1,0 +1,235 @@
+<!-- ========================================
+     SHARED MODALS — Login, Restrictions, etc.
+     ======================================== -->
+
+<!-- ===== LOGIN MODAL ===== -->
+<div id="login-modal" class="modal">
+  <div class="panel login-panel">
+    <button id="login-close-x" class="login-close-btn" aria-label="Close">✕</button>
+    
+    <div class="login-header">
+      <div class="login-lock-icon">🔐</div>
+      <h3 class="login-title">ENTER CODE</h3>
+      <p class="login-subtitle">Secure Access</p>
+    </div>
+    
+    <div id="pin-display" class="pin-display">••••</div>
+    
+    <div class="pin-pad">
+      <button class="pin-btn" data-digit="1">1</button>
+      <button class="pin-btn" data-digit="2">2</button>
+      <button class="pin-btn" data-digit="3">3</button>
+      <button class="pin-btn" data-digit="4">4</button>
+      <button class="pin-btn" data-digit="5">5</button>
+      <button class="pin-btn" data-digit="6">6</button>
+      <button class="pin-btn" data-digit="7">7</button>
+      <button class="pin-btn" data-digit="8">8</button>
+      <button class="pin-btn" data-digit="9">9</button>
+      <button class="pin-btn pin-btn-clear" data-action="clear">✕</button>
+      <button class="pin-btn" data-digit="0">0</button>
+      <button class="pin-btn pin-btn-confirm" data-action="confirm">✓</button>
+    </div>
+    
+    <div class="login-divider"><span>Or login with</span></div>
+    
+    <div class="login-socials">
+      <button id="google-login-btn" class="login-social-btn google">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#fff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#fff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#fff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#fff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Google
+      </button>
+      <button id="email-login-btn" class="login-social-btn email">
+        <span>📧</span> Email
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EMAIL AUTH MODAL ===== -->
+<div id="email-auth-modal" class="modal">
+  <div class="panel email-auth-panel">
+    <button id="email-auth-close-x" class="login-close-btn" aria-label="Close">✕</button>
+    
+    <div class="login-header">
+      <div class="login-lock-icon">📧</div>
+      <h3 class="login-title" id="email-auth-title" data-i18n="login">Login</h3>
+      <p class="login-subtitle" id="email-auth-subtitle" data-i18n="emailSubtitle">Secure Email Access</p>
+    </div>
+    
+    <div id="email-login-form" class="email-form">
+      <div class="email-input-group">
+        <label class="email-label" data-i18n="email">Email</label>
+        <input type="email" id="auth-email" class="email-input" data-i18n-placeholder="email" placeholder="your@email.com">
+      </div>
+      <div class="email-input-group">
+        <label class="email-label" data-i18n="password">Password</label>
+        <input type="password" id="auth-password" class="email-input" data-i18n-placeholder="password" placeholder="••••••••">
+      </div>
+      
+      <div class="email-actions-row">
+        <button id="auth-submit-btn" class="email-btn email-btn-primary">
+          <span data-i18n="login">Zaloguj się</span>
+        </button>
+        <button id="auth-toggle-register" class="email-btn email-btn-secondary">
+          <span data-i18n="createAccount">Utwórz konto</span>
+        </button>
+      </div>
+      
+      <button id="auth-forgot-btn" class="email-btn email-btn-ghost">
+        <span data-i18n="forgotPassword">Zapomniałeś hasła?</span>
+      </button>
+    </div>
+    
+    <div id="email-register-form" class="email-form" style="display:none">
+      <div class="email-input-group">
+        <label class="email-label" data-i18n="email">Email</label>
+        <input type="email" id="reg-email" class="email-input" data-i18n-placeholder="email" placeholder="your@email.com">
+      </div>
+      <div class="email-input-group">
+        <label class="email-label" data-i18n="password">Password</label>
+        <input type="password" id="reg-password" class="email-input" data-i18n-placeholder="passwordMin" placeholder="Min. 6 characters">
+      </div>
+      <div class="email-input-group">
+        <label class="email-label" data-i18n="confirmPassword">Confirm Password</label>
+        <input type="password" id="reg-password-confirm" class="email-input" data-i18n-placeholder="confirmPassword" placeholder="Repeat password">
+      </div>
+      
+      <button id="reg-submit-btn" class="email-btn email-btn-primary email-btn-full">
+        <span data-i18n="createAccount">Utwórz konto</span>
+      </button>
+      <button id="reg-toggle-login" class="email-btn email-btn-ghost">
+        <span data-i18n="backToLogin">Back to Login</span>
+      </button>
+    </div>
+    
+    <div id="email-forgot-form" class="email-form" style="display:none">
+      <div class="email-input-group">
+        <label class="email-label" data-i18n="email">Email</label>
+        <input type="email" id="forgot-email" class="email-input" data-i18n-placeholder="email" placeholder="your@email.com">
+      </div>
+      
+      <button id="forgot-submit-btn" class="email-btn email-btn-primary email-btn-full">
+        <span data-i18n="sendResetEmail">Send Reset Email</span>
+      </button>
+      <button id="forgot-toggle-login" class="email-btn email-btn-ghost">
+        <span data-i18n="backToLogin">Back to Login</span>
+      </button>
+    </div>
+    
+    <button id="email-auth-cancel" class="email-btn email-btn-cancel">
+      <span data-i18n="cancel">Cancel</span>
+    </button>
+  </div>
+</div>
+
+<!-- ===== PLAYLIST RESTRICTION MODAL ===== -->
+<div id="playlist-restriction-modal" class="modal">
+  <div class="panel login-panel" style="max-width:380px;text-align:center;position:relative;">
+
+    <!-- Close X -->
+    <button id="playlist-restriction-close-x" class="login-close-btn" aria-label="Close">✕</button>
+
+    <!-- Animated Lock Icon -->
+    <div class="login-lock-icon" style="color:#ff4da6;animation:lockPulse 2.5s ease-inout infinite;">
+      🎵
+    </div>
+
+    <!-- Title -->
+    <h3 id="playlist-restricted-title"
+        data-i18n="playlistRestrictedTitle"
+        style="color:#ff4da6;font-weight:800;font-size:20px;margin-bottom:8px;text-shadow:0 0 10px rgba(255,77,166,0.4);">
+      Создание плейлиста
+    </h3>
+
+    <!-- Subtitle -->
+    <p id="playlist-restricted-text"
+       data-i18n="playlistRestrictedText"
+       style="color:#bfc3d6;font-size:14px;line-height:1.6;margin-bottom:24px;text-transform:none;">
+      Создание плейлистов доступно только для авторизованных пользователей
+    </p>
+
+    <!-- Login Button -->
+    <button id="playlist-restriction-login-btn" class="login-niko-btn" style="background:linear-gradient(90deg,#ff4da6,#ff7a4d);">
+      <span class="login-icon">🔑</span>
+      <span id="playlist-restricted-login-text" data-i18n="playlistRestrictedLogin">Войти</span>
+    </button>
+
+    <!-- Close Button -->
+    <button id="playlist-restriction-close-btn" class="email-btn email-btn-ghost" style="margin-top:14px;">
+      <span id="playlist-restricted-close-text" data-i18n="playlistRestrictedClose">Закрыть</span>
+    </button>
+
+  </div>
+</div>
+
+<div id="download-restriction-modal" class="modal">
+  <div class="panel login-panel" style="max-width:380px;text-align:center;position:relative;">
+
+    <button id="download-restriction-close-x" class="login-close-btn" aria-label="Close">✕</button>
+
+    <div class="login-lock-icon" style="color:#30be70;animation:lockPulse 2.5s ease-in-out infinite;">
+      🔒
+    </div>
+
+    <h3 id="download-restricted-title"
+        data-i18n="downloadRestricted"
+        style="color:#00d1ff;font-weight:800;font-size:20px;margin-bottom:8px;text-shadow:0 0 10px rgba(0,209,255,0.4);">
+      Download Restricted
+    </h3>
+
+    <p id="download-restricted-text"
+       data-i18n="downloadRestrictedText"
+       style="color:#bfc3d6;font-size:14px;line-height:1.6;margin-bottom:24px;text-transform:none;">
+      Track download is available only for registered users
+    </p>
+
+    <button id="download-restriction-login-btn" class="login-niko-btn">
+      <span class="login-icon">🔑</span>
+      <span id="download-restricted-login-text" data-i18n="login">Login</span>
+    </button>
+
+    <button id="download-restriction-close-btn" class="email-btn email-btn-ghost" style="margin-top:14px;">
+      <span id="download-restricted-close-text" data-i18n="close">Close</span>
+    </button>
+
+  </div>
+</div>
+
+<!-- ===== FEEDBACK RESTRICTION MODAL ===== -->
+<div id="feedback-restriction-modal" class="modal">
+  <div class="panel login-panel" style="max-width:380px;text-align:center;position:relative;">
+
+    <!-- Close X -->
+    <button id="feedback-restriction-close-x" class="login-close-btn" aria-label="Close">✕</button>
+
+    <!-- Animated Lock Icon -->
+    <div class="login-lock-icon" style="color:#00d1ff;animation:lockPulse 2.5s ease-in-out infinite;">
+      💬
+    </div>
+
+    <!-- Title -->
+    <h3 id="feedback-restricted-title"
+        data-i18n="feedbackRestrictedTitle"
+        style="color:#00d1ff;font-weight:800;font-size:20px;margin-bottom:8px;text-shadow:0 0 10px rgba(0,209,255,0.4);">
+      Обратная связь ограничена
+    </h3>
+
+    <!-- Subtitle -->
+    <p id="feedback-restricted-text"
+       data-i18n="feedbackRestrictedText"
+       style="color:#bfc3d6;font-size:14px;line-height:1.6;margin-bottom:24px;text-transform:none;">
+      Отправка отзывов доступна только зарегистрированным пользователям
+    </p>
+
+    <!-- Login Button -->
+    <button id="feedback-restriction-login-btn" class="login-niko-btn">
+      <span class="login-icon">🔑</span>
+      <span id="feedback-restricted-login-text" data-i18n="feedbackRestrictedLogin">Войти</span>
+    </button>
+
+    <!-- Close Button -->
+    <button id="feedback-restriction-close-btn" class="email-btn email-btn-ghost" style="margin-top:14px;">
+      <span id="feedback-restricted-close-text" data-i18n="feedbackRestrictedClose">Закрыть</span>
+    </button>
+
+  </div>
+</div>
