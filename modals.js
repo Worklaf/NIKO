@@ -557,3 +557,168 @@ window.closeFeedbackRestriction = closeFeedbackRestriction;
     tryInit();
   }
 })();
+// ==========================================================
+// PLAYLIST CREATE/EDIT MODAL — глобальная функция
+// ==========================================================
+
+/**
+ * Открывает модалку создания/редактирования плейлиста
+ * @param {Object|null} existingData — данные для редактирования (или null для создания)
+ * @param {Function} onSave — callback после сохранения (получает {name, description, visibility, hideFromHome, cover})
+ */
+function openPlaylistCreateModal(existingData = null, onSave = null) {
+  const modal = document.getElementById('playlistModal');
+  if (!modal) {
+    console.error('❌ #playlistModal не найден в DOM. Проверь modals.html');
+    return;
+  }
+
+  const role = localStorage.getItem('siteRole') || 'guest';
+  const isAdmin = role === 'admin';
+
+  const titleEl = document.getElementById('playlistModalTitle');
+  const nameInput = document.getElementById('playlistNameInput');
+  const descInput = document.getElementById('playlistDescriptionInput');
+  const visSelect = document.getElementById('playlistVisibilitySelect');
+  const visRow = document.getElementById('visibilityRow');
+  const hideRow = document.getElementById('hideFromHomeRow');
+  const hideCheck = document.getElementById('playlistHideFromHome');
+  const coverPreview = document.getElementById('playlistCoverPreview');
+  const coverFile = document.getElementById('playlistCoverFile');
+  const deleteRow = document.getElementById('playlistDeleteRow');
+  const saveBtn = document.getElementById('playlistSaveBtn');
+  const cancelBtn = document.getElementById('playlistCancelBtn');
+  const closeBtn = document.getElementById('playlistModalClose');
+
+  // Сброс
+  let currentCoverBlob = null;
+
+  // Показываем поля только для админа
+  if (visRow) visRow.style.display = isAdmin ? 'block' : 'none';
+  if (hideRow) hideRow.style.display = isAdmin ? 'flex' : 'none';
+
+  // Заполняем данными
+  if (existingData) {
+    if (titleEl) titleEl.textContent = t('editPlaylist') || 'Edit playlist';
+    if (nameInput) nameInput.value = existingData.name || '';
+    if (descInput) descInput.value = existingData.description || '';
+    if (visSelect) visSelect.value = existingData.visibility || 'public';
+    if (hideCheck) hideCheck.checked = !!existingData.hideFromHome;
+    if (coverPreview) coverPreview.src = existingData.cover || 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
+    if (deleteRow) deleteRow.style.display = existingData.onDelete ? 'flex' : 'none';
+  } else {
+    if (titleEl) titleEl.textContent = t('newPlaylist') || 'New playlist';
+    if (nameInput) nameInput.value = '';
+    if (descInput) descInput.value = '';
+    if (visSelect) visSelect.value = 'public';
+    if (hideCheck) hideCheck.checked = false;
+    if (coverPreview) coverPreview.src = 'https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png';
+    if (deleteRow) deleteRow.style.display = 'none';
+  }
+
+  // Обработчик выбора обложки
+  const coverHandler = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    currentCoverBlob = file;
+    if (coverPreview) coverPreview.src = URL.createObjectURL(file);
+  };
+  if (coverFile) {
+    coverFile.onchange = null; // сброс
+    coverFile.addEventListener('change', coverHandler);
+  }
+
+  // Закрытие
+  function close() {
+    modal.classList.remove('open');
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+    if (coverFile) coverFile.value = '';
+    currentCoverBlob = null;
+  }
+
+  // Сохранение
+  const saveHandler = async () => {
+    const name = nameInput?.value.trim() || '';
+    if (!name) {
+      alert(t('playlistNameRequired') || 'Введите название плейлиста');
+      nameInput?.focus();
+      return;
+    }
+
+    const data = {
+      name,
+      description: descInput?.value.trim() || '',
+      visibility: isAdmin ? (visSelect?.value || 'public') : 'partner',
+      hideFromHome: isAdmin ? !!hideCheck?.checked : false,
+      coverBlob: currentCoverBlob,
+      coverPreviewUrl: coverPreview?.src || ''
+    };
+
+    // Если есть callback — вызываем его
+    if (typeof onSave === 'function') {
+      try {
+        saveBtn.disabled = true;
+        saveBtn.textContent = t('saving') || '⏳...';
+        await onSave(data);
+        close();
+      } catch (e) {
+        console.error('Ошибка сохранения:', e);
+        alert((t('saveFailed') || 'Ошибка: ') + e.message);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = t('save') || '💾 Save';
+      }
+    } else {
+      close();
+    }
+  };
+
+  // Кнопка удаления
+  const deleteHandler = async () => {
+    if (!existingData?.onDelete) return;
+    if (!confirm(t('deletePlaylistConfirm') || 'Удалить плейлист?')) return;
+    try {
+      await existingData.onDelete();
+      close();
+    } catch (e) {
+      console.error('Ошибка удаления:', e);
+      alert((t('deleteFailed') || 'Ошибка: ') + e.message);
+    }
+  };
+
+  // Вешаем обработчики (один раз)
+  saveBtn.onclick = saveHandler;
+  cancelBtn.onclick = close;
+  if (closeBtn) closeBtn.onclick = close;
+
+  const deleteBtn = document.getElementById('playlistDeleteBtn');
+  if (deleteBtn) deleteBtn.onclick = deleteHandler;
+
+  // Клик по фону
+  modal.onclick = (e) => {
+    if (e.target === modal) close();
+  };
+
+  // Escape
+  const escHandler = (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('open')) {
+      close();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
+// ✅ Применить переводы (модалка уже в DOM)
+if (typeof window.applyTranslations === 'function') {
+  window.applyTranslations();
+}
+ 
+  // Открываем
+  modal.classList.add('open');
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => nameInput?.focus(), 100);
+}
+
+// Экспорт
+window.openPlaylistCreateModal = openPlaylistCreateModal;
