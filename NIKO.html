@@ -480,157 +480,7 @@
   font-size: 10px;
   color: var(--muted);
   opacity: 0.7;
-}
-	 /* ===== MODERN LOGIN MODAL ===== */
-.login-panel {
-  max-width: 380px;
-  width: 90%;
-  text-align: center;
-  background: linear-gradient(145deg, rgba(16,16,28,0.98), rgba(8,8,16,0.98));
-  border: 1px solid rgba(0,229,255,0.2);
-  box-shadow: 
-    0 0 60px rgba(0,229,255,0.1),
-    0 25px 80px rgba(0,0,0,0.7),
-    inset 0 1px 0 rgba(255,255,255,0.04);
-  border-radius: 28px;
-  padding: 40px 32px 32px;
-  position: relative;
-  overflow: hidden;
-  animation: loginAppear 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes loginAppear {
-  from { opacity: 0; transform: scale(0.9) translateY(30px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-/* Glow orb at top */
-.login-panel::before {
-  content: '';
-  position: absolute;
-  top: -60%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 140%;
-  height: 140%;
-  background: radial-gradient(ellipse at 50% 0%, rgba(0,229,255,0.1) 0%, transparent 55%);
-  pointer-events: none;
-}
-
-/* Close button — seamless top-right corner */
-.login-close-btn {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
-  color: #6b6f7e;
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 10;
-  backdrop-filter: blur(12px);
-}
-
-.login-close-btn:hover {
-  background: rgba(255,77,166,0.12);
-  border-color: rgba(255,77,166,0.35);
-  color: #ff4da6;
-  transform: rotate(90deg);
-  box-shadow: 0 0 24px rgba(255,77,166,0.25);
-}
-
-.login-close-btn:active {
-  transform: rotate(90deg) scale(0.9);
-}
-
-/* Header */
-.login-header {
-  margin-bottom: 28px;
-  position: relative;
-  z-index: 1;
-}
-
-.login-lock-icon {
-  font-size: 40px;
-  margin-bottom: 14px;
-  filter: drop-shadow(0 0 16px rgba(0,229,255,0.35));
-  animation: lockFloat 3s ease-in-out infinite;
-}
-
-@keyframes lockFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-}
-
-.login-title {
-  color: #00E5FF;
-  text-shadow: 0 0 20px rgba(0,229,255,0.45);
-  margin: 0 0 6px;
-  font-size: 24px;
-  font-weight: 800;
-  letter-spacing: 4px;
-}
-
-.login-subtitle {
-  color: #4a4e5e;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  margin: 0;
-}
-
-/* PIN Display */
-.pin-display {
-  font-size: 34px;
-  font-weight: 700;
-  letter-spacing: 16px;
-  color: #00E5FF;
-  text-shadow: 0 0 30px rgba(0,229,255,0.5), 0 0 60px rgba(0,229,255,0.15);
-  margin: 24px 0 28px;
-  min-height: 56px;
-  font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
-  background: rgba(0,0,0,0.35);
-  border-radius: 18px;
-  padding: 14px 24px;
-  border: 1px solid rgba(0,229,255,0.12);
-  box-shadow: 
-    inset 0 2px 12px rgba(0,0,0,0.5), 
-    0 0 30px rgba(0,229,255,0.06);
-  position: relative;
-  z-index: 1;
-  transition: all 0.3s ease;
-}
-
-.pin-display.filled {
-  color: #4dff8a;
-  text-shadow: 0 0 30px rgba(77,255,138,0.5);
-  border-color: rgba(77,255,138,0.25);
-}
-
-.pin-display.error {
-  animation: pinShake 0.45s ease;
-  color: #ff4d4d;
-  text-shadow: 0 0 30px rgba(255,77,77,0.5);
-  border-color: rgba(255,77,77,0.35);
-}
-
-@keyframes pinShake {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-10px); }
-  40% { transform: translateX(10px); }
-  60% { transform: translateX(-5px); }
-  80% { transform: translateX(5px); }
-}
+} 
 /* ===== ANIMATED LOADER ===== */
 .loader-wrap {
   width: 180px;
@@ -955,122 +805,9 @@
   </div>
 </div>
 
-<div id="login-modal" class="modal">
-  <div class="panel login-panel">
-    <button id="login-close-x" class="login-close-btn" aria-label="Close">✕</button>
-    
-    <div class="login-header">
-      <div class="login-lock-icon">🔐</div>
-      <h3 class="login-title">ENTER CODE</h3>
-      <p class="login-subtitle">Secure Access</p>
-    </div>
-    
-    <div id="pin-display" class="pin-display">••••</div>
-    
-    <div class="pin-pad">
-      <button class="pin-btn" data-digit="1">1</button>
-      <button class="pin-btn" data-digit="2">2</button>
-      <button class="pin-btn" data-digit="3">3</button>
-      <button class="pin-btn" data-digit="4">4</button>
-      <button class="pin-btn" data-digit="5">5</button>
-      <button class="pin-btn" data-digit="6">6</button>
-      <button class="pin-btn" data-digit="7">7</button>
-      <button class="pin-btn" data-digit="8">8</button>
-      <button class="pin-btn" data-digit="9">9</button>
-      <button class="pin-btn pin-btn-clear" data-action="clear">✕</button>
-      <button class="pin-btn" data-digit="0">0</button>
-      <button class="pin-btn pin-btn-confirm" data-action="confirm">✓</button>
-    </div>
-    
-    <div class="login-divider"><span>Or login with</span></div>
-    
-    <div class="login-socials">
-      <button id="google-login-btn" class="login-social-btn google">
-        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#fff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#fff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#fff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#fff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-        Google
-      </button>
-      <button id="email-login-btn" class="login-social-btn email">
-        <span>📧</span> Email
-      </button>
-    </div>
-  </div>
-</div>
+ 
 
-<div id="email-auth-modal" class="modal">
-  <div class="panel email-auth-panel">
-    <button id="email-auth-close-x" class="login-close-btn" aria-label="Close">✕</button>
-    
-    <div class="login-header">
-      <div class="login-lock-icon">📧</div>
-      <h3 class="login-title" id="email-auth-title">Login</h3>
-      <p class="login-subtitle" id="email-auth-subtitle">Secure Email Access</p>
-    </div>
-    
-    <div id="email-login-form" class="email-form">
-      <div class="email-input-group">
-        <label class="email-label">Email</label>
-        <input type="email" id="auth-email" class="email-input" placeholder="your@email.com">
-      </div>
-      <div class="email-input-group">
-        <label class="email-label">Password</label>
-        <input type="password" id="auth-password" class="email-input" placeholder="••••••••">
-      </div>
-      
-      <div class="email-actions-row">
-        <button id="auth-submit-btn" class="email-btn email-btn-primary">
-          <span>Zaloguj się</span>
-        </button>
-        <button id="auth-toggle-register" class="email-btn email-btn-secondary">
-          <span>Utwórz konto</span>
-        </button>
-      </div>
-      
-      <button id="auth-forgot-btn" class="email-btn email-btn-ghost">
-        <span>Zapomniałeś hasła?</span>
-      </button>
-    </div>
-    
-    <div id="email-register-form" class="email-form" style="display:none">
-      <div class="email-input-group">
-        <label class="email-label">Email</label>
-        <input type="email" id="reg-email" class="email-input" placeholder="your@email.com">
-      </div>
-      <div class="email-input-group">
-        <label class="email-label">Password</label>
-        <input type="password" id="reg-password" class="email-input" placeholder="Min. 6 characters">
-      </div>
-      <div class="email-input-group">
-        <label class="email-label">Confirm Password</label>
-        <input type="password" id="reg-password-confirm" class="email-input" placeholder="Repeat password">
-      </div>
-      
-      <button id="reg-submit-btn" class="email-btn email-btn-primary email-btn-full">
-        <span>Utwórz konto</span>
-      </button>
-      <button id="reg-toggle-login" class="email-btn email-btn-ghost">
-        <span>Back to Login</span>
-      </button>
-    </div>
-    
-    <div id="email-forgot-form" class="email-form" style="display:none">
-      <div class="email-input-group">
-        <label class="email-label">Email</label>
-        <input type="email" id="forgot-email" class="email-input" placeholder="your@email.com">
-      </div>
-      
-      <button id="forgot-submit-btn" class="email-btn email-btn-primary email-btn-full">
-        <span>Send Reset Email</span>
-      </button>
-      <button id="forgot-toggle-login" class="email-btn email-btn-ghost">
-        <span>Back to Login</span>
-      </button>
-    </div>
-    
-    <button id="email-auth-cancel" class="email-btn email-btn-cancel">
-      <span>Cancel</span>
-    </button>
-  </div>
-</div>
+ 
 
 <div id="mini-player" style="display:none" role="region" aria-label="Mini player">
   <div id="mini-center">
@@ -1428,8 +1165,7 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 
-<script>
-let accessHashes = null;
+<script> 
 let globalCounts = {};
 window.globalTracks = [];
 let isShuffleMode = localStorage.getItem('shuffleMode') === 'true';
@@ -1836,11 +1572,7 @@ async function sha256(text) {
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
-async function loadAccessHashes() {
-  const doc = await db.collection('config').doc('access').get();
-  accessHashes = doc.exists ? doc.data() : {};
-}
-
+ 
 function getRole() { return localStorage.getItem('siteRole') || 'guest'; }
 function setRole(r) { localStorage.setItem('siteRole', r); window.currentUserRole = r; }
 function logoutRole() { localStorage.removeItem('siteRole'); location.reload(); }
@@ -4908,38 +4640,8 @@ if (e.target.closest('.track-date-editable')) {
     window.addEventListener('resize', sync);
     sync(); // проверка при старте
   })();
-});
-/* ---------- модалка «Pobieranie ograniczone» ---------- */
-function openDownloadRestriction() {
-  const modal = document.getElementById('download-restriction-modal');
-  if (!modal) return;
-
-  const setText = (id, key) => {
-    const el = document.getElementById(id);
-    if (el && typeof t === 'function') el.textContent = t(key) || el.textContent;
-  };
-
-  setText('download-restricted-title', 'downloadRestricted');
-  setText('download-restricted-text', 'downloadRestrictedText');
-  setText('download-restricted-login-text', 'login');
-  setText('download-restricted-close-text', 'close');
-
-  modal.style.display = '';            // не оставляем inline-стиля
-  modal.classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeDownloadRestriction() {
-  const modal = document.getElementById('download-restriction-modal');
-  if (!modal) return;
-
-  modal.classList.remove('open');
-  modal.style.display = '';            // ← ключевая строка, снимает inline display:flex
-  document.body.style.overflow = '';
-}
-
-window.openDownloadRestriction = openDownloadRestriction;
-window.closeDownloadRestriction = closeDownloadRestriction;
+}); 
+ 
 // ========================================
 // 🔄 СБРОС СТАТИСТИКИ (ADMIN)
 // ========================================
@@ -5538,208 +5240,15 @@ document.addEventListener('click', (e) => {
       customDropdown.classList.remove('open');
     }
   }
-});
-  // Download Restriction Modal Handlers
-  document.getElementById('download-restriction-login-btn')?.addEventListener('click', () => {
-  closeDownloadRestriction();
-  const login = document.getElementById('login-modal');
-  if (login) {
-    login.classList.add('open');
-    login.style.display = 'flex';
-  }
-});
-
-document.getElementById('download-restriction-close-btn')?.addEventListener('click', closeDownloadRestriction);
-
-/* клик по фону */
-document.getElementById('download-restriction-modal')?.addEventListener('click', (e) => {
-  if (e.target.id === 'download-restriction-modal') closeDownloadRestriction();
-});
-document.getElementById('download-restriction-close-x')?.addEventListener('click', closeDownloadRestriction);
-
-document.getElementById('playlist-restriction-close-x')?.addEventListener('click', closePlaylistRestriction);
-document.getElementById('playlist-restriction-close-btn')?.addEventListener('click', closePlaylistRestriction);
-document.getElementById('playlist-restriction-login-btn')?.addEventListener('click', () => {
-  closePlaylistRestriction();
-  
-  // Открываем модальное окно логина
-  const loginModal = document.getElementById('login-modal');
-  if (loginModal) {
-    loginModal.classList.add('open');
-    loginModal.style.display = 'flex';
-  }
-});
-document.getElementById('playlist-restriction-modal')?.addEventListener('click', (e) => {
-  if (e.target.id === 'playlist-restriction-modal') closePlaylistRestriction();
-});
-
+}); 
+    
 /* Escape */
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeDownloadRestriction();
 });
-
-  // Firebase Auth - Google Login
-  document.getElementById('google-login-btn')?.addEventListener('click', async () => {
-    try {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      const result = await firebase.auth().signInWithPopup(provider);
-      const user = result.user;
-      
-      // Store user data in Firestore with last login tracking
-      await db.collection('users').doc(user.uid).set({
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true });
-      
-      // Set role as 'user' (not admin/partner)
-      localStorage.setItem('siteRole', 'user');
-      localStorage.setItem('firebaseUid', user.uid);
-      localStorage.setItem('userEmail', user.email);
-      localStorage.setItem('userDisplayName', user.displayName || 'User');
-      localStorage.setItem('userCreatedAt', user.metadata.creationTime || new Date().toISOString());
-      
-      document.getElementById('login-modal').classList.remove('open');
-      location.reload();
-    } catch (error) {
-      console.error('Google login error:', error);
-      alert('Login failed: ' + error.message);
-    }
-  });
-
-  // Email Auth Modal Handlers
-  document.getElementById('email-login-btn')?.addEventListener('click', () => {
-  document.getElementById('login-modal')?.classList.remove('open');
-  const emailModal = document.getElementById('email-auth-modal');
-  if (emailModal) {
-    emailModal.style.display = 'flex';
-    emailModal.classList.add('open');
-  }
-  showEmailForm('login');
-  updateEmailAuthModalTranslations();
+    
 });
-
-  // Close email auth modal with X button
-document.getElementById('email-auth-close-x')?.addEventListener('click', (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-  const modal = document.getElementById('email-auth-modal');
-  if (modal) {
-    modal.classList.remove('open');
-    modal.style.display = 'none';
-  }
-});
-
-document.getElementById('email-auth-cancel')?.addEventListener('click', () => {
-  const modal = document.getElementById('email-auth-modal');
-  if (modal) {
-    modal.classList.remove('open');
-    modal.style.display = 'none';
-  }
-});
-
-  // Toggle between login/register/forgot forms
-  document.getElementById('auth-toggle-register')?.addEventListener('click', () => showEmailForm('register'));
-  document.getElementById('reg-toggle-login')?.addEventListener('click', () => showEmailForm('login'));
-  document.getElementById('auth-forgot-btn')?.addEventListener('click', () => showEmailForm('forgot'));
-  document.getElementById('forgot-toggle-login')?.addEventListener('click', () => showEmailForm('login'));
-
-  // Email Login
-  document.getElementById('auth-submit-btn')?.addEventListener('click', async () => {
-    const email = document.getElementById('auth-email').value.trim();
-    const password = document.getElementById('auth-password').value;
-    
-    if (!email || !password) {
-      alert('Please enter email and password');
-      return;
-    }
-    
-    try {
-      const result = await firebase.auth().signInWithEmailAndPassword(email, password);
-      const user = result.user;
-      
-      // Update last login timestamp
-      await db.collection('users').doc(user.uid).set({
-        lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true });
-      
-      // Auth state listener will handle the rest
-    } catch (error) {
-      alert('Login failed: ' + error.message);
-    }
-  });
-
-  // Email Register
-  document.getElementById('reg-submit-btn')?.addEventListener('click', async () => {
-    const email = document.getElementById('reg-email').value.trim();
-    const password = document.getElementById('reg-password').value;
-    const confirmPassword = document.getElementById('reg-password-confirm').value;
-    
-    if (!email || !password || !confirmPassword) {
-      alert('Please fill all fields');
-      return;
-    }
-    
-    if (password.length < 6) {
-      alert('Password must be at least 6 characters');
-      return;
-    }
-    
-    if (password !== confirmPassword) {
-      alert('Passwords do not match');
-      return;
-    }
-    
-    try {
-      const result = await firebase.auth().createUserWithEmailAndPassword(email, password);
-      const user = result.user;
-      
-      // Store user data in Firestore with last login tracking
-      await db.collection('users').doc(user.uid).set({
-        email: user.email,
-        displayName: email.split('@')[0],
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true });
-      
-      alert('Account created successfully!');
-      showEmailForm('login');
-    } catch (error) {
-      alert('Registration failed: ' + error.message);
-    }
-  });
-// Close login modal with X button
-document.getElementById('login-close-x')?.addEventListener('click', (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-  const modal = document.getElementById('login-modal');
-  if (modal) {
-    modal.classList.remove('open');
-    modal.style.display = 'none';
-  }
-  enteredPin = '';
-  updatePinDisplay();
-});
-  // Forgot Password
-  document.getElementById('forgot-submit-btn')?.addEventListener('click', async () => {
-    const email = document.getElementById('forgot-email').value.trim();
-    
-    if (!email) {
-      alert('Please enter your email');
-      return;
-    }
-    
-    try {
-      await firebase.auth().sendPasswordResetEmail(email);
-      alert('Password reset email sent! Check your inbox.');
-      showEmailForm('login');
-    } catch (error) {
-      alert('Failed to send reset email: ' + error.message);
-    }
-  });
-
+   
   // Firebase Auth State Listener
   firebase.auth().onAuthStateChanged(async (user) => {
     if (user) {
@@ -5783,86 +5292,8 @@ document.getElementById('login-close-x')?.addEventListener('click', (e) => {
         refreshLoginBtn();
       }
     }
-  });
+  }); 
 
-  let enteredPin = '';
-  const pinDisplay = document.getElementById('pin-display');
-  const loginModal = document.getElementById('login-modal');
-
-  function updatePinDisplay() {
-  const display = document.getElementById('pin-display');
-  if (!display) return;
-  display.classList.remove('filled', 'error');
-  
-  if (enteredPin.length === 0) {
-    display.textContent = '••••';
-  } else {
-    display.textContent = '•'.repeat(Math.min(enteredPin.length, 4)) + '•'.repeat(Math.max(0, 4 - enteredPin.length));
-    display.classList.add('filled');
-  }
-}
-
-  function flashError() {
-  const display = document.getElementById('pin-display');
-  if (display) {
-    display.classList.add('error');
-    setTimeout(() => display.classList.remove('error'), 450);
-  }
-  const modal = document.getElementById('login-modal');
-  if (modal) {
-    modal.style.animation = 'none';
-    modal.offsetHeight;
-    modal.style.animation = 'flashRed 0.5s ease';
-  }
-}
-
-  document.querySelectorAll('.pin-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const digit = btn.dataset.digit;
-      const action = btn.dataset.action;
-      if (digit !== undefined) {
-        enteredPin += digit;
-        updatePinDisplay();
-      } else if (action === 'clear') {
-        enteredPin = '';
-        updatePinDisplay();
-      } else if (action === 'confirm') {
-        if (enteredPin.length === 0) return;
-        const hash = await sha256(enteredPin);
-        const role =
-          hash === accessHashes?.adminHash ? 'admin' :
-          hash === accessHashes?.partnerHash ? 'partner' :
-          null;
-        if (role) {
-          setRole(role);
-          enteredPin = '';
-          updatePinDisplay();
-          const modal = document.getElementById('login-modal');
-          if (modal) {
-            modal.classList.remove('open');
-            modal.style.display = 'none';
-          }
-          
-          // Update last login timestamp in profiles collection for partners
-          if (role === 'partner' && db) {
-            try {
-              await db.collection('profiles').doc('partner').set({
-                lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
-              }, { merge: true });
-            } catch (e) {
-              console.error('Failed to update partner last login:', e);
-            }
-          }
-          
-          location.reload();
-        } else {
-          flashError();
-          enteredPin = '';
-          updatePinDisplay();
-        }
-      }
-    });
-  });
   function initFloatingLogout() {
   const btn = document.getElementById('floating-logout-btn');
   if (!btn) {
@@ -5897,72 +5328,7 @@ document.getElementById('login-close-x')?.addEventListener('click', (e) => {
 
   setTimeout(updateVisibility, 100);
 }
-
-function showEmailForm(formType) {
-  const loginForm = document.getElementById('email-login-form');
-  const registerForm = document.getElementById('email-register-form');
-  const forgotForm = document.getElementById('email-forgot-form');
-  const title = document.getElementById('email-auth-title');
-  const subtitle = document.getElementById('email-auth-subtitle');
-  
-  [loginForm, registerForm, forgotForm].forEach(f => {
-    if (f) f.style.display = 'none';
-  });
-  
-  const target = formType === 'login' ? loginForm : formType === 'register' ? registerForm : forgotForm;
-  if (target) {
-    target.style.display = 'block';
-    target.style.animation = 'none';
-    target.offsetHeight;
-    target.style.animation = 'formFadeIn 0.35s ease';
-  }
-  
-  if (formType === 'login') {
-    if (title) title.textContent = t('login') || 'Login';
-    if (subtitle) subtitle.textContent = 'Secure Email Access';
-  } else if (formType === 'register') {
-    if (title) title.textContent = t('createAccount') || 'Create Account';
-    if (subtitle) subtitle.textContent = 'Join N1K∅';
-  } else if (formType === 'forgot') {
-    if (title) title.textContent = t('forgotPassword') || 'Reset Password';
-    if (subtitle) subtitle.textContent = 'We\'ll send you a link';
-  }
-  
-  updateEmailAuthModalTranslations();
-}
-
-function updateEmailAuthModalTranslations() {
-  const setText = (id, key, fallback) => {
-    const el = document.getElementById(id);
-    if (el) {
-      const span = el.querySelector('span');
-      const text = t(key) || fallback;
-      if (span) span.textContent = text;
-      else el.textContent = text;
-    }
-  };
-  
-  const setPlaceholder = (id, key, fallback) => {
-    const el = document.getElementById(id);
-    if (el) el.placeholder = t(key) || fallback;
-  };
-  
-  setPlaceholder('auth-email', 'email', 'your@email.com');
-  setPlaceholder('auth-password', 'password', '••••••••');
-  setPlaceholder('reg-email', 'email', 'your@email.com');
-  setPlaceholder('reg-password', 'passwordMin', 'Min. 6 characters');
-  setPlaceholder('reg-password-confirm', 'confirmPassword', 'Repeat password');
-  setPlaceholder('forgot-email', 'email', 'your@email.com');
-  
-  setText('auth-submit-btn', 'login', 'Zaloguj się');
-  setText('auth-toggle-register', 'create', 'Utwórz konto');
-  setText('auth-forgot-btn', 'forgotPassword', 'Zapomniałeś hasła?');
-  setText('reg-submit-btn', 'createAccount', 'Utwórz konto');
-  setText('reg-toggle-login', 'backToLogin', 'Back to Login');
-  setText('forgot-submit-btn', 'sendResetEmail', 'Send Reset Email');
-  setText('forgot-toggle-login', 'backToLogin', 'Back to Login');
-  setText('email-auth-cancel', 'cancel', 'Cancel');
-}
+ 
  
 /* Обновление UI иконок play/pause + эквалайзер */
 window.updateTrackPlayIcons = function() {
@@ -6120,8 +5486,7 @@ window.updateTrackPlayIcons = function() {
       }
     }
   });
-})();
-}); 
+})(); 
 </script>
 
 <div id="visualizer-fullscreen" style="
@@ -6250,128 +5615,6 @@ window.updateTrackPlayIcons = function() {
   </div>
 </div>
 
-<div id="download-restriction-modal" class="modal">
-  <div class="panel login-panel" style="max-width:380px;text-align:center;position:relative;">
-
-    <!-- Close X -->
-    <button id="download-restriction-close-x" class="login-close-btn" aria-label="Close">✕</button>
-
-    <!-- Animated Lock Icon -->
-    <div class="login-lock-icon" style="color:#30be70;animation:lockPulse 2.5s ease-in-out infinite;">
-      🔒
-    </div>
-
-    <!-- Title -->
-    <h3 id="download-restricted-title"
-        data-i18n="downloadRestrictedTitle"
-        style="color:#00d1ff;font-weight:800;font-size:20px;margin-bottom:8px;text-shadow:0 0 10px rgba(0,209,255,0.4);">
-      Pobieranie ograniczone
-    </h3>
-
-    <!-- Subtitle -->
-    <p id="download-restricted-text"
-       data-i18n="downloadRestrictedText"
-       style="color:#bfc3d6;font-size:14px;line-height:1.6;margin-bottom:24px;text-transform:none;">
-      Pobieranie utworów dostępne tylko dla zalogowanych użytkowników
-    </p>
-
-    <!-- Login Button -->
-    <button id="download-restriction-login-btn" class="login-niko-btn">
-      <span class="login-icon">🔑</span>
-      <span id="download-restricted-login-text" data-i18n="downloadRestrictedLogin">Zaloguj się</span>
-    </button>
-
-    <!-- Close Button -->
-    <button id="download-restriction-close-btn" class="email-btn email-btn-ghost" style="margin-top:14px;">
-      <span id="download-restricted-close-text" data-i18n="downloadRestrictedClose">Zamknij</span>
-    </button>
-
-  </div>
-</div>
-
-<div id="playlist-restriction-modal" class="modal">
-  <div class="panel login-panel" style="max-width:380px;text-align:center;position:relative;">
-
-    <!-- Close X -->
-    <button id="playlist-restriction-close-x" class="login-close-btn" aria-label="Close">✕</button>
-
-    <!-- Animated Lock Icon -->
-    <div class="login-lock-icon" style="color:#ff4da6;animation:lockPulse 2.5s ease-inout infinite;">
-      🎵
-    </div>
-
-    <!-- Title -->
-    <h3 id="playlist-restricted-title"
-        data-i18n="playlistRestrictedTitle"
-        style="color:#ff4da6;font-weight:800;font-size:20px;margin-bottom:8px;text-shadow:0 0 10px rgba(255,77,166,0.4);">
-      Создание плейлиста
-    </h3>
-
-    <!-- Subtitle -->
-    <p id="playlist-restricted-text"
-       data-i18n="playlistRestrictedText"
-       style="color:#bfc3d6;font-size:14px;line-height:1.6;margin-bottom:24px;text-transform:none;">
-      Создание плейлистов доступно только для авторизованных пользователей
-    </p>
-
-    <!-- Login Button -->
-    <button id="playlist-restriction-login-btn" class="login-niko-btn" style="background:linear-gradient(90deg,#ff4da6,#ff7a4d);">
-      <span class="login-icon">🔑</span>
-      <span id="playlist-restricted-login-text" data-i18n="playlistRestrictedLogin">Войти</span>
-    </button>
-
-    <!-- Close Button -->
-    <button id="playlist-restriction-close-btn" class="email-btn email-btn-ghost" style="margin-top:14px;">
-      <span id="playlist-restricted-close-text" data-i18n="playlistRestrictedClose">Закрыть</span>
-    </button>
-
-  </div>
-</div>
-<div id="feedback-restriction-modal" class="modal">
-  <div class="panel login-panel" style="max-width:380px;text-align:center;position:relative;">
-
-    <!-- Close X -->
-    <button id="feedback-restriction-close-x" class="login-close-btn" aria-label="Close">✕</button>
-
-    <!-- Animated Thinking Icon -->
-    <div class="thinking-icon" style="margin-bottom:16px;">
-      <span class="chat-main">💬</span>
-      <span class="chat-dots">
-        <span class="dot dot1">•</span>
-        <span class="dot dot2">•</span>
-        <span class="dot dot3">•</span>
-      </span>
-    </div>
-
-    <!-- Title -->
-    <h3 id="feedback-restricted-title"
-        data-i18n="feedbackRestrictedTitle"
-        style="color:#00d1ff;font-weight:800;font-size:20px;margin-bottom:8px;text-shadow:0 0 10px rgba(0,209,255,0.4);">
-      Обратная связь ограничена
-    </h3>
-
-    <!-- Subtitle -->
-    <p id="feedback-restricted-text"
-       data-i18n="feedbackRestrictedText"
-       style="color:#bfc3d6;font-size:14px;line-height:1.6;margin-bottom:24px;text-transform:none;">
-      Отправка отзывов доступна только зарегистрированным пользователям
-    </p>
-
-    <!-- Login Button -->
-    <button id="feedback-restriction-login-btn" class="login-niko-btn">
-      <span class="login-icon">🔑</span>
-      <span id="feedback-restricted-login-text" data-i18n="feedbackRestrictedLogin">Войти</span>
-    </button>
-
-    <!-- Close Button -->
-    <button id="feedback-restriction-close-btn" class="email-btn email-btn-ghost" style="margin-top:14px;">
-      <span id="feedback-restricted-close-text" data-i18n="feedbackRestrictedClose">Закрыть</span>
-    </button>
-
-  </div>
-</div>
-
-
 <div id="feedback-modal" class="modal" style="z-index:1100050">
   <div class="panel" style="max-width:450px;background:linear-gradient(135deg,rgba(10,10,15,0.95),rgba(5,5,8,0.95));border:1px solid rgba(99,102,241,0.2);box-shadow:0 0 30px rgba(99,102,241,0.1);position:relative">
     <button id="feedback-close-x" class="login-close-btn" aria-label="Close">✕</button>
@@ -6450,6 +5693,18 @@ window.updateTrackPlayIcons = function() {
 <script src="player-core.js"></script>
 <script src="visualizers.js"></script>
 <script src="language.js"></script>
+<div id="modals-container"></div>
+<script>
+  fetch('modals.html')
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById('modals-container').innerHTML = html;
+      if (typeof applyTranslations === 'function') applyTranslations();
+      if (typeof initModals === 'function') initModals();
+    })
+    .catch(err => console.error('❌ Failed to load modals:', err));
+</script>
+<script src="modals.js"></script>
 <script>
 (function() {
   const btn = document.getElementById('floating-logout-btn');
@@ -6887,7 +6142,11 @@ window.onPlayerTrackChanged = function(trackId) {
 window.addEventListener('message', function(e) {
   var data = e.data;
   if (!data) return;
-
+  if (data.type === 'open-download-restriction') {
+    if (typeof openDownloadRestriction === 'function') {
+      openDownloadRestriction();
+    }
+  }
   if (data === 'get-player-state') {
     if (e.source && e.source !== window) {
       e.source.postMessage({
