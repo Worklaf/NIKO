@@ -1679,7 +1679,7 @@ function renderPlaylistsList() {
     const isPartner = p.owner === 'role_partner';
     const canDelete = isOwner || role === 'admin';
     const canEdit = isOwner || role === 'admin';
-    const ownerLabel = isOwner ? ' (мой)' : isPartner ? ' (партнер)' : p.ownerEmail ? ` (${p.ownerEmail})` : '';
+    const ownerLabel = isOwner ? ' ' : isPartner ? ' (партнер)' : p.ownerEmail ? ` (${p.ownerEmail})` : '';
     
     return `
       <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:rgba(255,255,255,0.05);border-radius:8px;margin-bottom:8px;${canEdit ? 'cursor:pointer;' : ''}" ${canEdit ? `onclick="editPlaylist('${p.id}')"` : ''}>
@@ -2914,7 +2914,7 @@ if (isAdmin) {
     const showPlus = (!isInPlaylist && canAdd);
     const showMinus = (isInPlaylist && canRemove);
     const visIcon = p.visibility === 'public' ? '🌍' : p.visibility === 'partner' ? '♥' : '🔒';
-    const ownerLabel = isOwner ? ' (мой)' : isPartner ? ' (партнер)' : p.ownerEmail ? ` (${p.ownerEmail})` : '';
+    const ownerLabel = isOwner ? ' ' : isPartner ? ' (партнер)' : p.ownerEmail ? ` (${p.ownerEmail})` : '';
     
     const div = document.createElement('div');
     div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;background:rgba(255,255,255,0.04);margin-bottom:6px;position:relative;';
@@ -2958,49 +2958,81 @@ if (isAdmin) {
 
   // Кнопка создания плейлиста для гостей, партнеров и обычных пользователей
   if (role === 'guest' || role === 'user' || role === 'partner') {
-    const createBtn = document.createElement('button');
-    createBtn.textContent = '+ Создать плейлист';
-    createBtn.style.cssText = 'width:100%;padding:12px;border-radius:8px;border:none;background:linear-gradient(90deg,#ff4da6,#ff7a4d);color:#fff;font-weight:600;cursor:pointer;margin-top:8px;';
-    createBtn.addEventListener('click', async () => {
-      // Для гостей - показываем модальное окно с требованием авторизации
-      if (role === 'guest') {
-        showPlaylistRestriction();
-        return;
-      }
-      
-      // Для партнеров и обычных пользователей - создаем плейлист
-      const name = prompt('Введите название плейлиста:');
-      if (!name) return;
-      
-      // Партнер создает с visibility 'partner' (виден партнеру и админу)
-      // Обычный пользователь создает с visibility 'private' (виден только пользователю и админу)
+  const createBtn = document.createElement('button');
+  createBtn.textContent = t('createPlaylist') || '+ Создать плейлист';
+  createBtn.style.cssText = 'width:100%;padding:12px;border-radius:8px;border:none;background:linear-gradient(90deg,#ff4da6,#ff7a4d);color:#fff;font-weight:600;cursor:pointer;margin-top:8px;';
+
+  createBtn.addEventListener('click', async () => {
+    // Для гостей - показываем модальное окно с требованием авторизации
+    if (role === 'guest') {
+      showPlaylistRestriction();
+      return;
+    }
+
+    // Проверяем, что модалка загружена
+    if (typeof openPlaylistCreateModal !== 'function') {
+      alert('❌ Модалка не загружена. Проверь modals.js');
+      return;
+    }
+
+    // Открываем модалку
+    openPlaylistCreateModal(null, async (data) => {
+      const name = data.name;
+
+      // Партнер создает с visibility 'partner', обычный пользователь с 'private'
+      // (сохранена старая логика — та же, что была при prompt())
       const visibility = role === 'partner' ? 'partner' : 'private';
-      
-      console.log('Creating playlist from main page with visibility:', visibility, 'for role:', role, 'ownerId:', ownerId);
-      
+
+      console.log('Creating playlist with visibility:', visibility, 'for role:', role, 'ownerId:', ownerId);
+
+      // Загрузка обложки, если пользователь её выбрал
+      let coverUrl = null;
+      let coverFileName = null;
+      if (data.coverBlob) {
+        try {
+          const safeBase = name.toLowerCase().replace(/\s+/g, '_').replace(/[^\w\-]/g, '') || 'playlist_' + Date.now();
+          const ext = data.coverBlob.name?.split('.').pop() || 'jpg';
+          coverFileName = `${safeBase}.${ext}`;
+          coverUrl = await uploadToWorker(data.coverBlob, 'NIKO_music_covers', coverFileName);
+        } catch (e) {
+          console.warn('Cover upload failed:', e);
+        }
+      }
+
+      // Создаём плейлист (та же логика, что была)
       const newPlaylistRef = await db.collection('playlists').add({
         name,
+        description: data.description || '',
         visibility: visibility,
         hideFromHome: false,
-        cover: null,
-        owner: ownerId, // Теперь это email
+        cover: coverUrl,                    // обложка, если пользователь загрузил
+        coverFileName: coverFileName,
+        owner: ownerId,
         ownerEmail: user?.email || role,
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-      
+
       // Добавляем трек в новый плейлист
-      await db.collection('tracks').doc(trackId).update({ playlistIds: firebase.firestore.FieldValue.arrayUnion(newPlaylistRef.id) });
+      await db.collection('tracks').doc(trackId).update({
+        playlistIds: firebase.firestore.FieldValue.arrayUnion(newPlaylistRef.id)
+      });
+
+      // songCount +1
       await newPlaylistRef.update({ songCount: 1 });
-      if (track?.cover) {
+
+      // Если пользователь не загрузил обложку, но у трека есть — используем обложку трека
+      if (!coverUrl && track?.cover) {
         await newPlaylistRef.update({ cover: track.cover, coverFileName: track.coverFileName });
       }
-      
+
       // Добавляем новый плейлист в массив без перезагрузки
       openPlaylistPicker(trackId);
     });
-    listEl.appendChild(createBtn);
-  }
+  });
+
+  listEl.appendChild(createBtn);
+}
 
   modal.classList.add('open');
   document.getElementById('playlist-picker-cancel').onclick = () => { modal.classList.remove('open'); };
