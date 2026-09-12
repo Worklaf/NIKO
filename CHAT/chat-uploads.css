@@ -1,0 +1,728 @@
+/* ========================================
+   CHAT — ПАКЕТНАЯ ЗАГРУЗКА И АЛЬБОМЫ
+   ======================================== */
+
+/* ===== КРУГОВОЙ ПРОГРЕСС-БАР ЗАГРУЗКИ ===== */
+.upload-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 2, 6, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 10080;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.upload-overlay.open { display: flex; }
+
+.upload-overlay-panel {
+  background: linear-gradient(180deg, rgba(14,14,20,0.98), rgba(8,8,12,0.98));
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 24px;
+  padding: 32px 28px;
+  max-width: 380px;
+  width: 100%;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.75);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.upload-progress-ring {
+  position: relative;
+  width: 180px;
+  height: 180px;
+}
+.upload-progress-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.upload-progress-ring .ring-bg {
+  fill: none;
+  stroke: rgba(255,255,255,0.06);
+  stroke-width: 10;
+}
+.upload-progress-ring .ring-fill {
+  fill: none;
+  stroke: url(#uploadGradient);
+  stroke-width: 10;
+  stroke-linecap: round;
+  stroke-dasharray: 502;
+  stroke-dashoffset: 502;
+  transition: stroke-dashoffset 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 0 12px rgba(255,77,166,0.6));
+}
+.upload-progress-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.upload-progress-percent {
+  font-size: 32px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.5px;
+  text-shadow: 0 0 20px rgba(255,77,166,0.4);
+  font-variant-numeric: tabular-nums;
+}
+.upload-progress-size {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.upload-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+}
+.upload-subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.5;
+}
+.upload-file-list {
+  width: 100%;
+  max-height: 140px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: rgba(255,255,255,0.02);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.upload-file-list::-webkit-scrollbar { width: 4px; }
+.upload-file-list::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+}
+.upload-file-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+.upload-file-item.done { color: #4dff8a; }
+.upload-file-item.active {
+  color: #fff;
+  background: rgba(255,77,166,0.12);
+}
+.upload-file-item .file-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.upload-file-item .file-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.upload-file-item .file-status {
+  font-size: 11px;
+  flex-shrink: 0;
+}
+/* ==========================================================
+   АЛЬБОМ — Facebook-style наложение (компактное)
+   ========================================================== */
+.album-container {
+  position: relative;
+  width: 240px;
+  max-width: 70vw;
+  height: 210px;              /* было 260px */
+  margin-top: 6px;            /* было 20px */
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.album-container:hover { transform: translateY(-2px); }
+
+/* Базовый размер карточки — одинаковый для всех */
+.album-photo {
+  position: absolute;
+  top: 20px;                  /* было 60px */
+  left: 20px;                 /* было 40px */
+  width: 190px;
+  height: 180px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #111;
+  border: 3px solid var(--card);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.album-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Бейдж "+N" в углу */
+.album-photo .album-more {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+/* ===== НАЛОЖЕНИЕ: каждая следующая за главной идёт ЛЕВЕЕ и ВЫШЕ ===== */
+/* 
+ * Порядок в DOM: 1-я самая задняя, 5-я — главная (сверху).
+ * Главная (5-я) стоит сзади справа-внизу, 
+ * а задние уходят влево-вверх с чередующимся наклоном.
+ */
+
+/* 5-я — ГЛАВНАЯ, опорная (право-низ) */
+.album-photo:nth-child(5) {
+  transform: translate(20px, 0) rotate(-2deg);
+  z-index: 5;
+  opacity: 1;
+}
+
+/* 4-я — минимальный сдвиг от главной */
+.album-photo:nth-child(4) {
+  transform: translate(14px, -6px) rotate(5deg) scale(0.98);
+  z-index: 4;
+  opacity: 0.92;
+}
+
+/* 3-я — ещё на 6px влево-вверх */
+.album-photo:nth-child(3) {
+  transform: translate(8px, -12px) rotate(-6deg) scale(0.96);
+  z-index: 3;
+  opacity: 0.82;
+}
+
+/* 2-я */
+.album-photo:nth-child(2) {
+  transform: translate(2px, -18px) rotate(8deg) scale(0.94);
+  z-index: 2;
+  opacity: 0.68;
+}
+
+/* 1-я — самая задняя, максимальный сдвиг 12px */
+.album-photo:nth-child(1) {
+  transform: translate(-4px, -24px) rotate(-10deg) scale(0.92);
+  z-index: 1;
+  opacity: 0.5;
+}
+
+/* Больше 5 не показываем */
+.album-photo:nth-child(n+6) { display: none; }
+
+/* Hover — очень лёгкое раздвижение */
+.album-container:hover .album-photo:nth-child(5) {
+  transform: translate(24px, 2px) rotate(-1deg);
+}
+.album-container:hover .album-photo:nth-child(1) {
+  transform: translate(-6px, -28px) rotate(-12deg) scale(0.92);
+}
+/* ==========================================================
+   ПОЛНОЭКРАННЫЙ ПРОСМОТР АЛЬБОМА (сетка)
+   ========================================================== */
+.album-viewer {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.98);
+  backdrop-filter: blur(10px);
+  z-index: 10090;
+  display: none;
+  flex-direction: column;
+  transition: opacity 0.2s ease;
+}
+.album-viewer.open { display: flex; }
+
+/* Когда открыт fullscreen фото — сетка скрыта */
+.album-viewer.fullscreen {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.album-viewer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.6), transparent);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+.album-viewer-counter {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(0,0,0,0.5);
+  padding: 6px 14px;
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  font-variant-numeric: tabular-nums;
+}
+.album-viewer-actions {
+  display: flex;
+  gap: 8px;
+}
+.album-viewer-actions button {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.album-viewer-actions button:hover {
+  background: rgba(255,255,255,0.22);
+  transform: scale(1.08);
+}
+
+.album-viewer-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 6px;
+  padding: 80px 16px 20px;
+  overflow-y: auto;
+  align-content: start;
+}
+.album-viewer-grid::-webkit-scrollbar { width: 8px; }
+.album-viewer-grid::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: 4px;
+}
+.album-viewer-grid .album-thumb {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: zoom-in;
+  background: #111;
+  transition: transform 0.2s;
+}
+.album-viewer-grid .album-thumb:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.album-viewer-grid .album-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ==========================================================
+   FULLSCREEN PHOTO — поверх всего
+   ========================================================== */
+#img-viewer {
+  z-index: 10200 !important;
+}
+#img-viewer.open {
+  display: flex !important;
+}
+
+/* Стрелки и счётчик — поверх фото */
+#album-fs-nav,
+#album-fs-nav button,
+#album-fs-counter {
+  z-index: 10300 !important;
+}
+
+/* ==========================================================
+   МОБИЛЬНАЯ АДАПТАЦИЯ
+   ========================================================== */
+@media (max-width: 600px) {
+  .upload-progress-ring { width: 140px; height: 140px; }
+  .upload-progress-percent { font-size: 26px; }
+  .upload-overlay-panel { padding: 24px 20px; }
+  .album-viewer-grid { grid-template-columns: repeat(2, 1fr); }
+  .album-container { width: 220px; height: 180px; }
+  .album-photo { width: 190px; height: 160px; }
+}
+
+/* ==========================================================
+   ПРОГРЕСС ПРЯМО В СООБЩЕНИИ С АЛЬБОМОМ
+   ========================================================== */
+.album-upload-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.55);
+  border-radius: 12px;
+  font-size: 13px;
+  color: #fff;
+}
+.album-upload-progress .mini-ring {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+.album-upload-progress .mini-ring svg {
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+}
+.album-upload-progress .mini-ring .ring-bg {
+  fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 3;
+}
+.album-upload-progress .mini-ring .ring-fill {
+  fill: none; stroke: #ff4da6; stroke-width: 3; stroke-linecap: round;
+  stroke-dasharray: 75.4;
+  transition: stroke-dashoffset 0.3s;
+}
+/* ==========================================================
+   ПРЕДПРОСМОТР ФАЙЛОВ (PDF, JSON, JS, TXT, CSV)
+   ========================================================== */
+.file-preview-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 10600;
+  display: none;
+  flex-direction: column;
+}
+.file-preview-overlay.open { display: flex; }
+
+.file-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px;
+  background: rgba(0, 0, 0, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+.file-preview-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+}
+.file-preview-title .icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.file-preview-title .name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.file-preview-title .size {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+.file-preview-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.file-preview-actions button,
+.file-preview-actions a {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.file-preview-actions button:hover,
+.file-preview-actions a:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: scale(1.08);
+}
+
+.file-preview-body {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 16px;
+}
+.file-preview-body::-webkit-scrollbar { width: 8px; height: 8px; }
+.file-preview-body::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: 4px;
+}
+
+/* PDF — iframe на весь экран */
+.file-preview-body iframe.pdf-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 12px;
+  background: #fff;
+}
+
+/* Текстовый предпросмотр (JSON, JS, TXT, CSV) */
+.file-preview-pre {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #0a0a0f;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  color: #eaeaf2;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+.file-preview-pre .key { color: #ff7a4d; }        /* ключи JSON */
+.file-preview-pre .string { color: #4dff8a; }     /* строки */
+.file-preview-pre .number { color: #00d1ff; }     /* числа */
+.file-preview-pre .boolean { color: #ff4da6; }    /* true/false */
+.file-preview-pre .null { color: #bfc3d6; }       /* null */
+.file-preview-pre .comment { color: #6b6f7e; font-style: italic; }  /* комментарии JS */
+.file-preview-pre .keyword { color: #ff4da6; font-weight: 600; }    /* function/const/let */
+
+/* CSV — таблица */
+.file-preview-table {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  border-collapse: collapse;
+  background: #0a0a0f;
+  border-radius: 14px;
+  overflow: hidden;
+  font-size: 13px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+.file-preview-table th,
+.file-preview-table td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: #eaeaf2;
+}
+.file-preview-table th {
+  background: rgba(255, 77, 166, 0.12);
+  color: #ff4da6;
+  font-weight: 700;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.file-preview-table tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Загрузка */
+.file-preview-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 60px 20px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.file-preview-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255,255,255,0.1);
+  border-top-color: #ff4da6;
+  border-radius: 50%;
+  animation: filePreviewSpin 0.8s linear infinite;
+}
+@keyframes filePreviewSpin {
+  to { transform: rotate(360deg); }
+}
+
+.file-preview-error {
+  padding: 40px 20px;
+  text-align: center;
+  color: #ff4da6;
+  font-size: 14px;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 600px) {
+  .file-preview-title { font-size: 13px; }
+  .file-preview-title .size { display: none; }
+  .file-preview-actions button,
+  .file-preview-actions a { width: 36px; height: 36px; }
+  .file-preview-pre { font-size: 12px; padding: 14px; }
+  .file-preview-table { font-size: 12px; }
+  .file-preview-table th,
+  .file-preview-table td { padding: 8px 10px; }
+}
+/* ==========================================================
+   ИКОНКИ ТИПОВ ФАЙЛОВ (SVG)
+   ========================================================== */
+.file-icon-svg {
+  width: 38px;
+  height: 46px;
+  flex-shrink: 0;
+  position: relative;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.35));
+}
+
+.file-icon-svg svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+/* ==========================================================
+   КАРТОЧКА ФАЙЛА В СООБЩЕНИИ — компактная
+   ========================================================== */
+.file-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  transition: all 0.2s;
+  cursor: pointer;
+  /* ✅ Не растягиваем на весь бабл */
+  width: max-content;
+  max-width: 260px;
+}
+.file-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.14);
+  transform: translateY(-1px);
+}
+.file-card .fi {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;   /* выравнивание с первой строкой */
+}
+.file-card .fi .file-icon-svg {
+  width: 30px;
+  height: 36px;
+}
+.file-card .fn {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.35;
+  /* ✅ Переносим слова на новую строку */
+  white-space: normal;
+  overflow-wrap: anywhere;   /* ломаем длинные слова с дефисами/точками */
+  word-break: break-word;
+  /* Максимум 3 строки */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.file-card .fs {
+  font-size: 11px;
+  opacity: 0.6;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* Если бабл "мой" (мой файл) — карточка со светлым фоном */
+.msg-wrap.me .file-card {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+.msg-wrap.me .file-card .fn {
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.msg-wrap.me .file-card .fs {
+  color: rgba(255, 255, 255, 0.7);
+}
+.msg-wrap.me .file-card:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* Мобильная адаптация */
+@media (max-width: 600px) {
+  .file-card {
+    max-width: 200px;
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  .file-card .fi .file-icon-svg {
+    width: 26px;
+    height: 30px;
+  }
+  .file-card .fn { font-size: 12px; }
+  .file-card .fs { font-size: 10px; }
+}
+
+/* Иконка в модалке предпросмотра */
+.file-preview-title .icon .file-icon-svg {
+  width: 32px;
+  height: 38px;
+}
+
+/* Иконка в списке загрузки */
+.upload-file-item .file-icon .file-icon-svg {
+  width: 22px;
+  height: 26px;
+  filter: none;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 600px) {
+  .file-icon-svg { width: 32px; height: 40px; }
+  .file-preview-title .icon .file-icon-svg { width: 26px; height: 32px; }
+  .file-card .fn { max-width: 140px; font-size: 12px; }
+}
