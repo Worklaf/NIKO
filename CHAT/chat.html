@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="stylesheet" href="chat-uploads.css">
+
 <title>N1K∅ — Chat</title>
 <style>
   :root{
@@ -324,13 +326,22 @@
   @keyframes uploadPulse{0%{margin-left:-30%}100%{margin-left:100%}}
 
   #img-viewer{
-    position:fixed;inset:0;display:none;align-items:center;justify-content:center;
-    background:rgba(0,0,0,0.85);z-index:9999;
-  }
-  #img-viewer.open{display:flex}
-  #img-viewer-img{
-    max-width:100%;max-height:100%;object-fit:contain;touch-action:pinch-zoom;
-  }
+  position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.95);z-index:10100;
+  /* ✅ Кликабельность по всему фону */
+  cursor: pointer;
+}
+#img-viewer.open{ display: flex; }
+
+/* ✅ Картинка НЕ передаёт клик на фон — поэтому у неё отдельный курсор */
+#img-viewer-img{
+  cursor: zoom-out;
+}
+#img-viewer-img{
+  max-width:100%;max-height:100%;object-fit:contain;touch-action:pinch-zoom;
+  user-select: none;
+  -webkit-user-drag: none;
+}
   #img-viewer-close,
 #img-viewer-download {
   position: absolute;
@@ -1166,6 +1177,20 @@ img.twemoji {
 @media (max-width:480px){
   .scroll-to-bottom{right:10px;bottom:78px}
 }
+.album-viewer.fullscreen {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.2s ease;
+}
+#img-viewer {
+  z-index: 10200 !important;
+}
+#img-viewer.open {
+  display: flex !important;
+}
+#album-fs-nav {
+  z-index: 10300 !important;
+}
 </style>
 <base target="_blank">
 </head>
@@ -1379,7 +1404,7 @@ img.twemoji {
 </div>
   <div id="input-bar">
   <div id="upload-progress"><div class="bar"></div></div>
-  <input type="file" id="file-input" style="display:none">
+  <input type="file" id="file-input" multiple style="display:none">
   <!-- СКРЕПКА -->
   <button id="attach-btn" class="chat-icon-btn" title="Прикрепить" data-key="attach">
     <svg viewBox="0 0 24 24">
@@ -1524,6 +1549,7 @@ border-radius:4px;overflow:hidden;cursor:pointer"></div>
     </svg>
   </button>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/@twemoji/api@14.1.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -1532,6 +1558,7 @@ border-radius:4px;overflow:hidden;cursor:pointer"></div>
 <script src="https://unpkg.com/wavesurfer.js"></script>
 <script src="language_chat.js"></script>
 <script src="emoji_categories.js"></script>
+<script src="chat-uploads.js"></script>
 <script>
   // === ДИАГНОСТИКА ЯЗЫКА ===
 console.log('=== LANGUAGE DEBUG ===');
@@ -3045,18 +3072,20 @@ header.innerHTML = `
         content.style.cssText = 'font-size:13px;color:var(--muted);margin-bottom:8px;max-height:60px;overflow:hidden;text-overflow:ellipsis';
         
         if (msg.type === 'text') {
-          content.textContent = msg.text || t('text_message');
-        } else if (msg.type === 'image') {
-          content.textContent = t('file_image');
-              } else if (msg.type === 'audio') {
-          content.textContent = t('file_audio') + (msg.fileName || '—');
-               } else if (msg.type === 'voice') {
-          content.textContent = t('file_voice');
-                } else if (msg.type === 'file') {
-          content.textContent = t('file_doc') + (msg.fileName || '—');
-        } else {
-          content.textContent = t('message');
-        }
+  content.textContent = msg.text || t('text_message');
+} else if (msg.type === 'image') {
+  content.textContent = t('file_image');
+} else if (msg.type === 'album') {
+  content.textContent = '🖼️ Album · ' + (msg.photos?.length || 0) + ' photos';
+} else if (msg.type === 'audio') {
+  content.textContent = t('file_audio') + (msg.fileName || '—');
+} else if (msg.type === 'voice') {
+  content.textContent = t('file_voice');
+} else if (msg.type === 'file') {
+  content.textContent = t('file_doc') + (msg.fileName || '—');
+} else {
+  content.textContent = t('message');
+}
         
         const actions = document.createElement('div');
         actions.style.cssText = 'display:flex;gap:8px';
@@ -3217,9 +3246,58 @@ const TICK_READ = `
   }
 
   document.getElementById('img-viewer-close').addEventListener('click', () => {
-    document.getElementById('img-viewer').classList.remove('open');
-  });
+  // Закрываем fullscreen
+  document.getElementById('img-viewer').classList.remove('open');
 
+  // Снимаем класс fullscreen с сетки — она снова видна
+  document.querySelector('.album-viewer')?.classList.remove('fullscreen');
+
+  // 🗑️ Удаляем стрелки
+  document.getElementById('album-fs-nav')?.remove();
+});
+// ==========================================================
+// ЗАКРЫТИЕ FULLSCREEN ПРИ КЛИКЕ ВНЕ КАРТИНКИ
+// ==========================================================
+(function setupImageViewerBackdropClose() {
+  const viewer = document.getElementById('img-viewer');
+  const img = document.getElementById('img-viewer-img');
+  if (!viewer || !img) return;
+
+  // Клик по фону (не по картинке и не по кнопкам) — закрываем
+  viewer.addEventListener('click', (e) => {
+    // Если клик пришёл по картинке — игнорируем
+    if (e.target === img) return;
+    // Если клик по кнопке (крестик/скачать) — игнорируем,
+    // у них свои обработчики
+    if (e.target.closest('#img-viewer-close')) return;
+    if (e.target.closest('#img-viewer-download')) return;
+    // Если клик по навигации (стрелки prev/next) — игнорируем
+    if (e.target.closest('#album-fs-nav')) return;
+
+    // Закрываем
+    viewer.classList.remove('open');
+    document.querySelector('.album-viewer')?.classList.remove('fullscreen');
+    document.getElementById('album-fs-nav')?.remove();
+  });
+})();
+// ==========================================================
+// ЗАКРЫТИЕ СЕТКИ АЛЬБОМА ПО КЛИКУ ПО ФОНУ
+// ==========================================================
+(function setupAlbumViewerBackdropClose() {
+  document.addEventListener('click', (e) => {
+    const grid = document.querySelector('.album-viewer.open .album-viewer-grid');
+    if (!grid) return;
+    // Клик по самой сетке или её содержимому — игнорируем
+    if (e.target.closest('.album-thumb')) return;
+    if (e.target.closest('.album-viewer-actions')) return;
+    // Клик по фону (пустому месту вокруг сетки) — закрываем
+    if (e.target.classList.contains('album-viewer') || e.target === grid) {
+      if (window.ChatUploads?.closeAlbumViewer) {
+        window.ChatUploads.closeAlbumViewer();
+      }
+    }
+  });
+})();
   // === МИНИ-ПЛЕЕР ДЛЯ АУДИО ===
   let chatPlayer = null;
   let chatPlayerIsPlaying = false;
@@ -3909,48 +3987,36 @@ function renderSearch(query) {
     recCancelBtn.addEventListener('click', () => stopRecording(true));
     recSendBtn.addEventListener('click', () => stopRecording(false));
 
-    attachBtn.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', async () => {
-      const file = fileInput.files[0];
-      fileInput.value = '';
-      if (!file) return;
+    attachBtn.addEventListener('click', () => {
+  document.getElementById('file-input').click();
+});
 
-      let type = 'file';
+document.getElementById('file-input').addEventListener('change', async (e) => {
+  const input = e.target;
+  const files = Array.from(input.files || []);
+  input.value = '';
+  if (!files.length) return;
 
-if (file.type.startsWith('image/')) {
-  type = 'image';
-}
-else if (file.type.startsWith('audio/')) {
-  type = 'audio';
-}
-else if (file.type.startsWith('video/')) {
-  type = 'video';
-}
+  console.log('🟢 FILES SELECTED:', files.length);
+  files.forEach(f => console.log('  →', f.name, f.size, f.type));
 
+  if (!window.ChatUploads || typeof window.ChatUploads.sendFilesAsBatch !== 'function') {
+    console.error('❌ ChatUploads не загружен');
+    alert('Модуль загрузки не загружен. Проверь консоль.');
+    return;
+  }
 
-      uploadProgress.classList.add('active');
-      try {
-        const safeName = uniqueChatFileName(sanitizeName(file.name));
-        knownFileNames.add(safeName);
-        const url = await uploadToWorker(file, STORAGE_FOLDER_CHAT, safeName);
-        await db.collection('chat_messages').add({
-          type,
-          text: '',
-          fileUrl: url,
-          fileName: file.name,
-          fileSize: file.size,
-          sender: myRole,
-          status: 'sent',
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      } catch (e) {
-        console.error(e);
-        alert(t('error_upload'));
-      } finally {
-        uploadProgress.classList.remove('active');
-      }
-    });
-
+  try {
+    await window.ChatUploads.sendFilesAsBatch(files, db, myRole);
+    console.log('✅ Upload complete');
+    if (typeof scrollToLastMessage === 'function') {
+      setTimeout(scrollToLastMessage, 150);
+    }
+  } catch (err) {
+    console.error('❌ Batch upload error:', err);
+    alert('Ошибка загрузки: ' + err.message);
+  }
+});
     const renderedMessages = new Map();
     let isFirstLoad = true;
     
@@ -4615,8 +4681,30 @@ else if (m.status === 'read') {
 
 
    async function renderBubbleContent(bubble, m, id) {
+  console.log('🎨 renderBubbleContent type:', m.type, 'photos:', m.photos?.length);
   bubble.innerHTML = '';
- bubble.classList.add('twemoji-loaded');
+  bubble.classList.add('twemoji-loaded');
+  
+  // === ALBUM ===
+  if (m.type === 'album') {
+    console.log('🎨 ALBUM branch! photos:', m.photos?.length);
+    if (m.photos && m.photos.length) {
+      try {
+        ChatUploads.renderAlbum(bubble, m.photos, id);
+        console.log('🎨 после renderAlbum, children:', bubble.children.length);
+      } catch (e) {
+        console.error('🎨 ОШИБКА:', e);
+      }
+    }
+    if (m.text) {
+      const cap = document.createElement('div');
+      cap.style.marginTop = '6px';
+      cap.textContent = m.text;
+      bubble.appendChild(cap);
+    }
+    return;
+  }
+
   // === IMAGE ===
   if (m.type === 'image') {
     const img = document.createElement('img');
@@ -4850,25 +4938,49 @@ else if (m.status === 'read') {
     bubble.appendChild(voiceContainer);
     return;
   }
+// === FILE ===
+if (m.type === 'file') {
+  // ✅ Компактный контейнер — не растягивает бабл
+  bubble.style.padding = '6px';
+  bubble.style.whiteSpace = 'normal';   // отключаем pre-wrap для файла
+  bubble.style.width = 'max-content';   // ширина по содержимому
+  bubble.style.maxWidth = '280px';
+  bubble.style.background = 'transparent';  // убираем градиент/фон бабла
+  bubble.style.border = 'none';
 
-  // === FILE ===
-  if (m.type === 'file') {
-    const card = document.createElement('a');
-    card.className = 'file-card';
-    card.href = m.fileUrl;
-    card.target = '_blank';
-    card.style.color = 'inherit';
-    card.style.textDecoration = 'none';
-    card.innerHTML = `
-      <span class="fi">📄</span>
-      <div>
-        <div class="fn">${m.fileName || t('file_fallback')}</div>
-        <div class="fs">${fmtFileSize(m.fileSize)}</div>
-      </div>
-    `;
-    bubble.appendChild(card);
-    return;
-  }
+  const card = document.createElement('div');
+  card.className = 'file-card';
+
+  const iconHtml = (window.ChatUploads?.getFileIconSvg)
+    ? window.ChatUploads.getFileIconSvg(m.fileName || '', m.mime || '')
+    : '<span style="font-size:32px;">📄</span>';
+
+  card.innerHTML = `
+    <span class="fi">${iconHtml}</span>
+    <div>
+      <div class="fn">${m.fileName || t('file_fallback')}</div>
+      <div class="fs">${fmtFileSize(m.fileSize)}</div>
+    </div>
+  `;
+
+  card.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (window.ChatUploads?.openFilePreview) {
+      window.ChatUploads.openFilePreview(
+        m.fileUrl,
+        m.fileName || 'file',
+        m.fileSize,
+        m.mime || ''
+      );
+    } else {
+      window.open(m.fileUrl, '_blank');
+    }
+  });
+
+  bubble.appendChild(card);
+  return;
+}
 
   // === VIDEO ===
   if (m.type === 'video') {
