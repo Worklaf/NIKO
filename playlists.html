@@ -162,9 +162,21 @@ main, #playlistsContainer {
   justify-content: flex-end;
   padding: 8px;
   gap: 6px;
+  /* ✅ Чтобы кнопка была кликабельной на телефоне */
+  pointer-events: none;
+}
+.playlist-overlay .overlay-btn {
+  pointer-events: auto;      /* ← кнопка ловит клики */
 }
 .playlist-card:hover .playlist-overlay { opacity: 1; }
 
+/* ✅ На тач-устройствах — показываем всегда */
+@media (hover: none), (pointer: coarse) {
+  .playlist-overlay {
+    opacity: 1;
+    background: linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 40%);
+  }
+}
 .overlay-btn {
   width: 32px;
   height: 32px;
@@ -232,91 +244,6 @@ main, #playlistsContainer {
   letter-spacing: 0.5px;
   opacity: 0.9;
 }
-
-/* ===== Модалка создания/редактирования плейлиста ===== */
-/* .modal и .panel — базовые в styles.css, здесь только уникальные оверрайды */
-#playlistModal .panel {
-  max-width: 420px;
-}
-#playlistModal .panel h3 {
-  margin: 0 0 16px;
-  font-size: 18px;
-  font-weight: 700;
-}
-.panel-row { margin-bottom: 12px; }
-.panel-row label {
-  display: block;
-  font-size: 12px;
-  color: #8b8fa3;
-  margin-bottom: 6px;
-  font-weight: 500;
-}
-.panel-row input,
-.panel-row textarea,
-.panel-row select {
-  width: 100%;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: #07070a;
-  color: #eaeaf2;
-  padding: 10px 12px;
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.2s;
-  box-sizing: border-box;
-}
-.panel-row input:focus,
-.panel-row textarea:focus,
-.panel-row select:focus {
-  border-color: rgba(255,77,166,0.5);
-}
-.panel-row textarea {
-  min-height: 70px;
-  resize: vertical;
-}
-.panel-cover-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 14px;
-}
-.panel-cover-row img {
-  width: 80px;
-  height: 80px;
-  border-radius: 12px;
-  object-fit: cover;
-  background: #111;
-  flex-shrink: 0;
-}
-.panel-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-/* Кнопки внутри playlistModal — переопределяем .btn */
-#playlistModal .btn {
-  border: none;
-  border-radius: 999px;
-  padding: 8px 16px;
-  font-size: 13px;
-  cursor: pointer;
-  background: rgba(255,255,255,0.08);
-  color: #eaeaf2;
-  font-weight: 600;
-  transition: all 0.2s;
-}
-#playlistModal .btn:hover { background: rgba(255,255,255,0.14); }
-#playlistModal .btn.active {
-  background: linear-gradient(90deg, #ff4da6, #ff0000);
-  color: #fff;
-}
-#playlistModal .btn.danger {
-  background: rgba(255,0,0,0.12);
-  color: #ff4da6;
-}
-#playlistModal .btn.danger:hover { background: rgba(255,0,0,0.2); }
 
 /* ===== Выпадающее меню карточки ===== */
 .playlist-menu {
@@ -388,58 +315,7 @@ main, #playlistsContainer {
   <div class="content-wrap">
     <div id="playlistsContainer" class="playlists-grid"></div>
   </div>
-
-  <!-- Модалка для создания/редактирования плейлиста -->
-  <!-- Модалка для создания/редактирования плейлиста -->
-<div id="playlistModal" class="modal">
-  <div class="panel">
-    <h3 id="playlistModalTitle" data-i18n="playlistModalTitle">New playlist</h3>
-
-    <div class="panel-cover-row">
-      <img id="playlistCoverPreview" src="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png" alt="Cover">
-      <div style="flex:1">
-        <div class="panel-row">
-          <label data-i18n="coverImage">Cover image</label>
-          <input type="file" id="playlistCoverFile" accept="image/*">
-        </div>
-      </div>
-    </div>
-
-    <div class="panel-row">
-      <label data-i18n="playlistName">Name</label>
-      <input id="playlistNameInput" data-i18n-placeholder="playlistName" placeholder="Playlist name">
-    </div>
-
-    <div class="panel-row">
-      <label data-i18n="description">Description</label>
-      <textarea id="playlistDescriptionInput" data-i18n-placeholder="playlistDescription" placeholder="Short description"></textarea>
-    </div>
-
-    <div class="panel-row" id="visibilityRow">
-      <label data-i18n="visibility">Visibility</label>
-      <select id="playlistVisibilitySelect">
-        <option value="public" data-i18n="public">🌍 Everyone</option>
-        <option value="partner" data-i18n="partner">♥ Admin + partner</option>
-        <option value="admin" data-i18n="admin">🔒 Only admin</option>
-      </select>
-    </div>
-    <div class="panel-row" id="hideFromHomeRow" style="display:flex;align-items:center;gap:10px;background:rgba(255,77,166,0.08);border:1px solid rgba(255,77,166,0.2);border-radius:10px;padding:10px 12px;">
-      <input type="checkbox" id="playlistHideFromHome" style="width:20px;height:20px;cursor:pointer;accent-color:#ff4da6;flex-shrink:0;">
-      <label for="playlistHideFromHome" data-i18n="hideFromHome" style="margin:0;cursor:pointer;color:#eaeaf2;font-weight:600;font-size:13px;">👁️‍🗨️ Hide tracks from home page</label>
-    </div>
-
-    <div class="panel-actions">
-      <button id="playlistCancelBtn" class="btn" data-i18n="cancel">Cancel</button>
-      <button id="playlistSaveBtn" class="btn active" data-i18n="save">💾 Save</button>
-    </div>
-
-    <div class="panel-actions" id="playlistDeleteRow" style="margin-top:8px;display:none">
-      <button id="playlistDeleteBtn" class="btn danger" data-i18n="deletePlaylist">🗑️ Delete playlist</button>
-    </div>
-  </div>
-</div>
-
-  <!-- ===== КОНТЕЙНЕР ДЛЯ ОБЩИХ МОДАЛОК ===== -->
+    <!-- ===== КОНТЕЙНЕР ДЛЯ ОБЩИХ МОДАЛОК ===== -->
   <div id="modals-container"></div>
 
   <!-- Подключаем Firebase -->
@@ -633,7 +509,7 @@ main, #playlistsContainer {
               menuHtml += '<button class="menu-item edit-item">✏️ Edit</button>';
               menuHtml += '<button class="menu-item delete-item">🗑️ Delete</button>';
             } else {
-              menuHtml = '<div style="padding:10px;font-size:12px;color:#8b8fa3;text-align:center">Только владелец может редактировать</div>';
+              menuHtml = '<div style="padding:10px;font-size:12px;color:#8b8fa3;text-align:center">' + (t('onlyOwnerCanEdit') || 'Только владелец может редактировать') + '</div>';
             }
             menu.innerHTML = menuHtml;
             
@@ -772,7 +648,7 @@ main, #playlistsContainer {
                 menuHtml += '<button class="menu-item edit-item">✏️ Edit</button>';
                 menuHtml += '<button class="menu-item delete-item">🗑️ Delete</button>';
               } else {
-                menuHtml = '<div style="padding:10px;font-size:12px;color:#8b8fa3;text-align:center">Только владелец может редактировать</div>';
+                menuHtml = '<div style="padding:10px;font-size:12px;color:#8b8fa3;text-align:center">' + (t('onlyOwnerCanEdit') || 'Только владелец может редактировать') + '</div>';
               }
               menu.innerHTML = menuHtml;
               
