@@ -233,3 +233,55 @@
 
   </div>
 </div>
+
+<!-- ===== PLAYLIST CREATE/EDIT MODAL ===== -->
+<div id="playlistModal" class="modal" style="z-index:100030">
+  <div class="panel" style="max-width:420px">
+    <button id="playlistModalClose" class="login-close-btn" aria-label="Close">✕</button>
+
+    <h3 id="playlistModalTitle" data-i18n="playlistModalTitle">New playlist</h3>
+
+    <div class="panel-cover-row">
+      <img id="playlistCoverPreview" src="https://pub-6f797b2842b7491297940c7f3f51e92f.r2.dev/NIKO_music/default-cover.png" alt="Cover">
+      <div style="flex:1">
+        <div class="panel-row">
+          <label data-i18n="coverImage">Cover image</label>
+          <input type="file" id="playlistCoverFile" accept="image/*">
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-row">
+      <label data-i18n="playlistName">Name</label>
+      <input id="playlistNameInput" data-i18n-placeholder="playlistName" placeholder="Playlist name">
+    </div>
+
+    <div class="panel-row">
+      <label data-i18n="description">Description</label>
+      <textarea id="playlistDescriptionInput" data-i18n-placeholder="playlistDescription" placeholder="Short description"></textarea>
+    </div>
+
+    <div class="panel-row" id="visibilityRow">
+      <label data-i18n="visibility">Visibility</label>
+      <select id="playlistVisibilitySelect">
+        <option value="public" data-i18n="public">🌍 Everyone</option>
+        <option value="partner" data-i18n="partner">♥ Admin + partner</option>
+        <option value="admin" data-i18n="admin">🔒 Only admin</option>
+      </select>
+    </div>
+
+    <div class="panel-row" id="hideFromHomeRow" style="display:flex;align-items:center;gap:10px;background:rgba(255,77,166,0.08);border:1px solid rgba(255,77,166,0.2);border-radius:10px;padding:10px 12px;">
+      <input type="checkbox" id="playlistHideFromHome" style="width:20px;height:20px;cursor:pointer;accent-color:#ff4da6;flex-shrink:0;">
+      <label for="playlistHideFromHome" data-i18n="hideFromHome" style="margin:0;cursor:pointer;color:#eaeaf2;font-weight:600;font-size:13px;">👁️‍🗨️ Hide tracks from home page</label>
+    </div>
+
+    <div class="panel-actions">
+      <button id="playlistCancelBtn" class="btn" data-i18n="cancel">Cancel</button>
+      <button id="playlistSaveBtn" class="btn active" data-i18n="save">💾 Save</button>
+    </div>
+
+    <div class="panel-actions" id="playlistDeleteRow" style="margin-top:8px;display:none">
+      <button id="playlistDeleteBtn" class="btn danger" data-i18n="deletePlaylist">🗑️ Delete playlist</button>
+    </div>
+  </div>
+</div>
