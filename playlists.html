@@ -8,809 +8,359 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ff4da6">
   <style>
-    /* ===== СБРОС глобальных стилей styles.css ===== */
-    html, body {
-      display: block !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      overflow-x: hidden;
-      background: #05050a;
-      color: #eaeaf2;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      -webkit-font-smoothing: antialiased;
-    }
-    /* Отменяем, если styles.css делает header сайдбаром */
-    body > header, body > .top-bar {
-      position: relative !important;
-      left: auto !important;
-      top: auto !important;
-      width: 100% !important;
-      height: auto !important;
-    }
-    main, #playlistsContainer {
-      margin-left: 0 !important;
-      max-width: none !important;
-    }
-
-    /* ===== Верхняя полоска ===== */
-    .top-bar {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 16px;
-      background: rgba(5,5,10,0.88);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .back-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.08);
-      color: #fff;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      line-height: 1;
-      transition: background 0.2s;
-      flex-shrink: 0;
-    }
-    .back-btn:hover { background: rgba(255,255,255,0.15); }
-
-    /* ===== Заголовок ===== */
-    .page-title {
-      font-size: 24px;
-      font-weight: 800;
-      margin: 18px 16px 14px;
-      letter-spacing: -0.3px;
-    }
-
-    /* ===== Сетка ===== */
-    .content-wrap {
-      padding: 0 10px 40px;
-      max-width: 1200px;
-      margin: 0 auto;
-      width: 100%;
-    }
-    @media (min-width: 480px) {
-      .content-wrap { padding: 0 16px 40px; }
-    }
-    /* ===== Сетка ===== */
-    .playlists-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-right: 10px;
-    }
-    @media (min-width: 480px) {
-      .playlists-grid { gap: 14px; }
-    }
-    @media (min-width: 640px) {
-      .playlists-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; }
-    }
-    @media (min-width: 900px) {
-      .playlists-grid { grid-template-columns: repeat(5, 1fr); }
-    }
-    @media (min-width: 1200px) {
-      .playlists-grid { grid-template-columns: repeat(6, 1fr); gap: 18px; }
-    }
-
-    /* ===== Карточка ===== */
-    .playlist-card {
-      cursor: pointer;
-      user-select: none;
-      position: relative;
-      transition: transform 0.2s ease;
-    }
-    .playlist-card:active { transform: scale(0.97); }
-    .playlist-cover-wrap {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      border-radius: 12px;
-      overflow: hidden;
-      background: #111;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    }
-    .playlist-cover-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      transition: transform 0.3s ease;
-    }
-    .playlist-card:hover .playlist-cover-wrap img { transform: scale(1.05); }
-
-    /* Бейдж владельца */
-    .owner-badge {
-      position: absolute;
-      top: 8px;
-      left: 8px;
-      font-size: 9px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      padding: 4px 8px;
-      border-radius: 6px;
-      backdrop-filter: blur(6px);
-      z-index: 2;
-      pointer-events: none;
-    }
-    .owner-badge.my {
-      background: rgba(255, 77, 166, 0.9);
-      color: #fff;
-    }
-    .owner-badge.partner {
-      background: rgba(77, 255, 138, 0.9);
-      color: #000;
-    }
-
-    /* Overlay */
-    .playlist-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 55%);
-      opacity: 0;
-      transition: opacity 0.2s;
-      display: flex;
-      align-items: flex-end;
-      justify-content: flex-end;
-      padding: 8px;
-      gap: 6px;
-    }
-    .playlist-card:hover .playlist-overlay { opacity: 1; }
-
-    .overlay-btn {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: none;
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(4px);
-      color: #fff;
-      font-size: 14px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s;
-    }
-    .overlay-btn:hover { background: rgba(255,255,255,0.3); }
-    .overlay-btn.danger { color: #ff4da6; }
-
-    .playlist-info { margin-top: 8px; }
-    .playlist-name {
-      font-size: 13px;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      line-height: 1.3;
-    }
-    .playlist-meta {
-      font-size: 11px;
-      color: #8b8fa3;
-      margin-top: 3px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .playlist-meta .dot {
-      width: 3px;
-      height: 3px;
-      border-radius: 50%;
-      background: #555;
-      display: inline-block;
-    }
-
-    /* ===== Карточка "Добавить" ===== */
-    .add-card .playlist-cover-wrap {
-      background: linear-gradient(135deg, #ff4da6, #ff7a4d);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 6px;
-      box-shadow: 0 4px 16px rgba(255,77,166,0.25);
-    }
-    .add-icon {
-      font-size: 36px;
-      font-weight: 300;
-      line-height: 1;
-      opacity: 0.95;
-    }
-    .add-label {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      opacity: 0.9;
-    }
-
-    /* ===== Модалка ===== */
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.75);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      padding: 16px;
-    }
-    .modal.open { display: flex; }
-    .panel {
-      background: #0f0f14;
-      border-radius: 20px;
-      padding: 20px;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: 0 24px 60px rgba(0,0,0,0.7);
-      border: 1px solid rgba(255,255,255,0.06);
-    }
-    .panel h3 {
-      margin: 0 0 16px;
-      font-size: 18px;
-      font-weight: 700;
-    }
-    .panel-row { margin-bottom: 12px; }
-    .panel-row label {
-      display: block;
-      font-size: 12px;
-      color: #8b8fa3;
-      margin-bottom: 6px;
-      font-weight: 500;
-    }
-    .panel-row input,
-    .panel-row textarea,
-    .panel-row select {
-      width: 100%;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: #07070a;
-      color: #eaeaf2;
-      padding: 10px 12px;
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .panel-row input:focus,
-    .panel-row textarea:focus,
-    .panel-row select:focus {
-      border-color: rgba(255,77,166,0.5);
-    }
-    .panel-row textarea {
-      min-height: 70px;
-      resize: vertical;
-    }
-    .panel-cover-row {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 14px;
-    }
-    .panel-cover-row img {
-      width: 80px;
-      height: 80px;
-      border-radius: 12px;
-      object-fit: cover;
-      background: #111;
-      flex-shrink: 0;
-    }
-    .panel-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 16px;
-    }
-    .btn {
-      border: none;
-      border-radius: 999px;
-      padding: 8px 16px;
-      font-size: 13px;
-      cursor: pointer;
-      background: rgba(255,255,255,0.08);
-      color: #eaeaf2;
-      font-weight: 600;
-      transition: all 0.2s;
-    }
-    .btn:hover { background: rgba(255,255,255,0.14); }
-    .btn.active {
-      background: linear-gradient(90deg, #ff4da6, #ff0000);
-      color: #fff;
-    }
-    .btn.danger {
-      background: rgba(255,0,0,0.12);
-      color: #ff4da6;
-    }
-    .btn.danger:hover { background: rgba(255,0,0,0.2); }
-
-    /* ===== Выпадающее меню ===== */
-    .playlist-menu {
-      position: fixed;
-      background: #1a1a20;
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 12px;
-      padding: 6px;
-      min-width: 140px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-      z-index: 1000;
-    }
-    .menu-item {
-      width: 100%;
-      border: none;
-      background: transparent;
-      color: #eaeaf2;
-      padding: 10px 12px;
-      text-align: left;
-      font-size: 13px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .menu-item:hover {
-      background: rgba(255,255,255,0.08);
-    }
-    .menu-item.delete-item {
-      color: #ff4da6;
-    }
-    .menu-item.delete-item:hover {
-      background: rgba(255,77,166,0.12);
-    }
-
-    /* ===== Login Panel Styles ===== */
-    .login-panel {
-      max-width: 380px;
-      width: 90%;
-      text-align: center;
-      background: linear-gradient(145deg, rgba(16,16,28,0.98), rgba(8,8,16,0.98));
-      border: 1px solid rgba(0,229,255,0.2);
-      box-shadow: 
-        0 0 60px rgba(0,229,255,0.1),
-        0 25px 80px rgba(0,0,0,0.7),
-        inset 0 1px 0 rgba(255,255,255,0.04);
-      border-radius: 28px;
-      padding: 40px 32px 32px;
-      position: relative;
-      overflow: hidden;
-      animation: loginAppear 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    @keyframes loginAppear {
-      from { opacity: 0; transform: scale(0.9) translateY(30px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
-    }
-
-    /* Glow orb at top */
-    .login-panel::before {
-      content: '';
-      position: absolute;
-      top: -60%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 140%;
-      height: 140%;
-      background: radial-gradient(ellipse at 50% 0%, rgba(0,229,255,0.1) 0%, transparent 55%);
-      pointer-events: none;
-    }
-
-    /* Close button — seamless top-right corner */
-    .login-close-btn {
-      position: absolute;
-      top: 14px;
-      right: 14px;
-      width: 34px;
-      height: 34px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.06);
-      color: #6b6f7e;
-      font-size: 16px;
-      font-weight: 500;
-      line-height: 1;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      z-index: 10;
-      backdrop-filter: blur(12px);
-    }
-
-    .login-close-btn:hover {
-      background: rgba(255,77,166,0.12);
-      border-color: rgba(255,77,166,0.35);
-      color: #ff4da6;
-      transform: rotate(90deg);
-      box-shadow: 0 0 24px rgba(255,77,166,0.25);
-    }
-
-    .login-close-btn:active {
-      transform: rotate(90deg) scale(0.9);
-    }
-
-    .login-lock-icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-      animation: lockPulse 2.5s ease-in-out infinite;
-    }
-
-    @keyframes lockPulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.1); opacity: 0.8; }
-    }
-
-    .login-niko-btn {
-      width: 100%;
-      padding: 14px 20px;
-      border-radius: 12px;
-      border: none;
-      background: linear-gradient(90deg, #30be70, #00d1ff);
-      color: #fff;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .login-niko-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(48,190,112,0.3);
-    }
-    .email-btn {
-      width: 100%;
-      padding: 12px 20px;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: transparent;
-      color: #bfc3d6;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .email-btn-ghost {
-      background: transparent;
-      border: none;
-    }
-    .email-btn-ghost:hover {
-      color: #fff;
-      background: rgba(255,255,255,0.05);
-    }
-    /* ========================================
-   LOGIN MODAL — полные стили
-   ======================================== */
-
-/* Контейнер модалки */
-.modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.75);
-  align-items: center;
-  justify-content: center;
-  z-index: 100010;
-  padding: 16px;
-  backdrop-filter: blur(4px);
+   html, body {
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: hidden;
+  background: #05050a;
+  color: #eaeaf2;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
-.modal.open {
-  display: flex;
+body > header, body > .top-bar {
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  width: 100% !important;
+  height: auto !important;
+}
+main, #playlistsContainer {
+  margin-left: 0 !important;
+  max-width: none !important;
 }
 
-/* Панель логина */
-.login-panel {
-  max-width: 380px;
-  width: 90%;
-  text-align: center;
-  background: linear-gradient(145deg, rgba(16, 16, 28, 0.98), rgba(8, 8, 16, 0.98));
-  border: 1px solid rgba(0, 229, 255, 0.2);
-  box-shadow: 
-    0 0 60px rgba(0, 229, 255, 0.1),
-    0 25px 80px rgba(0, 0, 0, 0.7),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  border-radius: 28px;
-  padding: 40px 32px 32px;
-  position: relative;
-  overflow: hidden;
-  animation: loginAppear 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes loginAppear {
-  from { opacity: 0; transform: scale(0.9) translateY(30px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-/* Glow orb at top */
-.login-panel::before {
-  content: '';
-  position: absolute;
-  top: -60%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 140%;
-  height: 140%;
-  background: radial-gradient(ellipse at 50% 0%, rgba(0, 229, 255, 0.1) 0%, transparent 55%);
-  pointer-events: none;
-}
-
-/* Close button */
-.login-close-btn {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  color: #6b6f7e;
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1;
-  cursor: pointer;
+/* ===== Верхняя полоска ===== */
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 10;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(5,5,10,0.88);
   backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
-.login-close-btn:hover {
-  background: rgba(255, 77, 166, 0.12);
-  border-color: rgba(255, 77, 166, 0.35);
-  color: #ff4da6;
-  transform: rotate(90deg);
-  box-shadow: 0 0 24px rgba(255, 77, 166, 0.25);
+.back-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  line-height: 1;
+  transition: background 0.2s;
+  flex-shrink: 0;
 }
-.login-close-btn:active {
-  transform: rotate(90deg) scale(0.9);
-}
+.back-btn:hover { background: rgba(255,255,255,0.15); }
 
-/* Header */
-.login-header {
-  margin-bottom: 28px;
-  position: relative;
-  z-index: 1;
-}
-.login-lock-icon {
-  font-size: 40px;
-  margin-bottom: 14px;
-  filter: drop-shadow(0 0 16px rgba(0, 229, 255, 0.35));
-  animation: lockFloat 3s ease-in-out infinite;
-}
-@keyframes lockFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-}
-.login-title {
-  color: #00E5FF;
-  text-shadow: 0 0 20px rgba(0, 229, 255, 0.45);
-  margin: 0 0 6px;
+/* ===== Заголовок ===== */
+.page-title {
   font-size: 24px;
   font-weight: 800;
-  letter-spacing: 4px;
-}
-.login-subtitle {
-  color: #4a4e5e;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  margin: 0;
+  margin: 18px 16px 14px;
+  letter-spacing: -0.3px;
 }
 
-/* PIN Display */
-.pin-display {
-  font-size: 34px;
-  font-weight: 700;
-  letter-spacing: 16px;
-  color: #00E5FF;
-  text-shadow: 0 0 30px rgba(0, 229, 255, 0.5), 0 0 60px rgba(0, 229, 255, 0.15);
-  margin: 24px 0 28px;
-  min-height: 56px;
-  font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
-  background: rgba(0, 0, 0, 0.35);
-  border-radius: 18px;
-  padding: 14px 24px;
-  border: 1px solid rgba(0, 229, 255, 0.12);
-  box-shadow: 
-    inset 0 2px 12px rgba(0, 0, 0, 0.5), 
-    0 0 30px rgba(0, 229, 255, 0.06);
-  position: relative;
-  z-index: 1;
-  transition: all 0.3s ease;
+/* ===== Контент ===== */
+.content-wrap {
+  padding: 0 10px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
 }
-.pin-display.filled {
-  color: #4dff8a;
-  text-shadow: 0 0 30px rgba(77, 255, 138, 0.5);
-  border-color: rgba(77, 255, 138, 0.25);
-}
-.pin-display.error {
-  animation: pinShake 0.45s ease;
-  color: #ff4d4d;
-  text-shadow: 0 0 30px rgba(255, 77, 77, 0.5);
-  border-color: rgba(255, 77, 77, 0.35);
-}
-@keyframes pinShake {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-10px); }
-  40% { transform: translateX(10px); }
-  60% { transform: translateX(-5px); }
-  80% { transform: translateX(5px); }
+@media (min-width: 480px) {
+  .content-wrap { padding: 0 16px 40px; }
 }
 
-/* PIN Pad */
-.pin-pad {
+/* ===== Сетка ===== */
+.playlists-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
-  margin: 0 0 28px;
-  position: relative;
-  z-index: 1;
+  margin-right: 10px;
 }
-.pin-btn {
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  color: #eaeaf2;
-  font-size: 20px;
-  font-weight: 600;
-  padding: 18px;
-  border-radius: 16px;
+@media (min-width: 480px) {
+  .playlists-grid { gap: 14px; }
+}
+@media (min-width: 640px) {
+  .playlists-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; }
+}
+@media (min-width: 900px) {
+  .playlists-grid { grid-template-columns: repeat(5, 1fr); }
+}
+@media (min-width: 1200px) {
+  .playlists-grid { grid-template-columns: repeat(6, 1fr); gap: 18px; }
+}
+
+/* ===== Карточка плейлиста ===== */
+.playlist-card {
   cursor: pointer;
-  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
   position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(6px);
+  transition: transform 0.2s ease;
 }
-.pin-btn::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at center, rgba(0, 229, 255, 0.12) 0%, transparent 70%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-.pin-btn:hover {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(0, 229, 255, 0.25);
-  transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
-}
-.pin-btn:hover::after { opacity: 1; }
-.pin-btn:active {
-  transform: translateY(-1px) scale(0.96);
-  transition-duration: 0.05s;
-}
-.pin-btn-clear {
-  background: rgba(255, 77, 166, 0.06);
-  border-color: rgba(255, 77, 166, 0.15);
-  color: #ff4da6;
-}
-.pin-btn-clear:hover {
-  background: rgba(255, 77, 166, 0.15);
-  border-color: rgba(255, 77, 166, 0.4);
-  box-shadow: 0 12px 28px rgba(255, 77, 166, 0.18);
-}
-.pin-btn-confirm {
-  background: rgba(39, 182, 70, 0.06);
-  border-color: rgba(39, 182, 70, 0.15);
-  color: #27b646;
-}
-.pin-btn-confirm:hover {
-  background: rgba(39, 182, 70, 0.15);
-  border-color: rgba(39, 182, 70, 0.4);
-  box-shadow: 0 12px 28px rgba(39, 182, 70, 0.18);
-}
+.playlist-card:active { transform: scale(0.97); }
 
-/* Divider */
-.login-divider {
+.playlist-cover-wrap {
   position: relative;
-  margin: 24px 0 16px;
-  text-align: center;
-}
-.login-divider::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
-}
-.login-divider span {
-  position: relative;
-  background: transparent;
-  padding: 0 12px;
-  color: #7a7f92;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-}
-
-/* Social Login Buttons */
-.login-socials {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 8px;
-}
-.login-social-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px 16px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
   border-radius: 12px;
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
-  color: #eaeaf2;
-  backdrop-filter: blur(6px);
+  overflow: hidden;
+  background: #111;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
-.login-social-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-  filter: brightness(1.1);
-}
-.login-social-btn.google {
-  background: rgba(66, 133, 244, 0.08);
-  border-color: rgba(66, 133, 244, 0.15);
-}
-.login-social-btn.google:hover {
-  background: rgba(66, 133, 244, 0.18);
-  border-color: rgba(66, 133, 244, 0.35);
-  box-shadow: 0 10px 28px rgba(66, 133, 244, 0.18);
-}
-.login-social-btn.email {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.12);
-}
-.login-social-btn.email:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.18);
-  box-shadow: 0 10px 28px rgba(255, 255, 255, 0.15);
-}
-.login-social-btn svg {
-  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
+.playlist-cover-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
   transition: transform 0.3s ease;
 }
-.login-social-btn:hover svg { transform: scale(1.1); }
+.playlist-card:hover .playlist-cover-wrap img { transform: scale(1.05); }
 
-/* Login Niko Button */
-.login-niko-btn {
-  width: 100%;
-  padding: 14px 20px;
-  border-radius: 12px;
-  border: none;
-  background: linear-gradient(90deg, #30be70, #00d1ff);
+/* Бейдж владельца */
+.owner-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  backdrop-filter: blur(6px);
+  z-index: 2;
+  pointer-events: none;
+}
+.owner-badge.my {
+  background: rgba(255, 77, 166, 0.9);
   color: #fff;
-  font-size: 15px;
-  font-weight: 700;
+}
+.owner-badge.partner {
+  background: rgba(77, 255, 138, 0.9);
+  color: #000;
+}
+
+/* Overlay */
+.playlist-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 55%);
+  opacity: 0;
+  transition: opacity 0.2s;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 8px;
+  gap: 6px;
+}
+.playlist-card:hover .playlist-overlay { opacity: 1; }
+
+.overlay-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  font-size: 14px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: background 0.2s;
 }
-.login-niko-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(48, 190, 112, 0.3);
+.overlay-btn:hover { background: rgba(255,255,255,0.3); }
+.overlay-btn.danger { color: #ff4da6; }
+
+/* Инфо под карточкой */
+.playlist-info { margin-top: 8px; }
+.playlist-name {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+.playlist-meta {
+  font-size: 11px;
+  color: #8b8fa3;
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.playlist-meta .dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #555;
+  display: inline-block;
+}
+
+/* ===== Карточка "Добавить" ===== */
+.add-card .playlist-cover-wrap {
+  background: linear-gradient(135deg, #ff4da6, #ff7a4d);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 4px 16px rgba(255,77,166,0.25);
+}
+.add-icon {
+  font-size: 36px;
+  font-weight: 300;
+  line-height: 1;
+  opacity: 0.95;
+}
+.add-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.9;
+}
+
+/* ===== Модалка создания/редактирования плейлиста ===== */
+/* .modal и .panel — базовые в styles.css, здесь только уникальные оверрайды */
+#playlistModal .panel {
+  max-width: 420px;
+}
+#playlistModal .panel h3 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-weight: 700;
+}
+.panel-row { margin-bottom: 12px; }
+.panel-row label {
+  display: block;
+  font-size: 12px;
+  color: #8b8fa3;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.panel-row input,
+.panel-row textarea,
+.panel-row select {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: #07070a;
+  color: #eaeaf2;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+.panel-row input:focus,
+.panel-row textarea:focus,
+.panel-row select:focus {
+  border-color: rgba(255,77,166,0.5);
+}
+.panel-row textarea {
+  min-height: 70px;
+  resize: vertical;
+}
+.panel-cover-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.panel-cover-row img {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: #111;
+  flex-shrink: 0;
+}
+.panel-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+/* Кнопки внутри playlistModal — переопределяем .btn */
+#playlistModal .btn {
+  border: none;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  background: rgba(255,255,255,0.08);
+  color: #eaeaf2;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+#playlistModal .btn:hover { background: rgba(255,255,255,0.14); }
+#playlistModal .btn.active {
+  background: linear-gradient(90deg, #ff4da6, #ff0000);
+  color: #fff;
+}
+#playlistModal .btn.danger {
+  background: rgba(255,0,0,0.12);
+  color: #ff4da6;
+}
+#playlistModal .btn.danger:hover { background: rgba(255,0,0,0.2); }
+
+/* ===== Выпадающее меню карточки ===== */
+.playlist-menu {
+  position: fixed;
+  background: #1a1a20;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 6px;
+  min-width: 140px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  z-index: 1000;
+}
+.menu-item {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: #eaeaf2;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 13px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.menu-item:hover {
+  background: rgba(255,255,255,0.08);
+}
+.menu-item.delete-item {
+  color: #ff4da6;
+}
+.menu-item.delete-item:hover {
+  background: rgba(255,77,166,0.12);
+}
+
+/* ===== Адаптив под мобильные ===== */
+@media (max-width: 480px) {
+  .page-title { font-size: 20px; margin: 14px 12px 10px; }
+  .content-wrap { padding: 0 8px 32px; }
+  .playlists-grid { gap: 8px; margin-right: 0; }
+  .playlist-name { font-size: 12px; }
+  .playlist-meta { font-size: 10px; }
 }
   </style>
 <base target="_blank">
