@@ -5637,12 +5637,13 @@ window.updateTrackPlayIcons = function() {
   </div>
 </div>
 
-<div id="playlist-picker-modal" class="modal">
-  <div class="panel" style="max-width:420px">
-    <h3 style="margin-top:0">Добавить в плейлист</h3>
-    <div id="playlist-picker-list" style="max-height:260px;overflow-y:auto;margin:10px 0"></div>
-    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
-      <button id="playlist-picker-cancel" class="btn">Отмена</button>
+<div id="playlist-picker-modal" class="modal" style="z-index:100035">
+  <div class="panel" style="max-width:420px;position:relative">
+    <button id="playlist-picker-close-x" class="login-close-btn" aria-label="Close">✕</button>
+    <h3 style="margin:0 0 16px" data-i18n="addToPlaylist">Add to playlist</h3>
+    <div id="playlist-picker-list" style="max-height:280px;overflow-y:auto;margin:10px 0"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px">
+      <button id="playlist-picker-cancel" class="btn" data-i18n="cancel">Cancel</button>
     </div>
   </div>
 </div>
