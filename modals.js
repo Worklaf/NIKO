@@ -519,8 +519,8 @@ function initModals() {
 
   setupGoogleLogin();
 }
-
-// ===== EXPOSE GLOBALLY =====
+// ===== ЭКСПОРТ В WINDOW =====
+window.initModals = initModals;
 window.openLoginModal = openLoginModal;
 window.closeLoginModal = closeLoginModal;
 window.openDownloadRestriction = openDownloadRestriction;
@@ -529,17 +529,31 @@ window.openPlaylistRestriction = openPlaylistRestriction;
 window.closePlaylistRestriction = closePlaylistRestriction;
 window.openFeedbackRestriction = openFeedbackRestriction;
 window.closeFeedbackRestriction = closeFeedbackRestriction;
-window.initModals = initModals;
-window.updatePinDisplay = updatePinDisplay;
-window.showEmailForm = showEmailForm;
-window.updateEmailAuthModalTranslations = updateEmailAuthModalTranslations;
-window.enteredPin = enteredPin;
 
-// ===== AUTO-INIT =====
-document.addEventListener('DOMContentLoaded', function() {
-  setTimeout(() => {
-    if (!modalsInitialized) {
-      initModals();
+// ===== ГАРАНТИРОВАННАЯ ИНИЦИАЛИЗАЦИЯ =====
+// Сбрасываем флаг, если DOM ещё не готов
+(function scheduleInit() {
+  function tryInit() {
+    // Проверяем, что модалки есть в DOM
+    const hasModals = document.getElementById('download-restriction-modal') ||
+                      document.getElementById('login-modal');
+    
+    if (!hasModals) {
+      // Модалок ещё нет — ждём следующего кадра
+      console.log('⏳ initModals: модалок нет в DOM, ждём...');
+      setTimeout(tryInit, 100);
+      return;
     }
-  }, 100);
-});
+    
+    // Модалки есть — сбрасываем флаг и инициализируем
+    modalsInitialized = false;
+    initModals();
+    console.log('✅ initModals выполнена');
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', tryInit);
+  } else {
+    tryInit();
+  }
+})();
