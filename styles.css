@@ -3059,4 +3059,152 @@ header,
     box-sizing: border-box;
   }
 }
- 
+ /* ==========================================================
+   PLAYLIST MODAL — универсальные стили
+   Используется в: NIKO.html, playlists.html, playlist-view.html
+   ========================================================== */
+
+/* Панель модалки */
+#playlistModal .panel {
+  max-width: 420px;
+  width: 100%;
+  background: #0b0b10;
+  border-radius: 16px;
+  padding: 20px;
+  color: #eaeaf2;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+#playlistModal .panel h3 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ff4da6;
+}
+
+/* Обложка */
+.panel-cover-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.panel-cover-row img {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: #111;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Поля */
+.panel-row {
+  margin-bottom: 12px;
+}
+.panel-row label {
+  display: block;
+  font-size: 12px;
+  color: #8b8fa3;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.panel-row input,
+.panel-row textarea,
+.panel-row select {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: #07070a;
+  color: #eaeaf2;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.panel-row input:focus,
+.panel-row textarea:focus,
+.panel-row select:focus {
+  border-color: rgba(255,77,166,0.5);
+}
+.panel-row textarea {
+  min-height: 70px;
+  resize: vertical;
+}
+
+/* Кнопки */
+.panel-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+/* Кнопки внутри playlistModal */
+#playlistModal .btn {
+  border: none;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  background: rgba(255,255,255,0.08);
+  color: #eaeaf2;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+#playlistModal .btn:hover {
+  background: rgba(255,255,255,0.14);
+}
+#playlistModal .btn.active {
+  background: linear-gradient(90deg, #ff4da6, #ff0000);
+  color: #fff;
+}
+#playlistModal .btn.danger {
+  background: rgba(255,0,0,0.12);
+  color: #ff4da6;
+}
+#playlistModal .btn.danger:hover {
+  background: rgba(255,0,0,0.2);
+}
+
+/* Кнопка закрытия (крестик) */
+#playlistModalClose {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: #6b6f7e;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
+}
+#playlistModalClose:hover {
+  background: rgba(255,77,166,0.12);
+  border-color: rgba(255,77,166,0.35);
+  color: #ff4da6;
+  transform: rotate(90deg);
+}
+
+/* Мобильная адаптация */
+@media (max-width: 480px) {
+  #playlistModal .panel {
+    max-width: 100%;
+    padding: 16px;
+  }
+  .panel-cover-row img {
+    width: 64px;
+    height: 64px;
+  }
+}
