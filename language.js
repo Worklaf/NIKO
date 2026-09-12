@@ -242,7 +242,7 @@ const translations = {
     admin: "🔒 Only admin",
     hideFromHome: "👁️‍🗨️ Hide tracks from home page",
     deletePlaylist: "🗑️ Delete playlist",
-
+    onlyOwnerCanEdit: "Only owner can edit",
   },
   pl: {
     updateAvailable: "🔄 Dostępna aktualizacja — kliknij, aby odświeżyć",
@@ -487,7 +487,7 @@ const translations = {
     admin: "🔒 Tylko admin",
     hideFromHome: "👁️‍🗨️ Ukryj utwory na stronie głównej",
     deletePlaylist: "🗑️ Usuń playlistę",
-
+    onlyOwnerCanEdit: "Tylko właściciel może edytować",
   },
   ua: {
     updateAvailable: "🔄 Доступне оновлення — натисніть, щоб перезавантажити",
@@ -728,6 +728,7 @@ const translations = {
     admin: "🔒 Тільки адмін",
     hideFromHome: "👁️‍🗨️ Приховати треки на головній сторінці",
     deletePlaylist: "🗑️ Видалити плейлист",
+    onlyOwnerCanEdit: "Тільки власник може редагувати",
   },
   es: {
     updateAvailable: "🔄 Actualización disponible — toque para recargar",
@@ -966,12 +967,13 @@ const translations = {
     playlistRestrictedText: "Crear listas de reproducción solo está disponible para usuarios autorizados",
     playlistRestrictedLogin: "Iniciar sesión",
     playlistRestrictedClose: "Cerrar",
-   playlistModalTitle: "Nueva lista de reproducción",
+    playlistModalTitle: "Nueva lista de reproducción",
     description: "Descripción",
     playlistDescription: "Breve descripción",
     admin: "🔒 Solo admin",
     hideFromHome: "👁️‍🗨️ Ocultar pistas en la página principal",
     deletePlaylist: "🗑️ Eliminar lista de reproducción",
+    onlyOwnerCanEdit: "Solo el propietario puede editar",
   },
   
 };
