@@ -252,8 +252,27 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics-compat.js"></script>
 <script src="firebase-config.js"></script>
+<script src="language.js"></script>
+
+<!-- ===== КОНТЕЙНЕР ДЛЯ ОБЩИХ МОДАЛОК ===== -->
+<div id="modals-container"></div>
+<script>
+  fetch('modals.html')
+    .then(res => {
+      if (!res.ok) throw new Error('Failed to load modals.html: ' + res.status);
+      return res.text();
+    })
+    .then(html => {
+      document.getElementById('modals-container').innerHTML = html;
+      if (typeof applyTranslations === 'function') applyTranslations();
+      if (typeof initModals === 'function') initModals();
+    })
+    .catch(err => console.error('❌ Failed to load modals:', err));
+</script>
+<script src="modals.js"></script>
 <script>
   // Аналитика запускается автоматически, если measurementId есть в конфиге
   if (typeof firebase !== 'undefined' && firebase.analytics) {
@@ -314,6 +333,11 @@ function toParent(msg) { if (IS_EMBED) { try { parent.postMessage(msg, '*'); } c
 /* ---------- отрисовка ---------- */
 function render() {
   const t = TP.track;
+  const promptToggle = $('#tp-prompt-toggle');
+  if (promptToggle && !isAdmin) {
+    promptToggle.style.opacity = '0.5';
+    promptToggle.style.cursor = 'default';
+  }
   const fullTitle = (t.artist ? t.artist + ' — ' : '') + (t.title || 'Track');
   document.title = fullTitle + ' | N1K∅';
 
@@ -399,6 +423,8 @@ $('#tp-back').addEventListener('click', () => {
 
 /* ---------- полный промпт ---------- */
 $('#tp-prompt-toggle').addEventListener('click', () => {
+  if (!isAdmin) return; // только админ может раскрыть полный промпт
+
   const box = $('#tp-prompt');
   const open = box.hidden;
   box.hidden = !open;
@@ -576,35 +602,12 @@ $('#tp-download').addEventListener('click', async () => {
     toParent({ type: 'download-track', audioUrl: url, title: title, trackId: TP.id });
     return;
   }
+
   if (TP.role === 'guest') {
-  openDownloadRestrictionModal();
-  return;
-}
-const dlModal = $('#tp-download-modal');
+    if (typeof openDownloadRestriction === 'function') openDownloadRestriction();
+    return;
+  }
 
-function openDownloadRestrictionModal() {
-  if (!dlModal) return;
-  dlModal.hidden = false;
-  dlModal.style.display = '';
-  document.body.classList.add('tp-modal-open');
-}
-
-function closeDownloadRestrictionModal() {
-  if (!dlModal) return;
-  dlModal.hidden = true;
-  dlModal.style.display = '';
-  document.body.classList.remove('tp-modal-open');
-}
-
-$('#tp-download-modal-close')?.addEventListener('click', closeDownloadRestrictionModal);
-$('#tp-download-close')?.addEventListener('click', closeDownloadRestrictionModal);
-dlModal?.addEventListener('click', (e) => { if (e.target === dlModal) closeDownloadRestrictionModal(); });
-
-$('#tp-download-login')?.addEventListener('click', () => {
-  closeDownloadRestrictionModal();
-  if (IS_EMBED) { toParent({ type: 'show-login-modal' }); return; }
-  location.href = 'NIKO.html?openLogin=1';
-});
   const btn = $('#tp-download');
   const old = btn.innerHTML;
   btn.innerHTML = '⏳';
@@ -630,13 +633,16 @@ $('#tp-download-login')?.addEventListener('click', () => {
 
 /* ---------- плейлисты (права как на главной) ---------- */
 $('#tp-playlist').addEventListener('click', async () => {
-  /* внутри iframe открываем родной выбор плейлистов главной страницы */
   if (IS_EMBED) {
     toParent({ type: 'open-playlist-picker', trackId: TP.id });
     return;
   }
+  if (TP.role === 'guest') {
+    if (typeof openPlaylistRestriction === 'function') openPlaylistRestriction();
+    return;
+  }
   openPlaylistPickerLocal();
-}); 
+});
 
 async function openPlaylistPickerLocal() {
   openModal('Playlista', '<div class="tp-muted">…</div>');
@@ -867,21 +873,11 @@ $('#tp-modal').addEventListener('click', (e) => { if (e.target.id === 'tp-modal'
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   closeModal();
-  closeDownloadRestrictionModal();
+  if (typeof closeDownloadRestriction === 'function') closeDownloadRestriction();
+  if (typeof closePlaylistRestriction === 'function') closePlaylistRestriction();
   document.getElementById('share-modal')?.classList.remove('open');
 });
 </script>
-<div id="tp-download-modal" class="tp-modal" hidden>
-  <div class="tp-modal-box tp-auth-download-box" role="dialog" aria-modal="true">
-    <button id="tp-download-modal-close" class="tp-modal-close" type="button" aria-label="Zamknij">✕</button>
-    <div class="tp-auth-icon">🔒</div>
-    <h3 class="tp-auth-title">Pobieranie ograniczone</h3>
-    <p class="tp-auth-text">Pobieranie utworów dostępne tylko dla zarejestrowanych użytkowników</p>
-    <div class="tp-auth-actions">
-      <button id="tp-download-login" class="tp-auth-primary" type="button">Zaloguj się</button>
-      <button id="tp-download-close" class="tp-auth-secondary" type="button">Zamknij</button>
-    </div>
-  </div>
-</div>
+ 
 </body>
 </html>
