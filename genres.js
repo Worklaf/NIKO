@@ -80,11 +80,13 @@ const GENRE_ROOTS = [
   [/lo[\s-]?fi|lofi/i,                    'Lo-Fi'],
   [/\bchill(out|hop|step)?\b/i,           'Chillout'],
   [/vapor\s?wave|synth\s?wave|retro\s?wave|outrun|darksynth/i, 'Synthwave'],
-[/neo[-\s]?baile/i,                      'Neo-Baile'],
-[/dark\s?romantic/i,                     'Dark Romantic'],
-[/romantic/i,                            'Romantic'],
-[/ritual\s?trap/i,                       'Ritual Trap'],
-[/\britual\b/i,                           'Ritual'],
+
+  // твоё
+  [/neo[-\s]?baile/i,                     'Neo-Baile'],
+  [/dark\s?romantic/i,                    'Dark Romantic'],
+  [/romantic/i,                           'Romantic'],
+  [/ritual\s?trap/i,                      'Ritual Trap'],
+  [/\britual\b/i,                          'Ritual'],
   [/\breggaeton\b/i,                      'Reggaeton'],
   [/\breggae\b|\bska\b/i,                 'Reggae'],
   [/\blatin\b|salsa|bossa|samba|tango|flamenco/i, 'Latin'],
@@ -92,7 +94,14 @@ const GENRE_ROOTS = [
   [/\beastern\b|oriental|arabic|balkan|turkish|\bethnic\b|\bworld\b|desert/i, 'World'],
   [/\bexperimental\b|\bavant/i,           'Experimental'],
   [/\bmeme\b|\bparody\b|\bcomedy\b/i,     'Meme & Comedy'],
+
+  // добавленные стили
+  [/dembow/i,                             'Dembow'],
+  [/dark\s?asmr/i,                        'Dark ASMR'],
+  [/asmr/i,                               'ASMR'],
+  [/electronic\b/i,                       'Electronic'],
 ];
+
 
 const GENRE_LABELS   = new Map();  // key -> красивое название
 const GENRE_PARENTS  = new Map();  // key подстиля -> [key родителей]
