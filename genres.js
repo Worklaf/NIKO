@@ -38,7 +38,7 @@ const GENRE_JUNK = [
 const GENRE_NOISE = /\b(cowbell|cowbells|808s?|bass|basses|sub|kick|snare|hat|hats|drums?|percussion|strings?|guitars?|oud|sitar|piano|keys|pads?|synths?|fx|glitch|riffs?|melody|melodies|hook|hooks|vocal|vocals|voice|voices|phrasing|consonants|adlibs?|ambience|reverb|delay|stereo|mixing|master|mastering|tone|drops?|build[\s-]?up|breakdown|intro|outro|bridge|verse|verses|chorus|lyrics?|attitude|energy|mood|theme|themes|atmosphere|texture|sound|sounds|sfx|width|loudness)\b/i;
 
 /* 3. Исключения: настоящие жанры с «шумными» словами в названии */
-const GENRE_STRONG = /\bdrum\s?(and|n|&)\s?bass\b|\bdnb\b|\bbass\s?house\b|\bbassline\b|\bjungle\b|\bvocal\s?trance\b|\bvocal\s?house\b/i;
+const GENRE_STRONG = /\bdrum\s?(and|n|&)\s?bass\b|\bdnb\b|\bbass\s?house\b|\bbassline\b|\bjungle\b|\bvocal\s?trance\b|\bvocal\s?house\b|\bdark\s+synth\b/i;
 
 /* 4. Корни жанров: regex -> родительский жанр. Дописывать можно свободно. */
 const GENRE_ROOTS = [
@@ -96,10 +96,14 @@ const GENRE_ROOTS = [
   [/\bmeme\b|\bparody\b|\bcomedy\b/i,     'Meme & Comedy'],
 
   // добавленные стили
-  [/dembow/i,                             'Dembow'],
-  [/dark\s?asmr/i,                        'Dark ASMR'],
-  [/asmr/i,                               'ASMR'],
-  [/electronic\b/i,                       'Electronic'],
+  [/dembow/i, 'Dembow'],
+[/dark\s+asmr/i, 'Dark ASMR'],
+[/asmr/i, 'ASMR Clicks'],
+[/dark\s+synth/i, 'Dark Synth'],
+[/spoken[-\s]?singing/i, 'Spoken-Singing'],
+[/spoken\s+word/i, 'Spoken-Singing'],
+[/vocal\s+performance/i, 'Spoken-Singing'],
+[/electronic\b/i, 'Electronic'],
 ];
 
 
