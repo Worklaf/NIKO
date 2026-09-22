@@ -147,7 +147,22 @@ function parseTrackGenres(rawGenreString) {
 
     if (!parents.length) { GENRE_DROPPED.add(tag); return; }
 
-    const label = titleCaseGenre(clean);
+    let label = null;
+
+if (/\bdembow\b/i.test(clean))
+  label = 'Dembow';
+
+else if (/\bdark\s+synth\b/i.test(clean))
+  label = 'Dark Synth';
+
+else if (/\bspoken[-\s]?singing\b/i.test(clean))
+  label = 'Spoken-Singing';
+
+else if (/\basmr\b/i.test(clean))
+  label = 'ASMR Clicks';
+
+else
+  label = titleCaseGenre(clean);
     const key = normalizeGenre(label);
     GENRE_LABELS.set(key, label);
 
